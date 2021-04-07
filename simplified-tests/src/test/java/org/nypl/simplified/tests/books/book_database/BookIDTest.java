@@ -17,21 +17,19 @@ import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess;
 
 import java.net.URI;
 
-public final class BookIDTest
-{
+public final class BookIDTest {
   @Rule
   public ExpectedException expected = ExpectedException.none();
 
   @Test
-  public void testBookIDNew()
-  {
+  public void testBookIDNew() {
     final OptionType<URI> revoke = Option.none();
     final OPDSAcquisitionFeedEntryBuilderType eb =
       OPDSAcquisitionFeedEntry.newBuilder(
         "http://circulation.alpha.librarysimplified"
-        + ".org/works/?urn=urn%3Alibrarysimplified"
-        + ".org%2Fterms%2Fid%2FOverdrive%2520ID%2F2b3729cd-27ec-42e1-bc51"
-        + "-298aaee0af7d",
+          + ".org/works/?urn=urn%3Alibrarysimplified"
+          + ".org%2Fterms%2Fid%2FOverdrive%2520ID%2F2b3729cd-27ec-42e1-bc51"
+          + "-298aaee0af7d",
         "1Q84",
         NullCheck.notNull(DateTime.now()),
         OPDSAvailabilityOpenAccess.get(revoke));
@@ -43,33 +41,33 @@ public final class BookIDTest
       b.toString());
   }
 
-  @Test public void testBookID_0()
-  {
+  @Test
+  public void testBookID_0() {
     final BookID b = BookIDs.newFromText(
       "http://circulation.alpha.librarysimplified.org/loans/Gutenberg/18405");
     System.out.println(b);
   }
 
-  @Test public void testBookIDNotValid0()
-  {
+  @Test
+  public void testBookIDNotValid0() {
     this.expected.expect(IllegalArgumentException.class);
     BookID.create("");
   }
 
-  @Test public void testBookIDNotValid1()
-  {
+  @Test
+  public void testBookIDNotValid1() {
     this.expected.expect(IllegalArgumentException.class);
     BookID.create("_");
   }
 
-  @Test public void testBookIDNotValid2()
-  {
+  @Test
+  public void testBookIDNotValid2() {
     this.expected.expect(IllegalArgumentException.class);
     BookID.create(" ");
   }
 
-  @Test public void testBookIDValid0()
-  {
+  @Test
+  public void testBookIDValid0() {
     Assert.assertEquals(
       "abcdefghijklmnopqrstuvwxyz1234567890",
       BookID.create("abcdefghijklmnopqrstuvwxyz1234567890").value());

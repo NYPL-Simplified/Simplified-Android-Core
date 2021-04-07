@@ -65,6 +65,9 @@ import org.nypl.simplified.reader.api.ReaderFontSelection
 import org.nypl.simplified.reader.api.ReaderPreferences
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkEvent
 import org.nypl.simplified.tests.EventAssertions
+import org.nypl.simplified.tests.MutableServiceDirectory
+import org.nypl.simplified.tests.books.idle_timer.InoperableIdleTimer
+import org.nypl.simplified.tests.mocking.FakeAccountCredentialStorage
 import org.nypl.simplified.tests.mocking.MockAccountCreationStringResources
 import org.nypl.simplified.tests.mocking.MockAccountDeletionStringResources
 import org.nypl.simplified.tests.mocking.MockAccountLoginStringResources
@@ -74,9 +77,6 @@ import org.nypl.simplified.tests.mocking.MockAccountProviderResolutionStrings
 import org.nypl.simplified.tests.mocking.MockAccountProviders
 import org.nypl.simplified.tests.mocking.MockAnalytics
 import org.nypl.simplified.tests.mocking.MockRevokeStringResources
-import org.nypl.simplified.tests.MutableServiceDirectory
-import org.nypl.simplified.tests.mocking.FakeAccountCredentialStorage
-import org.nypl.simplified.tests.books.idle_timer.InoperableIdleTimer
 import org.slf4j.Logger
 import java.io.File
 import java.io.FileNotFoundException

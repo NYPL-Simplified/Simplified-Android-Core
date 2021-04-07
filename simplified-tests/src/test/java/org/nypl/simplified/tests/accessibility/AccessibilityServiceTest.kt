@@ -24,8 +24,8 @@ import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSAvailabilityLoanable
 import org.nypl.simplified.taskrecorder.api.TaskResult
-import org.nypl.simplified.tests.mocking.MockAccessibilityStrings
 import org.nypl.simplified.tests.mocking.MockAccessibilityEvents
+import org.nypl.simplified.tests.mocking.MockAccessibilityStrings
 import org.nypl.simplified.tests.mocking.MockLifecycle
 import org.nypl.simplified.tests.mocking.MockUIThreadService
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType

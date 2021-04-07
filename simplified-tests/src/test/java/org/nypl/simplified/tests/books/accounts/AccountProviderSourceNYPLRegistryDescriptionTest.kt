@@ -7,10 +7,10 @@ import one.irradia.mime.api.MIMEType
 import org.joda.time.DateTime
 import org.joda.time.DateTimeUtils
 import org.joda.time.DateTimeZone
-import org.junit.After
-import org.junit.Assert
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.librarysimplified.http.api.LSHTTPClientConfiguration
 import org.librarysimplified.http.api.LSHTTPClientType
 import org.librarysimplified.http.vanilla.LSHTTPClients
@@ -47,7 +47,7 @@ class AccountProviderSourceNYPLRegistryDescriptionTest {
     LoggerFactory.getLogger(AccountProviderSourceNYPLRegistryDescriptionTest::class.java)
   private val currentDateTimeZoneSystem = DateTimeZone.getDefault()
 
-  @Before
+  @BeforeEach
   fun testSetup() {
     DateTimeUtils.setCurrentMillisFixed(0L)
     DateTimeZone.setDefault(DateTimeZone.UTC)
@@ -74,7 +74,7 @@ class AccountProviderSourceNYPLRegistryDescriptionTest {
     this.server.start()
   }
 
-  @After
+  @AfterEach
   fun tearDown() {
     DateTimeUtils.setCurrentMillisSystem()
     DateTimeZone.setDefault(currentDateTimeZoneSystem)
@@ -111,7 +111,7 @@ class AccountProviderSourceNYPLRegistryDescriptionTest {
 
     this.logger.debug("result: {}", result)
     result as TaskResult.Failure
-    Assert.assertEquals("resolvingAuthDocumentNoStartURI", result.steps.last().resolution.message)
+    Assertions.assertEquals("resolvingAuthDocumentNoStartURI", result.steps.last().resolution.message)
   }
 
   private val AUTH_DOCUMENT_TYPE =
@@ -159,7 +159,7 @@ class AccountProviderSourceNYPLRegistryDescriptionTest {
 
     this.logger.debug("result: {}", result)
     result as TaskResult.Failure
-    Assert.assertEquals("resolvingAuthDocumentRetrievalFailed", result.steps.last().resolution.message)
+    Assertions.assertEquals("resolvingAuthDocumentRetrievalFailed", result.steps.last().resolution.message)
   }
 
   /**
@@ -197,7 +197,7 @@ class AccountProviderSourceNYPLRegistryDescriptionTest {
 
     this.logger.debug("result: {}", result)
     result as TaskResult.Failure
-    Assert.assertEquals("resolvingUnexpectedException", result.steps.last().resolution.message)
+    Assertions.assertEquals("resolvingUnexpectedException", result.steps.last().resolution.message)
   }
 
   /**
@@ -249,7 +249,7 @@ class AccountProviderSourceNYPLRegistryDescriptionTest {
 
     this.logger.debug("result: {}", result)
     result as TaskResult.Failure
-    Assert.assertEquals("resolvingAuthDocumentParseFailed", result.steps.last().resolution.message)
+    Assertions.assertEquals("resolvingAuthDocumentParseFailed", result.steps.last().resolution.message)
   }
 
   /**
@@ -419,7 +419,7 @@ class AccountProviderSourceNYPLRegistryDescriptionTest {
       updated = DateTime.parse("1970-01-01T00:00:00.000Z")
     )
 
-    Assert.assertEquals(provider, result.result)
+    Assertions.assertEquals(provider, result.result)
   }
 
   /**
@@ -569,7 +569,7 @@ class AccountProviderSourceNYPLRegistryDescriptionTest {
       updated = DateTime.parse("1970-01-01T00:00:00.000Z")
     )
 
-    Assert.assertEquals(provider, result.result)
+    Assertions.assertEquals(provider, result.result)
   }
 
   /**
@@ -699,7 +699,7 @@ class AccountProviderSourceNYPLRegistryDescriptionTest {
       updated = DateTime.parse("1970-01-01T00:00:00.000Z")
     )
 
-    Assert.assertEquals(provider, result.result)
+    Assertions.assertEquals(provider, result.result)
   }
 
   /**
@@ -810,7 +810,7 @@ class AccountProviderSourceNYPLRegistryDescriptionTest {
 
     this.logger.debug("result: {}", result)
     result as TaskResult.Failure
-    Assert.assertEquals("resolvingAuthDocumentCOPPAAgeGateMalformed", result.steps.last().resolution.message)
+    Assertions.assertEquals("resolvingAuthDocumentCOPPAAgeGateMalformed", result.steps.last().resolution.message)
   }
 
   /**
@@ -922,7 +922,7 @@ class AccountProviderSourceNYPLRegistryDescriptionTest {
 
     this.logger.debug("result: {}", result)
     result as TaskResult.Failure
-    Assert.assertEquals("resolvingAuthDocumentNoUsableAuthenticationTypes", result.steps.last().resolution.message)
+    Assertions.assertEquals("resolvingAuthDocumentNoUsableAuthenticationTypes", result.steps.last().resolution.message)
   }
 
   /**
@@ -1022,7 +1022,7 @@ class AccountProviderSourceNYPLRegistryDescriptionTest {
 
     this.logger.debug("result: {}", result)
     result as TaskResult.Failure
-    Assert.assertEquals("resolvingAuthDocumentNoStartURI", result.steps.last().resolution.message)
+    Assertions.assertEquals("resolvingAuthDocumentNoStartURI", result.steps.last().resolution.message)
   }
 
   private fun <T> anyNotNull(): T {

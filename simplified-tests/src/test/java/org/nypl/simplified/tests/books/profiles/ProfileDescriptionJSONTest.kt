@@ -4,10 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.joda.time.DateTime
 import org.joda.time.DateTimeUtils
 import org.joda.time.DateTimeZone
-import org.junit.After
-import org.junit.Assert
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+
 import org.nypl.simplified.profiles.ProfileDescriptionJSON
 import org.nypl.simplified.profiles.api.ProfileAttributes
 import org.nypl.simplified.profiles.api.ProfileDateOfBirth
@@ -21,13 +22,13 @@ class ProfileDescriptionJSONTest {
   private val logger = LoggerFactory.getLogger(ProfileDescriptionJSONTest::class.java)
   private val currentDateTimeZoneSystem = DateTimeZone.getDefault()
 
-  @Before
+  @BeforeEach
   fun setUp() {
     DateTimeUtils.setCurrentMillisFixed(0L)
     DateTimeZone.setDefault(DateTimeZone.UTC)
   }
 
-  @After
+  @AfterEach
   fun tearDown() {
     DateTimeUtils.setCurrentMillisSystem()
     DateTimeZone.setDefault(currentDateTimeZoneSystem)
@@ -65,7 +66,7 @@ class ProfileDescriptionJSONTest {
       ProfileDescriptionJSON.deserializeFromJSON(mapper, node)
 
     this.logger.debug("{}", ProfileDescriptionJSON.serializeToString(ObjectMapper(), description_1))
-    Assert.assertEquals(description_0, description_1)
+    Assertions.assertEquals(description_0, description_1)
   }
 
   @Test
@@ -76,8 +77,8 @@ class ProfileDescriptionJSONTest {
       ProfileDescriptionJSON.deserializeFromText(mapper, this.ofResource("profile-lfa-0.json"))
 
     this.logger.debug("{}", ProfileDescriptionJSON.serializeToString(ObjectMapper(), description))
-    Assert.assertEquals("Eggbert", description.displayName)
-    Assert.assertEquals("developer", description.attributes.role)
+    Assertions.assertEquals("Eggbert", description.displayName)
+    Assertions.assertEquals("developer", description.attributes.role)
   }
 
   @Test
@@ -88,11 +89,11 @@ class ProfileDescriptionJSONTest {
       ProfileDescriptionJSON.deserializeFromText(mapper, this.ofResource("profile-lfa-1.json"))
 
     this.logger.debug("{}", ProfileDescriptionJSON.serializeToString(ObjectMapper(), description))
-    Assert.assertEquals("Newbert", description.displayName)
-    Assert.assertEquals("male", description.attributes.gender)
-    Assert.assertEquals("student", description.attributes.role)
-    Assert.assertEquals("ຊັ້ນ 8", description.attributes.grade)
-    Assert.assertEquals("ສົ້ນຂົວ", description.attributes.school)
+    Assertions.assertEquals("Newbert", description.displayName)
+    Assertions.assertEquals("male", description.attributes.gender)
+    Assertions.assertEquals("student", description.attributes.role)
+    Assertions.assertEquals("ຊັ້ນ 8", description.attributes.grade)
+    Assertions.assertEquals("ສົ້ນຂົວ", description.attributes.school)
   }
 
   @Test
@@ -103,7 +104,7 @@ class ProfileDescriptionJSONTest {
       ProfileDescriptionJSON.deserializeFromText(mapper, this.ofResource("profile-nypl-0.json"))
 
     this.logger.debug("{}", ProfileDescriptionJSON.serializeToString(ObjectMapper(), description))
-    Assert.assertEquals("", description.displayName)
+    Assertions.assertEquals("", description.displayName)
   }
 
   private fun ofResource(name: String): String {

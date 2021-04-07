@@ -15,20 +15,19 @@ public final class EventAssertions {
    */
 
   public static <T extends TB, TB> void isTypeAndMatches(
-      final Class<T> clazz,
-      final List<TB> events,
-      final int index,
-      final ProcedureType<T> property)
-  {
+    final Class<T> clazz,
+    final List<TB> events,
+    final int index,
+    final ProcedureType<T> property) {
     Assert.assertTrue(
-        new StringBuilder(64)
-            .append("List of events must be at least ")
-            .append(index + 1)
-            .append(" elements long (is: ")
-            .append(events.size())
-            .append(")")
-            .toString(),
-        events.size() >= index + 1);
+      new StringBuilder(64)
+        .append("List of events must be at least ")
+        .append(index + 1)
+        .append(" elements long (is: ")
+        .append(events.size())
+        .append(")")
+        .toString(),
+      events.size() >= index + 1);
 
     final TB x = events.get(index);
     Assert.assertThat(x, IsInstanceOf.instanceOf(clazz));
@@ -41,11 +40,11 @@ public final class EventAssertions {
    */
 
   public static <T extends TB, TB> void isType(
-      final Class<T> clazz,
-      final List<TB> events,
-      final int index)
-  {
-    isTypeAndMatches(clazz, events, index, e -> {});
+    final Class<T> clazz,
+    final List<TB> events,
+    final int index) {
+    isTypeAndMatches(clazz, events, index, e -> {
+    });
   }
 
   /**
@@ -54,8 +53,7 @@ public final class EventAssertions {
 
   public static void isListWithTypes(
     final List<?> events,
-    final List<Class<?>> types)
-  {
+    final List<Class<?>> types) {
     Assert.assertEquals(
       "Expected a list of " + types.size() + " events",
       events.size(),

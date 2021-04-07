@@ -7,8 +7,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.ExpectedException
 import org.nypl.simplified.accounts.api.AccountPreferences
-import org.nypl.simplified.accounts.json.AccountAuthenticationCredentialsJSON.deserializeFromJSON
-import org.nypl.simplified.accounts.json.AccountAuthenticationCredentialsJSON.serializeToJSON
 import org.nypl.simplified.accounts.json.AccountPreferencesJSON
 import java.net.URI
 import java.util.UUID

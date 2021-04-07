@@ -5,12 +5,12 @@ import io.reactivex.disposables.Disposable
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.joda.time.Instant
-import org.junit.After
-import org.junit.Assert.assertArrayEquals
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertArrayEquals
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.librarysimplified.audiobook.manifest_fulfill.spi.ManifestFulfilled
 import org.librarysimplified.http.api.LSHTTPClientConfiguration
 import org.librarysimplified.http.api.LSHTTPClientType
@@ -70,17 +70,6 @@ import org.nypl.simplified.profiles.api.ProfileType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskResult
-import org.nypl.simplified.tests.mocking.MockAccountProviders
-import org.nypl.simplified.tests.mocking.MockAdobeAdeptConnector
-import org.nypl.simplified.tests.mocking.MockAdobeAdeptExecutor
-import org.nypl.simplified.tests.mocking.MockAdobeAdeptNetProvider
-import org.nypl.simplified.tests.mocking.MockAdobeAdeptResourceProvider
-import org.nypl.simplified.tests.mocking.MockAxisNowService
-import org.nypl.simplified.tests.mocking.MockAudioBookManifestStrategies
-import org.nypl.simplified.tests.mocking.MockBookFormatSupport
-import org.nypl.simplified.tests.mocking.MockBorrowSubtaskDirectory
-import org.nypl.simplified.tests.mocking.MockBundledContentResolver
-import org.nypl.simplified.tests.mocking.MockContentResolver
 import org.nypl.simplified.tests.MutableServiceDirectory
 import org.nypl.simplified.tests.TestDirectories
 import org.nypl.simplified.tests.TestDirectories.temporaryFileOf
@@ -89,6 +78,17 @@ import org.nypl.simplified.tests.books.borrowing.BorrowTestFeeds.FeedRequirement
 import org.nypl.simplified.tests.books.borrowing.BorrowTestFeeds.PathElement
 import org.nypl.simplified.tests.books.borrowing.BorrowTestFeeds.Status.LOANABLE
 import org.nypl.simplified.tests.books.borrowing.BorrowTestFeeds.Status.LOANED
+import org.nypl.simplified.tests.mocking.MockAccountProviders
+import org.nypl.simplified.tests.mocking.MockAdobeAdeptConnector
+import org.nypl.simplified.tests.mocking.MockAdobeAdeptExecutor
+import org.nypl.simplified.tests.mocking.MockAdobeAdeptNetProvider
+import org.nypl.simplified.tests.mocking.MockAdobeAdeptResourceProvider
+import org.nypl.simplified.tests.mocking.MockAudioBookManifestStrategies
+import org.nypl.simplified.tests.mocking.MockAxisNowService
+import org.nypl.simplified.tests.mocking.MockBookFormatSupport
+import org.nypl.simplified.tests.mocking.MockBorrowSubtaskDirectory
+import org.nypl.simplified.tests.mocking.MockBundledContentResolver
+import org.nypl.simplified.tests.mocking.MockContentResolver
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.net.URI
@@ -190,7 +190,7 @@ class BorrowTaskTest {
     return result as TaskResult.Success
   }
 
-  @Before
+  @BeforeEach
   fun testSetup() {
     this.webServer = MockWebServer()
     this.webServer.start(20000)
@@ -323,7 +323,7 @@ class BorrowTaskTest {
       MockAxisNowService()
   }
 
-  @After
+  @AfterEach
   fun tearDown() {
     this.bookRegistrySub?.dispose()
     this.webServer.close()

@@ -3,8 +3,8 @@ package org.nypl.simplified.tests.opds;
 import com.io7m.jfunctional.Some;
 import com.io7m.jnull.NullCheck;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.nypl.simplified.opds.core.OPDSXML;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -24,10 +24,10 @@ import javax.xml.parsers.ParserConfigurationException;
 public final class OPDSXMLTest {
 
   private static Document parseStream(
-      final InputStream s)
-      throws ParserConfigurationException,
-      SAXException,
-      IOException {
+    final InputStream s)
+    throws ParserConfigurationException,
+    SAXException,
+    IOException {
     final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
     dbf.setNamespaceAware(true);
     final DocumentBuilder db = dbf.newDocumentBuilder();
@@ -36,8 +36,8 @@ public final class OPDSXMLTest {
   }
 
   private static InputStream getResource(
-      final String name)
-      throws Exception {
+    final String name)
+    throws Exception {
 
     final String path = "/org/nypl/simplified/tests/opds/" + name;
     final URL url = OPDSFeedEntryParserTest.class.getResource(path);
@@ -49,28 +49,28 @@ public final class OPDSXMLTest {
 
   @Test
   public void testNamespaces_0()
-      throws Exception {
+    throws Exception {
     final Document d =
-        OPDSXMLTest.parseStream(OPDSXMLTest.getResource("namespaces-0.xml"));
+      OPDSXMLTest.parseStream(OPDSXMLTest.getResource("namespaces-0.xml"));
     final Element r = d.getDocumentElement();
-    Assert.assertEquals("feed", r.getNodeName());
+    Assertions.assertEquals("feed", r.getNodeName());
 
     final NodeList p = r.getElementsByTagName("dcterms:publisher");
-    Assert.assertEquals(1, p.getLength());
+    Assertions.assertEquals(1, p.getLength());
     final Element pub_actual = (Element) p.item(0);
 
     final Some<String> pub_ns =
-        (Some<String>) OPDSXML.getNodeNamespace(pub_actual);
-    Assert.assertEquals(pub_ns.get(), "http://purl.org/dc/terms/");
+      (Some<String>) OPDSXML.getNodeNamespace(pub_actual);
+    Assertions.assertEquals(pub_ns.get(), "http://purl.org/dc/terms/");
 
-    Assert.assertTrue(OPDSXML.nodeHasName(
-        pub_actual,
-        URI.create("http://purl.org/dc/terms/"),
-        "publisher"));
+    Assertions.assertTrue(OPDSXML.nodeHasName(
+      pub_actual,
+      URI.create("http://purl.org/dc/terms/"),
+      "publisher"));
 
     OPDSXML.getFirstChildElementWithName(
-        r,
-        URI.create("http://purl.org/dc/terms/"),
-        "publisher");
+      r,
+      URI.create("http://purl.org/dc/terms/"),
+      "publisher");
   }
 }

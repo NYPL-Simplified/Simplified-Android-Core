@@ -1,7 +1,7 @@
 package org.nypl.simplified.tests.opds;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSJSONParser;
@@ -41,18 +41,18 @@ public final class OPDSJSONParserTest {
         OPDSJSONParserTest.getResource("compatibility-20180921-test-new-1.json"));
 
     {
-      Assert.assertEquals(e0.getAcquisitions(), e1.getAcquisitions());
-      Assert.assertEquals(e0.getAvailability(), e1.getAvailability());
-      Assert.assertEquals(e0.getAuthors(), e1.getAuthors());
-      Assert.assertEquals(e0.getCategories(), e1.getCategories());
-      Assert.assertEquals(e0.getCover(), e1.getCover());
-      Assert.assertEquals(e0.getGroups(), e1.getGroups());
-      Assert.assertEquals(e0.getID(), e1.getID());
-      Assert.assertEquals(e0.getPublished(), e1.getPublished());
-      Assert.assertEquals(e0.getPublisher(), e1.getPublisher());
-      Assert.assertEquals(e0.getSummary(), e1.getSummary());
-      Assert.assertEquals(e0.getThumbnail(), e1.getThumbnail());
-      Assert.assertEquals(e0.getTitle(), e1.getTitle());
+      Assertions.assertEquals(e0.getAcquisitions(), e1.getAcquisitions());
+      Assertions.assertEquals(e0.getAvailability(), e1.getAvailability());
+      Assertions.assertEquals(e0.getAuthors(), e1.getAuthors());
+      Assertions.assertEquals(e0.getCategories(), e1.getCategories());
+      Assertions.assertEquals(e0.getCover(), e1.getCover());
+      Assertions.assertEquals(e0.getGroups(), e1.getGroups());
+      Assertions.assertEquals(e0.getID(), e1.getID());
+      Assertions.assertEquals(e0.getPublished(), e1.getPublished());
+      Assertions.assertEquals(e0.getPublisher(), e1.getPublisher());
+      Assertions.assertEquals(e0.getSummary(), e1.getSummary());
+      Assertions.assertEquals(e0.getThumbnail(), e1.getThumbnail());
+      Assertions.assertEquals(e0.getTitle(), e1.getTitle());
     }
   }
 
@@ -75,18 +75,18 @@ public final class OPDSJSONParserTest {
       final OPDSAcquisition e0a = e0.getAcquisitions().get(0);
       final OPDSAcquisition e1a = e1.getAcquisitions().get(0);
 
-      Assert.assertEquals(e0a.availableFinalContentTypes(), e1a.availableFinalContentTypes());
-      Assert.assertEquals(e0.getAvailability(), e1.getAvailability());
-      Assert.assertEquals(e0.getAuthors(), e1.getAuthors());
-      Assert.assertEquals(e0.getCategories(), e1.getCategories());
-      Assert.assertEquals(e0.getCover(), e1.getCover());
-      Assert.assertEquals(e0.getGroups(), e1.getGroups());
-      Assert.assertEquals(e0.getID(), e1.getID());
-      Assert.assertEquals(e0.getPublished(), e1.getPublished());
-      Assert.assertEquals(e0.getPublisher(), e1.getPublisher());
-      Assert.assertEquals(e0.getSummary(), e1.getSummary());
-      Assert.assertEquals(e0.getThumbnail(), e1.getThumbnail());
-      Assert.assertEquals(e0.getTitle(), e1.getTitle());
+      Assertions.assertEquals(e0a.availableFinalContentTypes(), e1a.availableFinalContentTypes());
+      Assertions.assertEquals(e0.getAvailability(), e1.getAvailability());
+      Assertions.assertEquals(e0.getAuthors(), e1.getAuthors());
+      Assertions.assertEquals(e0.getCategories(), e1.getCategories());
+      Assertions.assertEquals(e0.getCover(), e1.getCover());
+      Assertions.assertEquals(e0.getGroups(), e1.getGroups());
+      Assertions.assertEquals(e0.getID(), e1.getID());
+      Assertions.assertEquals(e0.getPublished(), e1.getPublished());
+      Assertions.assertEquals(e0.getPublisher(), e1.getPublisher());
+      Assertions.assertEquals(e0.getSummary(), e1.getSummary());
+      Assertions.assertEquals(e0.getThumbnail(), e1.getThumbnail());
+      Assertions.assertEquals(e0.getTitle(), e1.getTitle());
     }
   }
 }

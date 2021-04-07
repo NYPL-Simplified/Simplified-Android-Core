@@ -6,8 +6,8 @@ import com.io7m.jfunctional.Some;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.nypl.simplified.opds.core.DRMLicensor;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
@@ -42,8 +42,8 @@ public final class OPDSFeedEntryParserTest {
     LoggerFactory.getLogger(OPDSFeedEntryParserTest.class);
 
   private static InputStream getResource(
-      final String name)
-      throws Exception {
+    final String name)
+    throws Exception {
 
     final String path = "/org/nypl/simplified/tests/opds/" + name;
     final URL url = OPDSFeedEntryParserTest.class.getResource(path);
@@ -55,303 +55,303 @@ public final class OPDSFeedEntryParserTest {
 
   @Test
   public void testEntryAvailabilityLoanable()
-      throws Exception {
+    throws Exception {
     final OPDSAcquisitionFeedEntryParserType parser = this.getParser();
     final OPDSAcquisitionFeedEntry e = parser.parseEntryStream(URI.create("urn:test"),
       OPDSFeedEntryParserTest.getResource(
-          "entry-availability-loanable.xml"));
+        "entry-availability-loanable.xml"));
 
     final OPDSAvailabilityType availability = e.getAvailability();
     final OPDSAvailabilityLoanable expected = OPDSAvailabilityLoanable.get();
-    Assert.assertEquals(expected, availability);
+    Assertions.assertEquals(expected, availability);
 
-    Assert.assertEquals(1, e.getAcquisitions().size());
+    Assertions.assertEquals(1, e.getAcquisitions().size());
   }
 
   @Test
   public void testEntryAvailabilityLoanedIndefinite()
-      throws Exception {
+    throws Exception {
     final OPDSAcquisitionFeedEntryParserType parser = this.getParser();
     final OPDSAcquisitionFeedEntry e = parser.parseEntryStream(URI.create("urn:test"),
       OPDSFeedEntryParserTest.getResource(
-          "entry-availability-loaned-indefinite.xml"));
+        "entry-availability-loaned-indefinite.xml"));
 
     final OPDSAvailabilityType availability = e.getAvailability();
 
     final OptionType<DateTime> expected_start_date = Option.some(
-        ISODateTimeFormat.dateTimeParser().parseDateTime("2000-01-01T00:00:00Z"));
+      ISODateTimeFormat.dateTimeParser().parseDateTime("2000-01-01T00:00:00Z"));
     final OptionType<DateTime> expected_end_date = Option.none();
     final OptionType<URI> expected_revoke =
-        Option.some(new URI("http://example.com/revoke"));
+      Option.some(new URI("http://example.com/revoke"));
     final OPDSAvailabilityLoaned expected = OPDSAvailabilityLoaned.get(
-        expected_start_date, expected_end_date, expected_revoke);
+      expected_start_date, expected_end_date, expected_revoke);
 
-    Assert.assertEquals(expected, availability);
+    Assertions.assertEquals(expected, availability);
 
-    Assert.assertEquals(1, e.getAcquisitions().size());
+    Assertions.assertEquals(1, e.getAcquisitions().size());
     final OPDSAcquisition acquisition = e.getAcquisitions().get(0);
-    Assert.assertTrue(
-      "application/epub+zip is available",
+    Assertions.assertTrue(
       OPDSIndirectAcquisition.Companion.findTypeInOptional(
         mimeOf("application/epub+zip"),
-        acquisition.getIndirectAcquisitions()).isSome());
+        acquisition.getIndirectAcquisitions()).isSome(),
+      "application/epub+zip is available");
   }
 
   @Test
   public void testEntryAvailabilityLoanedTimed()
-      throws Exception {
+    throws Exception {
     final OPDSAcquisitionFeedEntryParserType parser = this.getParser();
     final OPDSAcquisitionFeedEntry e = parser.parseEntryStream(URI.create("urn:test"),
       OPDSFeedEntryParserTest.getResource(
-          "entry-availability-loaned-timed.xml"));
+        "entry-availability-loaned-timed.xml"));
 
     final OPDSAvailabilityType availability = e.getAvailability();
 
     final OptionType<DateTime> expected_start_date = Option.some(
-        ISODateTimeFormat.dateTimeParser().parseDateTime("2000-01-01T00:00:00Z"));
+      ISODateTimeFormat.dateTimeParser().parseDateTime("2000-01-01T00:00:00Z"));
     final OptionType<DateTime> expected_end_date = Option.some(
-        ISODateTimeFormat.dateTimeParser().parseDateTime("2010-01-01T00:00:00Z"));
+      ISODateTimeFormat.dateTimeParser().parseDateTime("2010-01-01T00:00:00Z"));
     final OptionType<URI> expected_revoke =
-        Option.some(new URI("http://example.com/revoke"));
+      Option.some(new URI("http://example.com/revoke"));
     final OPDSAvailabilityLoaned expected = OPDSAvailabilityLoaned.get(
-        expected_start_date, expected_end_date, expected_revoke);
+      expected_start_date, expected_end_date, expected_revoke);
 
-    Assert.assertEquals(expected, availability);
+    Assertions.assertEquals(expected, availability);
 
-    Assert.assertEquals(1, e.getAcquisitions().size());
+    Assertions.assertEquals(1, e.getAcquisitions().size());
     final OPDSAcquisition acquisition = e.getAcquisitions().get(0);
-    Assert.assertTrue(
-      "application/epub+zip is available",
+    Assertions.assertTrue(
       OPDSIndirectAcquisition.Companion.findTypeInOptional(
         mimeOf("application/epub+zip"),
-        acquisition.getIndirectAcquisitions()).isSome());
+        acquisition.getIndirectAcquisitions()).isSome(),
+      "application/epub+zip is available");
   }
 
   @Test
   public void testEntryAvailabilityHoldable()
-      throws Exception {
+    throws Exception {
     final OPDSAcquisitionFeedEntryParserType parser = this.getParser();
     final OPDSAcquisitionFeedEntry e = parser.parseEntryStream(URI.create("urn:test"),
       OPDSFeedEntryParserTest.getResource(
-          "entry-availability-holdable.xml"));
+        "entry-availability-holdable.xml"));
 
     final OPDSAvailabilityType availability = e.getAvailability();
     final OPDSAvailabilityHoldable expected = OPDSAvailabilityHoldable.get();
 
-    Assert.assertEquals(expected, availability);
-    Assert.assertEquals(1, e.getAcquisitions().size());
+    Assertions.assertEquals(expected, availability);
+    Assertions.assertEquals(1, e.getAcquisitions().size());
 
     final OPDSAcquisition acquisition = e.getAcquisitions().get(0);
-    Assert.assertTrue(
-      "application/epub+zip is available",
+    Assertions.assertTrue(
       OPDSIndirectAcquisition.Companion.findTypeInOptional(
         mimeOf("application/epub+zip"),
-        acquisition.getIndirectAcquisitions()).isSome());
+        acquisition.getIndirectAcquisitions()).isSome(),
+      "application/epub+zip is available");
   }
 
   @Test
   public void testEntryAvailabilityHeldIndefinite()
-      throws Exception {
+    throws Exception {
     final OPDSAcquisitionFeedEntryParserType parser = this.getParser();
     final OPDSAcquisitionFeedEntry e = parser.parseEntryStream(URI.create("urn:test"),
       OPDSFeedEntryParserTest.getResource(
-          "entry-availability-held-indefinite.xml"));
+        "entry-availability-held-indefinite.xml"));
 
     final OPDSAvailabilityType availability = e.getAvailability();
 
     final OptionType<DateTime> expected_start_date = Option.some(
-        ISODateTimeFormat.dateTimeParser().parseDateTime("2000-01-01T00:00:00Z"));
+      ISODateTimeFormat.dateTimeParser().parseDateTime("2000-01-01T00:00:00Z"));
     final OptionType<Integer> queue_position = Option.none();
     final OptionType<DateTime> expected_end_date = Option.none();
     final OptionType<URI> expected_revoke =
-        Option.some(new URI("http://example.com/revoke"));
+      Option.some(new URI("http://example.com/revoke"));
     final OPDSAvailabilityHeld expected = OPDSAvailabilityHeld.get(
-        expected_start_date, queue_position, expected_end_date, expected_revoke);
+      expected_start_date, queue_position, expected_end_date, expected_revoke);
 
-    Assert.assertEquals(expected, availability);
-    Assert.assertEquals(1, e.getAcquisitions().size());
+    Assertions.assertEquals(expected, availability);
+    Assertions.assertEquals(1, e.getAcquisitions().size());
 
     final OPDSAcquisition acquisition = e.getAcquisitions().get(0);
-    Assert.assertTrue(
-      "application/epub+zip is available",
+    Assertions.assertTrue(
       OPDSIndirectAcquisition.Companion.findTypeInOptional(
         mimeOf("application/epub+zip"),
-        acquisition.getIndirectAcquisitions()).isSome());
+        acquisition.getIndirectAcquisitions()).isSome(),
+      "application/epub+zip is available");
   }
 
   @Test
   public void testEntryAvailabilityHeldTimed()
-      throws Exception {
+    throws Exception {
     final OPDSAcquisitionFeedEntryParserType parser = this.getParser();
     final OPDSAcquisitionFeedEntry e = parser.parseEntryStream(URI.create("urn:test"),
       OPDSFeedEntryParserTest.getResource(
-          "entry-availability-held-timed.xml"));
+        "entry-availability-held-timed.xml"));
 
     final OPDSAvailabilityType availability = e.getAvailability();
 
     final OptionType<DateTime> expected_start_date = Option.some(
-        ISODateTimeFormat.dateTimeParser().parseDateTime("2000-01-01T00:00:00Z"));
+      ISODateTimeFormat.dateTimeParser().parseDateTime("2000-01-01T00:00:00Z"));
     final OptionType<DateTime> expected_end_date = Option.some(
-        ISODateTimeFormat.dateTimeParser().parseDateTime("2010-01-01T00:00:00Z"));
+      ISODateTimeFormat.dateTimeParser().parseDateTime("2010-01-01T00:00:00Z"));
     final OptionType<Integer> queue_position = Option.none();
     final OptionType<URI> expected_revoke =
-        Option.some(new URI("http://example.com/revoke"));
+      Option.some(new URI("http://example.com/revoke"));
     final OPDSAvailabilityHeld expected = OPDSAvailabilityHeld.get(
-        expected_start_date, queue_position, expected_end_date, expected_revoke);
+      expected_start_date, queue_position, expected_end_date, expected_revoke);
 
-    Assert.assertEquals(expected, availability);
-    Assert.assertEquals(1, e.getAcquisitions().size());
+    Assertions.assertEquals(expected, availability);
+    Assertions.assertEquals(1, e.getAcquisitions().size());
 
     final OPDSAcquisition acquisition = e.getAcquisitions().get(0);
-    Assert.assertTrue(
-      "application/epub+zip is available",
+    Assertions.assertTrue(
       OPDSIndirectAcquisition.Companion.findTypeInOptional(
         mimeOf("application/epub+zip"),
-        acquisition.getIndirectAcquisitions()).isSome());
+        acquisition.getIndirectAcquisitions()).isSome(),
+      "application/epub+zip is available");
   }
 
   @Test
   public void testEntryAvailabilityHeldIndefiniteQueued()
-      throws Exception {
+    throws Exception {
     final OPDSAcquisitionFeedEntryParserType parser = this.getParser();
     final OPDSAcquisitionFeedEntry e = parser.parseEntryStream(URI.create("urn:test"),
       OPDSFeedEntryParserTest.getResource(
-          "entry-availability-held-indefinite-queued.xml"));
+        "entry-availability-held-indefinite-queued.xml"));
 
     final OPDSAvailabilityType availability = e.getAvailability();
 
     final OptionType<DateTime> expected_start_date = Option.some(
-        ISODateTimeFormat.dateTimeParser().parseDateTime("2000-01-01T00:00:00Z"));
+      ISODateTimeFormat.dateTimeParser().parseDateTime("2000-01-01T00:00:00Z"));
     final OptionType<Integer> queue_position = Option.some(3);
     final OptionType<DateTime> expected_end_date = Option.none();
     final OptionType<URI> expected_revoke =
-        Option.some(new URI("http://example.com/revoke"));
+      Option.some(new URI("http://example.com/revoke"));
     final OPDSAvailabilityHeld expected = OPDSAvailabilityHeld.get(
-        expected_start_date, queue_position, expected_end_date, expected_revoke);
+      expected_start_date, queue_position, expected_end_date, expected_revoke);
 
-    Assert.assertEquals(expected, availability);
-    Assert.assertEquals(1, e.getAcquisitions().size());
+    Assertions.assertEquals(expected, availability);
+    Assertions.assertEquals(1, e.getAcquisitions().size());
 
     final OPDSAcquisition acquisition = e.getAcquisitions().get(0);
-    Assert.assertTrue(
-      "application/epub+zip is available",
+    Assertions.assertTrue(
       OPDSIndirectAcquisition.Companion.findTypeInOptional(
         mimeOf("application/epub+zip"),
-        acquisition.getIndirectAcquisitions()).isSome());
+        acquisition.getIndirectAcquisitions()).isSome(),
+      "application/epub+zip is available");
   }
 
   @Test
   public void testEntryAvailabilityHeldTimedQueued()
-      throws Exception {
+    throws Exception {
     final OPDSAcquisitionFeedEntryParserType parser = this.getParser();
     final OPDSAcquisitionFeedEntry e = parser.parseEntryStream(URI.create("urn:test"),
       OPDSFeedEntryParserTest.getResource(
-          "entry-availability-held-timed-queued.xml"));
+        "entry-availability-held-timed-queued.xml"));
 
     final OPDSAvailabilityType availability = e.getAvailability();
 
     final OptionType<DateTime> expected_start_date = Option.some(
-        ISODateTimeFormat.dateTimeParser().parseDateTime("2000-01-01T00:00:00Z"));
+      ISODateTimeFormat.dateTimeParser().parseDateTime("2000-01-01T00:00:00Z"));
     final OptionType<DateTime> expected_end_date = Option.some(
-        ISODateTimeFormat.dateTimeParser().parseDateTime("2010-01-01T00:00:00Z"));
+      ISODateTimeFormat.dateTimeParser().parseDateTime("2010-01-01T00:00:00Z"));
     final OptionType<Integer> queue_position = Option.some(3);
     final OptionType<URI> expected_revoke =
-        Option.some(new URI("http://example.com/revoke"));
+      Option.some(new URI("http://example.com/revoke"));
     final OPDSAvailabilityHeld expected = OPDSAvailabilityHeld.get(
-        expected_start_date, queue_position, expected_end_date, expected_revoke);
+      expected_start_date, queue_position, expected_end_date, expected_revoke);
 
-    Assert.assertEquals(expected, availability);
-    Assert.assertEquals(1, e.getAcquisitions().size());
+    Assertions.assertEquals(expected, availability);
+    Assertions.assertEquals(1, e.getAcquisitions().size());
 
     final OPDSAcquisition acquisition = e.getAcquisitions().get(0);
-    Assert.assertTrue(
-      "application/epub+zip is available",
+    Assertions.assertTrue(
       OPDSIndirectAcquisition.Companion.findTypeInOptional(
         mimeOf("application/epub+zip"),
-        acquisition.getIndirectAcquisitions()).isSome());
+        acquisition.getIndirectAcquisitions()).isSome(),
+      "application/epub+zip is available");
   }
 
   @Test
   public void testEntryAvailabilityHeldReady()
-      throws Exception {
+    throws Exception {
     final OPDSAcquisitionFeedEntryParserType parser = this.getParser();
     final OPDSAcquisitionFeedEntry e = parser.parseEntryStream(URI.create("urn:test"),
       OPDSFeedEntryParserTest.getResource(
-          "entry-availability-heldready.xml"));
+        "entry-availability-heldready.xml"));
 
     final OPDSAvailabilityType availability = e.getAvailability();
 
     final OptionType<DateTime> expected_end_date = Option.none();
     final OptionType<URI> expected_revoke =
-        Option.some(new URI("http://example.com/revoke"));
+      Option.some(new URI("http://example.com/revoke"));
     final OPDSAvailabilityHeldReady expected =
-        OPDSAvailabilityHeldReady.get(expected_end_date, expected_revoke);
+      OPDSAvailabilityHeldReady.get(expected_end_date, expected_revoke);
 
-    Assert.assertEquals(expected, availability);
-    Assert.assertEquals(1, e.getAcquisitions().size());
+    Assertions.assertEquals(expected, availability);
+    Assertions.assertEquals(1, e.getAcquisitions().size());
 
     final OPDSAcquisition acquisition = e.getAcquisitions().get(0);
-    Assert.assertTrue(
-      "application/epub+zip is available",
+    Assertions.assertTrue(
       OPDSIndirectAcquisition.Companion.findTypeInOptional(
         mimeOf("application/epub+zip"),
-        acquisition.getIndirectAcquisitions()).isSome());
+        acquisition.getIndirectAcquisitions()).isSome(),
+      "application/epub+zip is available");
   }
 
   @Test
   public void testEntryAvailabilityReservedTimed()
-      throws Exception {
+    throws Exception {
     final OPDSAcquisitionFeedEntryParserType parser = this.getParser();
     final OPDSAcquisitionFeedEntry e = parser.parseEntryStream(URI.create("urn:test"),
       OPDSFeedEntryParserTest.getResource(
-          "entry-availability-heldready-timed.xml"));
+        "entry-availability-heldready-timed.xml"));
 
     final OPDSAvailabilityType availability = e.getAvailability();
 
     final OptionType<DateTime> expected_end_date = Option.some(
-        ISODateTimeFormat.dateTimeParser().parseDateTime("2010-01-01T00:00:00Z"));
+      ISODateTimeFormat.dateTimeParser().parseDateTime("2010-01-01T00:00:00Z"));
     final OptionType<URI> expected_revoke =
-        Option.some(new URI("http://example.com/revoke"));
+      Option.some(new URI("http://example.com/revoke"));
     final OPDSAvailabilityHeldReady expected =
-        OPDSAvailabilityHeldReady.get(expected_end_date, expected_revoke);
+      OPDSAvailabilityHeldReady.get(expected_end_date, expected_revoke);
 
-    Assert.assertEquals(expected, availability);
-    Assert.assertEquals(1, e.getAcquisitions().size());
+    Assertions.assertEquals(expected, availability);
+    Assertions.assertEquals(1, e.getAcquisitions().size());
 
     final OPDSAcquisition acquisition = e.getAcquisitions().get(0);
-    Assert.assertTrue(
-      "application/epub+zip is available",
+    Assertions.assertTrue(
       OPDSIndirectAcquisition.Companion.findTypeInOptional(
         mimeOf("application/epub+zip"),
-        acquisition.getIndirectAcquisitions()).isSome());
+        acquisition.getIndirectAcquisitions()).isSome(),
+      "application/epub+zip is available");
   }
 
   @Test
   public void testEntryAvailabilityOpenAccess()
-      throws Exception {
+    throws Exception {
     final OPDSAcquisitionFeedEntryParserType parser = this.getParser();
     final OPDSAcquisitionFeedEntry e = parser.parseEntryStream(URI.create("urn:test"),
       OPDSFeedEntryParserTest.getResource(
-          "entry-availability-open-access.xml"));
+        "entry-availability-open-access.xml"));
 
     final OPDSAvailabilityType availability = e.getAvailability();
 
     final OptionType<URI> expected_revoke =
-        Option.some(new URI("http://example.com/revoke"));
+      Option.some(new URI("http://example.com/revoke"));
     final OPDSAvailabilityOpenAccess expected =
-        OPDSAvailabilityOpenAccess.get(expected_revoke);
+      OPDSAvailabilityOpenAccess.get(expected_revoke);
 
-    Assert.assertEquals(expected, availability);
-    Assert.assertEquals(1, e.getAcquisitions().size());
+    Assertions.assertEquals(expected, availability);
+    Assertions.assertEquals(1, e.getAcquisitions().size());
 
     final OPDSAcquisition acquisition = e.getAcquisitions().get(0);
-    Assert.assertEquals(0, acquisition.getIndirectAcquisitions().size());
-    Assert.assertEquals(mimeOf("application/epub+zip"), acquisition.getType());
+    Assertions.assertEquals(0, acquisition.getIndirectAcquisitions().size());
+    Assertions.assertEquals(mimeOf("application/epub+zip"), acquisition.getType());
   }
 
   @Test
   public void testEntryAvailabilityReservedSpecific0()
-      throws Exception {
+    throws Exception {
     final OPDSAcquisitionFeedEntryParserType parser = this.getParser();
     final OPDSAcquisitionFeedEntry e = parser.parseEntryStream(URI.create("urn:test"),
       OPDSFeedEntryParserTest.getResource(
@@ -360,21 +360,21 @@ public final class OPDSFeedEntryParserTest {
     final OPDSAvailabilityType availability = e.getAvailability();
 
     final OptionType<DateTime> expected_end_date = Option.some(
-        ISODateTimeFormat.dateTimeParser().parseDateTime("2015-08-24T00:30:24Z"));
+      ISODateTimeFormat.dateTimeParser().parseDateTime("2015-08-24T00:30:24Z"));
     final OptionType<URI> expected_revoke =
-        Option.some(new URI("http://example.com/revoke"));
+      Option.some(new URI("http://example.com/revoke"));
     final OPDSAvailabilityHeldReady expected =
-        OPDSAvailabilityHeldReady.get(expected_end_date, expected_revoke);
+      OPDSAvailabilityHeldReady.get(expected_end_date, expected_revoke);
 
-    Assert.assertEquals(expected, availability);
-    Assert.assertEquals(1, e.getAcquisitions().size());
+    Assertions.assertEquals(expected, availability);
+    Assertions.assertEquals(1, e.getAcquisitions().size());
 
     final OPDSAcquisition acquisition = e.getAcquisitions().get(0);
-    Assert.assertTrue(
-      "application/epub+zip is available",
+    Assertions.assertTrue(
       OPDSIndirectAcquisition.Companion.findTypeInOptional(
         mimeOf("application/epub+zip"),
-        acquisition.getIndirectAcquisitions()).isSome());
+        acquisition.getIndirectAcquisitions()).isSome(),
+      "application/epub+zip is available");
   }
 
   @Test
@@ -384,33 +384,33 @@ public final class OPDSFeedEntryParserTest {
     final OPDSAcquisitionFeedEntry e = parser.parseEntryStream(URI.create("urn:test"),
       OPDSFeedEntryParserTest.getResource("entry-with-formats-0.xml"));
 
-    Assert.assertEquals(3, e.getAcquisitions().size());
+    Assertions.assertEquals(3, e.getAcquisitions().size());
 
     {
       final OPDSAcquisition acquisition = e.getAcquisitions().get(0);
-      Assert.assertTrue(
-        "application/epub+zip is available",
+      Assertions.assertTrue(
         OPDSIndirectAcquisition.Companion.findTypeInOptional(
           mimeOf("application/epub+zip"),
-          acquisition.getIndirectAcquisitions()).isSome());
+          acquisition.getIndirectAcquisitions()).isSome(),
+        "application/epub+zip is available");
     }
 
     {
       final OPDSAcquisition acquisition = e.getAcquisitions().get(1);
-      Assert.assertTrue(
-        "application/pdf is available",
+      Assertions.assertTrue(
         OPDSIndirectAcquisition.Companion.findTypeInOptional(
           mimeOf("application/pdf"),
-          acquisition.getIndirectAcquisitions()).isSome());
+          acquisition.getIndirectAcquisitions()).isSome(),
+        "application/pdf is available");
     }
 
     {
       final OPDSAcquisition acquisition = e.getAcquisitions().get(2);
-      Assert.assertTrue(
-        "text/html is available",
+      Assertions.assertTrue(
         OPDSIndirectAcquisition.Companion.findTypeInOptional(
           mimeOf("text/html"),
-          acquisition.getIndirectAcquisitions()).isSome());
+          acquisition.getIndirectAcquisitions()).isSome(),
+        "text/html is available");
     }
   }
 
@@ -421,14 +421,14 @@ public final class OPDSFeedEntryParserTest {
     final OPDSAcquisitionFeedEntry e = parser.parseEntryStream(URI.create("urn:test"),
       OPDSFeedEntryParserTest.getResource("entry-with-formats-1.xml"));
 
-    Assert.assertEquals(1, e.getAcquisitions().size());
+    Assertions.assertEquals(1, e.getAcquisitions().size());
 
     final OPDSAcquisition acquisition = e.getAcquisitions().get(0);
-    Assert.assertTrue(
-      "application/epub+zip is available",
+    Assertions.assertTrue(
       OPDSIndirectAcquisition.Companion.findTypeInOptional(
         mimeOf("application/epub+zip"),
-        acquisition.getIndirectAcquisitions()).isSome());
+        acquisition.getIndirectAcquisitions()).isSome(),
+      "application/epub+zip is available");
   }
 
   @Test
@@ -439,16 +439,16 @@ public final class OPDSFeedEntryParserTest {
       OPDSFeedEntryParserTest.getResource("entry-with-drm.xml"));
 
     OptionType<DRMLicensor> licensor_opt = e.getLicensor();
-    Assert.assertTrue(licensor_opt.isSome());
+    Assertions.assertTrue(licensor_opt.isSome());
 
     DRMLicensor licensor = ((Some<DRMLicensor>) licensor_opt).get();
-    Assert.assertEquals(
+    Assertions.assertEquals(
       "NYPL",
       licensor.getVendor());
-    Assert.assertEquals(
+    Assertions.assertEquals(
       "NYNYPL|0000000000|XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX|XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
       licensor.getClientToken());
-    Assert.assertEquals(
+    Assertions.assertEquals(
       Option.some("http://qa.circulation.librarysimplified.org/NYNYPL/AdobeAuth/devices"),
       licensor.getDeviceManager());
   }

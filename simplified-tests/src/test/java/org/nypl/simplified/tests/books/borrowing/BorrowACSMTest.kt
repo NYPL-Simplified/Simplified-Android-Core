@@ -6,12 +6,12 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import one.irradia.mime.api.MIMEType
 import org.joda.time.Instant
-import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-import org.junit.Assert.fail
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.fail
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.librarysimplified.http.api.LSHTTPClientConfiguration
 import org.librarysimplified.http.api.LSHTTPClientType
 import org.librarysimplified.http.vanilla.LSHTTPClients
@@ -64,6 +64,8 @@ import org.nypl.simplified.opds.core.OPDSAcquisitionPathElement
 import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskRecorderType
+import org.nypl.simplified.tests.TestDirectories
+import org.nypl.simplified.tests.TestDirectories.temporaryFileOf
 import org.nypl.simplified.tests.mocking.MockAccountProviders
 import org.nypl.simplified.tests.mocking.MockAdobeAdeptConnector
 import org.nypl.simplified.tests.mocking.MockAdobeAdeptExecutor
@@ -72,12 +74,10 @@ import org.nypl.simplified.tests.mocking.MockAdobeAdeptResourceProvider
 import org.nypl.simplified.tests.mocking.MockBookDatabase
 import org.nypl.simplified.tests.mocking.MockBookDatabaseEntry
 import org.nypl.simplified.tests.mocking.MockBookDatabaseEntryFormatHandleEPUB
+import org.nypl.simplified.tests.mocking.MockBorrowContext
 import org.nypl.simplified.tests.mocking.MockBundledContentResolver
 import org.nypl.simplified.tests.mocking.MockContentResolver
 import org.nypl.simplified.tests.mocking.MockDRMInformationACSHandle
-import org.nypl.simplified.tests.TestDirectories
-import org.nypl.simplified.tests.TestDirectories.temporaryFileOf
-import org.nypl.simplified.tests.mocking.MockBorrowContext
 import org.slf4j.LoggerFactory
 import java.net.URI
 import java.util.concurrent.ExecutorService
@@ -136,7 +136,7 @@ class BorrowACSMTest {
     assertEquals(clazz, registryStatus.javaClass)
   }
 
-  @Before
+  @BeforeEach
   fun testSetup() {
     this.webServer = MockWebServer()
     this.webServer.start(20000)
@@ -306,7 +306,7 @@ class BorrowACSMTest {
     this.bookEvents.add(event)
   }
 
-  @After
+  @AfterEach
   fun tearDown() {
     this.bookRegistrySub?.dispose()
     this.webServer.close()

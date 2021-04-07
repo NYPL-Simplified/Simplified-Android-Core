@@ -24,7 +24,8 @@ public final class BundledURIsTest {
     LOG = NullCheck.notNull(LoggerFactory.getLogger(BundledURIsTest.class));
   }
 
-  @Rule public final ExpectedException expected = ExpectedException.none();
+  @Rule
+  public final ExpectedException expected = ExpectedException.none();
 
   /**
    * Construct a new contract.
@@ -42,12 +43,12 @@ public final class BundledURIsTest {
 
   @Test
   public void testCategorize()
-      throws Exception {
+    throws Exception {
 
     Assert.assertFalse(
-        BundledURIs.isBundledURI(URI.create("http://www.example.org")));
+      BundledURIs.isBundledURI(URI.create("http://www.example.org")));
     Assert.assertTrue(
-        BundledURIs.isBundledURI(URI.create("simplified-bundled://a/b/c")));
+      BundledURIs.isBundledURI(URI.create("simplified-bundled://a/b/c")));
   }
 
   /**
@@ -58,11 +59,11 @@ public final class BundledURIsTest {
 
   @Test
   public void testMapToFile()
-      throws Exception {
+    throws Exception {
 
     Assert.assertEquals(
-        "file:///android_asset/a/b/c.png",
-        BundledURIs.toAndroidAssetFileURI(URI.create("simplified-bundled://a/b/c.png")).toString());
+      "file:///android_asset/a/b/c.png",
+      BundledURIs.toAndroidAssetFileURI(URI.create("simplified-bundled://a/b/c.png")).toString());
   }
 
   /**
@@ -73,7 +74,7 @@ public final class BundledURIsTest {
 
   @Test
   public void testMapToFileNotBundled()
-      throws Exception {
+    throws Exception {
 
     expected.expect(IllegalArgumentException.class);
     BundledURIs.toAndroidAssetFileURI(URI.create("file://a/b/c.png"));

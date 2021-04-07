@@ -6,10 +6,10 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okio.Buffer
 import org.joda.time.DateTimeUtils
-import org.junit.After
-import org.junit.Assert
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.librarysimplified.http.api.LSHTTPClientConfiguration
 import org.librarysimplified.http.api.LSHTTPClientType
 import org.librarysimplified.http.vanilla.LSHTTPClients
@@ -44,7 +44,7 @@ class AccountProviderNYPLRegistryTest {
       .openStream()
   }
 
-  @Before
+  @BeforeEach
   fun testSetup() {
     this.resources = Mockito.mock(Resources::class.java)
     this.context = Mockito.mock(Context::class.java)
@@ -76,7 +76,7 @@ class AccountProviderNYPLRegistryTest {
     this.server.start()
   }
 
-  @After
+  @AfterEach
   fun testTearDown() {
     this.cacheDir.deleteRecursively()
     this.server.close()
@@ -108,7 +108,7 @@ class AccountProviderNYPLRegistryTest {
     this.logger.debug("status: {}", result)
     val success = result as SourceSucceeded
 
-    Assert.assertEquals(43, success.results.size)
+    Assertions.assertEquals(43, success.results.size)
   }
 
   /**
@@ -143,7 +143,7 @@ class AccountProviderNYPLRegistryTest {
     this.logger.debug("status: {}", result)
     val success = result as SourceSucceeded
 
-    Assert.assertEquals(182, success.results.size)
+    Assertions.assertEquals(182, success.results.size)
   }
 
   /**
@@ -171,7 +171,7 @@ class AccountProviderNYPLRegistryTest {
     this.logger.debug("status: {}", result)
     val success = result as SourceSucceeded
 
-    Assert.assertEquals(43, success.results.size)
+    Assertions.assertEquals(43, success.results.size)
   }
 
   /**
@@ -204,8 +204,8 @@ class AccountProviderNYPLRegistryTest {
     this.logger.debug("status: {}", result)
     val success = result as SourceSucceeded
 
-    Assert.assertEquals(182, success.results.size)
-    Assert.assertNotEquals("Nonsense!", cacheFile.readText())
+    Assertions.assertEquals(182, success.results.size)
+    Assertions.assertNotEquals("Nonsense!", cacheFile.readText())
   }
 
   /**
@@ -234,7 +234,7 @@ class AccountProviderNYPLRegistryTest {
     this.logger.debug("status: {}", result)
     val failed = result as AccountProviderSourceType.SourceResult.SourceFailed
 
-    Assert.assertEquals(0, failed.results.size)
+    Assertions.assertEquals(0, failed.results.size)
   }
 
   /**
@@ -263,7 +263,7 @@ class AccountProviderNYPLRegistryTest {
       this.logger.debug("status: {}", result)
       val success = result as SourceSucceeded
 
-      Assert.assertEquals(43, success.results.size)
+      Assertions.assertEquals(43, success.results.size)
     }
 
     this.server.enqueue(
@@ -286,7 +286,7 @@ class AccountProviderNYPLRegistryTest {
       this.logger.debug("status: {}", result)
       val success = result as SourceSucceeded
 
-      Assert.assertEquals(182, success.results.size)
+      Assertions.assertEquals(182, success.results.size)
     }
 
     // Reset
@@ -318,11 +318,11 @@ class AccountProviderNYPLRegistryTest {
       val result1 = provider.load(this.context, true)
       this.logger.debug("status: {}", result1)
       val success1 = result1 as SourceSucceeded
-      Assert.assertEquals(43, success1.results.size)
+      Assertions.assertEquals(43, success1.results.size)
 
       // Bust the cache
       provider.clear(context)
-      Assert.assertFalse(cacheFile.exists())
+      Assertions.assertFalse(cacheFile.exists())
     }
   }
 }

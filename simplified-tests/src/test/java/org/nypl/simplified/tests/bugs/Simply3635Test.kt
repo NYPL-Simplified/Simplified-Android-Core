@@ -67,10 +67,10 @@ import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimer
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimerType
 import org.nypl.simplified.reader.api.ReaderPreferences
+import org.nypl.simplified.tests.TestDirectories
 import org.nypl.simplified.tests.mocking.MockAccountProviders
 import org.nypl.simplified.tests.mocking.MockBundledContentResolver
 import org.nypl.simplified.tests.mocking.MockStrings
-import org.nypl.simplified.tests.TestDirectories
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.util.concurrent.ExecutorService

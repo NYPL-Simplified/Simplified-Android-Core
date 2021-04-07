@@ -1,7 +1,7 @@
 package org.nypl.simplified.tests.books.book_database
 
-import org.junit.Assert
-import org.junit.Test
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Test
 import org.nypl.simplified.books.book_database.api.BookAcquisitionSelection
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser
 import org.nypl.simplified.opds.core.OPDSFeedParser
@@ -38,6 +38,6 @@ class BookAcquisitionSelectionTest {
     val entry = group.groupEntries[0]
 
     val acquisition = BookAcquisitionSelection.preferredAcquisition(entry.acquisitions)
-    Assert.assertNotNull(acquisition)
+    Assertions.assertNotNull(acquisition)
   }
 }

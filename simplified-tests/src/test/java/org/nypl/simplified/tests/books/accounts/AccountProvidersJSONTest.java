@@ -19,11 +19,12 @@ import java.util.Map;
 
 public final class AccountProvidersJSONTest {
 
-  @Rule public final ExpectedException expected = ExpectedException.none();
+  @Rule
+  public final ExpectedException expected = ExpectedException.none();
 
   private static InputStream readAllFromResource(
-      final String name)
-      throws Exception {
+    final String name)
+    throws Exception {
 
     final URL url =
       AccountProvidersJSONTest.class.getResource(
@@ -49,18 +50,18 @@ public final class AccountProvidersJSONTest {
 
   @Test
   public final void testEmptyWrongType()
-      throws Exception {
+    throws Exception {
     expected.expect(JSONParseException.class);
     deserializeFromString("{}");
   }
 
   @Test
   public final void testDuplicateProvider()
-      throws Exception {
+    throws Exception {
     expected.expect(JSONParseException.class);
     expected.expectMessage(StringContains.containsString("Duplicate provider"));
     AccountProvidersJSON.INSTANCE.deserializeCollectionFromStream(
-        readAllFromResource("providers-duplicate.json"));
+      readAllFromResource("providers-duplicate.json"));
   }
 
   @Test
@@ -68,7 +69,7 @@ public final class AccountProvidersJSONTest {
     throws Exception {
     Map<URI, AccountProvider> providers =
       AccountProvidersJSON.INSTANCE.deserializeCollectionFromStream(
-      readAllFromResource("providers-multi-auth-0.json"));
+        readAllFromResource("providers-multi-auth-0.json"));
 
     Assert.assertEquals(1, providers.size());
 
@@ -109,32 +110,32 @@ public final class AccountProvidersJSONTest {
 
   @Test
   public final void testSAML2()
-          throws Exception {
+    throws Exception {
     Map<URI, AccountProvider> providers =
-            AccountProvidersJSON.INSTANCE.deserializeCollectionFromStream(
-                    readAllFromResource("providers-saml.json"));
+      AccountProvidersJSON.INSTANCE.deserializeCollectionFromStream(
+        readAllFromResource("providers-saml.json"));
 
     Assert.assertEquals(1, providers.size());
 
     final AccountProvider provider =
-            providers.get(URI.create("urn:uuid:b67588ef-d3ce-4187-9709-04e6f4c01a13"));
+      providers.get(URI.create("urn:uuid:b67588ef-d3ce-4187-9709-04e6f4c01a13"));
 
     Assert.assertEquals(AccountProviderAuthenticationDescription.SAML2_0.class, provider.getAuthentication().getClass());
     Assert.assertEquals(0, provider.getAuthenticationAlternatives().size());
 
     final AccountProvider providerAfter =
-            AccountProvidersJSON.INSTANCE.deserializeFromJSON(
-                    AccountProvidersJSON.INSTANCE.serializeToJSON(provider));
+      AccountProvidersJSON.INSTANCE.deserializeFromJSON(
+        AccountProvidersJSON.INSTANCE.serializeToJSON(provider));
 
     Assert.assertEquals(providerAfter, provider);
   }
 
   @Test
   public final void testAll()
-      throws Exception {
+    throws Exception {
     final Map<URI, AccountProvider> c =
-        AccountProvidersJSON.INSTANCE.deserializeCollectionFromStream(
-            readAllFromResource("providers-all.json"));
+      AccountProvidersJSON.INSTANCE.deserializeCollectionFromStream(
+        readAllFromResource("providers-all.json"));
 
     Assert.assertEquals(172L, c.size());
   }

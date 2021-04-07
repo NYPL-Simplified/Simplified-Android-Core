@@ -48,8 +48,8 @@ public final class OPDSFeedParserTest {
   public ExpectedException expected = ExpectedException.none();
 
   private static InputStream getResource(
-      final String name)
-      throws Exception {
+    final String name)
+    throws Exception {
 
     final String path = "/org/nypl/simplified/tests/opds/" + name;
     final URL url = OPDSFeedEntryParserTest.class.getResource(path);
@@ -61,32 +61,32 @@ public final class OPDSFeedParserTest {
 
   @Test
   public void testAcquisitionFeedFiction0()
-      throws Exception {
+    throws Exception {
     final URI uri = URI.create(
-        "http://circulation.alpha.librarysimplified.org/feed/Picture%20Books");
+      "http://circulation.alpha.librarysimplified.org/feed/Picture%20Books");
     final OPDSFeedParserType p =
-        OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser());
+      OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser());
     final InputStream d =
-        OPDSFeedParserTest.getResource("acquisition-fiction-0.xml");
+      OPDSFeedParserTest.getResource("acquisition-fiction-0.xml");
     final OPDSAcquisitionFeed f = p.parse(uri, d);
     d.close();
 
     Assert.assertEquals(
-        "https://d5v0j5lesri7q.cloudfront.net/NYBKLYN/groups/",
-        f.getFeedID());
+      "https://d5v0j5lesri7q.cloudfront.net/NYBKLYN/groups/",
+      f.getFeedID());
     Assert.assertEquals("All Books", f.getFeedTitle());
     Assert.assertEquals(0, f.getFeedEntries().size());
     Assert.assertEquals(9, f.getFeedGroups().size());
 
     final Some<OPDSSearchLink> search_opt =
-        (Some<OPDSSearchLink>) f.getFeedSearchURI();
+      (Some<OPDSSearchLink>) f.getFeedSearchURI();
     final OPDSSearchLink search = search_opt.get();
     Assert.assertEquals(
-        URI.create("https://bplsimplye.bklynlibrary.org/NYBKLYN/search/"),
-        search.getURI());
+      URI.create("https://bplsimplye.bklynlibrary.org/NYBKLYN/search/"),
+      search.getURI());
     Assert.assertEquals(
-        "application/opensearchdescription+xml",
-        search.getType());
+      "application/opensearchdescription+xml",
+      search.getType());
 
     final DateTime u = f.getFeedUpdated();
     final Set<String> ids = new HashSet<String>();
@@ -134,13 +134,13 @@ public final class OPDSFeedParserTest {
 
   @Test
   public void testAcquisitionFeedGroups0()
-      throws Exception {
+    throws Exception {
     final URI uri =
-        URI.create("http://circulation.alpha.librarysimplified.org/groups/");
+      URI.create("http://circulation.alpha.librarysimplified.org/groups/");
     final OPDSFeedParserType p =
-        OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser());
+      OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser());
     final InputStream d =
-        OPDSFeedParserTest.getResource("acquisition-groups-0.xml");
+      OPDSFeedParserTest.getResource("acquisition-groups-0.xml");
     final OPDSAcquisitionFeed f = p.parse(uri, d);
     d.close();
 
@@ -163,14 +163,14 @@ public final class OPDSFeedParserTest {
 
   @Test
   public void testAcquisitionFeedPaginated0()
-      throws Exception {
+    throws Exception {
     final URI uri = URI.create(
-        "http://library-simplified.herokuapp"
-            + ".com/feed/Biography%20%26%20Memoir?order=author");
+      "http://library-simplified.herokuapp"
+        + ".com/feed/Biography%20%26%20Memoir?order=author");
     final OPDSFeedParserType p =
-        OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser());
+      OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser());
     final InputStream d =
-        OPDSFeedParserTest.getResource("acquisition-paginated-0.xml");
+      OPDSFeedParserTest.getResource("acquisition-paginated-0.xml");
     final OPDSAcquisitionFeed f = p.parse(uri, d);
     d.close();
 
@@ -181,39 +181,39 @@ public final class OPDSFeedParserTest {
     final Some<URI> next_opt = (Some<URI>) f.getFeedNext();
 
     Assert.assertEquals(
-        "https://d2txvnljjb5oij.cloudfront.net/NYNYPL/feed/13?available=now&collection=full&entrypoint=Book&key=%5B%22%5Cu1516%5Cu1693%5Cu49c7%5Cu2443%5Cu5152%5Cu1011%5Cu1098%5Cu4646%5Cu1a03%5Cu0114%5Cu0706%5Cu2011%5Cu480e%5Cu72f3%5Cu3981%5Cu5c06%5Cu0000%5Cu0001%22%2C+%22%5Cu2b1c%5Cu0e94%5Cu0640%5Cu6043%5Cu6192%5Cu1111%5Cu3402%5Cu1001%5Cu7060%5Cu3702%5Cu0000%5Cu0001%22%2C+264205%5D&order=title&size=50",
-        next_opt.get().toString());
+      "https://d2txvnljjb5oij.cloudfront.net/NYNYPL/feed/13?available=now&collection=full&entrypoint=Book&key=%5B%22%5Cu1516%5Cu1693%5Cu49c7%5Cu2443%5Cu5152%5Cu1011%5Cu1098%5Cu4646%5Cu1a03%5Cu0114%5Cu0706%5Cu2011%5Cu480e%5Cu72f3%5Cu3981%5Cu5c06%5Cu0000%5Cu0001%22%2C+%22%5Cu2b1c%5Cu0e94%5Cu0640%5Cu6043%5Cu6192%5Cu1111%5Cu3402%5Cu1001%5Cu7060%5Cu3702%5Cu0000%5Cu0001%22%2C+264205%5D&order=title&size=50",
+      next_opt.get().toString());
   }
 
   @Test
   public void testDOMException()
-      throws Exception {
+    throws Exception {
     final URI uri =
-        URI.create("http://library-simplified.herokuapp.com/feed/Fiction");
+      URI.create("http://library-simplified.herokuapp.com/feed/Fiction");
 
     expected.expect(OPDSParseException.class);
 
     final OPDSAcquisitionFeedEntryParserType ep =
-        OPDSAcquisitionFeedEntryParser.newParser();
+      OPDSAcquisitionFeedEntryParser.newParser();
     final OPDSFeedParserType p = OPDSFeedParser.newParser(ep);
     final InputStream d =
-        new InputStream() {
-          @Override
-          public int read()
-              throws IOException {
-            throw new DOMException((short) 0, "Bad news");
-          }
-        };
+      new InputStream() {
+        @Override
+        public int read()
+          throws IOException {
+          throw new DOMException((short) 0, "Bad news");
+        }
+      };
     p.parse(uri, d);
   }
 
   @Test
   public void testEmpty0()
-      throws Exception {
+    throws Exception {
     final URI uri =
-        URI.create("http://library-simplified.herokuapp.com/feed/Fiction");
+      URI.create("http://library-simplified.herokuapp.com/feed/Fiction");
     final OPDSFeedParserType p =
-        OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser());
+      OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser());
     final InputStream d = OPDSFeedParserTest.getResource("empty-0.xml");
     final OPDSAcquisitionFeed f = p.parse(uri, d);
     NullCheck.notNull(f);
@@ -222,11 +222,11 @@ public final class OPDSFeedParserTest {
 
   @Test
   public void testEntryAsFeed0()
-      throws Exception {
+    throws Exception {
     final URI uri =
-        URI.create("http://library-simplified.herokuapp.com/feed/Fiction");
+      URI.create("http://library-simplified.herokuapp.com/feed/Fiction");
     final OPDSFeedParserType p =
-        OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser());
+      OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser());
     final InputStream d = OPDSFeedParserTest.getResource("entry-0.xml");
     final OPDSAcquisitionFeed f = NullCheck.notNull(p.parse(uri, d));
 
@@ -237,29 +237,29 @@ public final class OPDSFeedParserTest {
 
   @Test
   public void testNotXMLException()
-      throws Exception {
+    throws Exception {
     final URI uri =
-        URI.create("http://library-simplified.herokuapp.com/feed/Fiction");
+      URI.create("http://library-simplified.herokuapp.com/feed/Fiction");
 
     expected.expect(OPDSParseException.class);
 
     final OPDSFeedParserType p = OPDSFeedParser.newParser(
-        OPDSAcquisitionFeedEntryParser.newParser());
+      OPDSAcquisitionFeedEntryParser.newParser());
     final InputStream d =
-        OPDSFeedParserTest.getResource("bad-not-xml.xml");
+      OPDSFeedParserTest.getResource("bad-not-xml.xml");
     p.parse(uri, d);
   }
 
   @Test
   public void testParserURISyntaxException()
-      throws Exception {
+    throws Exception {
     final URI uri =
-        URI.create("http://library-simplified.herokuapp.com/feed/Fiction");
+      URI.create("http://library-simplified.herokuapp.com/feed/Fiction");
 
     final OPDSFeedParserType p = OPDSFeedParser.newParser(
-        OPDSAcquisitionFeedEntryParser.newParser());
+      OPDSAcquisitionFeedEntryParser.newParser());
     final InputStream d =
-        OPDSFeedParserTest.getResource("bad-uri-syntax.xml");
+      OPDSFeedParserTest.getResource("bad-uri-syntax.xml");
     final OPDSAcquisitionFeed result =
       p.parse(uri, d);
     final List<ParseError> errors =
@@ -271,18 +271,18 @@ public final class OPDSFeedParserTest {
 
   @Test
   public void testStreamIOException()
-      throws Exception {
+    throws Exception {
     final URI uri =
-        URI.create("http://library-simplified.herokuapp.com/feed/Fiction");
+      URI.create("http://library-simplified.herokuapp.com/feed/Fiction");
 
     expected.expect(OPDSParseException.class);
 
     final OPDSFeedParserType p = OPDSFeedParser.newParser(
-        OPDSAcquisitionFeedEntryParser.newParser());
+      OPDSAcquisitionFeedEntryParser.newParser());
     final InputStream d = new InputStream() {
       @Override
       public int read()
-          throws IOException {
+        throws IOException {
         throw new IOException();
       }
     };
@@ -291,13 +291,13 @@ public final class OPDSFeedParserTest {
 
   @Test
   public void testAcquisitionFeedCategories0()
-      throws Exception {
+    throws Exception {
     final URI uri = URI.create(
-        "http://circulation.alpha.librarysimplified.org/feed/Picture%20Books");
+      "http://circulation.alpha.librarysimplified.org/feed/Picture%20Books");
     final OPDSFeedParserType p =
-        OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser());
+      OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser());
     final InputStream d =
-        OPDSFeedParserTest.getResource("acquisition-categories-0.xml");
+      OPDSFeedParserTest.getResource("acquisition-categories-0.xml");
     final OPDSAcquisitionFeed f = p.parse(uri, d);
     d.close();
 
@@ -313,23 +313,23 @@ public final class OPDSFeedParserTest {
     final OPDSCategory ec1 = ec.get(1);
     Assert.assertEquals(ec1.getTerm(), "3");
     Assert.assertEquals(
-        ec1.getScheme(), "http://schema.org/typicalAgeRange");
+      ec1.getScheme(), "http://schema.org/typicalAgeRange");
 
     final OPDSCategory ec2 = ec.get(2);
     Assert.assertEquals(ec2.getTerm(), "Nonfiction");
     Assert.assertEquals(
-        ec2.getScheme(), "http://librarysimplified.org/terms/genres/Simplified/");
+      ec2.getScheme(), "http://librarysimplified.org/terms/genres/Simplified/");
   }
 
   @Test
   public void testAcquisitionFeedFacets0()
-      throws Exception {
+    throws Exception {
     final URI uri = URI.create(
-        "http://circulation.alpha.librarysimplified.org/feed/Picture%20Books");
+      "http://circulation.alpha.librarysimplified.org/feed/Picture%20Books");
     final OPDSFeedParserType p =
-        OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser());
+      OPDSFeedParser.newParser(OPDSAcquisitionFeedEntryParser.newParser());
     final InputStream d =
-        OPDSFeedParserTest.getResource("acquisition-facets-0.xml");
+      OPDSFeedParserTest.getResource("acquisition-facets-0.xml");
     final OPDSAcquisitionFeed f = p.parse(uri, d);
     d.close();
 
@@ -349,9 +349,9 @@ public final class OPDSFeedParserTest {
       Assert.assertEquals("Title", fi.getTitle());
       Assert.assertTrue(!fi.isActive());
       Assert.assertEquals(
-          URI.create(
-              "http://circulation.alpha.librarysimplified"
-                  + ".org/feed/Picture%20Books?order=title"), fi.getUri());
+        URI.create(
+          "http://circulation.alpha.librarysimplified"
+            + ".org/feed/Picture%20Books?order=title"), fi.getUri());
     }
 
     {
@@ -360,9 +360,9 @@ public final class OPDSFeedParserTest {
       Assert.assertEquals("Author", fi.getTitle());
       Assert.assertTrue(fi.isActive());
       Assert.assertEquals(
-          URI.create(
-              "http://circulation.alpha.librarysimplified"
-                  + ".org/feed/Picture%20Books?order=author"), fi.getUri());
+        URI.create(
+          "http://circulation.alpha.librarysimplified"
+            + ".org/feed/Picture%20Books?order=author"), fi.getUri());
     }
   }
 

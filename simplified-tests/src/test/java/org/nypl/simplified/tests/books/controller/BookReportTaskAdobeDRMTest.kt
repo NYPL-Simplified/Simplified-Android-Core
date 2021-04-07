@@ -7,7 +7,6 @@ import okhttp3.mockwebserver.MockWebServer
 import org.joda.time.DateTime
 import org.junit.After
 import org.junit.Assert
-import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.librarysimplified.http.api.LSHTTPClientConfiguration

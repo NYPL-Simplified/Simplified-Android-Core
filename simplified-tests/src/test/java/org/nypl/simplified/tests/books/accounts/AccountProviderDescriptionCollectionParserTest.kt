@@ -1,7 +1,7 @@
 package org.nypl.simplified.tests.books.accounts
 
-import org.junit.Assert
-import org.junit.Test
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Test
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionCollection
 import org.nypl.simplified.accounts.json.AccountProviderDescriptionCollectionParsers
 import org.nypl.simplified.accounts.json.AccountProviderDescriptionCollectionSerializers
@@ -39,12 +39,12 @@ class AccountProviderDescriptionCollectionParserTest {
       this.dumpResult(result)
       val success = result as ParseResult.Success
       val collection = success.result
-      Assert.assertEquals(182, collection.providers.size)
-      Assert.assertTrue(collection.providers.any { p -> p.links.isNotEmpty() })
-      Assert.assertTrue(collection.providers.any { p -> p.images.isNotEmpty() })
-      Assert.assertEquals(4, collection.links.size)
-      Assert.assertEquals("NYPL", collection.metadata.adobeVendorID!!.value)
-      Assert.assertEquals("Libraries", collection.metadata.title)
+      Assertions.assertEquals(182, collection.providers.size)
+      Assertions.assertTrue(collection.providers.any { p -> p.links.isNotEmpty() })
+      Assertions.assertTrue(collection.providers.any { p -> p.images.isNotEmpty() })
+      Assertions.assertEquals(4, collection.links.size)
+      Assertions.assertEquals("NYPL", collection.metadata.adobeVendorID!!.value)
+      Assertions.assertEquals("Libraries", collection.metadata.title)
     }
   }
 
@@ -76,7 +76,7 @@ class AccountProviderDescriptionCollectionParserTest {
 
       val successSerialized = resultSerialized as ParseResult.Success
       val collectionSerialized = success.result
-      Assert.assertEquals(collection, collectionSerialized)
+      Assertions.assertEquals(collection, collectionSerialized)
     }
   }
 

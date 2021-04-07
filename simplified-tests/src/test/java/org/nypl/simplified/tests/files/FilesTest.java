@@ -11,8 +11,7 @@ public final class FilesTest {
 
   @Test
   public final void testDeleteRecreate()
-      throws Exception
-  {
+    throws Exception {
     final File tmp = DirectoryUtilities.directoryCreateTemporary();
     final File file0 = new File(tmp, "file.txt");
 
