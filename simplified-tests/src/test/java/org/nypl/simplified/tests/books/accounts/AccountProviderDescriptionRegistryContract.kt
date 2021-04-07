@@ -10,6 +10,7 @@ import org.junit.rules.ExpectedException
 import org.nypl.simplified.accounts.api.AccountProviderDescription
 import org.nypl.simplified.accounts.api.AccountProviderResolutionListenerType
 import org.nypl.simplified.accounts.api.AccountProviderType
+import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent.SourceFailed
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent.StatusChanged
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent.Updated
@@ -26,7 +27,7 @@ import java.net.URI
 
 abstract class AccountProviderDescriptionRegistryContract {
 
-  private lateinit var events: MutableList<org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent>
+  private lateinit var events: MutableList<AccountProviderRegistryEvent>
 
   protected abstract val logger: Logger
 

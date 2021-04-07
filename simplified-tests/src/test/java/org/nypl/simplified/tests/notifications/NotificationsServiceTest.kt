@@ -35,7 +35,8 @@ import java.util.UUID
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.ThreadFactory
 
-abstract class NotificationsServiceContract {
+class NotificationsServiceTest {
+
   private val logger =
     LoggerFactory.getLogger(BookDatabaseContract::class.java)
 

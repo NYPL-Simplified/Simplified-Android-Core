@@ -23,7 +23,7 @@ import java.net.URI
  * @see AccountAuthenticationCredentialsJSON
  */
 
-abstract class AccountAuthenticationCredentialsJSONContract {
+class AccountAuthenticationCredentialsJSONTest {
 
   @JvmField
   @Rule

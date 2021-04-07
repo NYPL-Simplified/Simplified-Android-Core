@@ -69,6 +69,7 @@ import org.nypl.simplified.opds.core.OPDSSearchParser
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.tests.mocking.MockRevokeStringResources
 import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -84,7 +85,7 @@ import java.util.concurrent.TimeUnit
  * Contract for the `BookRevokeTask` class that doesn't involve DRM.
  */
 
-abstract class BookRevokeTaskAdobeDRMContract {
+class BookRevokeTaskAdobeDRMTest {
 
   @JvmField
   @Rule
@@ -93,7 +94,8 @@ abstract class BookRevokeTaskAdobeDRMContract {
   val accountID =
     AccountID(UUID.fromString("46d17029-14ba-4e34-bcaa-def02713575a"))
 
-  protected abstract val logger: Logger
+  private val logger: Logger =
+    LoggerFactory.getLogger(BookRevokeTaskAdobeDRMTest::class.java)
 
   private lateinit var adobeConnector: AdobeAdeptConnectorType
   private lateinit var adobeExecutor: AdobeAdeptExecutorType
@@ -1320,7 +1322,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
   }
 
   private fun resource(file: String): InputStream? {
-    return BookRevokeTaskAdobeDRMContract::class.java.getResourceAsStream(file)
+    return BookRevokeTaskAdobeDRMTest::class.java.getResourceAsStream(file)
   }
 
   @Throws(IOException::class)

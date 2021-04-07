@@ -69,6 +69,7 @@ import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.tests.mocking.MockCrashingFeedLoader
 import org.nypl.simplified.tests.mocking.MockRevokeStringResources
 import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -83,7 +84,7 @@ import java.util.concurrent.TimeUnit
  * Contract for the `BookRevokeTask` class that doesn't involve DRM.
  */
 
-abstract class BookRevokeTaskContract {
+class BookRevokeTaskTest {
 
   @JvmField
   @Rule
@@ -92,7 +93,8 @@ abstract class BookRevokeTaskContract {
   val accountID =
     AccountID(UUID.fromString("46d17029-14ba-4e34-bcaa-def02713575a"))
 
-  protected abstract val logger: Logger
+  private val logger: Logger =
+    LoggerFactory.getLogger(BookRevokeTaskTest::class.java)
 
   private lateinit var bookEvents: MutableList<BookEvent>
   private lateinit var bookFormatSupport: BookFormatSupportType
@@ -2220,7 +2222,7 @@ abstract class BookRevokeTaskContract {
 
   private fun resource(file: String): Buffer {
     val buffer = Buffer()
-    buffer.readFrom(BookRevokeTaskContract::class.java.getResourceAsStream(file)!!)
+    buffer.readFrom(BookRevokeTaskTest::class.java.getResourceAsStream(file)!!)
     return buffer
   }
 

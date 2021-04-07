@@ -15,12 +15,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.URI;
 
-public abstract class AccountBundledCredentialsJSONContract {
+public final class AccountBundledCredentialsJSONTest {
 
   private InputStream resource(
     final String name)
   {
-    return AccountBundledCredentialsJSONContract.class.getResourceAsStream(
+    return AccountBundledCredentialsJSONTest.class.getResourceAsStream(
       "/org/nypl/simplified/tests/books/accounts/" + name);
   }
 
