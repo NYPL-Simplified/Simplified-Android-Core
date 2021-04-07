@@ -4,8 +4,6 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,16 +15,15 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
-import androidx.annotation.UiThread
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import org.joda.time.format.DateTimeFormat
 import org.librarysimplified.documents.DocumentStoreType
@@ -128,7 +125,7 @@ class SplashFragment : Fragment() {
     inflater: LayoutInflater,
     container: ViewGroup?,
     state: Bundle?
-  ): View? {
+  ): View {
     val stackView =
       inflater.inflate(R.layout.splash_stack, container, false) as ViewGroup
     val imageView =
@@ -298,7 +295,6 @@ class SplashFragment : Fragment() {
     this.viewsForMigrationRunning.text.text = ""
   }
 
-  @UiThread
   private fun configureViewsForMigrationReport(report: MigrationReport) {
     this.viewsForEULA.container.visibility = View.INVISIBLE
     this.viewsForImage.container.visibility = View.INVISIBLE
@@ -372,6 +368,7 @@ class SplashFragment : Fragment() {
 
     this.bootSubscription =
       this.listener.onSplashWantBootEvents()
+        .observeOn(AndroidSchedulers.mainThread())
         .subscribe(this::onBootEvent)
 
     /*
@@ -400,13 +397,6 @@ class SplashFragment : Fragment() {
   }
 
   private fun onBootEvent(event: BootEvent) {
-    this.runOnUIThread {
-      this.onBootEventUI(event)
-    }
-  }
-
-  @UiThread
-  private fun onBootEventUI(event: BootEvent) {
     return when (event) {
       is BootEvent.BootInProgress -> {
         this.viewsForImage.text.text = event.message
@@ -417,12 +407,11 @@ class SplashFragment : Fragment() {
       }
 
       is BootEvent.BootFailed ->
-        this.onBootEventFailedUI(event)
+        this.onBootEventFailed(event)
     }
   }
 
-  @UiThread
-  private fun onBootEventFailedUI(event: BootEvent.BootFailed) {
+  private fun onBootEventFailed(event: BootEvent.BootFailed) {
     this.logger.error("boot failed: ", event.exception)
 
     if (this.viewsForImage.image.alpha > 0.0) {
@@ -454,11 +443,6 @@ class SplashFragment : Fragment() {
   }
 
   private fun onBootFinished() {
-    this.runOnUIThread { this.onBootFinishedUI() }
-  }
-
-  @UiThread
-  private fun onBootFinishedUI() {
     this.viewsForImage.progress.isIndeterminate = false
     this.viewsForImage.progress.progress = 100
     this.viewsForImage.text.text = ""
@@ -479,7 +463,6 @@ class SplashFragment : Fragment() {
    * Either no EULA was provided, or one was provided and the user agreed to it.
    */
 
-  @UiThread
   private fun onFinishEULASuccessfully() {
     val profilesController =
       Services.serviceDirectory()
@@ -500,7 +483,6 @@ class SplashFragment : Fragment() {
     this.doMigrations()
   }
 
-  @UiThread
   private fun doMigrations() {
     this.logger.debug("doMigrations")
 
@@ -513,12 +495,12 @@ class SplashFragment : Fragment() {
     }
 
     this.migrationTried = true
-    this.runOnUIThread {
-      this.configureViewsForMigrationProgress()
-    }
+    this.configureViewsForMigrationProgress()
 
     this.migrationSubscription =
-      migrations.events.subscribe { event -> this.onMigrationEvent(event) }
+      migrations.events
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe { event -> this.onMigrationEvent(event) }
 
     val migrationFuture =
       migrations.start()
@@ -548,9 +530,7 @@ class SplashFragment : Fragment() {
     this.logger.debug("saving migration report")
     this.processMigrationReportSaveToDisk(report)
 
-    this.runOnUIThread {
-      this.configureViewsForMigrationReport(report)
-    }
+    this.configureViewsForMigrationReport(report)
   }
 
   /**
@@ -595,26 +575,7 @@ class SplashFragment : Fragment() {
   }
 
   private fun onMigrationEvent(event: MigrationEvent) {
-    this.runOnUIThread {
-      this.onMigrationEventUI(event)
-    }
-  }
-
-  @UiThread
-  private fun onMigrationEventUI(event: MigrationEvent) {
     this.viewsForMigrationRunning.text.text = event.message
-  }
-
-  /**
-   * Run the given Runnable on the UI thread.
-   *
-   * @param r The runnable
-   */
-
-  private fun runOnUIThread(f: () -> Unit) {
-    val looper = Looper.getMainLooper()
-    val h = Handler(looper)
-    h.post { f.invoke() }
   }
 
   private fun getSplashParams(): SplashParameters {
