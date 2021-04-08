@@ -7,9 +7,9 @@ import android.view.accessibility.AccessibilityManager
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import org.joda.time.DateTime
-import org.junit.Assert.assertEquals
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.nypl.simplified.accessibility.AccessibilityService
 import org.nypl.simplified.accessibility.AccessibilityServiceType
@@ -24,8 +24,8 @@ import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSAvailabilityLoanable
 import org.nypl.simplified.taskrecorder.api.TaskResult
-import org.nypl.simplified.tests.mocking.MockAccessibilityStrings
 import org.nypl.simplified.tests.mocking.MockAccessibilityEvents
+import org.nypl.simplified.tests.mocking.MockAccessibilityStrings
 import org.nypl.simplified.tests.mocking.MockLifecycle
 import org.nypl.simplified.tests.mocking.MockUIThreadService
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
@@ -47,7 +47,7 @@ class AccessibilityServiceTest {
   private val failure =
     TaskResult.fail<Unit>("x", "x", "x") as TaskResult.Failure<Unit>
 
-  @Before
+  @BeforeEach
   fun setup() {
     this.context =
       Mockito.mock(Context::class.java)

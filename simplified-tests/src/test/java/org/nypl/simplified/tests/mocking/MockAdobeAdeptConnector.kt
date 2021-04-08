@@ -21,8 +21,7 @@ class MockAdobeAdeptConnector(
     listener: AdobeAdeptFulfillmentListenerType,
     acsm: ByteArray,
     user: AdobeUserID
-  ) -> Unit = {
-    _, _, _ ->
+  ) -> Unit = { _, _, _ ->
   }
 
   override fun activateDeviceToken(

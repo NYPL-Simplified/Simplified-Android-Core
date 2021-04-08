@@ -6,9 +6,10 @@ import android.content.Context.NOTIFICATION_SERVICE
 import io.reactivex.subjects.PublishSubject
 import one.irradia.mime.vanilla.MIMEParser
 import org.joda.time.DateTime
-import org.junit.Assert
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Timeout
 import org.mockito.Mockito
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.books.api.Book
@@ -34,8 +35,10 @@ import java.net.URI
 import java.util.UUID
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.ThreadFactory
+import java.util.concurrent.TimeUnit
 
-abstract class NotificationsServiceContract {
+class NotificationsServiceTest {
+
   private val logger =
     LoggerFactory.getLogger(BookDatabaseContract::class.java)
 
@@ -62,7 +65,7 @@ abstract class NotificationsServiceContract {
 
   private var notificationCounter = 0
 
-  @Before
+  @BeforeEach
   fun setUp() {
     logger.debug("setup")
     mockContext = Mockito.mock(Context::class.java)
@@ -210,17 +213,18 @@ abstract class NotificationsServiceContract {
   @Test
   fun testInitializeNotificationsService() {
     // Instance created and properties assigned
-    Assert.assertNotNull(notificationsService)
+    Assertions.assertNotNull(notificationsService)
 
-    Assert.assertEquals(profileEvents, notificationsService.profileEvents)
-    Assert.assertEquals(bookRegistry, notificationsService.bookRegistry)
-    Assert.assertEquals(mockContext, notificationsService.context)
+    Assertions.assertEquals(profileEvents, notificationsService.profileEvents)
+    Assertions.assertEquals(bookRegistry, notificationsService.bookRegistry)
+    Assertions.assertEquals(mockContext, notificationsService.context)
 
     // No book subscription on initialization
-    Assert.assertNull(notificationsService.bookRegistrySubscription)
+    Assertions.assertNull(notificationsService.bookRegistrySubscription)
   }
 
-  @Test(timeout = 3_000L)
+  @Test
+  @Timeout(value = 3L, unit = TimeUnit.SECONDS)
   fun testProfileEventSubscriptionAndUnsubscription() {
     /**
      * Create a countdown latch that only accepts one count down.
@@ -288,7 +292,7 @@ abstract class NotificationsServiceContract {
     bookRegistry.update(bookWithStatusHeld)
 
     Thread.sleep(300)
-    Assert.assertEquals(0, notificationCounter)
+    Assertions.assertEquals(0, notificationCounter)
   }
 
   @Test
@@ -309,7 +313,7 @@ abstract class NotificationsServiceContract {
     bookRegistry.update(bookWithStatusHeldReady)
 
     Thread.sleep(300)
-    Assert.assertEquals(1, notificationCounter)
+    Assertions.assertEquals(1, notificationCounter)
   }
 
   @Test
@@ -330,6 +334,6 @@ abstract class NotificationsServiceContract {
     bookRegistry.update(bookWithStatusHeldReady2)
 
     Thread.sleep(300)
-    Assert.assertEquals(0, notificationCounter)
+    Assertions.assertEquals(0, notificationCounter)
   }
 }

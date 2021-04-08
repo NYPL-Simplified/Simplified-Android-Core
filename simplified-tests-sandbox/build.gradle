@@ -1,6 +1,8 @@
 android {
   packagingOptions {
     exclude "META-INF/LICENSE"
+    exclude "META-INF/LICENSE.md"
+    exclude "META-INF/LICENSE-notice.md"
 
     // The PDF library and Readium both provide this shared library. This will
     // cause the build to fail because Gradle doesn"t know which one to pick.

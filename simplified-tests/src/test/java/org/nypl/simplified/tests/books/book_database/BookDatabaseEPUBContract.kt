@@ -5,8 +5,8 @@ import com.io7m.jfunctional.Option
 import one.irradia.mime.vanilla.MIMEParser
 import org.joda.time.DateTime
 import org.joda.time.DateTimeZone
-import org.junit.Assert
-import org.junit.Test
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Test
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.books.api.BookDRMInformation
 import org.nypl.simplified.books.api.BookDRMKind
@@ -60,12 +60,9 @@ abstract class BookDatabaseEPUBContract {
       val formatHandle =
         databaseEntry0.findFormatHandle(BookDatabaseEntryFormatHandleEPUB::class.java)
 
-      Assert.assertTrue(
-        "Format is present", formatHandle != null
-      )
-
+      Assertions.assertTrue(formatHandle != null, "Format is present")
       formatHandle!!
-      Assert.assertEquals(null, formatHandle.format.lastReadLocation)
+      Assertions.assertEquals(null, formatHandle.format.lastReadLocation)
 
       val bookmark =
         Bookmark.create(
@@ -84,10 +81,10 @@ abstract class BookDatabaseEPUBContract {
         )
 
       formatHandle.setLastReadLocation(bookmark)
-      Assert.assertEquals(bookmark, formatHandle.format.lastReadLocation)
+      Assertions.assertEquals(bookmark, formatHandle.format.lastReadLocation)
 
       formatHandle.setLastReadLocation(null)
-      Assert.assertEquals(null, formatHandle.format.lastReadLocation)
+      Assertions.assertEquals(null, formatHandle.format.lastReadLocation)
     }
   }
 
@@ -163,18 +160,15 @@ abstract class BookDatabaseEPUBContract {
       val formatHandle =
         databaseEntry0.findFormatHandle(BookDatabaseEntryFormatHandleEPUB::class.java)
 
-      Assert.assertTrue(
-        "Format is present", formatHandle != null
-      )
-
+      Assertions.assertTrue(formatHandle != null, "Format is present")
       formatHandle!!
-      Assert.assertEquals(listOf<Bookmark>(), formatHandle.format.bookmarks)
+      Assertions.assertEquals(listOf<Bookmark>(), formatHandle.format.bookmarks)
 
       formatHandle.setBookmarks(bookmarks0)
-      Assert.assertEquals(bookmarks0, formatHandle.format.bookmarks)
+      Assertions.assertEquals(bookmarks0, formatHandle.format.bookmarks)
 
       formatHandle.setBookmarks(bookmarks1)
-      Assert.assertEquals(bookmarks1, formatHandle.format.bookmarks)
+      Assertions.assertEquals(bookmarks1, formatHandle.format.bookmarks)
     }
 
     val database1 =
@@ -186,12 +180,10 @@ abstract class BookDatabaseEPUBContract {
       val formatHandle =
         databaseEntry1.findFormatHandle(BookDatabaseEntryFormatHandleEPUB::class.java)
 
-      Assert.assertTrue(
-        "Format is present", formatHandle != null
-      )
+      Assertions.assertTrue(formatHandle != null, "Format is present")
 
       formatHandle!!
-      Assert.assertEquals(bookmarks1, formatHandle.format.bookmarks)
+      Assertions.assertEquals(bookmarks1, formatHandle.format.bookmarks)
     }
   }
 

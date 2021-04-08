@@ -10,12 +10,10 @@ import one.irradia.mime.api.MIMEType
 import one.irradia.mime.vanilla.MIMEParser
 import org.joda.time.DateTime
 import org.joda.time.Instant
-import org.junit.After
-import org.junit.Assert
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.ExpectedException
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.librarysimplified.http.api.LSHTTPClientConfiguration
 import org.librarysimplified.http.api.LSHTTPClientType
 import org.librarysimplified.http.vanilla.LSHTTPClients
@@ -69,6 +67,7 @@ import org.nypl.simplified.opds.core.OPDSSearchParser
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.tests.mocking.MockRevokeStringResources
 import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -84,16 +83,13 @@ import java.util.concurrent.TimeUnit
  * Contract for the `BookRevokeTask` class that doesn't involve DRM.
  */
 
-abstract class BookRevokeTaskAdobeDRMContract {
-
-  @JvmField
-  @Rule
-  val expected = ExpectedException.none()
+class BookRevokeTaskAdobeDRMTest {
 
   val accountID =
     AccountID(UUID.fromString("46d17029-14ba-4e34-bcaa-def02713575a"))
 
-  protected abstract val logger: Logger
+  private val logger: Logger =
+    LoggerFactory.getLogger(BookRevokeTaskAdobeDRMTest::class.java)
 
   private lateinit var adobeConnector: AdobeAdeptConnectorType
   private lateinit var adobeExecutor: AdobeAdeptExecutorType
@@ -140,7 +136,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
       )
     )
 
-  @Before
+  @BeforeEach
   @Throws(Exception::class)
   fun setUp() {
     this.http =
@@ -175,7 +171,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
     this.clock = { Instant.now() }
   }
 
-  @After
+  @AfterEach
   @Throws(Exception::class)
   fun tearDown() {
     this.executorBooks.shutdown()
@@ -300,7 +296,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
     TaskDumps.dump(logger, result)
 
     result as TaskResult.Success
-    Assert.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
+    Assertions.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
   }
@@ -397,7 +393,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
     TaskDumps.dump(logger, result)
 
     result as TaskResult.Success
-    Assert.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
+    Assertions.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
   }
@@ -538,7 +534,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
     TaskDumps.dump(logger, result)
 
     result as TaskResult.Success
-    Assert.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
+    Assertions.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
     Mockito.verify(drmHandle, Times(1)).setAdobeRightsInformation(null)
@@ -937,7 +933,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
     TaskDumps.dump(logger, result)
     result as TaskResult.Failure
 
-    Assert.assertEquals("Adobe ACS: E_DEFECTIVE", result.lastErrorCode)
+    Assertions.assertEquals("Adobe ACS: E_DEFECTIVE", result.lastErrorCode)
     Mockito.verify(bookDatabaseEntry, Times(0)).delete()
   }
 
@@ -1050,7 +1046,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
     TaskDumps.dump(logger, result)
     result as TaskResult.Failure
 
-    Assert.assertEquals("Adobe ACS: drmDeviceNotActive", result.lastErrorCode)
+    Assertions.assertEquals("Adobe ACS: drmDeviceNotActive", result.lastErrorCode)
     Mockito.verify(bookDatabaseEntry, Times(0)).delete()
   }
 
@@ -1149,7 +1145,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
     TaskDumps.dump(logger, result)
     result as TaskResult.Failure
 
-    Assert.assertEquals("revokeCredentialsRequired", result.lastErrorCode)
+    Assertions.assertEquals("revokeCredentialsRequired", result.lastErrorCode)
     Mockito.verify(bookDatabaseEntry, Times(0)).delete()
   }
 
@@ -1292,10 +1288,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
     TaskDumps.dump(logger, result)
     result as TaskResult.Failure
 
-    Assert.assertEquals(
-      IOException::class.java,
-      result.steps.last().resolution.exception!!::class.java
-    )
+    Assertions.assertEquals(IOException::class.java, result.steps.last().resolution.exception!!::class.java)
 
     Mockito.verify(bookDatabaseEntry, Times(0)).delete()
   }
@@ -1320,7 +1313,7 @@ abstract class BookRevokeTaskAdobeDRMContract {
   }
 
   private fun resource(file: String): InputStream? {
-    return BookRevokeTaskAdobeDRMContract::class.java.getResourceAsStream(file)
+    return BookRevokeTaskAdobeDRMTest::class.java.getResourceAsStream(file)
   }
 
   @Throws(IOException::class)

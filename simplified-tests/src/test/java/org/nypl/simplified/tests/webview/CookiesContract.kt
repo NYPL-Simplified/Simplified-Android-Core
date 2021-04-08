@@ -1,8 +1,8 @@
 package org.nypl.simplified.tests.webview
 
 import android.webkit.CookieManager
-import org.junit.Assert
 import org.junit.Test
+import org.junit.jupiter.api.Assertions
 import org.nypl.simplified.accounts.api.AccountCookie
 import org.nypl.simplified.webview.WebViewUtilities
 import java.io.File
@@ -18,7 +18,7 @@ abstract class CookiesContract {
       File(webViewDataDir)
     )
 
-    Assert.assertArrayEquals(
+    Assertions.assertArrayEquals(
       arrayOf(
         AccountCookie("https://shibboleth.columbia.edu", "JSESSIONID=2BD741F198E14A5D9EDA9C8B54611EE2; Domain=shibboleth.columbia.edu; Path=/idp/; Secure; HttpOnly"),
         AccountCookie("http://cas.columbia.edu", "cuPrivacyNotice=1; Domain=cas.columbia.edu; Path=/; Expires=Thu, 31 Dec 2020 03:41:10 GMT"),
@@ -42,7 +42,7 @@ abstract class CookiesContract {
       File(webViewDataDir)
     )
 
-    Assert.assertArrayEquals(
+    Assertions.assertArrayEquals(
       arrayOf(
         AccountCookie("https://cas.columbia.edu", "BIGipServer~CUIT~cas.columbia.edu-443-pool=F0F1D7969FA64A69BE4C1348067C4029; Domain=cas.columbia.edu; Path=/; Expires=Sun, 22 Nov 2020 22:00:53 GMT; Secure; HttpOnly"),
         AccountCookie("https://shibboleth.columbia.edu", "BIGipServer~CUIT~shibboleth.columbia.edu-128.59.105.181.443-pool=B845696DA38D4663A305B1134005A291; Domain=shibboleth.columbia.edu; Path=/; Expires=Sun, 22 Nov 2020 22:10:53 GMT; Secure; HttpOnly"),
@@ -67,7 +67,7 @@ abstract class CookiesContract {
       File(webViewDataDir)
     )
 
-    Assert.assertArrayEquals(
+    Assertions.assertArrayEquals(
       arrayOf(
         AccountCookie("https://secure.com", "foo1=bar1; Domain=secure.com; Path=/; Secure"),
         AccountCookie("http://none.com", "foo4=bar4; Domain=none.com; Path=/; SameSite=None"),
@@ -91,7 +91,7 @@ abstract class CookiesContract {
       File(webViewDataDir)
     )
 
-    Assert.assertArrayEquals(
+    Assertions.assertArrayEquals(
       arrayOf(
         AccountCookie("https://cas.columbia.edu", "BIGipServer~CUIT~cas.columbia.edu-443-pool=17567F5540E1410B9CA31919BF4643CA; Domain=cas.columbia.edu; Path=/; Expires=Sun, 22 Nov 2020 22:12:05 GMT; Secure; HttpOnly"),
         AccountCookie("https://shibboleth.columbia.edu", "BIGipServer~CUIT~shibboleth.columbia.edu-128.59.105.181.443-pool=376C08BC24AD40B8B16BDA6DB6A866CB; Domain=shibboleth.columbia.edu; Path=/; Expires=Sun, 22 Nov 2020 22:22:07 GMT; Secure; HttpOnly"),

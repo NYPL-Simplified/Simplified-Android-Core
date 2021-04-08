@@ -2,8 +2,8 @@ package org.nypl.simplified.tests.books.accounts;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials;
 import org.nypl.simplified.accounts.api.AccountBundledCredentialsType;
 import org.nypl.simplified.accounts.api.AccountPassword;
@@ -15,38 +15,35 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.URI;
 
-public abstract class AccountBundledCredentialsJSONContract {
+public final class AccountBundledCredentialsJSONTest {
 
   private InputStream resource(
-    final String name)
-  {
-    return AccountBundledCredentialsJSONContract.class.getResourceAsStream(
+    final String name) {
+    return AccountBundledCredentialsJSONTest.class.getResourceAsStream(
       "/org/nypl/simplified/tests/books/accounts/" + name);
   }
 
   @Test
   public void testEmpty()
-    throws Exception
-  {
+    throws Exception {
     final ObjectMapper mapper = new ObjectMapper();
 
     try (final InputStream stream = resource("bundled-creds-empty.json")) {
       final AccountBundledCredentialsType credentials =
         AccountBundledCredentialsJSON.deserializeFromStream(mapper, stream);
-      Assert.assertEquals(0L, credentials.bundledCredentials().size());
+      Assertions.assertEquals(0L, credentials.bundledCredentials().size());
     }
   }
 
   @Test
   public void testSimple()
-    throws Exception
-  {
+    throws Exception {
     final ObjectMapper mapper = new ObjectMapper();
 
     try (final InputStream stream = resource("bundled-creds-simple.json")) {
       final AccountBundledCredentialsType credentials =
         AccountBundledCredentialsJSON.deserializeFromStream(mapper, stream);
-      Assert.assertEquals(3L, credentials.bundledCredentials().size());
+      Assertions.assertEquals(3L, credentials.bundledCredentials().size());
 
       final AccountAuthenticationCredentials.Basic p0 =
         (AccountAuthenticationCredentials.Basic) credentials.bundledCredentialsFor(URI.create("urn:0"));
@@ -55,20 +52,19 @@ public abstract class AccountBundledCredentialsJSONContract {
       final AccountAuthenticationCredentials.Basic p2 =
         (AccountAuthenticationCredentials.Basic) credentials.bundledCredentialsFor(URI.create("urn:2"));
 
-      Assert.assertEquals(new AccountUsername("abcd"), p0.getUserName());
-      Assert.assertEquals(new AccountUsername("efgh"), p1.getUserName());
-      Assert.assertEquals(new AccountUsername("ijkl"), p2.getUserName());
+      Assertions.assertEquals(new AccountUsername("abcd"), p0.getUserName());
+      Assertions.assertEquals(new AccountUsername("efgh"), p1.getUserName());
+      Assertions.assertEquals(new AccountUsername("ijkl"), p2.getUserName());
 
-      Assert.assertEquals(new AccountPassword("1234"), p0.getPassword());
-      Assert.assertEquals(new AccountPassword("5678"), p1.getPassword());
-      Assert.assertEquals(new AccountPassword("9090"), p2.getPassword());
+      Assertions.assertEquals(new AccountPassword("1234"), p0.getPassword());
+      Assertions.assertEquals(new AccountPassword("5678"), p1.getPassword());
+      Assertions.assertEquals(new AccountPassword("9090"), p2.getPassword());
     }
   }
 
   @Test
   public void testSimpleRoundTrip()
-    throws Exception
-  {
+    throws Exception {
     final ObjectMapper mapper = new ObjectMapper();
 
     try (final InputStream stream = resource("bundled-creds-simple.json")) {
@@ -82,7 +78,7 @@ public abstract class AccountBundledCredentialsJSONContract {
           final AccountBundledCredentialsType alternate =
             AccountBundledCredentialsJSON.deserializeFromStream(mapper, input);
 
-          Assert.assertEquals(credentials, alternate);
+          Assertions.assertEquals(credentials, alternate);
         }
       }
     }

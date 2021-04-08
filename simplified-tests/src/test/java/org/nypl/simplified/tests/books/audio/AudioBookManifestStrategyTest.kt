@@ -1,10 +1,8 @@
 package org.nypl.simplified.tests.books.audio
 
-import org.junit.Assert
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.TemporaryFolder
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.librarysimplified.audiobook.api.PlayerResult
 import org.librarysimplified.audiobook.api.PlayerUserAgent
 import org.librarysimplified.audiobook.manifest_fulfill.api.ManifestFulfillmentStrategyRegistryType
@@ -20,13 +18,16 @@ import org.nypl.simplified.books.audio.AudioBookManifestStrategy
 import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.tests.MutableServiceDirectory
+import org.nypl.simplified.tests.TestDirectories
 import org.slf4j.LoggerFactory
 import rx.Observable
+import java.io.File
 import java.net.URI
 
 class AudioBookManifestStrategyTest {
 
-  private val logger = LoggerFactory.getLogger(AudioBookManifestStrategyTest::class.java)
+  private val logger =
+    LoggerFactory.getLogger(AudioBookManifestStrategyTest::class.java)
 
   private lateinit var basicStrategies: ManifestFulfillmentBasicType
   private lateinit var basicStrategy: ManifestFulfillmentStrategyType
@@ -34,12 +35,9 @@ class AudioBookManifestStrategyTest {
   private lateinit var manifestParsers: ManifestParsersType
   private lateinit var services: MutableServiceDirectory
   private lateinit var strategies: ManifestFulfillmentStrategyRegistryType
+  private lateinit var tempFolder: File
 
-  @Rule
-  @JvmField
-  val tempFolder = TemporaryFolder()
-
-  @Before
+  @BeforeEach
   fun testSetup() {
     this.basicStrategy =
       Mockito.mock(ManifestFulfillmentStrategyType::class.java)
@@ -49,6 +47,9 @@ class AudioBookManifestStrategyTest {
       Mockito.mock(ManifestFulfillmentStrategyRegistryType::class.java)
     this.manifestParsers =
       Mockito.mock(ManifestParsersType::class.java)
+
+    this.tempFolder =
+      TestDirectories.temporaryDirectory()
 
     this.fulfillError =
       object : ManifestFulfillmentErrorType {
@@ -72,15 +73,12 @@ class AudioBookManifestStrategyTest {
           services = this.services,
           isNetworkAvailable = { true },
           strategyRegistry = this.strategies,
-          cacheDirectory = tempFolder.newFolder("cache")
+          cacheDirectory = File(tempFolder, "cache")
         )
       )
 
     val failure = strategy.execute() as TaskResult.Failure
-    Assert.assertEquals(
-      UnsupportedOperationException::class.java,
-      failure.resolutionOf(0).exception?.javaClass
-    )
+    Assertions.assertEquals(UnsupportedOperationException::class.java, failure.resolutionOf(0).exception?.javaClass)
   }
 
   @Test
@@ -116,16 +114,13 @@ class AudioBookManifestStrategyTest {
           services = this.services,
           isNetworkAvailable = { true },
           strategyRegistry = this.strategies,
-          cacheDirectory = tempFolder.newFolder("cache")
+          cacheDirectory = File(tempFolder, "cache")
         )
       )
 
     val failure = strategy.execute() as TaskResult.Failure
 
-    Assert.assertEquals(
-      "Download failed!",
-      failure.resolutionOf(0).message
-    )
+    Assertions.assertEquals("Download failed!", failure.resolutionOf(0).message)
   }
 
   @Test
@@ -168,12 +163,12 @@ class AudioBookManifestStrategyTest {
           strategyRegistry = this.strategies,
           manifestParsers = AudioBookFailingParsers,
           extensions = emptyList(),
-          cacheDirectory = tempFolder.newFolder("cache")
+          cacheDirectory = File(tempFolder, "cache")
         )
       )
 
     val failure = strategy.execute() as TaskResult.Failure
-    Assert.assertTrue(
+    Assertions.assertTrue(
       failure.resolutionOf(1).message.startsWith("Manifest parsing failed")
     )
   }
@@ -219,12 +214,12 @@ class AudioBookManifestStrategyTest {
           manifestParsers = AudioBookSucceedingParsers,
           extensions = emptyList(),
           licenseChecks = listOf(AudioBookFailingLicenseChecks),
-          cacheDirectory = tempFolder.newFolder("cache")
+          cacheDirectory = File(tempFolder, "cache")
         )
       )
 
     val failure = strategy.execute() as TaskResult.Failure
-    Assert.assertTrue(
+    Assertions.assertTrue(
       failure.resolutionOf(2).message.startsWith("One or more license checks failed")
     )
   }
@@ -270,12 +265,12 @@ class AudioBookManifestStrategyTest {
           manifestParsers = AudioBookSucceedingParsers,
           extensions = emptyList(),
           licenseChecks = listOf(),
-          cacheDirectory = tempFolder.newFolder("cache")
+          cacheDirectory = File(tempFolder, "cache")
         )
       )
 
     val success = strategy.execute() as TaskResult.Success
-    Assert.assertEquals(AudioBookSucceedingParsers.playerManifest, success.result.manifest)
+    Assertions.assertEquals(AudioBookSucceedingParsers.playerManifest, success.result.manifest)
   }
 
   @Test
@@ -289,16 +284,13 @@ class AudioBookManifestStrategyTest {
           credentials = null,
           services = this.services,
           isNetworkAvailable = { false },
-          cacheDirectory = tempFolder.newFolder("cache")
+          cacheDirectory = File(tempFolder, "cache")
         )
       )
 
     val failure = strategy.execute() as TaskResult.Failure
 
-    Assert.assertEquals(
-      "No fallback manifest data is provided",
-      failure.resolutionOf(0).message
-    )
+    Assertions.assertEquals("No fallback manifest data is provided", failure.resolutionOf(0).message)
   }
 
   @Test
@@ -321,12 +313,12 @@ class AudioBookManifestStrategyTest {
           isNetworkAvailable = { false },
           strategyRegistry = this.strategies,
           licenseChecks = listOf(),
-          cacheDirectory = tempFolder.newFolder("cache")
+          cacheDirectory = File(tempFolder, "cache")
         )
       )
 
     val success = strategy.execute() as TaskResult.Success
-    Assert.assertEquals(AudioBookSucceedingParsers.playerManifest, success.result.manifest)
+    Assertions.assertEquals(AudioBookSucceedingParsers.playerManifest, success.result.manifest)
   }
 
   /**

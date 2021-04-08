@@ -87,7 +87,8 @@ class MockProfile(
   }
 
   override fun account(accountId: AccountID): AccountType {
-    return this.accounts[accountId] ?: throw AccountsDatabaseNonexistentException("No such account!")
+    return this.accounts[accountId]
+      ?: throw AccountsDatabaseNonexistentException("No such account!")
   }
 
   override fun compareTo(other: ProfileReadableType): Int {
