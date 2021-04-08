@@ -295,6 +295,12 @@ numbers, etc) is defined in the `gradle.properties` file in each module. The [gr
 file in the root of the project defines default values that are overridden as necessary by each
 module.
 
+#### Test suite
+
+We aggregate all unit tests in the [simplified-tests](simplified-tests) module. Tests should
+be written using the JUnit 5 library, although at the time of writing we have [one test](simplified-tests/src/test/java/org/nypl/simplified/tests/webview/CookiesContract.kt)
+that still requires JUnit 4 due to the use of [Roboelectric](http://robolectric.org/).
+
 #### Modules
 
 The project is heavily modularized in order to keep the separate application components as loosely
