@@ -52,6 +52,7 @@ same core:
   * [Branching/Merging](#branchingmerging)
   * [Project Structure](#project-structure--architecture)
     * [MVC](#mvc)
+    * [MVVM](#mvvm)
     * [API vs SPI](#api-vs-spi)
     * [Modules](#modules)
   * [Binaries](#binaries)
@@ -229,6 +230,12 @@ The project, as a whole, roughly follows an [MVC](https://en.wikipedia.org/wiki/
 architecture distributed over the application modules. The _controller_ in the application is
 task-based and executes all tasks on a background thread to avoid any possibility of blocking
 the Android UI thread.
+
+#### MVVM
+
+Newer application modules, roughly follow an [MVVM](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93viewmodel) architecture.
+The _View Model_ in the application exposes reactive properties
+and executes all tasks on a background thread. The _View_ observes those properties and updates on the Android UI thread.
 
 #### API vs SPI
 
