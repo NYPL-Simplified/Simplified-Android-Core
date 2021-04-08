@@ -269,7 +269,7 @@ class BookmarkAnnotationsJSONTest {
     assertEquals("", bookmark.chapterTitle)
 
     val location = bookmark.location as BookLocation.BookLocationR2
-    assertEquals(0.5, location.progress.chapterProgress, 0.0)
+    assertEquals(0.666, location.progress.chapterProgress, 0.0)
     assertEquals("/xyz.html", location.progress.chapterHref)
 
     this.checkRoundTrip(annotation)
@@ -293,7 +293,7 @@ class BookmarkAnnotationsJSONTest {
     assertEquals("", bookmark.chapterTitle)
 
     val location = bookmark.location as BookLocation.BookLocationR2
-    assertEquals(0.5, location.progress.chapterProgress, 0.0)
+    assertEquals(0.666, location.progress.chapterProgress, 0.0)
     assertEquals("/xyz.html", location.progress.chapterHref)
 
     this.checkRoundTrip(annotation)
@@ -317,7 +317,31 @@ class BookmarkAnnotationsJSONTest {
     assertEquals("", bookmark.chapterTitle)
 
     val location = bookmark.location as BookLocation.BookLocationR2
-    assertEquals(0.5, location.progress.chapterProgress, 0.0)
+    assertEquals(0.666, location.progress.chapterProgress, 0.0)
+    assertEquals("/xyz.html", location.progress.chapterHref)
+
+    this.checkRoundTrip(annotation)
+  }
+
+  @Test
+  fun testSpecValidBookmark3() {
+    val annotation =
+      BookmarkAnnotationsJSON.deserializeBookmarkAnnotationFromJSON(
+        objectMapper = this.objectMapper,
+        node = this.resourceNode("valid-bookmark-3.json")
+      )
+
+    DateTimeUtils.setCurrentMillisFixed(0L)
+
+    val bookmark = BookmarkAnnotations.toBookmark(this.objectMapper, annotation)
+    assertEquals("urn:uuid:1daa8de6-94e8-4711-b7d1-e43b572aa6e0", bookmark.opdsId)
+    assertEquals("urn:uuid:c83db5b1-9130-4b86-93ea-634b00235c7c", bookmark.deviceID)
+    assertEquals(BookmarkKind.ReaderBookmarkExplicit, bookmark.kind)
+    assertEquals("2021-03-12T16:32:49.000Z", bookmark.time.toString())
+    assertEquals("", bookmark.chapterTitle)
+
+    val location = bookmark.location as BookLocation.BookLocationR2
+    assertEquals(0.666, location.progress.chapterProgress, 0.0)
     assertEquals("/xyz.html", location.progress.chapterHref)
 
     this.checkRoundTrip(annotation)
@@ -332,7 +356,7 @@ class BookmarkAnnotationsJSONTest {
       )
 
     val locationHP = location as BookLocation.BookLocationR2
-    assertEquals(0.5, locationHP.progress.chapterProgress, 0.0)
+    assertEquals(0.666, locationHP.progress.chapterProgress, 0.0)
     assertEquals("/xyz.html", locationHP.progress.chapterHref)
   }
 
