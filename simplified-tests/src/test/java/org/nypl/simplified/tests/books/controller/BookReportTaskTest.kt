@@ -5,10 +5,10 @@ import com.io7m.jfunctional.Option
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.joda.time.DateTime
-import org.junit.After
-import org.junit.Assert
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.librarysimplified.http.api.LSHTTPClientConfiguration
 import org.librarysimplified.http.api.LSHTTPClientType
 import org.librarysimplified.http.vanilla.LSHTTPClients
@@ -30,7 +30,7 @@ class BookReportTaskTest {
   private lateinit var http: LSHTTPClientType
   private lateinit var server: MockWebServer
 
-  @Before
+  @BeforeEach
   fun setup() {
     this.http =
       LSHTTPClients()
@@ -48,7 +48,7 @@ class BookReportTaskTest {
     this.server.start()
   }
 
-  @After
+  @AfterEach
   fun tearDown() {
     this.server.close()
   }
@@ -117,8 +117,8 @@ class BookReportTaskTest {
     task.call()
 
     val req0 = this.server.takeRequest()
-    Assert.assertEquals(this.server.url("issues"), req0.requestUrl)
-    Assert.assertEquals(1, this.server.requestCount)
+    Assertions.assertEquals(this.server.url("issues"), req0.requestUrl)
+    Assertions.assertEquals(1, this.server.requestCount)
   }
 
   /**
@@ -169,8 +169,8 @@ class BookReportTaskTest {
     task.call()
 
     val req0 = this.server.takeRequest()
-    Assert.assertEquals(this.server.url("issues"), req0.requestUrl)
-    Assert.assertEquals(1, this.server.requestCount)
+    Assertions.assertEquals(this.server.url("issues"), req0.requestUrl)
+    Assertions.assertEquals(1, this.server.requestCount)
   }
 
   /**
@@ -221,7 +221,7 @@ class BookReportTaskTest {
     task.call()
 
     val req0 = this.server.takeRequest()
-    Assert.assertEquals(this.server.url("issues"), req0.requestUrl)
-    Assert.assertEquals(1, this.server.requestCount)
+    Assertions.assertEquals(this.server.url("issues"), req0.requestUrl)
+    Assertions.assertEquals(1, this.server.requestCount)
   }
 }

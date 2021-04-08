@@ -7,12 +7,10 @@ import io.reactivex.subjects.PublishSubject
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.joda.time.Instant
-import org.junit.After
-import org.junit.Assert
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.ExpectedException
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.librarysimplified.http.api.LSHTTPClientConfiguration
 import org.librarysimplified.http.api.LSHTTPClientType
 import org.librarysimplified.http.vanilla.LSHTTPClients
@@ -66,10 +64,6 @@ import java.util.concurrent.TimeUnit
 
 class ProfileAccountCreateCustomOPDSTest {
 
-  @JvmField
-  @Rule
-  val expected = ExpectedException.none()
-
   val accountID =
     AccountID(UUID.fromString("46d17029-14ba-4e34-bcaa-def02713575a"))
 
@@ -101,7 +95,7 @@ class ProfileAccountCreateCustomOPDSTest {
   private lateinit var profilesDatabase: ProfilesDatabaseType
   private lateinit var server: MockWebServer
 
-  @Before
+  @BeforeEach
   @Throws(Exception::class)
   fun setUp() {
     this.context = Mockito.mock(Context::class.java)
@@ -144,7 +138,7 @@ class ProfileAccountCreateCustomOPDSTest {
     this.server.start()
   }
 
-  @After
+  @AfterEach
   @Throws(Exception::class)
   fun tearDown() {
     this.executorBooks.shutdown()
@@ -177,7 +171,7 @@ class ProfileAccountCreateCustomOPDSTest {
 
     val result = task.call()
     val failure = result as TaskResult.Failure
-    Assert.assertEquals("fetchingOPDSFeedFailed", failure.steps.last().resolution.message)
+    Assertions.assertEquals("fetchingOPDSFeedFailed", failure.steps.last().resolution.message)
   }
 
   @Test
@@ -197,7 +191,7 @@ class ProfileAccountCreateCustomOPDSTest {
 
     val result = task.call()
     val failure = result as TaskResult.Failure
-    Assert.assertEquals("fetchingOPDSFeedFailed", failure.steps.last().resolution.message)
+    Assertions.assertEquals("fetchingOPDSFeedFailed", failure.steps.last().resolution.message)
   }
 
   @Test
@@ -228,7 +222,7 @@ class ProfileAccountCreateCustomOPDSTest {
 
     val result = task.call()
     val failure = result as TaskResult.Failure
-    Assert.assertEquals("parsingOPDSFeedFailed", failure.lastErrorCode)
+    Assertions.assertEquals("parsingOPDSFeedFailed", failure.lastErrorCode)
   }
 
   @Test
@@ -301,7 +295,7 @@ class ProfileAccountCreateCustomOPDSTest {
     val result = task.call()
     val success = result as TaskResult.Success
 
-    Assert.assertSame(account, success.result)
+    Assertions.assertSame(account, success.result)
 
     Mockito.verify(profile, Mockito.times(1))
       .createAccount(anyNonNull())
@@ -360,7 +354,7 @@ class ProfileAccountCreateCustomOPDSTest {
 
     val result = task.call()
     val failure = result as TaskResult.Failure
-    Assert.assertEquals("resolvingAccountProviderFailed", failure.steps.last().resolution.message)
+    Assertions.assertEquals("resolvingAccountProviderFailed", failure.steps.last().resolution.message)
   }
 
   @Test
@@ -413,7 +407,7 @@ class ProfileAccountCreateCustomOPDSTest {
 
     val result = task.call()
     val failure = result as TaskResult.Failure
-    Assert.assertEquals("creatingAccountFailed", failure.lastErrorCode)
+    Assertions.assertEquals("creatingAccountFailed", failure.lastErrorCode)
   }
 
   private fun <T> anyNonNull(): T =

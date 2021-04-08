@@ -2,8 +2,7 @@ package org.nypl.simplified.tests;
 
 import com.io7m.jfunctional.ProcedureType;
 
-import org.hamcrest.core.IsInstanceOf;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 
 import java.util.List;
 
@@ -19,18 +18,23 @@ public final class EventAssertions {
     final List<TB> events,
     final int index,
     final ProcedureType<T> property) {
-    Assert.assertTrue(
+    Assertions.assertTrue(
+      events.size() >= index + 1,
       new StringBuilder(64)
         .append("List of events must be at least ")
         .append(index + 1)
         .append(" elements long (is: ")
         .append(events.size())
         .append(")")
-        .toString(),
-      events.size() >= index + 1);
+        .toString());
 
     final TB x = events.get(index);
-    Assert.assertThat(x, IsInstanceOf.instanceOf(clazz));
+    if (!clazz.isAssignableFrom(x.getClass())) {
+      Assertions.fail(
+        String.format("Expected class %s != received class %s", clazz, x.getClass())
+      );
+    }
+
     final T y = (T) x;
     property.call(y);
   }
@@ -54,19 +58,21 @@ public final class EventAssertions {
   public static void isListWithTypes(
     final List<?> events,
     final List<Class<?>> types) {
-    Assert.assertEquals(
-      "Expected a list of " + types.size() + " events",
+    Assertions.assertEquals(
       events.size(),
-      types.size());
+      types.size(),
+      "Expected a list of " + types.size() + " events"
+    );
 
     for (int index = 0; index < events.size(); ++index) {
       Class<?> expectedClass = types.get(index);
       Object received = events.get(index);
 
-      Assert.assertThat(
-        String.format("Expected [%d] %s == Received [%d] %s\n", index, expectedClass, index, received),
-        received,
-        new IsInstanceOf(expectedClass));
+      if (received.getClass() != expectedClass) {
+        Assertions.fail(
+          String.format("Expected [%d] %s == Received [%d] %s\n", index, expectedClass, index, received)
+        );
+      }
     }
   }
 }

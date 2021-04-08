@@ -15,12 +15,11 @@ import one.irradia.mime.vanilla.MIMEParser
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import org.joda.time.Instant
-import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.ExpectedException
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Timeout
 import org.librarysimplified.http.api.LSHTTPClientConfiguration
 import org.librarysimplified.http.api.LSHTTPClientType
 import org.librarysimplified.http.vanilla.LSHTTPClients
@@ -86,10 +85,6 @@ import java.util.concurrent.TimeUnit
 
 class BookRevokeTaskTest {
 
-  @JvmField
-  @Rule
-  val expected = ExpectedException.none()
-
   val accountID =
     AccountID(UUID.fromString("46d17029-14ba-4e34-bcaa-def02713575a"))
 
@@ -114,7 +109,7 @@ class BookRevokeTaskTest {
 
   private val bookRevokeStrings = MockRevokeStringResources()
 
-  @Before
+  @BeforeEach
   @Throws(Exception::class)
   fun setUp() {
     this.http =
@@ -150,7 +145,7 @@ class BookRevokeTaskTest {
     this.server.start()
   }
 
-  @After
+  @AfterEach
   @Throws(Exception::class)
   fun tearDown() {
     this.executorBooks.shutdown()
@@ -1020,7 +1015,8 @@ class BookRevokeTaskTest {
    * Revoking a book using a URI succeeds if the server returns the expected data.
    */
 
-  @Test(timeout = 5_000L)
+  @Test
+  @Timeout(value = 5L, unit = TimeUnit.SECONDS)
   fun testRevokeURILoaned() {
     val account =
       Mockito.mock(AccountType::class.java)
@@ -1136,7 +1132,8 @@ class BookRevokeTaskTest {
    * Revoking a book using a URI succeeds trivially if no URI is provided.
    */
 
-  @Test(timeout = 5_000L)
+  @Test
+  @Timeout(value = 5L, unit = TimeUnit.SECONDS)
   fun testRevokeURILoanedNoURI() {
     val account =
       Mockito.mock(AccountType::class.java)
@@ -1220,7 +1217,8 @@ class BookRevokeTaskTest {
    * Revoking a book using a URI succeeds if the server returns the expected data.
    */
 
-  @Test(timeout = 5_000L)
+  @Test
+  @Timeout(value = 5L, unit = TimeUnit.SECONDS)
   fun testRevokeURIRevoked() {
     val account =
       Mockito.mock(AccountType::class.java)
@@ -1332,7 +1330,8 @@ class BookRevokeTaskTest {
    * Revoking a book using a URI fails if the server returns a corrupted feed.
    */
 
-  @Test(timeout = 5_000L)
+  @Test
+  @Timeout(value = 5L, unit = TimeUnit.SECONDS)
   fun testRevokeURIFeedCorrupt() {
     val account =
       Mockito.mock(AccountType::class.java)
@@ -1437,7 +1436,8 @@ class BookRevokeTaskTest {
    * Revoking a book using a URI fails if the server returns a NOT AUTHORIZED error.
    */
 
-  @Test(timeout = 5_000L)
+  @Test
+  @Timeout(value = 5L, unit = TimeUnit.SECONDS)
   fun testRevokeURIFeed401() {
     val account =
       Mockito.mock(AccountType::class.java)
@@ -1535,7 +1535,8 @@ class BookRevokeTaskTest {
    * Revoking a book using a URI fails if the server times out.
    */
 
-  @Test(timeout = 5_000L)
+  @Test
+  @Timeout(value = 5L, unit = TimeUnit.SECONDS)
   fun testRevokeURIFeedTimeout() {
     val account =
       Mockito.mock(AccountType::class.java)
@@ -1628,7 +1629,8 @@ class BookRevokeTaskTest {
    * Revoking a book using a URI fails if the feed loader crashes.
    */
 
-  @Test(timeout = 5_000L)
+  @Test
+  @Timeout(value = 5L, unit = TimeUnit.SECONDS)
   fun testRevokeURIFeedCrash() {
     val account =
       Mockito.mock(AccountType::class.java)
@@ -1715,7 +1717,8 @@ class BookRevokeTaskTest {
    * Revoking a book using a URI fails if the server returns a feed with groups.
    */
 
-  @Test(timeout = 5_000L)
+  @Test
+  @Timeout(value = 5L, unit = TimeUnit.SECONDS)
   fun testRevokeURIFeedWithGroups() {
     val account =
       Mockito.mock(AccountType::class.java)
@@ -1801,7 +1804,8 @@ class BookRevokeTaskTest {
    * You can't revoke a holdable book.
    */
 
-  @Test(timeout = 5_000L)
+  @Test
+  @Timeout(value = 5L, unit = TimeUnit.SECONDS)
   fun testRevokeHoldable() {
     val account =
       Mockito.mock(AccountType::class.java)
@@ -1894,7 +1898,8 @@ class BookRevokeTaskTest {
    * You can't revoke a loanable book.
    */
 
-  @Test(timeout = 5_000L)
+  @Test
+  @Timeout(value = 5L, unit = TimeUnit.SECONDS)
   fun testRevokeLoanable() {
     val account =
       Mockito.mock(AccountType::class.java)

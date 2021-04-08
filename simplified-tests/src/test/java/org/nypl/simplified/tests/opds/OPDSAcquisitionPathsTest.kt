@@ -2,8 +2,8 @@ package org.nypl.simplified.tests.opds
 
 import one.irradia.mime.api.MIMEType
 import one.irradia.mime.vanilla.MIMEParser.Companion.parseRaisingException
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 import org.nypl.simplified.opds.core.OPDSAcquisition
 import org.nypl.simplified.opds.core.OPDSAcquisitionPath
 import org.nypl.simplified.opds.core.OPDSAcquisitionPathElement

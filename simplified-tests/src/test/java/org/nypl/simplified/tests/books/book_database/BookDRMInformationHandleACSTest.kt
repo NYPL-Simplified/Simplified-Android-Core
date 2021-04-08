@@ -1,10 +1,10 @@
 package org.nypl.simplified.tests.books.book_database
 
-import org.junit.After
-import org.junit.Assert.assertArrayEquals
-import org.junit.Assert.assertEquals
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertArrayEquals
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.nypl.drm.core.AdobeAdeptLoan
 import org.nypl.drm.core.AdobeLoanID
 import org.nypl.simplified.books.book_database.BookDRMInformationHandleACS
@@ -21,14 +21,14 @@ class BookDRMInformationHandleACSTest {
   private lateinit var directory1: File
   private lateinit var directory0: File
 
-  @Before
+  @BeforeEach
   fun testSetup() {
     this.directory0 = TestDirectories.temporaryDirectory()
     this.directory1 = TestDirectories.temporaryDirectory()
     this.updates = 0
   }
 
-  @After
+  @AfterEach
   fun testTearDown() {
     DirectoryUtilities.directoryDelete(this.directory0)
     DirectoryUtilities.directoryDelete(this.directory1)

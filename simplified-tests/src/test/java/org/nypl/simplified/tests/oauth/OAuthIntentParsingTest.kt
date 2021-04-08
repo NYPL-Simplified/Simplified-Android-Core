@@ -3,8 +3,8 @@ package org.nypl.simplified.tests.oauth
 import android.content.Intent
 import android.net.Uri
 import com.io7m.junreachable.UnreachableCodeException
-import org.junit.Assert
-import org.junit.Test
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.nypl.simplified.oauth.OAuthCallbackIntentParsing
 import org.nypl.simplified.oauth.OAuthParseResult.Failed
@@ -24,7 +24,7 @@ class OAuthIntentParsingTest {
     Mockito.`when`(intent.data).thenReturn(null)
 
     val result = OAuthCallbackIntentParsing.processIntent(intent, "oauth", failIfCalled) as Failed
-    Assert.assertTrue(result.message.contains("No data provided"))
+    Assertions.assertTrue(result.message.contains("No data provided"))
   }
 
   @Test
@@ -33,7 +33,7 @@ class OAuthIntentParsingTest {
     Mockito.`when`(uri.scheme).thenReturn(null)
 
     val result = OAuthCallbackIntentParsing.processUri(uri, "oauth", failIfCalled) as Failed
-    Assert.assertTrue(result.message.contains("Unrecognized URI"))
+    Assertions.assertTrue(result.message.contains("Unrecognized URI"))
   }
 
   @Test
@@ -44,7 +44,7 @@ class OAuthIntentParsingTest {
     Mockito.`when`(uri.scheme).thenReturn("http")
 
     val result = OAuthCallbackIntentParsing.processUri(uri, "oauth", failIfCalled) as Failed
-    Assert.assertTrue(result.message.contains("Unrecognized URI"))
+    Assertions.assertTrue(result.message.contains("Unrecognized URI"))
   }
 
   @Test
@@ -60,7 +60,7 @@ class OAuthIntentParsingTest {
 
     val result =
       OAuthCallbackIntentParsing.processUri(uri, "oauth") { fakeUri } as Failed
-    Assert.assertTrue(result.message.contains("No user info in intent"))
+    Assertions.assertTrue(result.message.contains("No user info in intent"))
   }
 
   @Test
@@ -77,7 +77,7 @@ class OAuthIntentParsingTest {
 
     val result =
       OAuthCallbackIntentParsing.processUri(uri, "oauth") { fakeUri } as Failed
-    Assert.assertTrue(result.message.contains("Response did not contain an access_token parameter."))
+    Assertions.assertTrue(result.message.contains("Response did not contain an access_token parameter."))
   }
 
   @Test
@@ -91,7 +91,7 @@ class OAuthIntentParsingTest {
 
     val result =
       OAuthCallbackIntentParsing.processUri(uri, "oauth") { throw IOException("Failed!") } as Failed
-    Assert.assertTrue(result.message.contains("Failed!"))
+    Assertions.assertTrue(result.message.contains("Failed!"))
   }
 
   @Test
@@ -108,14 +108,11 @@ class OAuthIntentParsingTest {
       .thenReturn("smile")
 
     val result = OAuthCallbackIntentParsing.processUri(uri, "oauth") { text ->
-      Assert.assertEquals(
-        "oauth://$accountId@authenticated?access_token=smile",
-        text
-      )
+      Assertions.assertEquals("oauth://$accountId@authenticated?access_token=smile", text)
       fakeUri
     } as Success
-    Assert.assertEquals("smile", result.token)
-    Assert.assertEquals(accountId, result.accountId)
+    Assertions.assertEquals("smile", result.token)
+    Assertions.assertEquals(accountId, result.accountId)
   }
 
   @Test
@@ -135,13 +132,10 @@ class OAuthIntentParsingTest {
     Mockito.`when`(intent.data).thenReturn(uri)
 
     val result = OAuthCallbackIntentParsing.processIntent(intent, "oauth") { text ->
-      Assert.assertEquals(
-        "oauth://$accountId@authenticated?access_token=smile",
-        text
-      )
+      Assertions.assertEquals("oauth://$accountId@authenticated?access_token=smile", text)
       fakeUri
     } as Success
-    Assert.assertEquals("smile", result.token)
-    Assert.assertEquals(accountId, result.accountId)
+    Assertions.assertEquals("smile", result.token)
+    Assertions.assertEquals(accountId, result.accountId)
   }
 }

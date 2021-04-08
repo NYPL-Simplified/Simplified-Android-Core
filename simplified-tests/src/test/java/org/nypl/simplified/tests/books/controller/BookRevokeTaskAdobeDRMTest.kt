@@ -10,12 +10,10 @@ import one.irradia.mime.api.MIMEType
 import one.irradia.mime.vanilla.MIMEParser
 import org.joda.time.DateTime
 import org.joda.time.Instant
-import org.junit.After
-import org.junit.Assert
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.ExpectedException
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.librarysimplified.http.api.LSHTTPClientConfiguration
 import org.librarysimplified.http.api.LSHTTPClientType
 import org.librarysimplified.http.vanilla.LSHTTPClients
@@ -87,10 +85,6 @@ import java.util.concurrent.TimeUnit
 
 class BookRevokeTaskAdobeDRMTest {
 
-  @JvmField
-  @Rule
-  val expected = ExpectedException.none()
-
   val accountID =
     AccountID(UUID.fromString("46d17029-14ba-4e34-bcaa-def02713575a"))
 
@@ -142,7 +136,7 @@ class BookRevokeTaskAdobeDRMTest {
       )
     )
 
-  @Before
+  @BeforeEach
   @Throws(Exception::class)
   fun setUp() {
     this.http =
@@ -177,7 +171,7 @@ class BookRevokeTaskAdobeDRMTest {
     this.clock = { Instant.now() }
   }
 
-  @After
+  @AfterEach
   @Throws(Exception::class)
   fun tearDown() {
     this.executorBooks.shutdown()
@@ -302,7 +296,7 @@ class BookRevokeTaskAdobeDRMTest {
     TaskDumps.dump(logger, result)
 
     result as TaskResult.Success
-    Assert.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
+    Assertions.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
   }
@@ -399,7 +393,7 @@ class BookRevokeTaskAdobeDRMTest {
     TaskDumps.dump(logger, result)
 
     result as TaskResult.Success
-    Assert.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
+    Assertions.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
   }
@@ -540,7 +534,7 @@ class BookRevokeTaskAdobeDRMTest {
     TaskDumps.dump(logger, result)
 
     result as TaskResult.Success
-    Assert.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
+    Assertions.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
     Mockito.verify(drmHandle, Times(1)).setAdobeRightsInformation(null)
@@ -939,7 +933,7 @@ class BookRevokeTaskAdobeDRMTest {
     TaskDumps.dump(logger, result)
     result as TaskResult.Failure
 
-    Assert.assertEquals("Adobe ACS: E_DEFECTIVE", result.lastErrorCode)
+    Assertions.assertEquals("Adobe ACS: E_DEFECTIVE", result.lastErrorCode)
     Mockito.verify(bookDatabaseEntry, Times(0)).delete()
   }
 
@@ -1052,7 +1046,7 @@ class BookRevokeTaskAdobeDRMTest {
     TaskDumps.dump(logger, result)
     result as TaskResult.Failure
 
-    Assert.assertEquals("Adobe ACS: drmDeviceNotActive", result.lastErrorCode)
+    Assertions.assertEquals("Adobe ACS: drmDeviceNotActive", result.lastErrorCode)
     Mockito.verify(bookDatabaseEntry, Times(0)).delete()
   }
 
@@ -1151,7 +1145,7 @@ class BookRevokeTaskAdobeDRMTest {
     TaskDumps.dump(logger, result)
     result as TaskResult.Failure
 
-    Assert.assertEquals("revokeCredentialsRequired", result.lastErrorCode)
+    Assertions.assertEquals("revokeCredentialsRequired", result.lastErrorCode)
     Mockito.verify(bookDatabaseEntry, Times(0)).delete()
   }
 
@@ -1294,10 +1288,7 @@ class BookRevokeTaskAdobeDRMTest {
     TaskDumps.dump(logger, result)
     result as TaskResult.Failure
 
-    Assert.assertEquals(
-      IOException::class.java,
-      result.steps.last().resolution.exception!!::class.java
-    )
+    Assertions.assertEquals(IOException::class.java, result.steps.last().resolution.exception!!::class.java)
 
     Mockito.verify(bookDatabaseEntry, Times(0)).delete()
   }

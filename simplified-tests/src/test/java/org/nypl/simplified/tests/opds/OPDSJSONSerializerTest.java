@@ -1,7 +1,7 @@
 package org.nypl.simplified.tests.opds;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeed;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
@@ -59,29 +59,29 @@ public final class OPDSJSONSerializerTest {
     {
       final List<OPDSAcquisition> e0a = e0.getAcquisitions();
       final List<OPDSAcquisition> e1a = e1.getAcquisitions();
-      Assert.assertEquals(e0a.size(), e1a.size());
+      Assertions.assertEquals(e0a.size(), e1a.size());
 
       for (int index = 0; index < e0a.size(); ++index) {
         final OPDSAcquisition a0 = e0a.get(index);
         final OPDSAcquisition a1 = e1a.get(index);
-        Assert.assertEquals(a0.getRelation(), a1.getRelation());
-        Assert.assertEquals(a0.getType().getFullType(), a1.getType().getFullType());
-        Assert.assertEquals(a0.getUri(), a1.getUri());
-        Assert.assertEquals(a0.getIndirectAcquisitions(), a1.getIndirectAcquisitions());
+        Assertions.assertEquals(a0.getRelation(), a1.getRelation());
+        Assertions.assertEquals(a0.getType().getFullType(), a1.getType().getFullType());
+        Assertions.assertEquals(a0.getUri(), a1.getUri());
+        Assertions.assertEquals(a0.getIndirectAcquisitions(), a1.getIndirectAcquisitions());
       }
 
-      Assert.assertEquals(e0.getAvailability(), e1.getAvailability());
-      Assert.assertEquals(e0.getAuthors(), e1.getAuthors());
-      Assert.assertEquals(e0.getCategories(), e1.getCategories());
-      Assert.assertEquals(e0.getCover(), e1.getCover());
-      Assert.assertEquals(e0.getGroups(), e1.getGroups());
-      Assert.assertEquals(e0.getID(), e1.getID());
-      Assert.assertEquals(e0.getPublished(), e1.getPublished());
-      Assert.assertEquals(e0.getPublisher(), e1.getPublisher());
-      Assert.assertEquals(e0.getSummary(), e1.getSummary());
-      Assert.assertEquals(e0.getThumbnail(), e1.getThumbnail());
-      Assert.assertEquals(e0.getTitle(), e1.getTitle());
-      Assert.assertEquals(e0.getUpdated(), e1.getUpdated());
+      Assertions.assertEquals(e0.getAvailability(), e1.getAvailability());
+      Assertions.assertEquals(e0.getAuthors(), e1.getAuthors());
+      Assertions.assertEquals(e0.getCategories(), e1.getCategories());
+      Assertions.assertEquals(e0.getCover(), e1.getCover());
+      Assertions.assertEquals(e0.getGroups(), e1.getGroups());
+      Assertions.assertEquals(e0.getID(), e1.getID());
+      Assertions.assertEquals(e0.getPublished(), e1.getPublished());
+      Assertions.assertEquals(e0.getPublisher(), e1.getPublisher());
+      Assertions.assertEquals(e0.getSummary(), e1.getSummary());
+      Assertions.assertEquals(e0.getThumbnail(), e1.getThumbnail());
+      Assertions.assertEquals(e0.getTitle(), e1.getTitle());
+      Assertions.assertEquals(e0.getUpdated(), e1.getUpdated());
     }
   }
 
@@ -111,16 +111,16 @@ public final class OPDSJSONSerializerTest {
       for (int index = 0; index < fe0e.size(); ++index) {
         final OPDSAcquisitionFeedEntry e0 = fe0e.get(index);
         final OPDSAcquisitionFeedEntry e1 = fe1e.get(index);
-        Assert.assertEquals(e0.getAcquisitions(), e1.getAcquisitions());
-        Assert.assertEquals(e0.getAuthors(), e1.getAuthors());
-        Assert.assertEquals(e0.getCategories(), e1.getCategories());
-        Assert.assertEquals(e0.getCover(), e1.getCover());
-        Assert.assertEquals(e0.getGroups(), e1.getGroups());
-        Assert.assertEquals(e0.getID(), e1.getID());
-        Assert.assertEquals(e0.getPublisher(), e1.getPublisher());
-        Assert.assertEquals(e0.getSummary(), e1.getSummary());
-        Assert.assertEquals(e0.getThumbnail(), e1.getThumbnail());
-        Assert.assertEquals(e0.getTitle(), e1.getTitle());
+        Assertions.assertEquals(e0.getAcquisitions(), e1.getAcquisitions());
+        Assertions.assertEquals(e0.getAuthors(), e1.getAuthors());
+        Assertions.assertEquals(e0.getCategories(), e1.getCategories());
+        Assertions.assertEquals(e0.getCover(), e1.getCover());
+        Assertions.assertEquals(e0.getGroups(), e1.getGroups());
+        Assertions.assertEquals(e0.getID(), e1.getID());
+        Assertions.assertEquals(e0.getPublisher(), e1.getPublisher());
+        Assertions.assertEquals(e0.getSummary(), e1.getSummary());
+        Assertions.assertEquals(e0.getThumbnail(), e1.getThumbnail());
+        Assertions.assertEquals(e0.getTitle(), e1.getTitle());
         // Forget comparing instances of Calendar, no implementation gets this
         // right
         // Assert.assertEquals(e0.getUpdated(), e1.getUpdated());

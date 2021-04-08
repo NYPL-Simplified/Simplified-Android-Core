@@ -38,7 +38,7 @@ import one.irradia.mime.vanilla.MIMEParser;
 
 public final class OPDSFeedEntryParserTest {
 
-  private static Logger LOG =
+  private static final Logger LOG =
     LoggerFactory.getLogger(OPDSFeedEntryParserTest.class);
 
   private static InputStream getResource(

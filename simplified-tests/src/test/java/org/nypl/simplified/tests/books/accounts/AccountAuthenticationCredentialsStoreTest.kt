@@ -2,11 +2,9 @@ package org.nypl.simplified.tests.books.accounts
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ObjectNode
-import org.junit.Assert
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.ExpectedException
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.api.AccountPassword
@@ -28,11 +26,7 @@ class AccountAuthenticationCredentialsStoreTest {
   private lateinit var fileTemp: File
   private lateinit var file: File
 
-  @JvmField
-  @Rule
-  val expectedException = ExpectedException.none()
-
-  @Before
+  @BeforeEach
   fun testSetup() {
     this.file =
       File.createTempFile("test-simplified-auth-credentials-store", ".json")
@@ -48,7 +42,7 @@ class AccountAuthenticationCredentialsStoreTest {
     val store =
       AccountAuthenticationCredentialsStore.open(this.file, this.fileTemp)
 
-    Assert.assertEquals(0, store.size())
+    Assertions.assertEquals(0, store.size())
   }
 
   @Test
@@ -66,12 +60,12 @@ class AccountAuthenticationCredentialsStoreTest {
       )
 
     store0.put(accountID, credentials)
-    Assert.assertEquals(credentials, store0.get(accountID))
+    Assertions.assertEquals(credentials, store0.get(accountID))
 
     val store1 =
       AccountAuthenticationCredentialsStore.open(this.file, this.fileTemp)
 
-    Assert.assertEquals(credentials, store1.get(accountID))
+    Assertions.assertEquals(credentials, store1.get(accountID))
   }
 
   @Test
@@ -89,7 +83,7 @@ class AccountAuthenticationCredentialsStoreTest {
     val store =
       AccountAuthenticationCredentialsStore.open(this.file, this.fileTemp)
 
-    Assert.assertEquals(0, store.size())
+    Assertions.assertEquals(0, store.size())
   }
 
   @Test
@@ -105,8 +99,9 @@ class AccountAuthenticationCredentialsStoreTest {
         stream.flush()
       }
 
-    this.expectedException.expect(JSONParseException::class.java)
-    AccountAuthenticationCredentialsStore.open(this.file, this.fileTemp)
+    Assertions.assertThrows(JSONParseException::class.java) {
+      AccountAuthenticationCredentialsStore.open(this.file, this.fileTemp)
+    }
   }
 
   @Test
@@ -178,8 +173,8 @@ class AccountAuthenticationCredentialsStoreTest {
     val store =
       AccountAuthenticationCredentialsStore.open(this.file, this.fileTemp)
 
-    Assert.assertEquals(1, store.size())
-    Assert.assertNotNull(store.get(AccountID(UUID.fromString("37452e48-2235-4098-ad67-e72bce45ccb6"))))
+    Assertions.assertEquals(1, store.size())
+    Assertions.assertNotNull(store.get(AccountID(UUID.fromString("37452e48-2235-4098-ad67-e72bce45ccb6"))))
   }
 
   @Test
@@ -197,10 +192,10 @@ class AccountAuthenticationCredentialsStoreTest {
       )
 
     store.put(accountID, credentials)
-    Assert.assertEquals(credentials, store.get(accountID))
-    Assert.assertEquals(1, store.size())
+    Assertions.assertEquals(credentials, store.get(accountID))
+    Assertions.assertEquals(1, store.size())
     store.delete(accountID)
-    Assert.assertEquals(null, store.get(accountID))
-    Assert.assertEquals(0, store.size())
+    Assertions.assertEquals(null, store.get(accountID))
+    Assertions.assertEquals(0, store.size())
   }
 }

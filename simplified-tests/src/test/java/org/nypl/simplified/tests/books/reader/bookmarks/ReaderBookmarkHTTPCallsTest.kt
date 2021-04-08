@@ -4,12 +4,11 @@ import android.content.Context
 import com.fasterxml.jackson.databind.ObjectMapper
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
-import org.junit.After
-import org.junit.Assert
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.ExpectedException
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.function.Executable
 import org.librarysimplified.http.api.LSHTTPClientConfiguration
 import org.librarysimplified.http.api.LSHTTPClientType
 import org.librarysimplified.http.vanilla.LSHTTPClients
@@ -29,10 +28,6 @@ class ReaderBookmarkHTTPCallsTest {
 
   private lateinit var http: LSHTTPClientType
   private lateinit var server: MockWebServer
-
-  @JvmField
-  @Rule
-  val expectedException = ExpectedException.none()
 
   private fun checkGetSyncing(
     expected: Boolean,
@@ -59,7 +54,7 @@ class ReaderBookmarkHTTPCallsTest {
     )
 
     val enabled0 = calls.syncingIsEnabled(targetURI, credentials)
-    Assert.assertEquals(expected, enabled0)
+    Assertions.assertEquals(expected, enabled0)
   }
 
   private fun checkGetBookmarks(
@@ -87,10 +82,10 @@ class ReaderBookmarkHTTPCallsTest {
     )
 
     val receivedBookmarks = calls.bookmarksGet(targetURI, credentials)
-    Assert.assertEquals(expectedBookmarks, receivedBookmarks)
+    Assertions.assertEquals(expectedBookmarks, receivedBookmarks)
   }
 
-  @Before
+  @BeforeEach
   fun setup() {
     this.http =
       LSHTTPClients()
@@ -108,7 +103,7 @@ class ReaderBookmarkHTTPCallsTest {
     this.server.start()
   }
 
-  @After
+  @AfterEach
   fun tearDown() {
     this.server.close()
   }
@@ -305,8 +300,12 @@ class ReaderBookmarkHTTPCallsTest {
         .setResponseCode(401)
     )
 
-    this.expectedException.expect(IOException::class.java)
-    calls.syncingIsEnabled(targetURI, credentials)
+    Assertions.assertThrows(
+      IOException::class.java,
+      Executable {
+        calls.syncingIsEnabled(targetURI, credentials)
+      }
+    )
   }
 
   @Test
@@ -328,8 +327,12 @@ class ReaderBookmarkHTTPCallsTest {
         .setResponseCode(401)
     )
 
-    this.expectedException.expect(IOException::class.java)
-    calls.bookmarksGet(targetURI, credentials)
+    Assertions.assertThrows(
+      IOException::class.java,
+      Executable {
+        calls.bookmarksGet(targetURI, credentials)
+      }
+    )
   }
 
   @Test
@@ -351,7 +354,11 @@ class ReaderBookmarkHTTPCallsTest {
         .setResponseCode(401)
     )
 
-    this.expectedException.expect(IOException::class.java)
-    calls.bookmarkAdd(targetURI, credentials, this.bookmark0)
+    Assertions.assertThrows(
+      IOException::class.java,
+      Executable {
+        calls.bookmarkAdd(targetURI, credentials, this.bookmark0)
+      }
+    )
   }
 }

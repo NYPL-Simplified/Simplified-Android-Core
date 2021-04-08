@@ -2,9 +2,9 @@ package org.nypl.simplified.tests.migration.from3master
 
 import android.content.Context
 import io.reactivex.subjects.PublishSubject
-import org.junit.Assert
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountID
@@ -47,7 +47,7 @@ abstract class MigrationFrom3MasterContract {
 
   protected abstract val logger: Logger
 
-  @Before
+  @BeforeEach
   fun testSetup() {
     this.context =
       Mockito.mock(Context::class.java)
@@ -159,7 +159,7 @@ abstract class MigrationFrom3MasterContract {
       .thenReturn(this.tempDir)
 
     val migration = this.migrations.create(this.services)
-    Assert.assertEquals(false, migration.needsToRun())
+    Assertions.assertEquals(false, migration.needsToRun())
   }
 
   /**
@@ -176,7 +176,7 @@ abstract class MigrationFrom3MasterContract {
     File(this.tempDir, "salt").writeBytes(ByteArray(16))
 
     val migration = this.migrations.create(this.services)
-    Assert.assertEquals(true, migration.needsToRun())
+    Assertions.assertEquals(true, migration.needsToRun())
   }
 
   /**
@@ -222,13 +222,13 @@ abstract class MigrationFrom3MasterContract {
     File(this.tempDir, "device.xml").writeBytes(ByteArray(16))
 
     val migration = this.migrations.create(this.services)
-    Assert.assertEquals(true, migration.needsToRun())
+    Assertions.assertEquals(true, migration.needsToRun())
 
     val report = migration.run()
     this.showReport(report)
-    Assert.assertEquals(2, report.events.size)
-    Assert.assertEquals("errorUnknownAccountProvider: 9999", report.events[0].message)
-    Assert.assertEquals("successDeletedOldData", report.events[1].message)
+    Assertions.assertEquals(2, report.events.size)
+    Assertions.assertEquals("errorUnknownAccountProvider: 9999", report.events[0].message)
+    Assertions.assertEquals("successDeletedOldData", report.events[1].message)
 
     this.assertWouldASecondMigrationNeedToRun(false)
   }
@@ -251,14 +251,14 @@ abstract class MigrationFrom3MasterContract {
     File(this.tempDir, "device.xml").writeBytes(ByteArray(16))
 
     val migration = this.migrations.create(this.services)
-    Assert.assertEquals(true, migration.needsToRun())
+    Assertions.assertEquals(true, migration.needsToRun())
 
     val report = migration.run()
     this.showReport(report)
-    Assert.assertEquals(3, report.events.size)
-    Assert.assertEquals("progressLoadingAccount: 12", report.events[0].message)
-    Assert.assertEquals("FAILED!", report.events[1].message)
-    Assert.assertEquals("successDeletedOldData", report.events[2].message)
+    Assertions.assertEquals(3, report.events.size)
+    Assertions.assertEquals("progressLoadingAccount: 12", report.events[0].message)
+    Assertions.assertEquals("FAILED!", report.events[1].message)
+    Assertions.assertEquals("successDeletedOldData", report.events[2].message)
     this.logger.debug("exception: ", (report.events[1] as MigrationStepError).exception)
 
     this.assertWouldASecondMigrationNeedToRun(true)
@@ -305,14 +305,14 @@ abstract class MigrationFrom3MasterContract {
     deviceFile.writeBytes(ByteArray(16))
 
     val migration = this.migrations.create(this.services)
-    Assert.assertEquals(true, migration.needsToRun())
+    Assertions.assertEquals(true, migration.needsToRun())
 
     val report = migration.run()
     this.showReport(report)
-    Assert.assertEquals(3, report.events.size)
-    Assert.assertEquals("progressLoadingAccount: 12", report.events[0].message)
-    Assert.assertEquals("FAILED!", report.events[1].message)
-    Assert.assertEquals("successDeletedOldData", report.events[2].message)
+    Assertions.assertEquals(3, report.events.size)
+    Assertions.assertEquals("progressLoadingAccount: 12", report.events[0].message)
+    Assertions.assertEquals("FAILED!", report.events[1].message)
+    Assertions.assertEquals("successDeletedOldData", report.events[2].message)
 
     this.logger.debug("exception: ", (report.events[1] as MigrationStepError).exception)
 
@@ -327,7 +327,7 @@ abstract class MigrationFrom3MasterContract {
         deviceFile
       )
     ) {
-      Assert.assertTrue("$file exists", file.exists())
+      Assertions.assertTrue(file.exists(), "$file exists")
     }
 
     this.assertWouldASecondMigrationNeedToRun(true)
@@ -398,15 +398,15 @@ abstract class MigrationFrom3MasterContract {
     File(this.tempDir, "device.xml").writeBytes(ByteArray(16))
 
     val migration = this.migrations.create(this.services)
-    Assert.assertEquals(true, migration.needsToRun())
+    Assertions.assertEquals(true, migration.needsToRun())
 
     val report = migration.run()
     this.showReport(report)
-    Assert.assertEquals(4, report.events.size)
-    Assert.assertEquals("progressLoadingAccount: 12", report.events[0].message)
-    Assert.assertEquals("successCreatedAccount: Account 0", report.events[1].message)
-    Assert.assertEquals("successAuthenticatedAccount: Account 0", report.events[2].message)
-    Assert.assertEquals("successDeletedOldData", report.events[3].message)
+    Assertions.assertEquals(4, report.events.size)
+    Assertions.assertEquals("progressLoadingAccount: 12", report.events[0].message)
+    Assertions.assertEquals("successCreatedAccount: Account 0", report.events[1].message)
+    Assertions.assertEquals("successAuthenticatedAccount: Account 0", report.events[2].message)
+    Assertions.assertEquals("successDeletedOldData", report.events[3].message)
 
     this.assertWouldASecondMigrationNeedToRun(false)
   }
@@ -488,7 +488,7 @@ abstract class MigrationFrom3MasterContract {
     bookDir.mkdirs()
 
     val bookEPUBFile = File(bookDir, "book.epub")
-    val epubData = Random.Default.nextBytes(32)
+    val epubData = Random.nextBytes(32)
     bookEPUBFile.writeBytes(epubData)
     val bookMetaFile = File(bookDir, "meta.json")
     bookMetaFile.writeBytes(this.resource("meta0.json"))
@@ -512,26 +512,26 @@ abstract class MigrationFrom3MasterContract {
         deviceFile
       )
     ) {
-      Assert.assertTrue("$file no exists", file.exists())
+      Assertions.assertTrue(file.exists(), "$file no exists")
     }
 
     val migration = this.migrations.create(this.services)
-    Assert.assertEquals(true, migration.needsToRun())
+    Assertions.assertEquals(true, migration.needsToRun())
 
     val report = migration.run()
     this.showReport(report)
-    Assert.assertEquals(6, report.events.size)
-    Assert.assertEquals("progressLoadingAccount: 12", report.events[0].message)
-    Assert.assertEquals("successCreatedAccount: Account 0", report.events[1].message)
-    Assert.assertEquals("successCopiedBookmarks: Bossypants 1", report.events[2].message)
-    Assert.assertEquals("successCopiedBook: Bossypants", report.events[3].message)
-    Assert.assertEquals("successAuthenticatedAccount: Account 0", report.events[4].message)
-    Assert.assertEquals("successDeletedOldData", report.events[5].message)
+    Assertions.assertEquals(6, report.events.size)
+    Assertions.assertEquals("progressLoadingAccount: 12", report.events[0].message)
+    Assertions.assertEquals("successCreatedAccount: Account 0", report.events[1].message)
+    Assertions.assertEquals("successCopiedBookmarks: Bossypants 1", report.events[2].message)
+    Assertions.assertEquals("successCopiedBook: Bossypants", report.events[3].message)
+    Assertions.assertEquals("successAuthenticatedAccount: Account 0", report.events[4].message)
+    Assertions.assertEquals("successDeletedOldData", report.events[5].message)
 
     val bookId = BookID.create("5924cb11000f67c5879f70d0bdfa11cbbd13a3e0feb5a9beda3f4a81032019a0")
-    Assert.assertTrue(bookDatabase.books().contains(bookId))
+    Assertions.assertTrue(bookDatabase.books().contains(bookId))
     val format = bookDatabase.entry(bookId).book.findPreferredFormat() as BookFormatEPUB
-    Assert.assertEquals(epubData.toList(), format.file!!.readBytes().toList())
+    Assertions.assertEquals(epubData.toList(), format.file!!.readBytes().toList())
 
     /*
      * All files should be gone.
@@ -550,7 +550,7 @@ abstract class MigrationFrom3MasterContract {
         deviceFile
       )
     ) {
-      Assert.assertTrue("$file no longer exists", !file.exists())
+      Assertions.assertTrue(!file.exists(), "$file no longer exists")
     }
 
     /*
@@ -562,7 +562,7 @@ abstract class MigrationFrom3MasterContract {
 
   private fun assertWouldASecondMigrationNeedToRun(wouldRun: Boolean) {
     val migrationAfter = this.migrations.create(this.services)
-    Assert.assertEquals(wouldRun, migrationAfter.needsToRun())
+    Assertions.assertEquals(wouldRun, migrationAfter.needsToRun())
   }
 
   /**
@@ -651,7 +651,7 @@ abstract class MigrationFrom3MasterContract {
     bookDir.mkdirs()
 
     val bookEPUBFile = File(bookDir, "book.epub")
-    val epubData = Random.Default.nextBytes(32)
+    val epubData = Random.nextBytes(32)
     bookEPUBFile.writeBytes(epubData)
     val bookMetaFile = File(bookDir, "meta.json")
     bookMetaFile.writeBytes(this.resource("meta0.json"))
@@ -667,19 +667,19 @@ abstract class MigrationFrom3MasterContract {
       .thenThrow(IOException("Bad book"))
 
     val migration = this.migrations.create(this.services)
-    Assert.assertEquals(true, migration.needsToRun())
+    Assertions.assertEquals(true, migration.needsToRun())
 
     val report = migration.run()
     this.showReport(report)
-    Assert.assertEquals(6, report.events.size)
-    Assert.assertEquals("progressLoadingAccount: 12", report.events[0].message)
-    Assert.assertEquals("successCreatedAccount: Account 0", report.events[1].message)
-    Assert.assertEquals("errorBookCopyFailure: Bossypants", report.events[2].message)
-    Assert.assertEquals("errorBookmarksCopyFailure: Bossypants", report.events[3].message)
-    Assert.assertEquals("successAuthenticatedAccount: Account 0", report.events[4].message)
-    Assert.assertEquals("successDeletedOldData", report.events[5].message)
+    Assertions.assertEquals(6, report.events.size)
+    Assertions.assertEquals("progressLoadingAccount: 12", report.events[0].message)
+    Assertions.assertEquals("successCreatedAccount: Account 0", report.events[1].message)
+    Assertions.assertEquals("errorBookCopyFailure: Bossypants", report.events[2].message)
+    Assertions.assertEquals("errorBookmarksCopyFailure: Bossypants", report.events[3].message)
+    Assertions.assertEquals("successAuthenticatedAccount: Account 0", report.events[4].message)
+    Assertions.assertEquals("successDeletedOldData", report.events[5].message)
 
-    Assert.assertFalse(bookDatabase.books().contains(bookId))
+    Assertions.assertFalse(bookDatabase.books().contains(bookId))
 
     this.assertWouldASecondMigrationNeedToRun(false)
   }
@@ -760,7 +760,7 @@ abstract class MigrationFrom3MasterContract {
     bookDir.mkdirs()
 
     val bookEPUBFile = File(bookDir, "book.epub")
-    val epubData = Random.Default.nextBytes(32)
+    val epubData = Random.nextBytes(32)
     bookEPUBFile.writeBytes(epubData)
     val bookMetaFile = File(bookDir, "meta.json")
     bookMetaFile.writeBytes(this.resource("meta0.json"))
@@ -773,22 +773,22 @@ abstract class MigrationFrom3MasterContract {
     deviceFile.writeBytes(ByteArray(16))
 
     val migration = this.migrations.create(this.services)
-    Assert.assertEquals(true, migration.needsToRun())
+    Assertions.assertEquals(true, migration.needsToRun())
 
     val report = migration.run()
     this.showReport(report)
-    Assert.assertEquals(6, report.events.size)
-    Assert.assertEquals("progressLoadingAccount: 12", report.events[0].message)
-    Assert.assertEquals("successCreatedAccount: Account 0", report.events[1].message)
-    Assert.assertEquals("successCopiedBookmarks: Bossypants 1", report.events[2].message)
-    Assert.assertEquals("successCopiedBook: Bossypants", report.events[3].message)
-    Assert.assertEquals("FAILURE!", report.events[4].message)
-    Assert.assertEquals("successDeletedOldData", report.events[5].message)
+    Assertions.assertEquals(6, report.events.size)
+    Assertions.assertEquals("progressLoadingAccount: 12", report.events[0].message)
+    Assertions.assertEquals("successCreatedAccount: Account 0", report.events[1].message)
+    Assertions.assertEquals("successCopiedBookmarks: Bossypants 1", report.events[2].message)
+    Assertions.assertEquals("successCopiedBook: Bossypants", report.events[3].message)
+    Assertions.assertEquals("FAILURE!", report.events[4].message)
+    Assertions.assertEquals("successDeletedOldData", report.events[5].message)
 
     val bookId = BookID.create("5924cb11000f67c5879f70d0bdfa11cbbd13a3e0feb5a9beda3f4a81032019a0")
-    Assert.assertTrue(bookDatabase.books().contains(bookId))
+    Assertions.assertTrue(bookDatabase.books().contains(bookId))
     val format = bookDatabase.entry(bookId).book.findPreferredFormat() as BookFormatEPUB
-    Assert.assertEquals(epubData.toList(), format.file!!.readBytes().toList())
+    Assertions.assertEquals(epubData.toList(), format.file!!.readBytes().toList())
 
     /*
      * Because everything except authentication succeeded, the original files can be deleted.
@@ -807,7 +807,7 @@ abstract class MigrationFrom3MasterContract {
         deviceFile
       )
     ) {
-      Assert.assertTrue("$file no longer exists", !file.exists())
+      Assertions.assertTrue(!file.exists(), "$file no longer exists")
     }
 
     this.assertWouldASecondMigrationNeedToRun(false)

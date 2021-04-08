@@ -2,10 +2,8 @@ package org.nypl.simplified.tests.bundled_content;
 
 import com.io7m.jnull.NullCheck;
 
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.nypl.simplified.books.bundled.api.BundledURIs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,9 +21,6 @@ public final class BundledURIsTest {
   static {
     LOG = NullCheck.notNull(LoggerFactory.getLogger(BundledURIsTest.class));
   }
-
-  @Rule
-  public final ExpectedException expected = ExpectedException.none();
 
   /**
    * Construct a new contract.
@@ -45,9 +40,9 @@ public final class BundledURIsTest {
   public void testCategorize()
     throws Exception {
 
-    Assert.assertFalse(
+    Assertions.assertFalse(
       BundledURIs.isBundledURI(URI.create("http://www.example.org")));
-    Assert.assertTrue(
+    Assertions.assertTrue(
       BundledURIs.isBundledURI(URI.create("simplified-bundled://a/b/c")));
   }
 
@@ -61,7 +56,7 @@ public final class BundledURIsTest {
   public void testMapToFile()
     throws Exception {
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
       "file:///android_asset/a/b/c.png",
       BundledURIs.toAndroidAssetFileURI(URI.create("simplified-bundled://a/b/c.png")).toString());
   }
@@ -76,7 +71,8 @@ public final class BundledURIsTest {
   public void testMapToFileNotBundled()
     throws Exception {
 
-    expected.expect(IllegalArgumentException.class);
-    BundledURIs.toAndroidAssetFileURI(URI.create("file://a/b/c.png"));
+    Assertions.assertThrows(IllegalArgumentException.class, () -> {
+      BundledURIs.toAndroidAssetFileURI(URI.create("file://a/b/c.png"));
+    });
   }
 }

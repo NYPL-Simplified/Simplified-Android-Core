@@ -1,11 +1,9 @@
 package org.nypl.simplified.tests.books.accounts
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.junit.Assert
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.ExpectedException
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.nypl.simplified.accounts.api.AccountPreferences
 import org.nypl.simplified.accounts.json.AccountPreferencesJSON
 import java.net.URI
@@ -19,11 +17,7 @@ class AccountPreferencesJSONTest {
 
   private lateinit var mapper: ObjectMapper
 
-  @JvmField
-  @Rule
-  var expected = ExpectedException.none()
-
-  @Before
+  @BeforeEach
   fun setup() {
     this.mapper = ObjectMapper()
   }
@@ -42,7 +36,7 @@ class AccountPreferencesJSONTest {
       AccountPreferencesJSON.deserializeFromJSON(
         AccountPreferencesJSON.serializeToJSON(mapper, prefs0)
       )
-    Assert.assertEquals(prefs0, prefs1)
+    Assertions.assertEquals(prefs0, prefs1)
   }
 
   @Test
@@ -59,6 +53,6 @@ class AccountPreferencesJSONTest {
       AccountPreferencesJSON.deserializeFromJSON(
         AccountPreferencesJSON.serializeToJSON(mapper, prefs0)
       )
-    Assert.assertEquals(prefs0, prefs1)
+    Assertions.assertEquals(prefs0, prefs1)
   }
 }

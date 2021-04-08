@@ -1,9 +1,9 @@
 package org.nypl.simplified.tests.books.book_database
 
-import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.nypl.simplified.books.book_database.BookDRMInformationHandleNone
 import org.nypl.simplified.books.book_database.api.BookFormats.BookFormatDefinition.BOOK_FORMAT_EPUB
 import org.nypl.simplified.books.book_database.api.BookFormats.BookFormatDefinition.BOOK_FORMAT_PDF
@@ -16,13 +16,13 @@ class BookDRMInformationHandleNoneTest {
   private lateinit var directory1: File
   private lateinit var directory0: File
 
-  @Before
+  @BeforeEach
   fun testSetup() {
     this.directory0 = TestDirectories.temporaryDirectory()
     this.directory1 = TestDirectories.temporaryDirectory()
   }
 
-  @After
+  @AfterEach
   fun testTearDown() {
     DirectoryUtilities.directoryDelete(this.directory0)
     DirectoryUtilities.directoryDelete(this.directory1)

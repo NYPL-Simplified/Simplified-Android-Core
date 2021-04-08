@@ -1,7 +1,7 @@
 package org.nypl.simplified.tests.books.formats
 
-import org.junit.Assert
-import org.junit.Test
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Test
 import org.nypl.simplified.books.formats.BookFormatAudioSupportParameters
 import org.nypl.simplified.books.formats.BookFormatSupport
 import org.nypl.simplified.books.formats.BookFormatSupportParameters
@@ -25,7 +25,7 @@ class BookFormatSupportTest {
         )
       )
 
-    Assert.assertFalse(support.isSupportedPath(listOf()))
+    Assertions.assertFalse(support.isSupportedPath(listOf()))
   }
 
   /**
@@ -53,14 +53,14 @@ class BookFormatSupportTest {
         )
       )
 
-    Assert.assertTrue(
+    Assertions.assertTrue(
       supportWith.isSupportedPath(
         listOf(
           StandardFormatNames.genericPDFFiles
         )
       )
     )
-    Assert.assertFalse(
+    Assertions.assertFalse(
       supportWithout.isSupportedPath(
         listOf(
           StandardFormatNames.genericPDFFiles
@@ -94,7 +94,7 @@ class BookFormatSupportTest {
         )
       )
 
-    Assert.assertTrue(
+    Assertions.assertTrue(
       supportWith.isSupportedPath(
         listOf(
           StandardFormatNames.adobeACSMFiles,
@@ -102,7 +102,7 @@ class BookFormatSupportTest {
         )
       )
     )
-    Assert.assertFalse(
+    Assertions.assertFalse(
       supportWithout.isSupportedPath(
         listOf(
           StandardFormatNames.adobeACSMFiles,
@@ -137,14 +137,14 @@ class BookFormatSupportTest {
         )
       )
 
-    Assert.assertTrue(
+    Assertions.assertTrue(
       supportWith.isSupportedPath(
         listOf(
           StandardFormatNames.axisNow
         )
       )
     )
-    Assert.assertFalse(
+    Assertions.assertFalse(
       supportWithout.isSupportedPath(
         listOf(
           StandardFormatNames.axisNow
@@ -182,14 +182,14 @@ class BookFormatSupportTest {
         )
       )
 
-    Assert.assertTrue(
+    Assertions.assertTrue(
       supportWith.isSupportedPath(
         listOf(
           StandardFormatNames.genericAudioBooks.first()
         )
       )
     )
-    Assert.assertFalse(
+    Assertions.assertFalse(
       supportWithout.isSupportedPath(
         listOf(
           StandardFormatNames.genericAudioBooks.first()
@@ -227,14 +227,14 @@ class BookFormatSupportTest {
         )
       )
 
-    Assert.assertTrue(
+    Assertions.assertTrue(
       supportWith.isSupportedPath(
         listOf(
           StandardFormatNames.dplaAudioBooks
         )
       )
     )
-    Assert.assertFalse(
+    Assertions.assertFalse(
       supportWithout.isSupportedPath(
         listOf(
           StandardFormatNames.dplaAudioBooks
@@ -272,14 +272,14 @@ class BookFormatSupportTest {
         )
       )
 
-    Assert.assertTrue(
+    Assertions.assertTrue(
       supportWith.isSupportedPath(
         listOf(
           StandardFormatNames.overdriveAudioBooks
         )
       )
     )
-    Assert.assertFalse(
+    Assertions.assertFalse(
       supportWithout.isSupportedPath(
         listOf(
           StandardFormatNames.overdriveAudioBooks
@@ -317,14 +317,14 @@ class BookFormatSupportTest {
         )
       )
 
-    Assert.assertTrue(
+    Assertions.assertTrue(
       supportWith.isSupportedPath(
         listOf(
           StandardFormatNames.findawayAudioBooks
         )
       )
     )
-    Assert.assertFalse(
+    Assertions.assertFalse(
       supportWithout.isSupportedPath(
         listOf(
           StandardFormatNames.findawayAudioBooks
@@ -349,7 +349,7 @@ class BookFormatSupportTest {
         )
       )
 
-    Assert.assertTrue(
+    Assertions.assertTrue(
       supportWith.isSupportedPath(
         listOf(
           StandardFormatNames.opdsAcquisitionFeedEntry,
@@ -357,7 +357,7 @@ class BookFormatSupportTest {
         )
       )
     )
-    Assert.assertFalse(
+    Assertions.assertFalse(
       supportWith.isSupportedPath(
         listOf(
           StandardFormatNames.genericEPUBFiles,
@@ -383,7 +383,7 @@ class BookFormatSupportTest {
         )
       )
 
-    Assert.assertFalse(
+    Assertions.assertFalse(
       supportWith.isSupportedPath(
         listOf(
           StandardFormatNames.adobeACSMFiles,

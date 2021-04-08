@@ -1,9 +1,7 @@
 package org.nypl.simplified.tests.books.accounts
 
-import org.junit.Assert
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.ExpectedException
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Test
 import org.nypl.drm.core.AdobeDeviceID
 import org.nypl.drm.core.AdobeUserID
 import org.nypl.drm.core.AdobeVendorID
@@ -25,10 +23,6 @@ import java.net.URI
 
 class AccountAuthenticationCredentialsJSONTest {
 
-  @JvmField
-  @Rule
-  var expected = ExpectedException.none()
-
   @Test
   @Throws(Exception::class)
   fun testRoundTrip0() {
@@ -41,7 +35,7 @@ class AccountAuthenticationCredentialsJSONTest {
       )
 
     val creds1 = deserializeFromJSON(serializeToJSON(creds0))
-    Assert.assertEquals(creds0, creds1)
+    Assertions.assertEquals(creds0, creds1)
   }
 
   @Test
@@ -55,7 +49,7 @@ class AccountAuthenticationCredentialsJSONTest {
       )
 
     val creds1 = deserializeFromJSON(serializeToJSON(creds0))
-    Assert.assertEquals(creds0, creds1)
+    Assertions.assertEquals(creds0, creds1)
   }
 
   @Test
@@ -78,7 +72,7 @@ class AccountAuthenticationCredentialsJSONTest {
       )
 
     val creds1 = deserializeFromJSON(serializeToJSON(creds0))
-    Assert.assertEquals(creds0, creds1)
+    Assertions.assertEquals(creds0, creds1)
   }
 
   @Test
@@ -106,7 +100,7 @@ class AccountAuthenticationCredentialsJSONTest {
       )
 
     val creds1 = deserializeFromJSON(serializeToJSON(creds0))
-    Assert.assertEquals(creds0, creds1)
+    Assertions.assertEquals(creds0, creds1)
   }
 
   @Test
@@ -139,6 +133,6 @@ class AccountAuthenticationCredentialsJSONTest {
       )
 
     val creds1 = deserializeFromJSON(serializeToJSON(creds0))
-    Assert.assertEquals(creds0, creds1)
+    Assertions.assertEquals(creds0, creds1)
   }
 }

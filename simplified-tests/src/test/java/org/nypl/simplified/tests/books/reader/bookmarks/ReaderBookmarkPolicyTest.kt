@@ -2,8 +2,8 @@ package org.nypl.simplified.tests.books.reader.bookmarks
 
 import org.joda.time.DateTime
 import org.joda.time.DateTimeZone
-import org.junit.Assert
-import org.junit.Test
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Test
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.books.api.BookLocation
 import org.nypl.simplified.books.api.Bookmark
@@ -84,9 +84,9 @@ class ReaderBookmarkPolicyTest {
         state
       )
 
-    Assert.assertTrue(result.newState.bookmarksAll.value.containsKey(bookmark0.bookmarkId))
-    Assert.assertEquals(1, result.outputs.size)
-    Assert.assertEquals(Command.LocallySaveBookmark(accountID, bookmark0), result.outputs[0])
+    Assertions.assertTrue(result.newState.bookmarksAll.value.containsKey(bookmark0.bookmarkId))
+    Assertions.assertEquals(1, result.outputs.size)
+    Assertions.assertEquals(Command.LocallySaveBookmark(accountID, bookmark0), result.outputs[0])
   }
 
   /**
@@ -115,9 +115,9 @@ class ReaderBookmarkPolicyTest {
         state
       )
 
-    Assert.assertTrue(result.newState.bookmarksAll.value.containsKey(bookmark0.bookmarkId))
-    Assert.assertEquals(1, result.outputs.size)
-    Assert.assertEquals(Command.LocallySaveBookmark(accountID, bookmark0), result.outputs[0])
+    Assertions.assertTrue(result.newState.bookmarksAll.value.containsKey(bookmark0.bookmarkId))
+    Assertions.assertEquals(1, result.outputs.size)
+    Assertions.assertEquals(Command.LocallySaveBookmark(accountID, bookmark0), result.outputs[0])
   }
 
   /**
@@ -146,9 +146,9 @@ class ReaderBookmarkPolicyTest {
         state
       )
 
-    Assert.assertTrue(result.newState.bookmarksAll.value.containsKey(bookmark0.bookmarkId))
-    Assert.assertEquals(1, result.outputs.size)
-    Assert.assertEquals(Command.LocallySaveBookmark(accountID, bookmark0), result.outputs[0])
+    Assertions.assertTrue(result.newState.bookmarksAll.value.containsKey(bookmark0.bookmarkId))
+    Assertions.assertEquals(1, result.outputs.size)
+    Assertions.assertEquals(Command.LocallySaveBookmark(accountID, bookmark0), result.outputs[0])
   }
 
   /**
@@ -177,10 +177,10 @@ class ReaderBookmarkPolicyTest {
         state
       )
 
-    Assert.assertTrue(result.newState.bookmarksAll.value.containsKey(bookmark0.bookmarkId))
-    Assert.assertEquals(2, result.outputs.size)
-    Assert.assertEquals(Command.LocallySaveBookmark(accountID, bookmark0), result.outputs[0])
-    Assert.assertEquals(Command.RemotelySendBookmark(accountID, bookmark0), result.outputs[1])
+    Assertions.assertTrue(result.newState.bookmarksAll.value.containsKey(bookmark0.bookmarkId))
+    Assertions.assertEquals(2, result.outputs.size)
+    Assertions.assertEquals(Command.LocallySaveBookmark(accountID, bookmark0), result.outputs[0])
+    Assertions.assertEquals(Command.RemotelySendBookmark(accountID, bookmark0), result.outputs[1])
   }
 
   /**
@@ -210,10 +210,10 @@ class ReaderBookmarkPolicyTest {
         state
       )
 
-    Assert.assertTrue(result.newState.bookmarksAll.value.containsKey(bookmark0.bookmarkId))
-    Assert.assertTrue(result.newState.bookmarksAll.value.containsKey(bookmark1.bookmarkId))
-    Assert.assertEquals(1, result.outputs.size)
-    Assert.assertEquals(Command.LocallySaveBookmark(accountID, bookmark0), result.outputs[0])
+    Assertions.assertTrue(result.newState.bookmarksAll.value.containsKey(bookmark0.bookmarkId))
+    Assertions.assertTrue(result.newState.bookmarksAll.value.containsKey(bookmark1.bookmarkId))
+    Assertions.assertEquals(1, result.outputs.size)
+    Assertions.assertEquals(Command.LocallySaveBookmark(accountID, bookmark0), result.outputs[0])
   }
 
   /**
@@ -236,9 +236,9 @@ class ReaderBookmarkPolicyTest {
         state
       )
 
-    Assert.assertTrue(result.newState.bookmarksAll.value.containsKey(bookmark0.bookmarkId))
-    Assert.assertEquals(Command.LocallySaveBookmark(accountID, bookmark0), result.outputs[0])
-    Assert.assertEquals(ReaderBookmarkPolicyOutput.Event.LocalBookmarkAlreadyExists(accountID, bookmark0), result.outputs[1])
+    Assertions.assertTrue(result.newState.bookmarksAll.value.containsKey(bookmark0.bookmarkId))
+    Assertions.assertEquals(Command.LocallySaveBookmark(accountID, bookmark0), result.outputs[0])
+    Assertions.assertEquals(ReaderBookmarkPolicyOutput.Event.LocalBookmarkAlreadyExists(accountID, bookmark0), result.outputs[1])
   }
 
   /**
@@ -261,9 +261,9 @@ class ReaderBookmarkPolicyTest {
         state
       )
 
-    Assert.assertTrue(result.newState.bookmarksAll.value.containsKey(bookmark0.bookmarkId))
-    Assert.assertEquals(Command.LocallySaveBookmark(accountID, bookmark0), result.outputs[0])
-    Assert.assertEquals(Command.LocallySaveBookmark(accountID, bookmark0Idle), result.outputs[1])
+    Assertions.assertTrue(result.newState.bookmarksAll.value.containsKey(bookmark0.bookmarkId))
+    Assertions.assertEquals(Command.LocallySaveBookmark(accountID, bookmark0), result.outputs[0])
+    Assertions.assertEquals(Command.LocallySaveBookmark(accountID, bookmark0Idle), result.outputs[1])
   }
 
   /**
@@ -292,7 +292,7 @@ class ReaderBookmarkPolicyTest {
         state
       )
 
-    Assert.assertEquals(Command.RemotelyFetchBookmarks(accountID), result.outputs[0])
+    Assertions.assertEquals(Command.RemotelyFetchBookmarks(accountID), result.outputs[0])
   }
 
   /**
@@ -321,7 +321,7 @@ class ReaderBookmarkPolicyTest {
         state
       )
 
-    Assert.assertEquals(Command.RemotelyFetchBookmarks(accountID), result.outputs[0])
+    Assertions.assertEquals(Command.RemotelyFetchBookmarks(accountID), result.outputs[0])
   }
 
   /**
@@ -339,10 +339,7 @@ class ReaderBookmarkPolicyTest {
 
     for (x in values) {
       val m = ReaderBookmarkPolicy.unit(x)
-      Assert.assertEquals(
-        ReaderBookmarkPolicy.evaluatePolicy(m.flatMap(f), state),
-        ReaderBookmarkPolicy.evaluatePolicy(f.invoke(x), state)
-      )
+      Assertions.assertEquals(ReaderBookmarkPolicy.evaluatePolicy(m.flatMap(f), state), ReaderBookmarkPolicy.evaluatePolicy(f.invoke(x), state))
     }
   }
 
@@ -360,10 +357,7 @@ class ReaderBookmarkPolicyTest {
 
     for (x in values) {
       val m = ReaderBookmarkPolicy.unit(x)
-      Assert.assertEquals(
-        ReaderBookmarkPolicy.evaluatePolicy(m.flatMap({ n -> ReaderBookmarkPolicy.unit(n) }), state),
-        ReaderBookmarkPolicy.evaluatePolicy(m, state)
-      )
+      Assertions.assertEquals(ReaderBookmarkPolicy.evaluatePolicy(m.flatMap({ n -> ReaderBookmarkPolicy.unit(n) }), state), ReaderBookmarkPolicy.evaluatePolicy(m, state))
     }
   }
 
@@ -387,10 +381,7 @@ class ReaderBookmarkPolicyTest {
       val r0 = m.flatMap(f).flatMap(g)
       val r1 = m.flatMap({ z -> (f.invoke(z)).flatMap(g) })
 
-      Assert.assertEquals(
-        ReaderBookmarkPolicy.evaluatePolicy(r0, state),
-        ReaderBookmarkPolicy.evaluatePolicy(r1, state)
-      )
+      Assertions.assertEquals(ReaderBookmarkPolicy.evaluatePolicy(r0, state), ReaderBookmarkPolicy.evaluatePolicy(r1, state))
     }
   }
 }

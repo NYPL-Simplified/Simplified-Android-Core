@@ -5,10 +5,8 @@ import com.io7m.jfunctional.OptionType;
 import com.io7m.jnull.NullCheck;
 
 import org.joda.time.DateTime;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.nypl.simplified.books.api.BookID;
 import org.nypl.simplified.books.api.BookIDs;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
@@ -18,8 +16,6 @@ import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess;
 import java.net.URI;
 
 public final class BookIDTest {
-  @Rule
-  public ExpectedException expected = ExpectedException.none();
 
   @Test
   public void testBookIDNew() {
@@ -36,7 +32,7 @@ public final class BookIDTest {
     final OPDSAcquisitionFeedEntry e = eb.build();
     final BookID b = BookIDs.newFromOPDSEntry(e);
     System.out.println("book: " + b);
-    Assert.assertEquals(
+    Assertions.assertEquals(
       "7a99601f479c30f66f0949c51bbed2adac0e12eb79ad1319db638e16604400bf",
       b.toString());
   }
@@ -50,25 +46,28 @@ public final class BookIDTest {
 
   @Test
   public void testBookIDNotValid0() {
-    this.expected.expect(IllegalArgumentException.class);
-    BookID.create("");
+    Assertions.assertThrows(IllegalArgumentException.class, () -> {
+      BookID.create("");
+    });
   }
 
   @Test
   public void testBookIDNotValid1() {
-    this.expected.expect(IllegalArgumentException.class);
-    BookID.create("_");
+    Assertions.assertThrows(IllegalArgumentException.class, () -> {
+      BookID.create("_");
+    });
   }
 
   @Test
   public void testBookIDNotValid2() {
-    this.expected.expect(IllegalArgumentException.class);
-    BookID.create(" ");
+    Assertions.assertThrows(IllegalArgumentException.class, () -> {
+      BookID.create(" ");
+    });
   }
 
   @Test
   public void testBookIDValid0() {
-    Assert.assertEquals(
+    Assertions.assertEquals(
       "abcdefghijklmnopqrstuvwxyz1234567890",
       BookID.create("abcdefghijklmnopqrstuvwxyz1234567890").value());
   }
