@@ -232,7 +232,7 @@ the Android UI thread.
 
 #### MVVM
 
-Newer application modules, roughly follows an [MVVM](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93viewmodel) architecture.
+Newer application modules, roughly follow an [MVVM](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93viewmodel) architecture.
 The _View Model_ in the application exposes reactive properties
 and executes all tasks on a background thread. The _View_ observes those properties and updates on the Android UI thread.
 
