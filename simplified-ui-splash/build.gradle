@@ -8,11 +8,13 @@ dependencies {
   api project(":simplified-ui-branding")
   api project(":simplified-ui-theme")
   api project(":simplified-services-api")
+  api project(":simplified-buildconfig-api")
 
   implementation libraries.androidx_appcompat
   implementation libraries.androidx_constraintlayout
   implementation libraries.androidx_legacy_support_v4
   implementation libraries.androidx_lifecycle
+  implementation libraries.androidx_fragment
   implementation libraries.google_material
   implementation libraries.io7m_jfunctional
   implementation libraries.io7m_junreachable

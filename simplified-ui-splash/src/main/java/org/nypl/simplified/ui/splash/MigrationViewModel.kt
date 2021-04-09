@@ -1,33 +1,35 @@
 package org.nypl.simplified.ui.splash
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import com.google.common.util.concurrent.MoreExecutors
 import hu.akarnokd.rxjava2.subjects.UnicastWorkSubject
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import org.librarysimplified.services.api.Services
+import org.nypl.simplified.migration.api.MigrationsType
 import org.nypl.simplified.migration.spi.MigrationEvent
 import org.nypl.simplified.migration.spi.MigrationReport
-import java.util.ServiceLoader
 import java.util.concurrent.Future
 
-class MigrationsViewModel : ViewModel() {
-
-  private val splashDependencies = ServiceLoader
-    .load(SplashListenerType::class.java)
-    .firstOrNull()
-    ?: throw IllegalStateException(
-      "No available services of type ${SplashListenerType::class.java.canonicalName}"
-    )
+class MigrationViewModel(application: Application) : AndroidViewModel(application) {
 
   private val migrations =
-    splashDependencies.onSplashWantMigrations()
-
-  val migrationEvents: UnicastWorkSubject<MigrationEvent> =
-    UnicastWorkSubject.create()
+    Services
+      .serviceDirectory()
+      .requireService(MigrationsType::class.java)
 
   private val subscriptions =
     CompositeDisposable()
+
+  override fun onCleared() {
+    super.onCleared()
+    subscriptions.clear()
+  }
+
+  val migrationEvents: UnicastWorkSubject<MigrationEvent> =
+    UnicastWorkSubject.create()
 
   init {
     migrations.events
@@ -53,8 +55,7 @@ class MigrationsViewModel : ViewModel() {
    return migrations.anyNeedToRun()
   }
 
-  override fun onCleared() {
-    super.onCleared()
-    subscriptions.clear()
+  fun sendReport(report: MigrationReport) {
+    MigrationReportEmail(report).send(getApplication())
   }
 }

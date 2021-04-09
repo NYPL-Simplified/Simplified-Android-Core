@@ -6,6 +6,8 @@ import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 
 class SplashSelectionFragmentViewModel : ViewModel() {
 
-  val profilesController = Services.serviceDirectory()
-    .requireService(ProfilesControllerType::class.java)
+  val profilesController =
+    Services
+      .serviceDirectory()
+      .requireService(ProfilesControllerType::class.java)
 }

@@ -9,16 +9,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.FragmentManager.OnBackStackChangedListener
 import androidx.lifecycle.ViewModelProvider
-import com.google.common.util.concurrent.ListenableFuture
 import com.io7m.junreachable.UnreachableCodeException
-import io.reactivex.Observable
 import org.joda.time.DateTime
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
-import org.nypl.simplified.boot.api.BootEvent
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
-import org.nypl.simplified.migration.api.MigrationsType
 import org.nypl.simplified.navigation.api.NavigationControllerDirectoryType
 import org.nypl.simplified.navigation.api.NavigationControllerType
 import org.nypl.simplified.navigation.api.NavigationControllers
@@ -32,21 +28,16 @@ import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest.OA
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.reports.Reports
 import org.nypl.simplified.ui.accounts.AccountFragmentParameters
-import org.nypl.simplified.ui.accounts.AccountListRegistryFragment
 import org.nypl.simplified.ui.accounts.AccountNavigationControllerType
 import org.nypl.simplified.ui.accounts.saml20.AccountSAML20FragmentParameters
-import org.nypl.simplified.ui.announcements.AnnouncementsController
 import org.nypl.simplified.ui.branding.BrandingSplashServiceType
 import org.nypl.simplified.ui.catalog.AgeGateDialog
 import org.nypl.simplified.ui.catalog.CatalogNavigationControllerType
 import org.nypl.simplified.ui.errorpage.ErrorPageListenerType
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
-import org.nypl.simplified.ui.profiles.ProfileSelectionFragment
 import org.nypl.simplified.ui.profiles.ProfilesNavigationControllerType
 import org.nypl.simplified.ui.settings.SettingsNavigationControllerType
 import org.nypl.simplified.ui.splash.SplashListenerType
-import org.nypl.simplified.ui.splash.SplashSelectionFragment
-import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.slf4j.LoggerFactory
 import java.util.ServiceLoader
 
@@ -106,7 +97,7 @@ class MainActivity :
       AccountNavigationControllerType::class.java
     )
 
-    return when (profilesController.profileAnonymousEnabled()) {
+    when (profilesController.profileAnonymousEnabled()) {
       ANONYMOUS_PROFILE_ENABLED -> {
         val profile = profilesController.profileCurrent()
         val defaultProvider = accountProviders.defaultProvider
@@ -185,13 +176,8 @@ class MainActivity :
       ProfilesNavigationControllerType::class.java, this.profilesNavigationController
     )
 
-    val migrationReportEmail =
-      this.resources.getString(R.string.featureErrorEmail)
-        .trim()
-        .ifEmpty { null }
-
     this.startupNavigationController =
-      StartupNavigationController(this.supportFragmentManager, migrationReportEmail)
+      StartupNavigationController(this.supportFragmentManager)
     this.navigationControllerDirectory.updateNavigationController(
       StartupNavigationController::class.java, this.startupNavigationController
     )
@@ -211,6 +197,10 @@ class MainActivity :
       } else {
         this.supportActionBar?.hide()
       }
+    }
+
+    supportFragmentManager.setFragmentResultListener("", this) { _, _->
+      this.onStartupFinished()
     }
   }
 
@@ -261,29 +251,6 @@ class MainActivity :
         setDisplayHomeAsUpEnabled(!isRoot)
       }
     }
-  }
-
-  override fun onSplashWantBootFuture(): ListenableFuture<*> {
-    this.logger.debug("onSplashWantBootFuture")
-    return MainApplication.application.servicesBooting
-  }
-
-  override fun onSplashWantBootEvents(): Observable<BootEvent> {
-    this.logger.debug("onSplashWantBootEvents")
-    return MainApplication.application.servicesBootEvents
-  }
-
-  override fun onSplashDone() {
-    this.logger.debug("onSplashDone")
-    return this.onStartupFinished()
-  }
-
-  override fun onSplashWantMigrations(): MigrationsType {
-    val profilesController =
-      Services.serviceDirectory()
-        .requireService(ProfilesControllerType::class.java)
-
-    return MigrationsAdapter().createMigrations(MainApplication.application, profilesController)
   }
 
   override fun onSplashLibrarySelectionWanted() {

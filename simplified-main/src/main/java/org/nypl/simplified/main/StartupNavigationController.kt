@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory
 
 internal class StartupNavigationController (
   fragmentManager: FragmentManager,
-  private val migrationReportEmail: String?
   ): BaseNavigationController(fragmentManager) {
 
   private val logger =
@@ -15,7 +14,7 @@ internal class StartupNavigationController (
 
   fun openSplashScreen() {
     this.logger.debug("openSplashScreen")
-    val splashFragment = SplashFragment.newInstance(migrationReportEmail)
+    val splashFragment = SplashFragment()
     this.fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
     this.fragmentManager.beginTransaction()
       .replace(R.id.mainFragmentHolder, splashFragment, "SPLASH_MAIN")

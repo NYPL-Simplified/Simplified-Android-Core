@@ -1,6 +1,6 @@
 package org.nypl.simplified.main
 
-import android.app.Application
+import android.content.Context
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.database.api.AccountType
@@ -16,40 +16,39 @@ import org.slf4j.LoggerFactory
 import java.net.URI
 import java.util.concurrent.TimeUnit
 
-class MigrationsAdapter {
+internal object MainMigrations {
 
-  private val logger = LoggerFactory.getLogger(MigrationsAdapter::class.java)
+  private val logger = LoggerFactory.getLogger(MainMigrations::class.java)
 
-  fun createMigrations(
-    application: Application,
+  fun create(
+    context: Context,
     profilesController: ProfilesControllerType
   ): MigrationsType {
     val isAnonymous =
       profilesController.profileAnonymousEnabled() == ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED
 
-    val dependencies =
-      MigrationServiceDependencies(
-        createAccount = { uri ->
-          this.doCreateAccount(profilesController, uri)
-        },
-        loginAccount = { account, credentials ->
-          this.doLoginAccount(profilesController, account, credentials)
-        },
-        accountEvents = profilesController.accountEvents(),
-        applicationProfileIsAnonymous = isAnonymous,
-        applicationVersion = this.applicationVersion(application),
-        context = application
-      )
+    val dependencies =  MigrationServiceDependencies(
+      createAccount = { uri ->
+        this.doCreateAccount(profilesController, uri)
+      },
+      loginAccount = { account, credentials ->
+        this.doLoginAccount(profilesController, account, credentials)
+      },
+      accountEvents = profilesController.accountEvents(),
+      applicationProfileIsAnonymous = isAnonymous,
+      applicationVersion = this.applicationVersion(context),
+      context = context
+    )
 
     return Migrations.create(dependencies)
   }
 
-  private fun applicationVersion(application: Application): String {
+  private fun applicationVersion(context: Context): String {
     return try {
       val packageInfo =
-        application
+        context
           .packageManager
-          .getPackageInfo(application.packageName, 0)
+          .getPackageInfo(context.packageName, 0)
 
       "${packageInfo.packageName} ${packageInfo.versionName} (${packageInfo.versionCode})"
     } catch (e: Exception) {

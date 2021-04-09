@@ -15,35 +15,6 @@ import org.nypl.simplified.migration.api.MigrationsType
 
 interface SplashListenerType {
 
-  /**
-   * The splash screen wants access to a future that represents the application startup
-   * procedure.
-   */
-
-  fun onSplashWantBootFuture(): ListenableFuture<*>
-
-  /**
-   * The splash screen wants access to an observable that publishes application startup events.
-   */
-
-  fun onSplashWantBootEvents(): Observable<BootEvent>
-
-  /**
-   * The splash screen is completely finished.
-   */
-
-  fun onSplashDone()
-
-  /**
-   * The splash screen wants to run migrations, if necessary.
-   */
-
-  fun onSplashWantMigrations(): MigrationsType
-
-  /**
-   * The library selection screen was opened, and the user chose to pick a library.
-   */
-
   fun onSplashLibrarySelectionWanted()
 
   /**

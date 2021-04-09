@@ -31,6 +31,6 @@
     android:gravity="center"
     android:maxLines="3"
     android:ellipsize="end"
-    android:text="Loading loading loading..." />
+    android:freezesText="true"/>
 
 </RelativeLayout>
