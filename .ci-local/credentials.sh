@@ -71,7 +71,7 @@ EOF
 
 #------------------------------------------------------------------------
 # Addding slack webhook to environment
-SLACK_WEBHOOK_URL=$(</Users/medwar40/Workspace/NYPL/Certificates/SimplyE/slack-webhook.url) || 
+SLACK_WEBHOOK_URL=$(<.ci/credentials/SimplyE/slack-webhook.url) || 
   fatal "Slack Webhook url not found."
 cat >> ".env" <<EOF
 SLACK_WEBHOOK_URL="${SLACK_WEBHOOK_URL}"
