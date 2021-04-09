@@ -13,14 +13,17 @@
 # Uncomment the line if you want fastlane to automatically update itself
 # update_fastlane
 
+fastlane_require 'dotenv'
+
 default_platform(:android)
 
 platform :android do
 
     # Runs ktlint before doing any distribution
-    # before_all do
+    before_all do
+      Dotenv.overload '.env'
     #   sh("./gradlew", "ktlint")
-    # end
+    end
 
     desc "Submit a new beta build to Firebase Beta"
     lane :qa do |options|
@@ -37,6 +40,16 @@ platform :android do
          groups: "librarysimplified",
          release_notes: "#{release_notes}",
          firebase_cli_path: ENV["FIREBASE_CLI_PATH"])
+       slack(
+        message: "New simplyE android build available on firebase",
+        slack_url: ENV['SLACK_WEBHOOK_URL'],
+        success: true,
+        channel: "#simplified-releases",
+        default_payloads: [],
+        payload: {
+          "Release notes" => :release_notes
+        }
+       )
     end
 
      # This needs to be tested as the .aab files have dynamic naming

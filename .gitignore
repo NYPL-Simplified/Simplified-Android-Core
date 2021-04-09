@@ -24,6 +24,7 @@ ReaderClientCert.sig
 
 # Misc
 simplified-tests-sandbox/src/main/*
+.env
 
 # deprecated
 cardcreator.conf
