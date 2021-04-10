@@ -26,13 +26,10 @@ import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEna
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED
 import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest.OAuthWithIntermediaryComplete
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
-import org.nypl.simplified.reports.Reports
 import org.nypl.simplified.ui.accounts.AccountNavigationControllerType
 import org.nypl.simplified.ui.branding.BrandingSplashServiceType
 import org.nypl.simplified.ui.catalog.AgeGateDialog
 import org.nypl.simplified.ui.catalog.CatalogNavigationControllerType
-import org.nypl.simplified.ui.errorpage.ErrorPageListenerType
-import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.profiles.ProfilesNavigationControllerType
 import org.nypl.simplified.ui.settings.SettingsNavigationControllerType
 import org.slf4j.LoggerFactory
@@ -42,7 +39,6 @@ class MainActivity :
   AppCompatActivity(R.layout.main_host),
   OnBackStackChangedListener,
   FragmentResultListener,
-  ErrorPageListenerType,
   AgeGateDialog.BirthYearSelectedListener {
 
   companion object {
@@ -245,15 +241,6 @@ class MainActivity :
       ?: throw IllegalStateException(
         "No available services of type ${BrandingSplashServiceType::class.java.canonicalName}"
       )
-  }
-
-  override fun onErrorPageSendReport(parameters: ErrorPageParameters) {
-    Reports.sendReportsDefault(
-      context = this,
-      address = parameters.emailAddress,
-      subject = parameters.subject,
-      body = parameters.report
-    )
   }
 
   override fun onNewIntent(intent: Intent) {
