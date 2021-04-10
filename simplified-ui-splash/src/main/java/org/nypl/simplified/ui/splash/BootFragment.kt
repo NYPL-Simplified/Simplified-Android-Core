@@ -32,7 +32,7 @@ class BootFragment : Fragment(R.layout.splash_boot) {
     ownerProducer = this::requireParentFragment
   )
 
-  private val logger = LoggerFactory.getLogger(SplashFragment::class.java)
+  private val logger = LoggerFactory.getLogger(BootFragment::class.java)
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)

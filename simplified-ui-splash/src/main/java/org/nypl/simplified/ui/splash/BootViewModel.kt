@@ -17,7 +17,7 @@ class BootViewModel(application: Application) : AndroidViewModel(application) {
       .load(SplashDependenciesType::class.java)
       .firstOrNull()
       ?: throw IllegalStateException(
-        "No available services of type ${SplashListenerType::class.java.canonicalName}"
+        "No available services of type ${SplashDependenciesType::class.java.canonicalName}"
       )
 
   private val buildConfig: BuildConfigurationServiceType by lazy {

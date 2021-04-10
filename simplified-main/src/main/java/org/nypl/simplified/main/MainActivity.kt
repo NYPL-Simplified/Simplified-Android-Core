@@ -8,8 +8,8 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.FragmentManager.OnBackStackChangedListener
+import androidx.fragment.app.FragmentResultListener
 import androidx.lifecycle.ViewModelProvider
-import com.io7m.junreachable.UnreachableCodeException
 import org.joda.time.DateTime
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountID
@@ -27,9 +27,7 @@ import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEna
 import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest.OAuthWithIntermediaryComplete
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.reports.Reports
-import org.nypl.simplified.ui.accounts.AccountFragmentParameters
 import org.nypl.simplified.ui.accounts.AccountNavigationControllerType
-import org.nypl.simplified.ui.accounts.saml20.AccountSAML20FragmentParameters
 import org.nypl.simplified.ui.branding.BrandingSplashServiceType
 import org.nypl.simplified.ui.catalog.AgeGateDialog
 import org.nypl.simplified.ui.catalog.CatalogNavigationControllerType
@@ -37,19 +35,20 @@ import org.nypl.simplified.ui.errorpage.ErrorPageListenerType
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.profiles.ProfilesNavigationControllerType
 import org.nypl.simplified.ui.settings.SettingsNavigationControllerType
-import org.nypl.simplified.ui.splash.SplashListenerType
 import org.slf4j.LoggerFactory
 import java.util.ServiceLoader
 
 class MainActivity :
-  AppCompatActivity(),
+  AppCompatActivity(R.layout.main_host),
   OnBackStackChangedListener,
-  SplashListenerType,
+  FragmentResultListener,
   ErrorPageListenerType,
   AgeGateDialog.BirthYearSelectedListener {
 
   companion object {
     private const val STATE_ACTION_BAR_IS_SHOWING = "ACTION_BAR_IS_SHOWING"
+    private const val SPLASH_RESULT_KEY = "SPLASH_RESULT"
+    private const val ONBOARDING_RESULT_KEY = "ONBOARDING_RESULT"
   }
 
   private val logger = LoggerFactory.getLogger(MainActivity::class.java)
@@ -58,7 +57,6 @@ class MainActivity :
   private lateinit var navigationControllerDirectory: NavigationControllerDirectoryType
   private lateinit var profilesNavigationController: ProfilesNavigationController
   private lateinit var startupNavigationController: StartupNavigationController
-  private lateinit var onboardingNavigationController: OnboardingNavigationController
   private lateinit var configurationService: BuildConfigurationServiceType
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var ageGateDialog: AgeGateDialog
@@ -82,80 +80,12 @@ class MainActivity :
       return controllers.filterNotNull().firstOrNull()
     }
 
-  private fun onStartupFinished() {
-    this.logger.debug("onStartupFinished")
-
-    val services =
-      Services.serviceDirectory()
-    val profilesController =
-      services.requireService(ProfilesControllerType::class.java)
-    val accountProviders =
-      services.requireService(AccountProviderRegistryType::class.java)
-    val splashService = getSplashService()
-
-    this.navigationControllerDirectory.removeNavigationController(
-      AccountNavigationControllerType::class.java
-    )
-
-    when (profilesController.profileAnonymousEnabled()) {
-      ANONYMOUS_PROFILE_ENABLED -> {
-        val profile = profilesController.profileCurrent()
-        val defaultProvider = accountProviders.defaultProvider
-
-        val hasNonDefaultAccount =
-          profile.accounts().values.count { it.provider.id != defaultProvider.id } > 0
-        this.logger.debug("hasNonDefaultAccount=$hasNonDefaultAccount")
-
-        val shouldShowLibrarySelectionScreen =
-          splashService.shouldShowLibrarySelectionScreen && !profile.preferences().hasSeenLibrarySelectionScreen
-        this.logger.debug("shouldShowLibrarySelectionScreen=$shouldShowLibrarySelectionScreen")
-
-        if (!hasNonDefaultAccount && shouldShowLibrarySelectionScreen) {
-          this.openLibrarySelectionScreen()
-        } else {
-          this.openCatalog()
-        }
-      }
-      ANONYMOUS_PROFILE_DISABLED -> {
-        this.startupNavigationController.openProfileSelection()
-      }
-    }
-  }
-
-  private fun openLibrarySelectionScreen() {
-    this.onboardingNavigationController.openOnboardingStartScreen()
-  }
-
-  private fun openCatalog() {
-    // Sanity check; we were seeing some crashes on startup when performing a
-    // transaction after the fragment manager had been destroyed.
-    if (this.isFinishing || this.supportFragmentManager.isDestroyed) return
-
-    ViewModelProvider(this)
-      .get(MainActivityViewModel::class.java)
-      .clearHistory = true
-
-    this.startupNavigationController.openMainFragment()
-
-    val services = Services.serviceDirectory()
-    this.configurationService =
-      services.requireService(BuildConfigurationServiceType::class.java)
-    this.profilesController =
-      services.requireService(ProfilesControllerType::class.java)
-    if (configurationService.showAgeGateUi &&
-      this.profilesController.profileCurrent().preferences().dateOfBirth == null
-    ) {
-      this.showAgeGate()
-    }
-  }
-
   override fun onCreate(savedInstanceState: Bundle?) {
     this.logger.debug("onCreate (recreating {})", savedInstanceState != null)
     super.onCreate(savedInstanceState)
     this.logger.debug("onCreate (super completed)")
 
     this.navigationControllerDirectory = NavigationControllers.findDirectory(this)
-    this.setContentView(R.layout.main_host)
 
     val toolbar = this.findViewById(R.id.mainToolbar) as Toolbar
     this.setSupportActionBar(toolbar)
@@ -182,15 +112,9 @@ class MainActivity :
       StartupNavigationController::class.java, this.startupNavigationController
     )
 
-    this.onboardingNavigationController =
-      OnboardingNavigationController(this.supportFragmentManager, this.supportActionBar)
-    this.navigationControllerDirectory.updateNavigationController(
-      OnboardingNavigationController::class.java, this.onboardingNavigationController
-    )
-
     if (savedInstanceState == null) {
       this.mainViewModel.clearHistory = true
-      this.startupNavigationController.openSplashScreen()
+      this.startupNavigationController.openSplashScreen(SPLASH_RESULT_KEY)
     } else {
       if (savedInstanceState.getBoolean(STATE_ACTION_BAR_IS_SHOWING)) {
         this.supportActionBar?.show()
@@ -199,9 +123,8 @@ class MainActivity :
       }
     }
 
-    supportFragmentManager.setFragmentResultListener("", this) { _, _->
-      this.onStartupFinished()
-    }
+    supportFragmentManager.setFragmentResultListener(SPLASH_RESULT_KEY, this, this)
+    supportFragmentManager.setFragmentResultListener(ONBOARDING_RESULT_KEY, this, this)
   }
 
   override fun onSaveInstanceState(outState: Bundle) {
@@ -225,6 +148,13 @@ class MainActivity :
 
     this.logger.debug("delivering back press to activity")
     super.onBackPressed()
+  }
+
+  override fun onFragmentResult(requestKey: String, result: Bundle) {
+    when (requestKey) {
+      SPLASH_RESULT_KEY -> onSplashFinished()
+      ONBOARDING_RESULT_KEY -> onOnboardingFinished()
+    }
   }
 
   override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -253,59 +183,59 @@ class MainActivity :
     }
   }
 
-  override fun onSplashLibrarySelectionWanted() {
-    val fm = this.supportFragmentManager
+  private fun onSplashFinished() {
+    this.logger.debug("onSplashFinished")
 
-    /*
-     * Set up a custom navigation controller used by the settings library registry screen. It's
-     * only capable of moving to the error page, or popping the back stack.
-     */
+    val services =
+      Services.serviceDirectory()
+    val profilesController =
+      services.requireService(ProfilesControllerType::class.java)
+    val accountProviders =
+      services.requireService(AccountProviderRegistryType::class.java)
+    val splashService = getSplashService()
 
-    this.navigationControllerDirectory.updateNavigationController(
-      AccountNavigationControllerType::class.java,
-      object : AccountNavigationControllerType {
-        override fun popBackStack(): Boolean {
-          this@MainActivity.onStartupFinished()
-          return true
-        }
+    when (profilesController.profileAnonymousEnabled()) {
+      ANONYMOUS_PROFILE_ENABLED -> {
+        val profile = profilesController.profileCurrent()
+        val defaultProvider = accountProviders.defaultProvider
 
-        override fun popToRoot(): Boolean {
-          this@MainActivity.onStartupFinished()
-          return true
-        }
+        val hasNonDefaultAccount =
+          profile.accounts().values.count { it.provider.id != defaultProvider.id } > 0
+        this.logger.debug("hasNonDefaultAccount=$hasNonDefaultAccount")
 
-        override fun backStackSize(): Int {
-          // Note: Little hack to get the Toolbar to display correctly.
-          return fm.backStackEntryCount + 1
-        }
+        val shouldShowLibrarySelectionScreen =
+          splashService.shouldShowLibrarySelectionScreen && !profile.preferences().hasSeenLibrarySelectionScreen
+        this.logger.debug("shouldShowLibrarySelectionScreen=$shouldShowLibrarySelectionScreen")
 
-        override fun openSettingsAccount(parameters: AccountFragmentParameters) {
-          throw UnreachableCodeException()
-        }
-
-        override fun openErrorPage(parameters: ErrorPageParameters) {
-          throw UnreachableCodeException()
-        }
-
-        override fun openSAML20Login(parameters: AccountSAML20FragmentParameters) {
-          throw UnreachableCodeException()
-        }
-
-        override fun openSettingsAccountRegistry() {
-          throw UnreachableCodeException()
-        }
-
-        override fun openCatalogAfterAuthentication() {
-          throw UnreachableCodeException()
+        if (!hasNonDefaultAccount && shouldShowLibrarySelectionScreen) {
+          this.startupNavigationController.openOnboarding(ONBOARDING_RESULT_KEY)
+        } else {
+          this.onOnboardingFinished()
         }
       }
-    )
-
-    this.onboardingNavigationController.openAccountListRegistry()
+      ANONYMOUS_PROFILE_DISABLED -> {
+        this.startupNavigationController.openProfileSelection()
+      }
+    }
   }
 
-  override fun onSplashLibrarySelectionNotWanted() {
-    this.openCatalog()
+  private fun onOnboardingFinished() {
+    ViewModelProvider(this)
+      .get(MainActivityViewModel::class.java)
+      .clearHistory = true
+
+    this.startupNavigationController.openMainFragment()
+
+    val services = Services.serviceDirectory()
+    this.configurationService =
+      services.requireService(BuildConfigurationServiceType::class.java)
+    this.profilesController =
+      services.requireService(ProfilesControllerType::class.java)
+    if (configurationService.showAgeGateUi &&
+      this.profilesController.profileCurrent().preferences().dateOfBirth == null
+    ) {
+      this.showAgeGate()
+    }
   }
 
   private fun getSplashService(): BrandingSplashServiceType {

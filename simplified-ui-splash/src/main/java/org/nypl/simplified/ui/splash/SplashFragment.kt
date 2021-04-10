@@ -1,6 +1,7 @@
 package org.nypl.simplified.ui.splash
 
 import android.os.Bundle
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
@@ -11,6 +12,17 @@ import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.slf4j.LoggerFactory
 
 class SplashFragment : Fragment(R.layout.splash_fragment) {
+
+  companion object {
+
+    private const val resultKeyKey = "org.nypl.simplified.splash.result.key"
+
+    fun newInstance(resultKey: String): SplashFragment {
+      return SplashFragment().apply {
+        arguments = bundleOf(resultKeyKey to resultKey)
+      }
+    }
+  }
 
   private val logger = LoggerFactory.getLogger(SplashFragment::class.java)
 
@@ -70,7 +82,8 @@ class SplashFragment : Fragment(R.layout.splash_fragment) {
   }
 
   private fun onMigrationReportFinished() {
-    requireActivity().supportFragmentManager.setFragmentResult("", Bundle())
+    val resultKey = requireNotNull(requireArguments().getString(resultKeyKey))
+    requireActivity().supportFragmentManager.setFragmentResult(resultKey, Bundle())
   }
 
   private fun showEula() {
