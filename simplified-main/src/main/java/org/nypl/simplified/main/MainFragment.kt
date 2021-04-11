@@ -5,8 +5,10 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.addCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -66,6 +68,7 @@ class MainFragment : Fragment() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+    setHasOptionsMenu(true) // Required to get a call to onOptionsItemSelected
 
     this.navigationControllerDirectory =
       NavigationControllers.findDirectory(this.requireActivity())
@@ -115,6 +118,18 @@ class MainFragment : Fragment() {
         uiThread = services.requireService(UIThreadServiceType::class.java)
       )
     )
+
+    requireActivity().onBackPressedDispatcher.addCallback(this) {
+      if (bottomNavigator.popBackStack())
+        return@addCallback
+
+      try {
+        isEnabled = false
+        requireActivity().onBackPressed()
+      } finally {
+        isEnabled = true
+      }
+    }
   }
 
   override fun onCreateView(
@@ -147,6 +162,15 @@ class MainFragment : Fragment() {
     profilesItem.isVisible = profilesVisible
     profilesItem.isEnabled = profilesVisible
     return layout
+  }
+
+  override fun onOptionsItemSelected(item: MenuItem): Boolean {
+    return when (item.itemId) {
+      android.R.id.home -> {
+        this.bottomNavigator.popToRoot()
+      }
+      else -> super.onOptionsItemSelected(item)
+    }
   }
 
   override fun onAttach(context: Context) {
@@ -183,7 +207,8 @@ class MainFragment : Fragment() {
           profilesController = viewModel.profilesController,
           settingsConfiguration = viewModel.buildConfig,
           fragmentContainerId = R.id.tabbedFragmentHolder,
-          navigationView = this.bottomView
+          navigationView = this.bottomView,
+          listener = this::onFragmentTransactionCompleted
         )
 
       if (this.activityViewModel.clearHistory) {
@@ -214,14 +239,26 @@ class MainFragment : Fragment() {
         .subscribe(this::onAccountEvent)
         .let { subscriptions.add(it) }
 
-        viewModel.profileEvents
-          .subscribe(this::onProfileEvent)
-          .let { subscriptions.add(it) }
+      viewModel.profileEvents
+        .subscribe(this::onProfileEvent)
+        .let { subscriptions.add(it) }
 
       /*
-     * Show the Toolbar
-     */
+      * Show the Toolbar
+      */
       this.supportActionBar?.show()
+    }
+  }
+
+  private fun onFragmentTransactionCompleted() {
+    val isRoot = (0 == bottomNavigator.backStackSize())
+    this.logger.debug(
+      "controller stack size changed [{}, isRoot={}]", bottomNavigator.backStackSize(), isRoot
+    )
+    this.supportActionBar?.apply {
+      setHomeAsUpIndicator(null)
+      setHomeActionContentDescription(null)
+      setDisplayHomeAsUpEnabled(!isRoot)
     }
   }
 

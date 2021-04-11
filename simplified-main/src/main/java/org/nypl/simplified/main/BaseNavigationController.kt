@@ -12,14 +12,18 @@ internal open class BaseNavigationController(
     LoggerFactory.getLogger(BaseNavigationController::class.java)
 
   override fun popBackStack(): Boolean {
+    if (this.backStackSize() == 0) {
+      return false
+    }
+
     this.logger.debug("popBackStack")
     this.fragmentManager.popBackStack()
-    return this.backStackSize() > 0
+    return true
   }
 
   override fun popToRoot(): Boolean {
     this.logger.debug("popToRoot")
-    if (this.backStackSize() == 1) {
+    if (this.backStackSize() == 0) {
       return false
     }
     this.fragmentManager.popBackStack(

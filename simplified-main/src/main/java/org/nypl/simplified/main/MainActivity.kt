@@ -4,10 +4,8 @@ import android.app.ActionBar
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.fragment.app.FragmentManager.OnBackStackChangedListener
 import androidx.fragment.app.FragmentResultListener
 import androidx.lifecycle.ViewModelProvider
 import org.joda.time.DateTime
@@ -16,7 +14,6 @@ import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.navigation.api.NavigationControllerDirectoryType
-import org.nypl.simplified.navigation.api.NavigationControllerType
 import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.oauth.OAuthCallbackIntentParsing
 import org.nypl.simplified.oauth.OAuthParseResult
@@ -26,18 +23,14 @@ import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEna
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED
 import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest.OAuthWithIntermediaryComplete
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
-import org.nypl.simplified.ui.accounts.AccountNavigationControllerType
 import org.nypl.simplified.ui.branding.BrandingSplashServiceType
 import org.nypl.simplified.ui.catalog.AgeGateDialog
-import org.nypl.simplified.ui.catalog.CatalogNavigationControllerType
 import org.nypl.simplified.ui.profiles.ProfilesNavigationControllerType
-import org.nypl.simplified.ui.settings.SettingsNavigationControllerType
 import org.slf4j.LoggerFactory
 import java.util.ServiceLoader
 
 class MainActivity :
   AppCompatActivity(R.layout.main_host),
-  OnBackStackChangedListener,
   FragmentResultListener,
   AgeGateDialog.BirthYearSelectedListener {
 
@@ -57,25 +50,6 @@ class MainActivity :
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var ageGateDialog: AgeGateDialog
 
-  private val navigationController: NavigationControllerType?
-    get() {
-      val controllers = arrayListOf(
-        this.navigationControllerDirectory.navigationControllerIfAvailable(
-          CatalogNavigationControllerType::class.java
-        ),
-        this.navigationControllerDirectory.navigationControllerIfAvailable(
-          AccountNavigationControllerType::class.java
-        ),
-        this.navigationControllerDirectory.navigationControllerIfAvailable(
-          SettingsNavigationControllerType::class.java
-        ),
-        this.navigationControllerDirectory.navigationControllerIfAvailable(
-          ProfilesNavigationControllerType::class.java
-        )
-      )
-      return controllers.filterNotNull().firstOrNull()
-    }
-
   override fun onCreate(savedInstanceState: Bundle?) {
     this.logger.debug("onCreate (recreating {})", savedInstanceState != null)
     super.onCreate(savedInstanceState)
@@ -88,9 +62,6 @@ class MainActivity :
     this.supportActionBar?.setDisplayHomeAsUpEnabled(true)
     this.supportActionBar?.setDisplayShowHomeEnabled(true)
     this.supportActionBar?.hide() // Hide toolbar until requested
-
-    this.supportFragmentManager
-      .addOnBackStackChangedListener(this)
 
     this.mainViewModel =
       ViewModelProvider(this)
@@ -133,49 +104,10 @@ class MainActivity :
     return super.getActionBar()
   }
 
-  override fun onBackPressed() {
-    this.navigationController?.let { controller ->
-      this.logger.debug("delivering back press to {}", controller::class.simpleName)
-      if (!controller.popBackStack()) {
-        super.onBackPressed()
-      }
-      return
-    }
-
-    this.logger.debug("delivering back press to activity")
-    super.onBackPressed()
-  }
-
   override fun onFragmentResult(requestKey: String, result: Bundle) {
     when (requestKey) {
       SPLASH_RESULT_KEY -> onSplashFinished()
       ONBOARDING_RESULT_KEY -> onOnboardingFinished()
-    }
-  }
-
-  override fun onOptionsItemSelected(item: MenuItem): Boolean {
-    return when (item.itemId) {
-      android.R.id.home -> {
-        this.navigationController?.let { controller ->
-          this.logger.debug("delivering home press to {}", controller::class.simpleName)
-          controller.popToRoot()
-        } ?: false
-      }
-      else -> super.onOptionsItemSelected(item)
-    }
-  }
-
-  override fun onBackStackChanged() {
-    this.navigationController?.let { controller ->
-      val isRoot = (1 == controller.backStackSize())
-      this.logger.debug(
-        "controller stack size changed [{}, isRoot={}]", controller.backStackSize(), isRoot
-      )
-      this.supportActionBar?.apply {
-        setHomeAsUpIndicator(null)
-        setHomeActionContentDescription(null)
-        setDisplayHomeAsUpEnabled(!isRoot)
-      }
     }
   }
 

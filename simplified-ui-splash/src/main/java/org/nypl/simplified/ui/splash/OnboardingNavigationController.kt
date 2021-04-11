@@ -50,7 +50,7 @@ internal class OnboardingNavigationController(
 
   override fun popToRoot(): Boolean {
     this.logger.debug("popToRoot")
-    if (this.backStackSize() == 1) {
+    if (this.backStackSize() == 0) {
       return false
     }
     this.fragmentManager.popBackStack(

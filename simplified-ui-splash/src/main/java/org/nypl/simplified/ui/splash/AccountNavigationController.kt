@@ -28,8 +28,7 @@ internal class AccountNavigationController(
   }
 
   override fun backStackSize(): Int {
-    // Note: Little hack to get the Toolbar to display correctly.
-    return onboardingFragmentManager.backStackEntryCount + 1
+    return onboardingFragmentManager.backStackEntryCount
   }
 
   override fun openSettingsAccount(parameters: AccountFragmentParameters) {
