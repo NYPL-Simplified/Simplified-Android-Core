@@ -35,15 +35,25 @@ class MainFragmentViewModel : ViewModel() {
     CompositeDisposable()
 
   init {
-      profilesController.accountEvents()
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe { accountEvents.onNext(it) }
-        .let { subscriptions.add(it) }
+    profilesController.accountEvents()
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribe(this::onAccountEvent)
+      .let { subscriptions.add(it) }
+  }
 
-      this.profilesController.profileEvents()
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe { profileEvents.onNext(it) }
-        .let { subscriptions.add(it) }
+  private fun onAccountEvent(event: AccountEvent) {
+    accountEvents.onNext(event)
+  }
+
+  init {
+    this.profilesController.profileEvents()
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribe(this::onProfileEvent)
+      .let { subscriptions.add(it) }
+  }
+
+  private fun onProfileEvent(event: ProfileEvent) {
+    profileEvents.onNext(event)
   }
 
   override fun onCleared() {

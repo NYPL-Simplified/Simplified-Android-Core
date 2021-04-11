@@ -18,7 +18,7 @@ internal class OnboardingNavigationController(
     LoggerFactory.getLogger(OnboardingNavigationController::class.java)
 
   override fun openSettingsAccountRegistry() {
-    this.logger.debug("openAccountListRegistry")
+    this.logger.debug("openSettingsAccountRegistry")
     val fragment = AccountListRegistryFragment()
     this.fragmentManager.commit {
       replace(R.id.onboarding_fragment_container, fragment)

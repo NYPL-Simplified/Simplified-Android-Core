@@ -23,30 +23,28 @@ class MigrationProgressFragment : Fragment(R.layout.splash_migration_progress) {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
-    viewModel.startMigrations()
-
-    viewModel.migrationsCompleted.observe(this, { completed ->
-      if (completed) {
+    viewModel.startMigrationsIfNotStarted()
+    viewModel.migrationReport.observe(this) {
         setFragmentResult("", Bundle())
       }
-    })
   }
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
+
     textView = view.findViewById(R.id.splashMigrationProgressText)
     progressBar = view.findViewById(R.id.splashMigrationProgress)
   }
 
-  override fun onResume() {
-    super.onResume()
+  override fun onStart() {
+    super.onStart()
     viewModel.migrationEvents
       .subscribe(this::onMigrationEvent)
       .let { subscriptions.add(it) }
   }
 
-  override fun onPause() {
-    super.onPause()
+  override fun onStop() {
+    super.onStop()
     subscriptions.clear()
   }
 

@@ -6,22 +6,23 @@ import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import org.nypl.simplified.navigation.api.NavigationControllerDirectoryType
 import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.ui.accounts.AccountListRegistryFragment
 import org.nypl.simplified.ui.accounts.AccountNavigationControllerType
 
-class OnboardingFragment: Fragment(R.layout.onboarding_fragment) {
+class OnboardingFragment :
+  Fragment(R.layout.onboarding_fragment),
+  FragmentManager.OnBackStackChangedListener {
 
   companion object {
 
     private const val resultKeyKey = "org.nypl.simplified.onboarding.result.key"
 
-    fun newInstance(resultKey: String): OnboardingFragment {
-      return OnboardingFragment().apply {
+    fun newInstance(resultKey: String) = OnboardingFragment().apply {
         arguments = bundleOf(resultKeyKey to resultKey)
       }
-    }
   }
 
   private lateinit var resultKey: String
@@ -30,7 +31,6 @@ class OnboardingFragment: Fragment(R.layout.onboarding_fragment) {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    setHasOptionsMenu(true) // Required to get a call to onOptionsItemSelected
 
     resultKey =
       requireNotNull(requireArguments().getString(resultKeyKey))
@@ -39,17 +39,26 @@ class OnboardingFragment: Fragment(R.layout.onboarding_fragment) {
     onboardingNavController =
       OnboardingNavigationController(childFragmentManager)
 
-    childFragmentManager.addOnBackStackChangedListener {
-      val actionBar = (requireActivity() as AppCompatActivity).supportActionBar
-      when (childFragmentManager.fragments.last()) {
-        is OnboardingStartScreenFragment -> actionBar?.hide()
-        is AccountListRegistryFragment -> actionBar?.show()
-      }
-    }
+
+    /*
+    * Demand that onOptionsItemSelected be called.
+    */
+
+    setHasOptionsMenu(true)
+
+    childFragmentManager.addOnBackStackChangedListener(this)
+
+    /*
+    * Finish the onboarding when a child fragment explicitly terminates.
+    */
 
     childFragmentManager.setFragmentResultListener("", this) { _, _->
       requireActivity().supportFragmentManager.setFragmentResult(resultKey, Bundle())
     }
+
+    /*
+     * Handle back pressed event by popping from the back stack if possible.
+     */
 
     requireActivity().onBackPressedDispatcher.addCallback(this) {
       if (onboardingNavController.popBackStack()) {
@@ -62,6 +71,14 @@ class OnboardingFragment: Fragment(R.layout.onboarding_fragment) {
       } finally {
         isEnabled = true
       }
+    }
+  }
+
+  override fun onBackStackChanged() {
+    val actionBar = (requireActivity() as AppCompatActivity).supportActionBar
+    when (childFragmentManager.fragments.last()) {
+      is OnboardingStartScreenFragment -> actionBar?.hide()
+      is AccountListRegistryFragment -> actionBar?.show()
     }
   }
 

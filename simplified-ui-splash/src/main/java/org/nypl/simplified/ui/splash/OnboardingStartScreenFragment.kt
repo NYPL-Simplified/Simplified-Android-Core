@@ -25,8 +25,8 @@ class OnboardingStartScreenFragment : Fragment(R.layout.splash_selection) {
     this.selectionImageView.setImageResource(viewModel.imageTitleResource)
   }
 
-  override fun onResume() {
-    super.onResume()
+  override fun onStart() {
+    super.onStart()
 
     this.selectionButton.setOnClickListener {
       NavigationControllers

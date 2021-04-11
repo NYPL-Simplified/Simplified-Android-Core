@@ -35,7 +35,7 @@ class EulaFragment : Fragment(R.layout.splash_eula) {
 
     agreeButton = view.findViewById(R.id.splashEulaAgree)
     disagreeButton = view.findViewById(R.id.splashEulaDisagree)
-    webview = view.findViewById<WebView>(R.id.splashEulaWebView)
+    webview = view.findViewById(R.id.splashEulaWebView)
 
     with(webview.settings) {
       allowFileAccessFromFileURLs = true
@@ -46,15 +46,16 @@ class EulaFragment : Fragment(R.layout.splash_eula) {
       javaScriptEnabled = false
     }
 
+    webview.webViewClient = MailtoWebViewClient(requireActivity())
+
     val url = eula.readableURL
     this.logger.debug("eula:     {}", eula)
     this.logger.debug("eula URL: {}", url)
-    webview.webViewClient = MailtoWebViewClient(requireActivity())
     webview.loadUrl(url.toString())
   }
 
-  override fun onResume() {
-    super.onResume()
+  override fun onStart() {
+    super.onStart()
     agreeButton.setOnClickListener {
       eula.hasAgreed = true
       setResult()

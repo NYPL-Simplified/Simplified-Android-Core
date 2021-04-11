@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import org.nypl.simplified.migration.spi.MigrationEvent
-import org.nypl.simplified.migration.spi.MigrationReport
 
 class MigrationReportFragment : Fragment(R.layout.splash_migration_report) {
 
@@ -23,9 +22,6 @@ class MigrationReportFragment : Fragment(R.layout.splash_migration_report) {
   private val viewModel: MigrationViewModel by viewModels(
     ownerProducer = this::requireParentFragment
   )
-  private val report: MigrationReport by lazy {
-    checkNotNull(viewModel.startMigrations().get())
-  }
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
@@ -34,6 +30,8 @@ class MigrationReportFragment : Fragment(R.layout.splash_migration_report) {
     list = view.findViewById(R.id.splashMigrationReportList)
     sendButton = view.findViewById(R.id.splashMigrationReportSend)
     okButton = view.findViewById(R.id.splashMigrationReportOK)
+
+    val report = checkNotNull(viewModel.migrationReport.value)
 
     val eventsToShow =
       report.events.filterNot { e -> e is MigrationEvent.MigrationStepInProgress }
@@ -58,10 +56,10 @@ class MigrationReportFragment : Fragment(R.layout.splash_migration_report) {
     )
   }
 
-  override fun onResume() {
-    super.onResume()
+  override fun onStart() {
+    super.onStart()
     sendButton.setOnClickListener {
-      viewModel.sendReport(report)
+      viewModel.sendReport()
     }
 
     okButton.setOnClickListener {

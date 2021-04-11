@@ -13,22 +13,22 @@ import org.nypl.simplified.ui.errorpage.ErrorPageParameters
  */
 
 internal class AccountNavigationController(
-  val onboardingFragmentManager: FragmentManager,
-  val closeOnboarding: () -> Unit
+  private val fragmentManager: FragmentManager,
+  private val onPopBackStack: () -> Unit
   ) : AccountNavigationControllerType {
 
   override fun popBackStack(): Boolean {
-    closeOnboarding()
+    onPopBackStack()
     return true
   }
 
   override fun popToRoot(): Boolean {
-    closeOnboarding()
+    onPopBackStack()
     return true
   }
 
   override fun backStackSize(): Int {
-    return onboardingFragmentManager.backStackEntryCount
+    return fragmentManager.backStackEntryCount
   }
 
   override fun openSettingsAccount(parameters: AccountFragmentParameters) {

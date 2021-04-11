@@ -23,6 +23,17 @@ class MigrationViewModel(application: Application) : AndroidViewModel(applicatio
   private val subscriptions =
     CompositeDisposable()
 
+  init {
+    migrations.events
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribe(this::onMigrationEvent)
+      .let { subscriptions.add(it) }
+  }
+
+  private fun onMigrationEvent(event: MigrationEvent) {
+    migrationEvents.onNext(event)
+  }
+
   override fun onCleared() {
     super.onCleared()
     subscriptions.clear()
@@ -31,20 +42,14 @@ class MigrationViewModel(application: Application) : AndroidViewModel(applicatio
   val migrationEvents: UnicastWorkSubject<MigrationEvent> =
     UnicastWorkSubject.create()
 
-  init {
-    migrations.events
-      .observeOn(AndroidSchedulers.mainThread())
-      .subscribe { migrationEvents.onNext(it) }
-      .let { subscriptions.add(it) }
-  }
+  val migrationReport: MutableLiveData<MigrationReport?> =
+    MutableLiveData()
 
-  val migrationsCompleted = MutableLiveData(false)
-
-  fun startMigrations(): Future<MigrationReport?> {
+  fun startMigrationsIfNotStarted(): Future<MigrationReport?> {
     val future = migrations.start()
 
     future.addListener(
-      { migrationsCompleted.postValue(true) },
+      { migrationReport.postValue(future.get()) },
       MoreExecutors.directExecutor()
     )
 
@@ -55,7 +60,10 @@ class MigrationViewModel(application: Application) : AndroidViewModel(applicatio
    return migrations.anyNeedToRun()
   }
 
-  fun sendReport(report: MigrationReport) {
-    MigrationReportEmail(report).send(getApplication())
+  fun sendReport() {
+    val report = checkNotNull(migrationReport.value)
+    MigrationReportEmail
+      .fromMigrationReport(report)
+      .send(getApplication())
   }
 }

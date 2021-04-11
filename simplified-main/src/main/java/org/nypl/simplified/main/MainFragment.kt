@@ -4,10 +4,8 @@ import android.content.Context
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
-import android.view.ViewGroup
 import androidx.activity.addCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
@@ -50,7 +48,7 @@ import org.slf4j.LoggerFactory
  * events.
  */
 
-class MainFragment : Fragment() {
+class MainFragment : Fragment(R.layout.main_tabbed_host) {
 
   private val logger = LoggerFactory.getLogger(MainFragment::class.java)
 
@@ -68,7 +66,6 @@ class MainFragment : Fragment() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    setHasOptionsMenu(true) // Required to get a call to onOptionsItemSelected
 
     this.navigationControllerDirectory =
       NavigationControllers.findDirectory(this.requireActivity())
@@ -93,6 +90,12 @@ class MainFragment : Fragment() {
         viewModel.profilesController.profileIdleTimer().start()
       }
     }
+
+    /*
+    * Demand that onOptionsItemSelected be called.
+    */
+
+    setHasOptionsMenu(true)
 
     /*
     * Register an announcements controller.
@@ -132,16 +135,11 @@ class MainFragment : Fragment() {
     }
   }
 
-  override fun onCreateView(
-    inflater: LayoutInflater,
-    container: ViewGroup?,
-    savedInstanceState: Bundle?
-  ): View? {
-    val layout =
-      inflater.inflate(R.layout.main_tabbed_host, container, false)
+  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    super.onViewCreated(view, savedInstanceState)
 
     this.bottomView =
-      layout.findViewById(R.id.bottomNavigator)
+      view.findViewById(R.id.bottomNavigator)
 
     /*
      * Hide various tabs based on build configuration and other settings.
@@ -161,7 +159,6 @@ class MainFragment : Fragment() {
     val profilesItem = this.bottomView.menu.findItem(R.id.tabProfile)
     profilesItem.isVisible = profilesVisible
     profilesItem.isEnabled = profilesVisible
-    return layout
   }
 
   override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -216,6 +213,12 @@ class MainFragment : Fragment() {
         this.activityViewModel.clearHistory = false
       }
 
+      /*
+       * Ensure the toolbar is properly configured after an orientation change.
+       */
+
+      configureToolbar()
+
       this.navigationControllerDirectory.updateNavigationController(
         CatalogNavigationControllerType::class.java, this.bottomNavigator
       )
@@ -231,8 +234,8 @@ class MainFragment : Fragment() {
     }
   }
 
-  override fun onResume() {
-    super.onResume()
+  override fun onStart() {
+    super.onStart()
 
     this.runOnUIThread {
       viewModel.accountEvents
@@ -255,6 +258,11 @@ class MainFragment : Fragment() {
     this.logger.debug(
       "controller stack size changed [{}, isRoot={}]", bottomNavigator.backStackSize(), isRoot
     )
+    configureToolbar()
+  }
+
+  private fun configureToolbar() {
+    val isRoot = (0 == bottomNavigator.backStackSize())
     this.supportActionBar?.apply {
       setHomeAsUpIndicator(null)
       setHomeActionContentDescription(null)
@@ -263,7 +271,7 @@ class MainFragment : Fragment() {
   }
 
   private fun onAccountEvent(event: AccountEvent) {
-    return when (event) {
+    when (event) {
       /*
        * We don't know which fragments on the backstack might refer to accounts that
        * have been deleted so we need to clear the history when an account is deleted.
@@ -278,21 +286,17 @@ class MainFragment : Fragment() {
           this.logger.error("could not clear history: ", e)
         }
       }
-
-      else -> {
-      }
     }
   }
 
   private fun onProfileEvent(event: ProfileEvent) {
-    return when (event) {
+    when (event) {
       is ProfileUpdated.Succeeded ->
         this.onProfileUpdateSucceeded(event)
       is ProfileIdleTimeOutSoon ->
         this.showTimeOutSoonDialog()
       is ProfileIdleTimedOut ->
         this.onIdleTimedOut()
-      else -> {}
     }
   }
 
@@ -341,8 +345,8 @@ class MainFragment : Fragment() {
     dialog.show()
   }
 
-  override fun onPause() {
-    super.onPause()
+  override fun onStop() {
+    super.onStop()
 
     clearDelayedRunnables()
 
