@@ -8,8 +8,6 @@ import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import org.librarysimplified.documents.DocumentStoreType
 import org.librarysimplified.services.api.Services
-import org.nypl.simplified.profiles.api.ProfilesDatabaseType
-import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.slf4j.LoggerFactory
 
 class SplashFragment : Fragment(R.layout.splash_fragment), FragmentResultListener {
@@ -50,8 +48,6 @@ class SplashFragment : Fragment(R.layout.splash_fragment), FragmentResultListene
   }
 
   private fun onBootCompleted() {
-    selectAnonymousProfile()
-
     val eula =
       Services.serviceDirectory()
       .requireService(DocumentStoreType::class.java)
@@ -122,24 +118,6 @@ class SplashFragment : Fragment(R.layout.splash_fragment), FragmentResultListene
     this.logger.debug("showMigrationReport")
     childFragmentManager.commit {
       replace(R.id.splash_fragment_container, MigrationReportFragment::class.java, Bundle())
-    }
-  }
-
-  private fun selectAnonymousProfile() {
-    val profilesController =
-      Services.serviceDirectory()
-        .requireService(ProfilesControllerType::class.java)
-
-    val profileMode =
-      profilesController
-        .profileAnonymousEnabled()
-
-    when (profileMode) {
-      ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED -> {
-        profilesController.profileSelect(profilesController.profileCurrent().id)
-      }
-      ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_DISABLED -> {
-      }
     }
   }
 }
