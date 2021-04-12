@@ -3,7 +3,7 @@ package org.nypl.simplified.main
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
 import org.nypl.simplified.ui.profiles.ProfileSelectionFragment
-import org.nypl.simplified.ui.splash.OnboardingFragment
+import org.nypl.simplified.ui.onboarding.OnboardingFragment
 import org.nypl.simplified.ui.splash.SplashFragment
 import org.slf4j.LoggerFactory
 

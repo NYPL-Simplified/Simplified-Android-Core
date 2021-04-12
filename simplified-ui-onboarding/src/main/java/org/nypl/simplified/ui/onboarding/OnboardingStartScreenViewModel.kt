@@ -1,4 +1,4 @@
-package org.nypl.simplified.ui.splash
+package org.nypl.simplified.ui.onboarding
 
 import androidx.lifecycle.ViewModel
 import org.librarysimplified.services.api.Services

@@ -1,4 +1,4 @@
-package org.nypl.simplified.ui.splash
+package org.nypl.simplified.ui.onboarding
 
 import androidx.fragment.app.FragmentManager
 import com.io7m.junreachable.UnreachableCodeException
@@ -8,7 +8,7 @@ import org.nypl.simplified.ui.accounts.saml20.AccountSAML20FragmentParameters
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 
 /*
- * A custom navigation controller used by the settings library registry screen. It's
+ * A custom navigation controller used by the onboarding. It's
  * only capable of moving to the error page, or popping the back stack.
  */
 

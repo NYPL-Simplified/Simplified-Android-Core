@@ -1,4 +1,4 @@
-package org.nypl.simplified.ui.splash
+package org.nypl.simplified.ui.onboarding
 
 import android.os.Bundle
 import android.view.View
@@ -8,7 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import org.nypl.simplified.navigation.api.NavigationControllers
 
-class OnboardingStartScreenFragment : Fragment(R.layout.splash_selection) {
+class OnboardingStartScreenFragment : Fragment(R.layout.onboarding_start_screen) {
 
   private lateinit var selectionAlternateButton: Button
   private lateinit var selectionButton: Button

@@ -1,4 +1,4 @@
-package org.nypl.simplified.ui.splash
+package org.nypl.simplified.ui.onboarding
 
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit

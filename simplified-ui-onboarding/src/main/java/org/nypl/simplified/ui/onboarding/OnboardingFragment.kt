@@ -1,4 +1,4 @@
-package org.nypl.simplified.ui.splash
+package org.nypl.simplified.ui.onboarding
 
 import android.os.Bundle
 import android.view.MenuItem

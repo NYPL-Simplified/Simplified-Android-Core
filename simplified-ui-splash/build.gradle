@@ -3,15 +3,12 @@ dependencies {
   api project(":simplified-documents")
   api project(":simplified-migration-api")
   api project(":simplified-presentableerror-api")
-  api project(":simplified-profiles-controller-api")
   api project(":simplified-reports")
   api project(":simplified-ui-branding")
   api project(":simplified-ui-theme")
   api project(":simplified-services-api")
   api project(":simplified-buildconfig-api")
-  api project(":simplified-ui-navigation-api")
   api project(":simplified-ui-accounts")
-  api project(":simplified-ui-errorpage")
 
   implementation libraries.androidx_appcompat
   implementation libraries.androidx_constraintlayout

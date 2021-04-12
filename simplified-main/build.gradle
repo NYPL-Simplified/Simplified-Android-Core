@@ -61,6 +61,7 @@ dependencies {
   api project(":simplified-ui-profiles")
   api project(":simplified-ui-screen")
   api project(":simplified-ui-splash")
+  api project(":simplified-ui-onboarding")
   api project(":simplified-ui-thread-api")
   api project(":simplified-viewer-api")
   api project(":simplified-viewer-audiobook")
