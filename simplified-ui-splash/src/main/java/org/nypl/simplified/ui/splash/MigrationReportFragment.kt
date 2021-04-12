@@ -14,6 +14,10 @@ import org.nypl.simplified.migration.spi.MigrationEvent
 
 class MigrationReportFragment : Fragment(R.layout.splash_migration_report) {
 
+  companion object {
+    private const val SEND_BUTTON_IS_ENABLED = "SEND_BUTTON_IS_ENABLED"
+  }
+
   private lateinit var title: TextView
   private lateinit var list: RecyclerView
   private lateinit var sendButton: Button
@@ -30,6 +34,10 @@ class MigrationReportFragment : Fragment(R.layout.splash_migration_report) {
     list = view.findViewById(R.id.splashMigrationReportList)
     sendButton = view.findViewById(R.id.splashMigrationReportSend)
     okButton = view.findViewById(R.id.splashMigrationReportOK)
+
+    if (savedInstanceState != null) {
+      sendButton.isEnabled = savedInstanceState.getBoolean(SEND_BUTTON_IS_ENABLED)
+    }
 
     val report = checkNotNull(viewModel.migrationReport.value)
 
@@ -59,11 +67,17 @@ class MigrationReportFragment : Fragment(R.layout.splash_migration_report) {
   override fun onStart() {
     super.onStart()
     sendButton.setOnClickListener {
+      sendButton.isEnabled = false
       viewModel.sendReport()
     }
 
     okButton.setOnClickListener {
       setFragmentResult("", Bundle())
     }
+  }
+
+  override fun onSaveInstanceState(outState: Bundle) {
+    super.onSaveInstanceState(outState)
+    outState.putBoolean(SEND_BUTTON_IS_ENABLED, sendButton.isEnabled)
   }
 }
