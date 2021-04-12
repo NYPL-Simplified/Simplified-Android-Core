@@ -33,6 +33,4 @@ dependencies {
   annotationProcessor libraries.google_autovalue_processor
 
   vanillaWithProfilesImplementation project(":simplified-accounts-source-filebased")
-
-  implementation project(":simplified-migration-fake")
 }
