@@ -32,9 +32,9 @@ interface MigrationsType {
   fun runMigrations(): MigrationReport?
 
   /**
-  * Start the migration process if it has not already started, and return a future representing
-  * the migration in progress.
-  */
+   * Start the migration process if it has not already started, and return a future representing
+   * the migration in progress.
+   */
 
   fun start(): ListenableFuture<MigrationReport?>
 }

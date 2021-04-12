@@ -26,10 +26,10 @@ class OnboardingStartScreenViewModel : ViewModel() {
   */
 
   fun setHasSeenOnboarding() {
-      Services
-        .serviceDirectory()
-        .requireService(ProfilesControllerType::class.java)
-        .profileUpdate { profileDescription ->
+    Services
+      .serviceDirectory()
+      .requireService(ProfilesControllerType::class.java)
+      .profileUpdate { profileDescription ->
         profileDescription.copy(
           preferences = profileDescription.preferences.copy(hasSeenLibrarySelectionScreen = true)
         )

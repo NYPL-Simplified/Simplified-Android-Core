@@ -34,7 +34,6 @@ class Migrations(
   private var migrationFuture: ListenableFuture<MigrationReport?>? = null
   private val migrationLock: Any = Any()
 
-
   init {
     try {
       val providers = this.services.invoke()

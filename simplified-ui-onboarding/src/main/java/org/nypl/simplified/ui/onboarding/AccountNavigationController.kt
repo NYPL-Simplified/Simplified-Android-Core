@@ -15,7 +15,7 @@ import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 internal class AccountNavigationController(
   private val fragmentManager: FragmentManager,
   private val onPopBackStack: () -> Unit
-  ) : AccountNavigationControllerType {
+) : AccountNavigationControllerType {
 
   override fun popBackStack(): Boolean {
     onPopBackStack()

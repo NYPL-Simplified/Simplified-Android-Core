@@ -27,7 +27,7 @@ internal object MainMigrations {
     val isAnonymous =
       profilesController.profileAnonymousEnabled() == ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED
 
-    val dependencies =  MigrationServiceDependencies(
+    val dependencies = MigrationServiceDependencies(
       createAccount = { uri ->
         this.doCreateAccount(profilesController, uri)
       },

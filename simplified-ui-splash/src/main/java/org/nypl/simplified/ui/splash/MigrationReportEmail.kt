@@ -11,7 +11,7 @@ internal data class MigrationReportEmail(
   val subject: String,
   val body: String,
   val email: String
-  ) {
+) {
 
   fun send(context: Context) {
     Reports.sendReportsDefault(

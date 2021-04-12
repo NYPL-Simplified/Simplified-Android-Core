@@ -57,7 +57,7 @@ class MigrationViewModel(application: Application) : AndroidViewModel(applicatio
   }
 
   fun anyMigrationNeedToRun(): Boolean {
-   return migrations.anyNeedToRun()
+    return migrations.anyNeedToRun()
   }
 
   fun sendReport() {

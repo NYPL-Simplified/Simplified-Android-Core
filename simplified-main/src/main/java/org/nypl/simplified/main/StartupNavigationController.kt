@@ -7,9 +7,9 @@ import org.nypl.simplified.ui.onboarding.OnboardingFragment
 import org.nypl.simplified.ui.splash.SplashFragment
 import org.slf4j.LoggerFactory
 
-internal class StartupNavigationController (
+internal class StartupNavigationController(
   fragmentManager: FragmentManager,
-  ): BaseNavigationController(fragmentManager) {
+) : BaseNavigationController(fragmentManager) {
 
   private val logger =
     LoggerFactory.getLogger(StartupNavigationController::class.java)

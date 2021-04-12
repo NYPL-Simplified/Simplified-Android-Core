@@ -17,8 +17,8 @@ class SplashFragment : Fragment(R.layout.splash_fragment), FragmentResultListene
     private const val resultKeyKey = "org.nypl.simplified.splash.result.key"
 
     fun newInstance(resultKey: String) = SplashFragment().apply {
-        arguments = bundleOf(resultKeyKey to resultKey)
-      }
+      arguments = bundleOf(resultKeyKey to resultKey)
+    }
   }
 
   private lateinit var resultKey: String
@@ -50,8 +50,8 @@ class SplashFragment : Fragment(R.layout.splash_fragment), FragmentResultListene
   private fun onBootCompleted() {
     val eula =
       Services.serviceDirectory()
-      .requireService(DocumentStoreType::class.java)
-      .eula
+        .requireService(DocumentStoreType::class.java)
+        .eula
 
     if (eula != null && !eula.hasAgreed) {
       showEula()

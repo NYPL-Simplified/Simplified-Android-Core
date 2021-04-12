@@ -21,8 +21,8 @@ class OnboardingFragment :
     private const val resultKeyKey = "org.nypl.simplified.onboarding.result.key"
 
     fun newInstance(resultKey: String) = OnboardingFragment().apply {
-        arguments = bundleOf(resultKeyKey to resultKey)
-      }
+      arguments = bundleOf(resultKeyKey to resultKey)
+    }
   }
 
   private lateinit var resultKey: String
@@ -39,7 +39,6 @@ class OnboardingFragment :
     onboardingNavController =
       OnboardingNavigationController(childFragmentManager)
 
-
     /*
     * Demand that onOptionsItemSelected be called.
     */
@@ -52,7 +51,7 @@ class OnboardingFragment :
     * Finish the onboarding when a child fragment explicitly terminates.
     */
 
-    childFragmentManager.setFragmentResultListener("", this) { _, _->
+    childFragmentManager.setFragmentResultListener("", this) { _, _ ->
       requireActivity().supportFragmentManager.setFragmentResult(resultKey, Bundle())
     }
 

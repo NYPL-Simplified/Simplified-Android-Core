@@ -25,8 +25,8 @@ class MigrationProgressFragment : Fragment(R.layout.splash_migration_progress) {
 
     viewModel.startMigrationsIfNotStarted()
     viewModel.migrationReport.observe(this) {
-        setFragmentResult("", Bundle())
-      }
+      setFragmentResult("", Bundle())
+    }
   }
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

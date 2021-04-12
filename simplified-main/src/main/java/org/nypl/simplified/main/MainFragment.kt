@@ -123,8 +123,9 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
     )
 
     requireActivity().onBackPressedDispatcher.addCallback(this) {
-      if (bottomNavigator.popBackStack())
+      if (bottomNavigator.popBackStack()) {
         return@addCallback
+      }
 
       try {
         isEnabled = false
