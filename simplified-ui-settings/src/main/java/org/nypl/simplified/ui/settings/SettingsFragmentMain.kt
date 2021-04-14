@@ -1,18 +1,13 @@
 package org.nypl.simplified.ui.settings
 
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.Gravity
 import android.widget.Toast
-import androidx.core.view.postDelayed
+import androidx.fragment.app.viewModels
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
-import org.librarysimplified.documents.DocumentStoreType
-import org.librarysimplified.services.api.Services
 import org.nypl.simplified.android.ktx.supportActionBar
-import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.navigation.api.NavigationControllers
-import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.slf4j.LoggerFactory
 
 /**
@@ -21,44 +16,8 @@ import org.slf4j.LoggerFactory
 
 class SettingsFragmentMain : PreferenceFragmentCompat() {
 
-  private val logger =
-    LoggerFactory.getLogger(SettingsFragmentMain::class.java)
-
-  private val appVersion by lazy {
-    try {
-      val context = requireContext()
-      val pkgManager = context.packageManager
-      val pkgInfo = pkgManager.getPackageInfo(context.packageName, 0)
-      pkgInfo.versionName
-    } catch (e: PackageManager.NameNotFoundException) {
-      "Unknown"
-    }
-  }
-
-  private val buildConfig by lazy {
-    Services.serviceDirectory()
-      .requireService(BuildConfigurationServiceType::class.java)
-  }
-  private val documents by lazy {
-    Services.serviceDirectory()
-      .requireService(DocumentStoreType::class.java)
-  }
-  private val profilesController by lazy {
-    Services.serviceDirectory()
-      .requireService(ProfilesControllerType::class.java)
-  }
-  private val navigationController by lazy {
-    NavigationControllers.find(
-      activity = this.requireActivity(),
-      interfaceType = SettingsNavigationControllerType::class.java
-    )
-  }
-
-  private val showDebugSettings: Boolean
-    get() = this.profilesController
-      .profileCurrent()
-      .preferences()
-      .showDebugSettings
+  private val logger = LoggerFactory.getLogger(SettingsFragmentMain::class.java)
+  private val viewModel: SettingsMainViewModel by viewModels()
 
   private lateinit var settingsAbout: Preference
   private lateinit var settingsAcknowledgements: Preference
@@ -116,30 +75,30 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
   }
 
   private fun configureAcknowledgements(preference: Preference) {
-    preference.isEnabled = this.documents.acknowledgements != null
+    preference.isEnabled = this.viewModel.documents.acknowledgements != null
     preference.onPreferenceClickListener =
       Preference.OnPreferenceClickListener {
-        this.navigationController.openSettingsAcknowledgements()
+        this.findNavigationController().openSettingsAcknowledgements()
         true
       }
   }
 
   private fun configureVersion(preference: Preference) {
-    preference.setSummaryProvider { this.appVersion }
+    preference.setSummaryProvider { this.viewModel.appVersion }
   }
 
   private fun configureVersionCore(preference: Preference) {
-    preference.setSummaryProvider { this.buildConfig.simplifiedVersion }
+    preference.setSummaryProvider { this.viewModel.buildConfig.simplifiedVersion }
 
     // Hide the Core version if it's similar to the app version
     preference.isVisible =
-      !this.appVersion.startsWith(this.buildConfig.simplifiedVersion)
+      !this.viewModel.appVersion.startsWith(this.viewModel.buildConfig.simplifiedVersion)
   }
 
   private fun configureBuild(preference: Preference) {
-    preference.setSummaryProvider { this.buildConfig.vcsCommit }
+    preference.setSummaryProvider { this.viewModel.buildConfig.vcsCommit }
 
-    if (!this.showDebugSettings) {
+    if (!this.viewModel.showDebugSettings) {
       preference.setOnPreferenceClickListener {
         this.onTapToDebugSettings(it)
         true
@@ -149,19 +108,19 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
 
   private fun configureDebug(preference: Preference) {
     preference.setOnPreferenceClickListener {
-      this.navigationController.openSettingsVersion()
+      this.findNavigationController().openSettingsVersion()
       true
     }
 
     // Show the debug settings menu, if enabled
-    preference.isVisible = this.showDebugSettings
+    preference.isVisible = this.viewModel.showDebugSettings
   }
 
   private fun configureLicense(preference: Preference) {
-    preference.isEnabled = this.documents.licenses != null
+    preference.isEnabled = this.viewModel.documents.licenses != null
     preference.onPreferenceClickListener =
       Preference.OnPreferenceClickListener {
-        this.navigationController.openSettingsLicense()
+        this.findNavigationController().openSettingsLicense()
         true
       }
   }
@@ -170,26 +129,26 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
     preference.isEnabled = false
     preference.onPreferenceClickListener =
       Preference.OnPreferenceClickListener {
-        this.navigationController.openSettingsFaq()
+        this.findNavigationController().openSettingsFaq()
         true
       }
   }
 
   private fun configureEULA(preference: Preference) {
-    preference.isEnabled = this.documents.eula != null
+    preference.isEnabled = this.viewModel.documents.eula != null
     preference.onPreferenceClickListener =
       Preference.OnPreferenceClickListener {
-        this.navigationController.openSettingsEULA()
+        this.findNavigationController().openSettingsEULA()
         true
       }
   }
 
   private fun configureAccounts(preference: Preference) {
-    if (this.buildConfig.allowAccountsAccess) {
+    if (this.viewModel.buildConfig.allowAccountsAccess) {
       preference.isEnabled = true
       preference.onPreferenceClickListener =
         Preference.OnPreferenceClickListener {
-          this.navigationController.openSettingsAccounts()
+          this.findNavigationController().openSettingsAccounts()
           true
         }
     } else {
@@ -199,10 +158,10 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
   }
 
   private fun configureAbout(preference: Preference) {
-    preference.isEnabled = this.documents.about != null
+    preference.isEnabled = this.viewModel.documents.about != null
     preference.onPreferenceClickListener =
       Preference.OnPreferenceClickListener {
-        this.navigationController.openSettingsAbout()
+        this.findNavigationController().openSettingsAbout()
         true
       }
   }
@@ -211,13 +170,7 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
     val context = this.context ?: return
 
     if (this.tapToDebugSettings == 0) {
-      this.profilesController.profileUpdate { description ->
-        description.copy(
-          preferences = description.preferences.copy(
-            showDebugSettings = true
-          )
-        )
-      }
+      this.viewModel.showDebugSettings = true
       this.settingsDebug.isVisible = true
 
       // Cancel the toast
@@ -225,9 +178,7 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
 
       // Reveal the preference, if hidden
       this.listView.run {
-        postDelayed(400L) {
-          smoothScrollToPosition(adapter!!.itemCount)
-        }
+        smoothScrollToPosition(adapter!!.itemCount)
       }
 
       // Unset our click listener
@@ -250,5 +201,12 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
       }
       this.tapToDebugSettings -= 1
     }
+  }
+
+  private fun findNavigationController(): SettingsNavigationControllerType {
+    return NavigationControllers.find(
+      activity = this.requireActivity(),
+      interfaceType = SettingsNavigationControllerType::class.java
+    )
   }
 }

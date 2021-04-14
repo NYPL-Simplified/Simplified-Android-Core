@@ -16,8 +16,8 @@
     android:id="@+id/value"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_gravity="right"
-    android:gravity="right"
+    android:layout_gravity="left"
+    android:gravity="left"
     android:textSize="11sp"
     android:fontFamily="monospace"
     android:text="@string/accountPlaceholder"/>
