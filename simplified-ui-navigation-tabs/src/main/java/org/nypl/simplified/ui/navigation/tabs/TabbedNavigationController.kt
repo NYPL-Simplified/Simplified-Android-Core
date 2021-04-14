@@ -7,7 +7,6 @@ import android.graphics.Color
 import androidx.annotation.IdRes
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
-import androidx.fragment.app.FragmentManager.OnBackStackChangedListener
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.bottomnavigation.LabelVisibilityMode
 import com.io7m.junreachable.UnreachableCodeException
@@ -64,14 +63,14 @@ class TabbedNavigationController private constructor(
   private val settingsConfiguration: BuildConfigurationServiceType,
   private val profilesController: ProfilesControllerType,
   private val navigator: BottomNavigator,
-  private val listener: OnBackStackChangedListener?
+  private val listener: () -> Unit
 ) : SettingsNavigationControllerType, CatalogNavigationControllerType {
 
   private val logger = LoggerFactory.getLogger(TabbedNavigationController::class.java)
 
   private val infoStream = this.navigator.infoStream().subscribe { action ->
     this.logger.debug(action.toString())
-    this.listener?.onBackStackChanged()
+    this.listener()
   }
 
   companion object {
@@ -90,7 +89,8 @@ class TabbedNavigationController private constructor(
       profilesController: ProfilesControllerType,
       settingsConfiguration: BuildConfigurationServiceType,
       @IdRes fragmentContainerId: Int,
-      navigationView: BottomNavigationView
+      navigationView: BottomNavigationView,
+      listener: () -> Unit
     ): TabbedNavigationController {
       this.logger.debug("creating bottom navigator")
       val navigator =
@@ -146,7 +146,7 @@ class TabbedNavigationController private constructor(
         navigator = navigator,
         settingsConfiguration = settingsConfiguration,
         profilesController = profilesController,
-        listener = activity as? OnBackStackChangedListener
+        listener = listener
       )
     }
 
@@ -371,7 +371,7 @@ class TabbedNavigationController private constructor(
 
   override fun backStackSize(): Int {
     // Note: currentStackSize() is not safe to call here as it may throw an NPE.
-    return this.navigator.stackSize(this.navigator.currentTab())
+    return this.navigator.stackSize(this.navigator.currentTab()) - 1
   }
 
   override fun openSettingsAccount(parameters: AccountFragmentParameters) {

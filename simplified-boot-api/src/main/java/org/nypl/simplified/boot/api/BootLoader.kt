@@ -6,7 +6,7 @@ import com.google.common.util.concurrent.FluentFuture
 import com.google.common.util.concurrent.MoreExecutors
 import com.google.common.util.concurrent.SettableFuture
 import io.reactivex.Observable
-import io.reactivex.subjects.PublishSubject
+import io.reactivex.subjects.BehaviorSubject
 import org.nypl.simplified.presentableerror.api.PresentableErrorType
 import org.slf4j.LoggerFactory
 import java.util.ServiceLoader
@@ -43,7 +43,7 @@ class BootLoader<T>(
       }
     )
 
-  private val eventsActual = PublishSubject.create<BootEvent>()
+  private val eventsActual = BehaviorSubject.create<BootEvent>()
   private val bootLock: Any = Any()
   private var boot: FluentFuture<T>? = null
 

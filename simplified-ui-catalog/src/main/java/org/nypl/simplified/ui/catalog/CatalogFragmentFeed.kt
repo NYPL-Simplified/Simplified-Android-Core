@@ -335,7 +335,7 @@ class CatalogFragmentFeed : Fragment() {
       }
       android.R.id.home -> {
         val isRoot =
-          (1 == this.navigationController.backStackSize())
+          (0 == this.navigationController.backStackSize())
         if (isRoot) {
           this.openAccountPickerDialog()
           true
@@ -706,7 +706,7 @@ class CatalogFragmentFeed : Fragment() {
     }
 
     try {
-      val isRoot = (1 == this.navigationController.backStackSize())
+      val isRoot = (0 == this.navigationController.backStackSize())
       if (isRoot) {
         when (this.parameters.ownership) {
           is OwnedByAccount -> showAccountPickerAction()

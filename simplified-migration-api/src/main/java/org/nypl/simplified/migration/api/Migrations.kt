@@ -1,5 +1,6 @@
 package org.nypl.simplified.migration.api
 
+import com.google.common.util.concurrent.ListenableFuture
 import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
 import org.nypl.simplified.migration.spi.MigrationEvent
@@ -7,8 +8,10 @@ import org.nypl.simplified.migration.spi.MigrationProviderType
 import org.nypl.simplified.migration.spi.MigrationReport
 import org.nypl.simplified.migration.spi.MigrationServiceDependencies
 import org.nypl.simplified.migration.spi.MigrationType
+import org.nypl.simplified.threads.NamedThreadPools
 import org.slf4j.LoggerFactory
 import java.util.ServiceLoader
+import java.util.concurrent.Callable
 
 /**
  * A class that runs the given set of migrations.
@@ -25,6 +28,11 @@ class Migrations(
     PublishSubject.create<MigrationEvent>()
   private val logger =
     LoggerFactory.getLogger(Migrations::class.java)
+
+  private val executor =
+    NamedThreadPools.namedThreadPool(1, "migrations", 19)
+  private var migrationFuture: ListenableFuture<MigrationReport?>? = null
+  private val migrationLock: Any = Any()
 
   init {
     try {
@@ -60,6 +68,15 @@ class Migrations(
       } finally {
         subscription.dispose()
       }
+    }
+  }
+
+  override fun start(): ListenableFuture<MigrationReport?> {
+    return synchronized(this.migrationLock) {
+      if (this.migrationFuture == null) {
+        this.migrationFuture = executor.submit(Callable { runMigrations() })
+      }
+      this.migrationFuture!!
     }
   }
 

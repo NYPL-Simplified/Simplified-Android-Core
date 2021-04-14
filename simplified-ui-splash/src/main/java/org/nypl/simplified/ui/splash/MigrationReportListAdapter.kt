@@ -13,10 +13,10 @@ import org.nypl.simplified.migration.spi.MigrationEvent
  * A recycler view adapter for migration reports.
  */
 
-class SplashMigrationReportListAdapter(
+class MigrationReportListAdapter(
   private val events: List<MigrationEvent>
 ) :
-  RecyclerView.Adapter<SplashMigrationReportListAdapter.ViewHolder>() {
+  RecyclerView.Adapter<MigrationReportListAdapter.ViewHolder>() {
 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
     val inflater =

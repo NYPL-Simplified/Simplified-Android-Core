@@ -5,7 +5,6 @@ import android.net.http.HttpResponseCache
 import android.os.StrictMode
 import android.os.StrictMode.ThreadPolicy
 import android.os.StrictMode.VmPolicy
-import com.google.common.util.concurrent.ListenableFuture
 import io.reactivex.Observable
 import org.librarysimplified.services.api.ServiceDirectoryType
 import org.nypl.simplified.boot.api.BootEvent
@@ -25,7 +24,6 @@ class MainApplication : Application() {
       get() = this.INSTANCE
   }
 
-  private lateinit var bootFuture: ListenableFuture<ServiceDirectoryType>
   private val logger = LoggerFactory.getLogger(MainApplication::class.java)
   private val boot: BootLoader<ServiceDirectoryType> =
     BootLoader(
@@ -44,7 +42,7 @@ class MainApplication : Application() {
     this.configureHttpCache()
     this.configureStrictMode()
     this.logger.debug("starting app: pid {}", android.os.Process.myPid())
-    this.bootFuture = this.boot.start(this)
+    this.boot.start(this)
     INSTANCE = this
   }
 
@@ -99,11 +97,4 @@ class MainApplication : Application() {
 
   val servicesBootEvents: Observable<BootEvent>
     get() = this.boot.events
-
-  /**
-   * @return A future representing the application's boot process.
-   */
-
-  val servicesBooting: ListenableFuture<ServiceDirectoryType>
-    get() = this.bootFuture
 }

@@ -12,8 +12,8 @@ import org.slf4j.LoggerFactory
 
 internal class ProfilesNavigationController(
   private val supportFragmentManager: FragmentManager,
-  private val mainViewModel: MainFragmentViewModel
-) : ProfilesNavigationControllerType {
+  private val mainViewModel: MainActivityViewModel
+) : BaseNavigationController(supportFragmentManager), ProfilesNavigationControllerType {
 
   private val logger =
     LoggerFactory.getLogger(ProfilesNavigationController::class.java)
@@ -70,27 +70,5 @@ internal class ProfilesNavigationController(
   override fun openProfileCreate() {
     this.logger.debug("openProfileCreate")
     this.openModificationFragment(ProfileModificationFragmentParameters(null))
-  }
-
-  override fun popBackStack(): Boolean {
-    this.logger.debug("popBackStack")
-    this.supportFragmentManager.popBackStack()
-    return this.backStackSize() > 0
-  }
-
-  override fun popToRoot(): Boolean {
-    this.logger.debug("popToRoot")
-    if (this.backStackSize() == 1) {
-      return false
-    }
-    this.supportFragmentManager.popBackStack(
-      null, FragmentManager.POP_BACK_STACK_INCLUSIVE
-    )
-    return true
-  }
-
-  override fun backStackSize(): Int {
-    this.logger.debug("backStackSize")
-    return this.supportFragmentManager.backStackEntryCount
   }
 }

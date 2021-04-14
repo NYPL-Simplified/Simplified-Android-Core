@@ -68,3 +68,11 @@ org.librarysimplified.nexus.password=${NYPL_NEXUS_PASSWORD}
 org.librarysimplified.app.assets.openebooks=${OPENEBOOKS_CREDENTIALS}
 org.librarysimplified.app.assets.simplye=${SIMPLYE_CREDENTIALS}
 EOF
+
+#------------------------------------------------------------------------
+# Addding slack webhook to environment
+SLACK_WEBHOOK_URL=$(<.ci/credentials/SimplyE/slack-webhook.url) || 
+  fatal "Slack Webhook url not found."
+cat >> ".env" <<EOF
+SLACK_WEBHOOK_URL="${SLACK_WEBHOOK_URL}"
+EOF
