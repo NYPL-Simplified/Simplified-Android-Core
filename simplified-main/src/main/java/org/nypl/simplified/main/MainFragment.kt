@@ -214,12 +214,6 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
         this.activityViewModel.clearHistory = false
       }
 
-      /*
-       * Ensure the toolbar is properly configured after an orientation change.
-       */
-
-      configureToolbar()
-
       this.navigationControllerDirectory.updateNavigationController(
         CatalogNavigationControllerType::class.java, this.bottomNavigator
       )
@@ -248,8 +242,15 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
         .let { subscriptions.add(it) }
 
       /*
-      * Show the Toolbar
-      */
+       * Ensure the toolbar is properly configured after an orientation change.
+       */
+
+      configureToolbar()
+
+      /*
+       * Show the Toolbar
+       */
+
       this.supportActionBar?.show()
     }
   }
@@ -348,7 +349,11 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
 
   override fun onStop() {
     super.onStop()
+    this.subscriptions.clear()
+  }
 
+  override fun onDetach() {
+    super.onDetach()
     clearDelayedRunnables()
 
     this.navigationControllerDirectory.removeNavigationController(
@@ -363,8 +368,6 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
     this.navigationControllerDirectory.removeNavigationController(
       NavigationControllerType::class.java
     )
-
-    this.subscriptions.clear()
   }
 
   override fun onDestroy() {
