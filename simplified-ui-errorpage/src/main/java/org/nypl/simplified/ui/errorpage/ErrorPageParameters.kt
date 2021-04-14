@@ -49,7 +49,7 @@ data class ErrorPageParameters(
 
   val report get() =
     listOf(this.body, this.reportAttributes, this.reportTaskSteps)
-      .filterNot { part -> part.isNullOrEmpty() }
+      .filterNot { part -> part.isEmpty() }
       .joinToString("\n\n")
 
   /**

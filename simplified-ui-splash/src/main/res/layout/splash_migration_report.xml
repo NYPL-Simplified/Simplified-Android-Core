@@ -10,8 +10,7 @@
     android:layout_alignParentTop="true"
     android:layout_margin="16dp"
     android:textStyle="bold"
-    android:textSize="24sp"
-    android:text="@string/migrationFailure"/>
+    android:textSize="24sp" />
 
   <androidx.recyclerview.widget.RecyclerView
     android:id="@+id/splashMigrationReportList"

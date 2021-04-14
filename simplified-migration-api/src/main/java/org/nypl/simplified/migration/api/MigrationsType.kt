@@ -1,5 +1,6 @@
 package org.nypl.simplified.migration.api
 
+import com.google.common.util.concurrent.ListenableFuture
 import io.reactivex.Observable
 import org.nypl.simplified.migration.spi.MigrationEvent
 import org.nypl.simplified.migration.spi.MigrationReport
@@ -29,4 +30,11 @@ interface MigrationsType {
    */
 
   fun runMigrations(): MigrationReport?
+
+  /**
+   * Start the migration process if it has not already started, and return a future representing
+   * the migration in progress.
+   */
+
+  fun start(): ListenableFuture<MigrationReport?>
 }
