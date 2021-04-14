@@ -52,7 +52,7 @@
         </c:change>
       </c:changes>
     </c:release>
-    <c:release date="2021-04-14T19:38:30+00:00" is-open="true" ticket-system="org.nypl.jira" version="6.6.4">
+    <c:release date="2021-04-14T19:39:36+00:00" is-open="true" ticket-system="org.nypl.jira" version="6.6.4">
       <c:changes>
         <c:change date="2021-03-26T00:00:00+00:00" summary="Standardize bookmarks across platforms">
           <c:tickets>
@@ -65,9 +65,14 @@
             <c:ticket id="SIMPLY-3666"/>
           </c:tickets>
         </c:change>
-        <c:change date="2021-04-14T19:38:30+00:00" summary="Eliminate some lifecycle-related crashes">
+        <c:change date="2021-04-14T00:00:00+00:00" summary="Eliminate some lifecycle-related crashes">
           <c:tickets>
             <c:ticket id="SIMPLY-3473"/>
+          </c:tickets>
+        </c:change>
+        <c:change date="2021-04-14T19:39:36+00:00" summary="Upgraded test suite to JUnit 5">
+          <c:tickets>
+            <c:ticket id="SIMPLY-3626"/>
           </c:tickets>
         </c:change>
       </c:changes>
