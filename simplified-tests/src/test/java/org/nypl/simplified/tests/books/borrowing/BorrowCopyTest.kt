@@ -3,10 +3,10 @@ package org.nypl.simplified.tests.books.borrowing
 import android.content.Context
 import io.reactivex.disposables.Disposable
 import org.joda.time.Instant
-import org.junit.Assert
-import org.junit.Assert.assertEquals
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.librarysimplified.http.api.LSHTTPClientConfiguration
 import org.librarysimplified.http.api.LSHTTPClientType
 import org.librarysimplified.http.vanilla.LSHTTPClients
@@ -37,16 +37,18 @@ import org.nypl.simplified.opds.core.OPDSAcquisitionPathElement
 import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskRecorderType
-import org.nypl.simplified.tests.MockAccountProviders
-import org.nypl.simplified.tests.MockBookDatabase
-import org.nypl.simplified.tests.MockBookDatabaseEntry
-import org.nypl.simplified.tests.MockBookDatabaseEntryFormatHandleEPUB
-import org.nypl.simplified.tests.MockBookDatabaseEntryFormatHandlePDF
-import org.nypl.simplified.tests.MockBundledContentResolver
-import org.nypl.simplified.tests.MockContentResolver
 import org.nypl.simplified.tests.TestDirectories
+import org.nypl.simplified.tests.mocking.MockAccountProviders
+import org.nypl.simplified.tests.mocking.MockBookDatabase
+import org.nypl.simplified.tests.mocking.MockBookDatabaseEntry
+import org.nypl.simplified.tests.mocking.MockBookDatabaseEntryFormatHandleEPUB
+import org.nypl.simplified.tests.mocking.MockBookDatabaseEntryFormatHandlePDF
+import org.nypl.simplified.tests.mocking.MockBorrowContext
+import org.nypl.simplified.tests.mocking.MockBundledContentResolver
+import org.nypl.simplified.tests.mocking.MockContentResolver
 import org.slf4j.LoggerFactory
 import java.net.URI
+import java.util.concurrent.TimeUnit
 
 class BorrowCopyTest {
 
@@ -77,7 +79,7 @@ class BorrowCopyTest {
     assertEquals(clazz, registryStatus.javaClass)
   }
 
-  @Before
+  @BeforeEach
   fun testSetup() {
     this.taskRecorder =
       TaskRecorder.create()
@@ -111,8 +113,10 @@ class BorrowCopyTest {
         .create(
           context = androidContext,
           configuration = LSHTTPClientConfiguration(
-            "simplified-tests",
-            "999.999.0"
+            applicationName = "simplified-tests",
+            applicationVersion = "999.999.0",
+            tlsOverrides = null,
+            timeout = Pair(5L, TimeUnit.SECONDS)
           )
         )
 
@@ -181,7 +185,7 @@ class BorrowCopyTest {
 
     try {
       task.execute(this.context)
-      Assert.fail()
+      Assertions.fail()
     } catch (e: Exception) {
       this.logger.error("exception: ", e)
     }
@@ -209,7 +213,7 @@ class BorrowCopyTest {
 
     try {
       task.execute(this.context)
-      Assert.fail()
+      Assertions.fail()
     } catch (e: Exception) {
       this.logger.error("exception: ", e)
     }
@@ -237,7 +241,7 @@ class BorrowCopyTest {
 
     try {
       task.execute(this.context)
-      Assert.fail()
+      Assertions.fail()
     } catch (e: Exception) {
       this.logger.error("exception: ", e)
     }

@@ -6,7 +6,9 @@ import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
-import org.joda.time.LocalDateTime
+import org.joda.time.DateTime
+import org.joda.time.DateTimeZone
+import org.joda.time.format.ISODateTimeFormat
 import org.nypl.simplified.json.core.JSONParseException
 import org.nypl.simplified.json.core.JSONParserUtilities
 import org.nypl.simplified.json.core.JSONSerializerUtilities
@@ -18,6 +20,18 @@ import java.io.IOException
  */
 
 object BookmarkJSON {
+
+  private val dateFormatter =
+    ISODateTimeFormat.dateTime()
+      .withZoneUTC()
+
+  private val dateParserWithTimezone =
+    ISODateTimeFormat.dateTimeParser()
+      .withOffsetParsed()
+
+  private val dateParserWithUTC =
+    ISODateTimeFormat.dateTimeParser()
+      .withZoneUTC()
 
   /**
    * Deserialize bookmarks from the given JSON node.
@@ -36,7 +50,7 @@ object BookmarkJSON {
     kind: BookmarkKind,
     node: JsonNode
   ): Bookmark {
-    return deserializeFromJSON(
+    return this.deserializeFromJSON(
       objectMapper = objectMapper,
       kind = kind,
       node = JSONParserUtilities.checkObject(null, node)
@@ -60,34 +74,102 @@ object BookmarkJSON {
     kind: BookmarkKind,
     node: ObjectNode
   ): Bookmark {
-    // Older bookmarks store chapter progress in a top-level property, instead of inside
-    // location.progress.
+    return when (val version = JSONParserUtilities.getIntegerOrNull(node, "@version")) {
+      20210317 ->
+        this.deserializeFromJSON20210317(objectMapper, kind, node)
+      null ->
+        this.deserializeFromJSONOld(objectMapper, kind, node)
+      else ->
+        throw JSONParseException("Unsupported bookmark version: $version")
+    }
+  }
 
-    val chapterProgress = JSONParserUtilities.getDouble(node, "chapterProgress")
-
-    val deserializedLocation = BookLocationJSON.deserializeFromJSON(
-      objectMapper, JSONParserUtilities.getObject(node, "location")
-    )
-
+  private fun deserializeFromJSON20210317(
+    objectMapper: ObjectMapper,
+    kind: BookmarkKind,
+    node: ObjectNode
+  ): Bookmark {
     val location =
-      if (deserializedLocation.progress == null && chapterProgress != null) {
-        // If this is an older bookmark, move the chapter progress into location.progress. In this
-        // case the chapter index is unknown.
-        deserializedLocation.copy(progress = BookChapterProgress(0, chapterProgress))
-      } else {
-        deserializedLocation
-      }
+      BookLocationJSON.deserializeFromJSON(
+        objectMapper,
+        JSONParserUtilities.getObject(node, "location")
+      )
 
-    return Bookmark(
+    val timeParsed =
+      this.parseTime(JSONParserUtilities.getString(node, "time"))
+
+    return Bookmark.create(
       opdsId = JSONParserUtilities.getString(node, "opdsId"),
       kind = kind,
       location = location,
-      time = LocalDateTime.parse(JSONParserUtilities.getString(node, "time")),
+      time = timeParsed,
       chapterTitle = JSONParserUtilities.getString(node, "chapterTitle"),
       bookProgress = JSONParserUtilities.getDouble(node, "bookProgress"),
-      uri = toNullable(JSONParserUtilities.getURIOptional(node, "uri")),
+      uri = this.toNullable(JSONParserUtilities.getURIOptional(node, "uri")),
       deviceID = JSONParserUtilities.getStringDefault(node, "deviceID", null)
     )
+  }
+
+  private fun deserializeFromJSONOld(
+    objectMapper: ObjectMapper,
+    kind: BookmarkKind,
+    node: ObjectNode
+  ): Bookmark {
+    val location =
+      BookLocationJSON.deserializeFromJSON(
+        objectMapper,
+        JSONParserUtilities.getObject(node, "location")
+      )
+
+    /*
+     * Old bookmarks have a top-level chapterProgress value. We've moved to having this
+     * stored explicitly in book locations for modern bookmarks. We pick whichever is
+     * the greater of the two possible values, because we default to 0.0 for missing
+     * values.
+     */
+
+    val chapterProgress =
+      JSONParserUtilities.getDoubleDefault(node, "chapterProgress", 0.0)
+
+    val locationMax =
+      when (location) {
+        is BookLocation.BookLocationR2 ->
+          location
+        is BookLocation.BookLocationR1 ->
+          location.copy(progress = Math.max(location.progress ?: 0.0, chapterProgress))
+      }
+
+    return Bookmark.create(
+      opdsId = JSONParserUtilities.getString(node, "opdsId"),
+      kind = kind,
+      location = locationMax,
+      time = this.parseTime(JSONParserUtilities.getString(node, "time")),
+      chapterTitle = JSONParserUtilities.getString(node, "chapterTitle"),
+      bookProgress = JSONParserUtilities.getDouble(node, "bookProgress"),
+      uri = this.toNullable(JSONParserUtilities.getURIOptional(node, "uri")),
+      deviceID = JSONParserUtilities.getStringDefault(node, "deviceID", null)
+    )
+  }
+
+  /**
+   * Correctly parse a date/time value.
+   *
+   * This slightly odd function first attempts to parse the incoming string as if it was
+   * a date/time string with an included time zone. If the time string turned out not to
+   * include a time zone, Joda Time will parse it using the system's default timezone. We
+   * then detect that this has happened and, if the current system's timezone isn't UTC,
+   * we parse the string *again* but this time assuming a UTC timezone.
+   */
+
+  private fun parseTime(
+    timeText: String
+  ): DateTime {
+    val defaultZone = DateTimeZone.getDefault()
+    val timeParsedWithZone = this.dateParserWithTimezone.parseDateTime(timeText)
+    if (timeParsedWithZone.zone == defaultZone && defaultZone != DateTimeZone.UTC) {
+      return this.dateParserWithUTC.parseDateTime(timeText)
+    }
+    return timeParsedWithZone.toDateTime(DateTimeZone.UTC)
   }
 
   private fun <T> toNullable(option: OptionType<T>): T? {
@@ -111,12 +193,12 @@ object BookmarkJSON {
     description: Bookmark
   ): ObjectNode {
     val node = objectMapper.createObjectNode()
+    node.put("@version", 20210317)
     node.put("opdsId", description.opdsId)
     val location = BookLocationJSON.serializeToJSON(objectMapper, description.location)
     node.set<ObjectNode>("location", location)
-    node.put("time", description.time.toString())
+    node.put("time", this.dateFormatter.print(description.time))
     node.put("chapterTitle", description.chapterTitle)
-    node.put("chapterProgress", description.chapterProgress)
     node.put("bookProgress", description.bookProgress)
     description.deviceID.let { device -> node.put("deviceID", device) }
     return node
@@ -135,7 +217,7 @@ object BookmarkJSON {
     bookmarks: List<Bookmark>
   ): ArrayNode {
     val node = objectMapper.createArrayNode()
-    bookmarks.forEach { bookmark -> node.add(serializeToJSON(objectMapper, bookmark)) }
+    bookmarks.forEach { bookmark -> node.add(this.serializeToJSON(objectMapper, bookmark)) }
     return node
   }
 
@@ -153,7 +235,7 @@ object BookmarkJSON {
     objectMapper: ObjectMapper,
     description: Bookmark
   ): String {
-    val json = serializeToJSON(objectMapper, description)
+    val json = this.serializeToJSON(objectMapper, description)
     val output = ByteArrayOutputStream(1024)
     JSONSerializerUtilities.serialize(json, output)
     return output.toString("UTF-8")
@@ -173,7 +255,7 @@ object BookmarkJSON {
     objectMapper: ObjectMapper,
     bookmarks: List<Bookmark>
   ): String {
-    val json = serializeToJSON(objectMapper, bookmarks)
+    val json = this.serializeToJSON(objectMapper, bookmarks)
     val output = ByteArrayOutputStream(1024)
     val writer = objectMapper.writerWithDefaultPrettyPrinter()
     writer.writeValue(output, json)
@@ -197,7 +279,7 @@ object BookmarkJSON {
     kind: BookmarkKind,
     serialized: String
   ): Bookmark {
-    return deserializeFromJSON(
+    return this.deserializeFromJSON(
       objectMapper = objectMapper,
       kind = kind,
       node = objectMapper.readTree(serialized)

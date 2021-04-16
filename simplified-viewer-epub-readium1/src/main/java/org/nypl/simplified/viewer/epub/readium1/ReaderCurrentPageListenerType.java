@@ -24,5 +24,5 @@ public interface ReaderCurrentPageListenerType
    */
 
   void onCurrentPageReceived(
-    BookLocation l);
+    BookLocation.BookLocationR1 l);
 }

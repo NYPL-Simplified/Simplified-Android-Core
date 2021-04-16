@@ -3,11 +3,12 @@ package org.nypl.simplified.tests.books.profiles
 import android.content.Context
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
-import org.junit.After
-import org.junit.Assert
-import org.junit.Assert.assertEquals
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Timeout
 import org.librarysimplified.http.api.LSHTTPClientConfiguration
 import org.librarysimplified.http.api.LSHTTPClientType
 import org.librarysimplified.http.vanilla.LSHTTPClients
@@ -43,11 +44,12 @@ import org.nypl.simplified.profiles.api.ProfileID
 import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest
 import org.nypl.simplified.taskrecorder.api.TaskResult
-import org.nypl.simplified.tests.MockAccountLoginStringResources
 import org.nypl.simplified.tests.books.controller.TaskDumps
+import org.nypl.simplified.tests.mocking.MockAccountLoginStringResources
 import org.slf4j.Logger
 import java.net.URI
 import java.util.UUID
+import java.util.concurrent.TimeUnit
 
 abstract class ProfileAccountLoginTaskContract {
 
@@ -68,13 +70,18 @@ abstract class ProfileAccountLoginTaskContract {
 
   abstract val logger: Logger
 
-  @Before
+  @BeforeEach
   fun testSetup() {
     this.http =
       LSHTTPClients()
         .create(
           context = Mockito.mock(Context::class.java),
-          configuration = LSHTTPClientConfiguration("simplified-test", "0.0.1")
+          configuration = LSHTTPClientConfiguration(
+            applicationName = "simplified-test",
+            applicationVersion = "0.0.1",
+            tlsOverrides = null,
+            timeout = Pair(5L, TimeUnit.SECONDS)
+          )
         )
 
     this.profile =
@@ -132,7 +139,7 @@ abstract class ProfileAccountLoginTaskContract {
 }"""
   }
 
-  @After
+  @AfterEach
   fun testTearDown() {
     this.server.close()
   }
@@ -141,7 +148,8 @@ abstract class ProfileAccountLoginTaskContract {
    * Logging in to an account that doesn't require logins doesn't work.
    */
 
-  @Test(timeout = 5_000L)
+  @Test
+  @Timeout(value = 5L, unit = TimeUnit.SECONDS)
   fun testLoginNotRequired() {
     val request =
       ProfileAccountLoginRequest.Basic(
@@ -207,7 +215,8 @@ abstract class ProfileAccountLoginTaskContract {
    * If the server responds with a 401, logging in fails.
    */
 
-  @Test(timeout = 5_000L)
+  @Test
+  @Timeout(value = 5L, unit = TimeUnit.SECONDS)
   fun testLoginServer401() {
     val authDescription =
       AccountProviderAuthenticationDescription.Basic(
@@ -285,7 +294,8 @@ abstract class ProfileAccountLoginTaskContract {
    * If the server responds with a non-401 error, logging in fails.
    */
 
-  @Test(timeout = 5_000L)
+  @Test
+  @Timeout(value = 5L, unit = TimeUnit.SECONDS)
   fun testLoginServerNon401() {
     val authDescription =
       AccountProviderAuthenticationDescription.Basic(
@@ -363,7 +373,8 @@ abstract class ProfileAccountLoginTaskContract {
    * If a connection attempt to the server results in an exception, logging in fails.
    */
 
-  @Test(timeout = 5_000L)
+  @Test
+  @Timeout(value = 5L, unit = TimeUnit.SECONDS)
   fun testLoginServerException() {
     this.server.close()
 
@@ -433,7 +444,8 @@ abstract class ProfileAccountLoginTaskContract {
    * If no patron URI is provided, logging in fails.
    */
 
-  @Test(timeout = 5_000L)
+  @Test
+  @Timeout(value = 5L, unit = TimeUnit.SECONDS)
   fun testLoginNoPatronURI() {
     val request =
       ProfileAccountLoginRequest.Basic(
@@ -512,7 +524,8 @@ abstract class ProfileAccountLoginTaskContract {
    * If a patron user profile cannot be parsed, logging in fails.
    */
 
-  @Test(timeout = 5_000L)
+  @Test
+  @Timeout(value = 5L, unit = TimeUnit.SECONDS)
   fun testLoginPatronProfileUnparseable() {
     val authDescription =
       AccountProviderAuthenticationDescription.Basic(
@@ -590,7 +603,8 @@ abstract class ProfileAccountLoginTaskContract {
    * If a patron user profile can be parsed and it advertises no DRM, then logging in succeeds.
    */
 
-  @Test(timeout = 5_000L)
+  @Test
+  @Timeout(value = 5L, unit = TimeUnit.SECONDS)
   fun testLoginNoDRM() {
     val authDescription =
       AccountProviderAuthenticationDescription.Basic(
@@ -679,7 +693,8 @@ abstract class ProfileAccountLoginTaskContract {
    * then logging in succeeds.
    */
 
-  @Test(timeout = 5_000L)
+  @Test
+  @Timeout(value = 5L, unit = TimeUnit.SECONDS)
   fun testLoginAdobeDRM() {
     val authDescription =
       AccountProviderAuthenticationDescription.Basic(
@@ -821,7 +836,8 @@ abstract class ProfileAccountLoginTaskContract {
    * If the account shows that DRM is required, but none is supported, then fail.
    */
 
-  @Test(timeout = 5_000L)
+  @Test
+  @Timeout(value = 5L, unit = TimeUnit.SECONDS)
   fun testLoginAdobeDRMNotSupported() {
     val authDescription =
       AccountProviderAuthenticationDescription.Basic(
@@ -920,7 +936,8 @@ abstract class ProfileAccountLoginTaskContract {
    * If no activations are delivered by the Adobe DRM connector, then activation fails.
    */
 
-  @Test(timeout = 5_000L)
+  @Test
+  @Timeout(value = 5L, unit = TimeUnit.SECONDS)
   fun testLoginAdobeDRMNoActivations() {
     val request =
       ProfileAccountLoginRequest.Basic(
@@ -1029,7 +1046,8 @@ abstract class ProfileAccountLoginTaskContract {
    * any other accounts is used.
    */
 
-  @Test(timeout = 5_000L)
+  @Test
+  @Timeout(value = 5L, unit = TimeUnit.SECONDS)
   fun testLoginAdobeDRMMultipleActivations() {
     val previouslyLoggedInAccountId = AccountID(UUID.randomUUID())
     val previouslyLoggedInAccount = Mockito.mock(AccountType::class.java, Mockito.RETURNS_DEEP_STUBS)
@@ -1186,7 +1204,8 @@ abstract class ProfileAccountLoginTaskContract {
    * If the Adobe DRM connector delivers an error, then activation fails.
    */
 
-  @Test(timeout = 5_000L)
+  @Test
+  @Timeout(value = 5L, unit = TimeUnit.SECONDS)
   fun testLoginAdobeDRMActivationError() {
     val authDescription =
       AccountProviderAuthenticationDescription.Basic(
@@ -1287,7 +1306,8 @@ abstract class ProfileAccountLoginTaskContract {
    * Trying to log in to an account using an unsupported mechanism, fails.
    */
 
-  @Test(timeout = 5_000L)
+  @Test
+  @Timeout(value = 5L, unit = TimeUnit.SECONDS)
   fun testLoginWrongType0() {
     val request =
       ProfileAccountLoginRequest.Basic(
@@ -1360,7 +1380,8 @@ abstract class ProfileAccountLoginTaskContract {
    * Trying to log in to an account using an unsupported mechanism, fails.
    */
 
-  @Test(timeout = 5_000L)
+  @Test
+  @Timeout(value = 5L, unit = TimeUnit.SECONDS)
   fun testLoginWrongType1() {
     val request =
       ProfileAccountLoginRequest.OAuthWithIntermediaryInitiate(
@@ -1431,7 +1452,8 @@ abstract class ProfileAccountLoginTaskContract {
    * Logging in with OAuth succeeds.
    */
 
-  @Test(timeout = 5_000L)
+  @Test
+  @Timeout(value = 5L, unit = TimeUnit.SECONDS)
   fun testLoginOAuthCompleteNoDRM() {
     val authDescription =
       AccountProviderAuthenticationDescription.OAuthWithIntermediary(
@@ -1533,7 +1555,8 @@ abstract class ProfileAccountLoginTaskContract {
    * Receiving an OAuth token in an account that wasn't waiting for one ignores the request.
    */
 
-  @Test(timeout = 5_000L)
+  @Test
+  @Timeout(value = 5L, unit = TimeUnit.SECONDS)
   fun testLoginOAuthNotWaiting() {
     val authDescription =
       AccountProviderAuthenticationDescription.OAuthWithIntermediary(
@@ -1604,7 +1627,8 @@ abstract class ProfileAccountLoginTaskContract {
    * Cancelling an OAuth request in an account that wasn't waiting for one ignores the request.
    */
 
-  @Test(timeout = 5_000L)
+  @Test
+  @Timeout(value = 5L, unit = TimeUnit.SECONDS)
   fun testLoginOAuthNotWaitingCancel() {
     val authDescription =
       AccountProviderAuthenticationDescription.OAuthWithIntermediary(
@@ -1675,7 +1699,8 @@ abstract class ProfileAccountLoginTaskContract {
    * Cancelling OAuth works.
    */
 
-  @Test(timeout = 5_000L)
+  @Test
+  @Timeout(value = 5L, unit = TimeUnit.SECONDS)
   fun testLoginOAuthCancel() {
     val authDescription =
       AccountProviderAuthenticationDescription.OAuthWithIntermediary(
@@ -1856,7 +1881,7 @@ abstract class ProfileAccountLoginTaskContract {
     val state =
       this.account.loginState as AccountLoggedIn
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
       AccountAuthenticationCredentials.SAML2_0(
         adobeCredentials = null,
         authenticationDescription = "Description",

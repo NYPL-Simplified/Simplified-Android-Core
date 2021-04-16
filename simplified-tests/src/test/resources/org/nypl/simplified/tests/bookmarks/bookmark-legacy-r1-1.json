@@ -1,0 +1,12 @@
+{
+  "opdsId": "urn:isbn:9781683606123",
+  "location": {
+    "contentCFI": "/4/2[cover-image]/2",
+    "idref": "Cover"
+  },
+  "time": "2021-03-17T15:19:56.465",
+  "chapterTitle": "Unknown",
+  "chapterProgress": 0.3,
+  "bookProgress": 0.5,
+  "deviceID": "null"
+}

@@ -4,11 +4,9 @@ import android.content.Context
 import io.reactivex.subjects.PublishSubject
 import org.hamcrest.BaseMatcher
 import org.hamcrest.Description
-import org.junit.Assert
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.ExpectedException
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountEvent
@@ -23,7 +21,8 @@ import org.nypl.simplified.books.book_database.BookDatabases
 import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.files.FileUtilities
 import org.nypl.simplified.profiles.api.ProfileEvent
-import org.nypl.simplified.tests.MockAccountProviders
+import org.nypl.simplified.tests.mocking.FakeAccountCredentialStorage
+import org.nypl.simplified.tests.mocking.MockAccountProviders
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.IOException
@@ -38,13 +37,9 @@ abstract class AccountsDatabaseContract {
   private lateinit var credentialStore: FakeAccountCredentialStorage
   private lateinit var profileEvents: PublishSubject<ProfileEvent>
 
-  @Rule
-  @JvmField
-  var expected = ExpectedException.none()
-
   protected abstract fun context(): Context
 
-  @Before
+  @BeforeEach
   open fun setup() {
     this.credentialStore = FakeAccountCredentialStorage()
     this.accountEvents = PublishSubject.create()
@@ -59,7 +54,7 @@ abstract class AccountsDatabaseContract {
    * @param <T> The cause type
    */
 
-  private class CausesContains<T : Exception> internal constructor(
+  private class CausesContains<T : Exception>(
     private val exception_type: Class<T>,
     private val message: String
   ) : BaseMatcher<AccountsDatabaseException>() {
@@ -97,17 +92,22 @@ abstract class AccountsDatabaseContract {
 
     FileUtilities.fileWriteUTF8(f_acc, "Hello!")
 
-    this.expected.expect(AccountsDatabaseException::class.java)
-    this.expected.expect(CausesContains(IOException::class.java, "Not a directory"))
+    val ex = Assertions.assertThrows(AccountsDatabaseException::class.java) {
+      AccountsDatabase.open(
+        this.context(),
+        this.accountEvents,
+        this.bookDatabases(),
+        this.credentialStore,
+        this.accountProviders,
+        f_acc
+      )
+    }
 
-    AccountsDatabase.open(
-      this.context(),
-      this.accountEvents,
-      this.bookDatabases(),
-      this.credentialStore,
-      this.accountProviders,
-      f_acc
-    )
+    val causes =
+      ex.causes()
+        .filterIsInstance<IOException>()
+        .find { ex -> ex.message!!.contains("Not a directory") }
+    Assertions.assertTrue(causes != null)
   }
 
   private fun bookDatabases(): BookDatabases {
@@ -138,16 +138,22 @@ abstract class AccountsDatabaseContract {
     val f_a = File(f_acc, "xyz")
     f_a.mkdirs()
 
-    this.expected.expect(AccountsDatabaseException::class.java)
-    this.expected.expect(CausesContains(IOException::class.java, "Could not parse account: "))
-    val database = AccountsDatabase.open(
-      this.context(),
-      this.accountEvents,
-      this.bookDatabases(),
-      this.credentialStore,
-      this.accountProviders,
-      f_acc
-    )
+    val ex = Assertions.assertThrows(AccountsDatabaseException::class.java) {
+      val database = AccountsDatabase.open(
+        this.context(),
+        this.accountEvents,
+        this.bookDatabases(),
+        this.credentialStore,
+        this.accountProviders,
+        f_acc
+      )
+    }
+
+    val causes =
+      ex.causes()
+        .filterIsInstance<IOException>()
+        .find { ex -> ex.message!!.contains("Could not parse account: ") }
+    Assertions.assertTrue(causes != null)
   }
 
   @Test
@@ -163,16 +169,22 @@ abstract class AccountsDatabaseContract {
     val f_a = File(f_acc, "64e606e8-e242-4c5f-9bfb-63df11b187bd")
     f_a.mkdirs()
 
-    this.expected.expect(AccountsDatabaseException::class.java)
-    this.expected.expect(CausesContains(IOException::class.java, "Could not parse account: "))
-    AccountsDatabase.open(
-      this.context(),
-      this.accountEvents,
-      this.bookDatabases(),
-      this.credentialStore,
-      this.accountProviders,
-      f_acc
-    )
+    val ex = Assertions.assertThrows(AccountsDatabaseException::class.java) {
+      AccountsDatabase.open(
+        this.context(),
+        this.accountEvents,
+        this.bookDatabases(),
+        this.credentialStore,
+        this.accountProviders,
+        f_acc
+      )
+    }
+
+    val causes =
+      ex.causes()
+        .filterIsInstance<IOException>()
+        .find { ex -> ex.message!!.contains("Could not parse account: ") }
+    Assertions.assertTrue(causes != null)
   }
 
   @Test
@@ -191,16 +203,22 @@ abstract class AccountsDatabaseContract {
     val f_f = File(f_a, "account.json")
     FileUtilities.fileWriteUTF8(f_f, "} { this is not JSON { } { }")
 
-    this.expected.expect(AccountsDatabaseException::class.java)
-    this.expected.expect(CausesContains(IOException::class.java, "Could not parse account: "))
-    AccountsDatabase.open(
-      this.context(),
-      this.accountEvents,
-      this.bookDatabases(),
-      this.credentialStore,
-      this.accountProviders,
-      f_acc
-    )
+    val ex = Assertions.assertThrows(AccountsDatabaseException::class.java) {
+      AccountsDatabase.open(
+        this.context(),
+        this.accountEvents,
+        this.bookDatabases(),
+        this.credentialStore,
+        this.accountProviders,
+        f_acc
+      )
+    }
+
+    val causes =
+      ex.causes()
+        .filterIsInstance<IOException>()
+        .find { ex -> ex.message!!.contains("Could not parse account: ") }
+    Assertions.assertTrue(causes != null)
   }
 
   @Test
@@ -222,8 +240,8 @@ abstract class AccountsDatabaseContract {
       f_acc
     )
 
-    Assert.assertEquals(0, db.accounts().size.toLong())
-    Assert.assertEquals(f_acc, db.directory())
+    Assertions.assertEquals(0, db.accounts().size.toLong())
+    Assertions.assertEquals(f_acc, db.directory())
   }
 
   @Test
@@ -256,32 +274,19 @@ abstract class AccountsDatabaseContract {
     val acc0 = db.createAccount(provider0)
     val acc1 = db.createAccount(provider1)
 
-    Assert.assertTrue("Account 0 directory exists", acc0.directory.isDirectory())
-    Assert.assertTrue("Account 1 directory exists", acc1.directory.isDirectory())
+    Assertions.assertTrue(acc0.directory.isDirectory, "Account 0 directory exists")
+    Assertions.assertTrue(acc1.directory.isDirectory, "Account 1 directory exists")
+    Assertions.assertTrue(File(acc0.directory, "account.json").isFile, "Account 0 file exists")
+    Assertions.assertTrue(File(acc1.directory, "account.json").isFile, "Account 1 file exists")
 
-    Assert.assertTrue(
-      "Account 0 file exists",
-      File(acc0.directory, "account.json").isFile()
-    )
-    Assert.assertTrue(
-      "Account 1 file exists",
-      File(acc1.directory, "account.json").isFile()
-    )
+    Assertions.assertEquals(provider0, acc0.provider)
+    Assertions.assertEquals(provider1, acc1.provider)
 
-    Assert.assertEquals(
-      provider0,
-      acc0.provider
-    )
-    Assert.assertEquals(
-      provider1,
-      acc1.provider
-    )
+    Assertions.assertNotEquals(acc0.id, acc1.id)
+    Assertions.assertNotEquals(acc0.directory, acc1.directory)
 
-    Assert.assertNotEquals(acc0.id, acc1.id)
-    Assert.assertNotEquals(acc0.directory, acc1.directory)
-
-    Assert.assertEquals(AccountLoginState.AccountNotLoggedIn, acc0.loginState)
-    Assert.assertEquals(AccountLoginState.AccountNotLoggedIn, acc1.loginState)
+    Assertions.assertEquals(AccountLoginState.AccountNotLoggedIn, acc0.loginState)
+    Assertions.assertEquals(AccountLoginState.AccountNotLoggedIn, acc1.loginState)
   }
 
   @Test
@@ -308,8 +313,10 @@ abstract class AccountsDatabaseContract {
       MockAccountProviders.fakeProvider("http://www.example.com/accounts0/")
 
     val acc0 = db.createAccount(provider0)
-    this.expected.expect(AccountsDatabaseDuplicateProviderException::class.java)
-    val acc1 = db.createAccount(provider0)
+
+    Assertions.assertThrows(AccountsDatabaseDuplicateProviderException::class.java) {
+      val acc1 = db.createAccount(provider0)
+    }
   }
 
   @Test
@@ -351,12 +358,12 @@ abstract class AccountsDatabaseContract {
     val acr0 = db1.accounts()[acc0.id]!!
     val acr1 = db1.accounts()[acc1.id]!!
 
-    Assert.assertEquals(acc0.id, acr0.id)
-    Assert.assertEquals(acc1.id, acr1.id)
-    Assert.assertEquals(acc0.directory, acr0.directory)
-    Assert.assertEquals(acc1.directory, acr1.directory)
-    Assert.assertEquals(acc0.provider.id, acr0.provider.id)
-    Assert.assertEquals(acc1.provider.id, acr1.provider.id)
+    Assertions.assertEquals(acc0.id, acr0.id)
+    Assertions.assertEquals(acc1.id, acr1.id)
+    Assertions.assertEquals(acc0.directory, acr0.directory)
+    Assertions.assertEquals(acc1.directory, acr1.directory)
+    Assertions.assertEquals(acc0.provider.id, acr0.provider.id)
+    Assertions.assertEquals(acc1.provider.id, acr1.provider.id)
   }
 
   @Test
@@ -391,7 +398,7 @@ abstract class AccountsDatabaseContract {
       )
 
     acc0.setLoginState(AccountLoginState.AccountLoggedIn(creds))
-    Assert.assertEquals(AccountLoginState.AccountLoggedIn(creds), acc0.loginState)
+    Assertions.assertEquals(AccountLoginState.AccountLoggedIn(creds), acc0.loginState)
   }
 
   @Test
@@ -420,8 +427,9 @@ abstract class AccountsDatabaseContract {
 
     val acc0 = db0.createAccount(provider0)
 
-    this.expected.expect(AccountsDatabaseException::class.java)
-    acc0.setAccountProvider(provider1)
+    Assertions.assertThrows(AccountsDatabaseException::class.java) {
+      acc0.setAccountProvider(provider1)
+    }
   }
 
   @Test

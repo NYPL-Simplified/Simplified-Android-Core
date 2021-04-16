@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <c:changelog project="LibrarySimplified" xmlns:c="urn:com.io7m.changelog:4.0">
   <c:releases>
-    <c:release date="2021-03-04T19:53:37+00:00" is-open="true" ticket-system="org.nypl.jira" version="6.6.1">
+    <c:release date="2021-03-26T00:00:00+00:00" is-open="false" ticket-system="org.nypl.jira" version="6.6.3">
       <c:changes>
         <c:change date="2021-01-14T00:00:00+00:00" summary="Implemented announcements">
           <c:tickets>
@@ -45,9 +45,34 @@
             <c:ticket id="SIMPLY-3138"/>
           </c:tickets>
         </c:change>
-        <c:change date="2021-03-04T19:53:37+00:00" summary="Add a neutral age gate for the Play Store">
+        <c:change date="2021-03-04T00:00:00+00:00" summary="Add a neutral age gate for the Play Store">
           <c:tickets>
             <c:ticket id="SIMPLY-3493"/>
+          </c:tickets>
+        </c:change>
+      </c:changes>
+    </c:release>
+    <c:release date="2021-04-14T19:39:36+00:00" is-open="true" ticket-system="org.nypl.jira" version="6.6.4">
+      <c:changes>
+        <c:change date="2021-03-26T00:00:00+00:00" summary="Standardize bookmarks across platforms">
+          <c:tickets>
+            <c:ticket id="SIMPLY-3605"/>
+            <c:ticket id="SIMPLY-3604"/>
+          </c:tickets>
+        </c:change>
+        <c:change date="2021-04-01T00:00:00+00:00" summary="Fix DPLA audio book downloads">
+          <c:tickets>
+            <c:ticket id="SIMPLY-3666"/>
+          </c:tickets>
+        </c:change>
+        <c:change date="2021-04-14T00:00:00+00:00" summary="Eliminate some lifecycle-related crashes">
+          <c:tickets>
+            <c:ticket id="SIMPLY-3473"/>
+          </c:tickets>
+        </c:change>
+        <c:change date="2021-04-14T19:39:36+00:00" summary="Upgraded test suite to JUnit 5">
+          <c:tickets>
+            <c:ticket id="SIMPLY-3626"/>
           </c:tickets>
         </c:change>
       </c:changes>

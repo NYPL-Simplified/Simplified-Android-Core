@@ -5,11 +5,13 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.reactivex.subjects.Subject
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
-import org.joda.time.LocalDateTime
-import org.junit.After
-import org.junit.Assert
-import org.junit.Before
-import org.junit.Test
+import org.joda.time.DateTime
+import org.joda.time.DateTimeZone
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Timeout
 import org.librarysimplified.http.api.LSHTTPClientConfiguration
 import org.librarysimplified.http.api.LSHTTPClientType
 import org.librarysimplified.http.vanilla.LSHTTPClients
@@ -23,7 +25,6 @@ import org.nypl.simplified.accounts.api.AccountPreferences
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.api.AccountUsername
 import org.nypl.simplified.accounts.database.api.AccountType
-import org.nypl.simplified.books.api.BookChapterProgress
 import org.nypl.simplified.books.api.BookDRMInformation
 import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.books.api.BookID
@@ -46,6 +47,7 @@ import org.nypl.simplified.tests.EventAssertions
 import org.nypl.simplified.tests.EventLogging
 import org.slf4j.Logger
 import java.util.UUID
+import java.util.concurrent.TimeUnit
 
 abstract class ReaderBookmarkServiceContract {
 
@@ -85,20 +87,25 @@ abstract class ReaderBookmarkServiceContract {
     )
   }
 
-  @Before
+  @BeforeEach
   fun setup() {
     this.http =
       LSHTTPClients()
         .create(
           context = Mockito.mock(Context::class.java),
-          configuration = LSHTTPClientConfiguration("simplified-test", "0.0.1")
+          configuration = LSHTTPClientConfiguration(
+            applicationName = "simplified-test",
+            applicationVersion = "0.0.1",
+            tlsOverrides = null,
+            timeout = Pair(5L, TimeUnit.SECONDS)
+          )
         )
 
     this.server = MockWebServer()
     this.server.start()
   }
 
-  @After
+  @AfterEach
   fun tearDown() {
     this.readerBookmarkService?.close()
     this.server.close()
@@ -109,7 +116,8 @@ abstract class ReaderBookmarkServiceContract {
    * but has no books, succeeds quietly.
    */
 
-  @Test(timeout = 10_000L)
+  @Test
+  @Timeout(value = 10L, unit = TimeUnit.SECONDS)
   fun testInitializeEmpty() {
     addResponse(
       "http://www.example.com/patron",
@@ -220,14 +228,14 @@ abstract class ReaderBookmarkServiceContract {
       ReaderBookmarkEvent.ReaderBookmarkSyncStarted::class.java,
       bookmarkEvents.eventLog,
       0,
-      { event -> Assert.assertEquals(fakeAccountID, event.accountID) }
+      { event -> Assertions.assertEquals(fakeAccountID, event.accountID) }
     )
 
     EventAssertions.isTypeAndMatches(
       ReaderBookmarkEvent.ReaderBookmarkSyncFinished::class.java,
       bookmarkEvents.eventLog,
       1,
-      { event -> Assert.assertEquals(fakeAccountID, event.accountID) }
+      { event -> Assertions.assertEquals(fakeAccountID, event.accountID) }
     )
   }
 
@@ -236,7 +244,8 @@ abstract class ReaderBookmarkServiceContract {
    * but has no books, succeeds quietly.
    */
 
-  @Test(timeout = 5_000L)
+  @Test
+  @Timeout(value = 5L, unit = TimeUnit.SECONDS)
   fun testInitializeReceive() {
     addResponse(
       "http://www.example.com/patron",
@@ -400,28 +409,25 @@ abstract class ReaderBookmarkServiceContract {
       ReaderBookmarkEvent.ReaderBookmarkSyncStarted::class.java,
       bookmarkEvents.eventLog,
       0,
-      { event -> Assert.assertEquals(fakeAccountID, event.accountID) }
+      { event -> Assertions.assertEquals(fakeAccountID, event.accountID) }
     )
 
     EventAssertions.isTypeAndMatches(
       ReaderBookmarkEvent.ReaderBookmarkSaved::class.java,
       bookmarkEvents.eventLog,
       1,
-      { event -> Assert.assertEquals(fakeAccountID, event.accountID) }
+      { event -> Assertions.assertEquals(fakeAccountID, event.accountID) }
     )
 
     EventAssertions.isTypeAndMatches(
       ReaderBookmarkEvent.ReaderBookmarkSyncFinished::class.java,
       bookmarkEvents.eventLog,
       2,
-      { event -> Assert.assertEquals(fakeAccountID, event.accountID) }
+      { event -> Assertions.assertEquals(fakeAccountID, event.accountID) }
     )
 
-    Assert.assertEquals(1, receivedBookmarks.size)
-    Assert.assertEquals(
-      "urn:example.com/terms/id/c083c0a6-54c6-4cc5-9d3a-425317da662a",
-      receivedBookmarks[0].opdsId
-    )
+    Assertions.assertEquals(1, receivedBookmarks.size)
+    Assertions.assertEquals("urn:example.com/terms/id/c083c0a6-54c6-4cc5-9d3a-425317da662a", receivedBookmarks[0].opdsId)
   }
 
   /**
@@ -429,7 +435,8 @@ abstract class ReaderBookmarkServiceContract {
    * and has bookmarks, succeeds quietly.
    */
 
-  @Test(timeout = 5_000L)
+  @Test
+  @Timeout(value = 5L, unit = TimeUnit.SECONDS)
   fun testInitializeSendBookmarks() {
     addResponse(
       "http://www.example.com/patron",
@@ -498,11 +505,11 @@ abstract class ReaderBookmarkServiceContract {
 
     val startingBookmarks =
       listOf(
-        Bookmark(
+        Bookmark.create(
           opdsId = "urn:example.com/terms/id/c083c0a6-54c6-4cc5-9d3a-425317da662a",
-          location = BookLocation(BookChapterProgress(0, 0.5), null, "x"),
+          location = BookLocation.BookLocationR1(0.5, null, "x"),
           kind = BookmarkKind.ReaderBookmarkLastReadLocation,
-          time = LocalDateTime.now(),
+          time = DateTime.now(DateTimeZone.UTC),
           chapterTitle = "A Title",
           bookProgress = 0.5,
           deviceID = "urn:uuid:253c7cbc-4fdf-430e-81b9-18bea90b6026",
@@ -606,31 +613,25 @@ abstract class ReaderBookmarkServiceContract {
       ReaderBookmarkEvent.ReaderBookmarkSyncStarted::class.java,
       bookmarkEvents.eventLog,
       0,
-      { event -> Assert.assertEquals(fakeAccountID, event.accountID) }
+      { event -> Assertions.assertEquals(fakeAccountID, event.accountID) }
     )
 
     EventAssertions.isTypeAndMatches(
       ReaderBookmarkEvent.ReaderBookmarkSaved::class.java,
       bookmarkEvents.eventLog,
       1,
-      { event -> Assert.assertEquals(fakeAccountID, event.accountID) }
+      { event -> Assertions.assertEquals(fakeAccountID, event.accountID) }
     )
 
     EventAssertions.isTypeAndMatches(
       ReaderBookmarkEvent.ReaderBookmarkSyncFinished::class.java,
       bookmarkEvents.eventLog,
       2,
-      { event -> Assert.assertEquals(fakeAccountID, event.accountID) }
+      { event -> Assertions.assertEquals(fakeAccountID, event.accountID) }
     )
 
-    Assert.assertEquals(2, receivedBookmarks.size)
-    Assert.assertEquals(
-      "urn:example.com/terms/id/c083c0a6-54c6-4cc5-9d3a-425317da662a",
-      receivedBookmarks[0].opdsId
-    )
-    Assert.assertEquals(
-      "urn:example.com/terms/id/c083c0a6-54c6-4cc5-9d3a-425317da662a",
-      receivedBookmarks[1].opdsId
-    )
+    Assertions.assertEquals(2, receivedBookmarks.size)
+    Assertions.assertEquals("urn:example.com/terms/id/c083c0a6-54c6-4cc5-9d3a-425317da662a", receivedBookmarks[0].opdsId)
+    Assertions.assertEquals("urn:example.com/terms/id/c083c0a6-54c6-4cc5-9d3a-425317da662a", receivedBookmarks[1].opdsId)
   }
 }

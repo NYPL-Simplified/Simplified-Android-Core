@@ -1,22 +1,24 @@
 package org.nypl.simplified.main
 
+import android.content.Context
 import android.os.Bundle
-import android.view.LayoutInflater
+import android.os.Handler
+import android.os.Looper
+import android.view.MenuItem
 import android.view.View
-import android.view.ViewGroup
-import androidx.annotation.UiThread
+import androidx.activity.addCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import io.reactivex.disposables.Disposable
+import io.reactivex.disposables.CompositeDisposable
 import org.joda.time.DateTime
 import org.librarysimplified.services.api.Services
+import org.nypl.simplified.accessibility.AccessibilityService
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventDeletion
-import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.android.ktx.supportActionBar
-import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
+import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.navigation.api.NavigationControllerDirectoryType
 import org.nypl.simplified.navigation.api.NavigationControllerType
 import org.nypl.simplified.navigation.api.NavigationControllers
@@ -28,6 +30,7 @@ import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimeOutSoon
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimedOut
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.ui.accounts.AccountNavigationControllerType
+import org.nypl.simplified.ui.announcements.AnnouncementsController
 import org.nypl.simplified.ui.catalog.CatalogFeedArguments
 import org.nypl.simplified.ui.catalog.CatalogFeedOwnership
 import org.nypl.simplified.ui.catalog.CatalogNavigationControllerType
@@ -45,20 +48,21 @@ import org.slf4j.LoggerFactory
  * events.
  */
 
-class MainFragment : Fragment() {
+class MainFragment : Fragment(R.layout.main_tabbed_host) {
+
+  private val logger = LoggerFactory.getLogger(MainFragment::class.java)
 
   private lateinit var bottomNavigator: TabbedNavigationController
   private lateinit var bottomView: BottomNavigationView
-  private lateinit var buildConfig: BuildConfigurationServiceType
   private lateinit var navigationControllerDirectory: NavigationControllerDirectoryType
-  private lateinit var accountProviders: AccountProviderRegistryType
-  private lateinit var profilesController: ProfilesControllerType
-  private lateinit var uiThread: UIThreadServiceType
-  private lateinit var viewModel: MainFragmentViewModel
-  private val logger = LoggerFactory.getLogger(MainFragment::class.java)
-  private var accountSubscription: Disposable? = null
-  private var profileSubscription: Disposable? = null
   private var timeOutDialog: AlertDialog? = null
+
+  private lateinit var activityViewModel: MainActivityViewModel
+  private lateinit var viewModel: MainFragmentViewModel
+  private val subscriptions = CompositeDisposable()
+
+  private val handler: Handler = Handler(Looper.getMainLooper())
+  private val delayedRunnables: MutableList<Runnable> = mutableListOf()
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -66,57 +70,109 @@ class MainFragment : Fragment() {
     this.navigationControllerDirectory =
       NavigationControllers.findDirectory(this.requireActivity())
 
-    val services =
-      Services.serviceDirectory()
-
-    this.accountProviders =
-      services.requireService(AccountProviderRegistryType::class.java)
-    this.profilesController =
-      services.requireService(ProfilesControllerType::class.java)
-    this.buildConfig =
-      services.requireService(BuildConfigurationServiceType::class.java)
-    this.uiThread =
-      services.requireService(UIThreadServiceType::class.java)
-  }
-
-  override fun onCreateView(
-    inflater: LayoutInflater,
-    container: ViewGroup?,
-    savedInstanceState: Bundle?
-  ): View? {
-    val layout =
-      inflater.inflate(R.layout.main_tabbed_host, container, false)
-
-    this.bottomView =
-      layout.findViewById(R.id.bottomNavigator)
+    this.activityViewModel =
+      ViewModelProvider(this.requireActivity())
+        .get(MainActivityViewModel::class.java)
 
     this.viewModel =
-      ViewModelProviders.of(this.requireActivity())
+      ViewModelProvider(this)
         .get(MainFragmentViewModel::class.java)
+
+    /*
+    * If named profiles are enabled, subscribe to profile timer events so that users are
+    * logged out after a period of inactivity.
+    */
+
+    when (viewModel.profilesController.profileAnonymousEnabled()) {
+      ANONYMOUS_PROFILE_ENABLED -> {
+      }
+      ANONYMOUS_PROFILE_DISABLED -> {
+        viewModel.profilesController.profileIdleTimer().start()
+      }
+    }
+
+    /*
+    * Demand that onOptionsItemSelected be called.
+    */
+
+    setHasOptionsMenu(true)
+
+    /*
+    * Register an announcements controller.
+    */
+
+    val services = Services.serviceDirectory()
+    this.lifecycle.addObserver(
+      AnnouncementsController(
+        context = requireContext(),
+        uiThread = services.requireService(UIThreadServiceType::class.java),
+        profileController = services.requireService(ProfilesControllerType::class.java)
+      )
+    )
+
+    /*
+     * Register an accessibility controller.
+     */
+
+    this.lifecycle.addObserver(
+      AccessibilityService.create(
+        context = requireContext(),
+        bookRegistry = services.requireService(BookRegistryType::class.java),
+        uiThread = services.requireService(UIThreadServiceType::class.java)
+      )
+    )
+
+    requireActivity().onBackPressedDispatcher.addCallback(this) {
+      if (bottomNavigator.popBackStack()) {
+        return@addCallback
+      }
+
+      try {
+        isEnabled = false
+        requireActivity().onBackPressed()
+      } finally {
+        isEnabled = true
+      }
+    }
+  }
+
+  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    super.onViewCreated(view, savedInstanceState)
+
+    this.bottomView =
+      view.findViewById(R.id.bottomNavigator)
 
     /*
      * Hide various tabs based on build configuration and other settings.
      */
 
     val holdsItem = this.bottomView.menu.findItem(R.id.tabHolds)
-    holdsItem.isVisible = this.buildConfig.showHoldsTab
-    holdsItem.isEnabled = this.buildConfig.showHoldsTab
+    holdsItem.isVisible = viewModel.buildConfig.showHoldsTab
+    holdsItem.isEnabled = viewModel.buildConfig.showHoldsTab
 
     val settingsItem = this.bottomView.menu.findItem(R.id.tabSettings)
-    settingsItem.isVisible = this.buildConfig.showSettingsTab
-    settingsItem.isEnabled = this.buildConfig.showSettingsTab
+    settingsItem.isVisible = viewModel.buildConfig.showSettingsTab
+    settingsItem.isEnabled = viewModel.buildConfig.showSettingsTab
 
     val profilesVisible =
-      this.profilesController.profileAnonymousEnabled() == ANONYMOUS_PROFILE_DISABLED
+      viewModel.profilesController.profileAnonymousEnabled() == ANONYMOUS_PROFILE_DISABLED
 
     val profilesItem = this.bottomView.menu.findItem(R.id.tabProfile)
     profilesItem.isVisible = profilesVisible
     profilesItem.isEnabled = profilesVisible
-    return layout
   }
 
-  override fun onActivityCreated(savedInstanceState: Bundle?) {
-    super.onActivityCreated(savedInstanceState)
+  override fun onOptionsItemSelected(item: MenuItem): Boolean {
+    return when (item.itemId) {
+      android.R.id.home -> {
+        this.bottomNavigator.popToRoot()
+      }
+      else -> super.onOptionsItemSelected(item)
+    }
+  }
+
+  override fun onAttach(context: Context) {
+    super.onAttach(context)
 
     /*
      * This extremely unfortunate workaround (delaying the creation of the navigator by scheduling
@@ -141,28 +197,23 @@ class MainFragment : Fragment() {
      * foreground/background switches.
      */
 
-    this.uiThread.runOnUIThread {
+    this.runOnUIThread {
       this.bottomNavigator =
         TabbedNavigationController.create(
           activity = this.requireActivity(),
-          accountProviders = this.accountProviders,
-          profilesController = this.profilesController,
-          settingsConfiguration = this.buildConfig,
+          accountProviders = viewModel.accountProviders,
+          profilesController = viewModel.profilesController,
+          settingsConfiguration = viewModel.buildConfig,
           fragmentContainerId = R.id.tabbedFragmentHolder,
-          navigationView = this.bottomView
+          navigationView = this.bottomView,
+          listener = this::onFragmentTransactionCompleted
         )
 
-      if (this.viewModel.clearHistory) {
+      if (this.activityViewModel.clearHistory) {
         this.bottomNavigator.clearHistory()
-        this.viewModel.clearHistory = false
+        this.activityViewModel.clearHistory = false
       }
-    }
-  }
 
-  override fun onStart() {
-    super.onStart()
-
-    this.uiThread.runOnUIThread {
       this.navigationControllerDirectory.updateNavigationController(
         CatalogNavigationControllerType::class.java, this.bottomNavigator
       )
@@ -176,35 +227,53 @@ class MainFragment : Fragment() {
         NavigationControllerType::class.java, this.bottomNavigator
       )
     }
+  }
 
-    this.accountSubscription =
-      this.profilesController.accountEvents()
+  override fun onStart() {
+    super.onStart()
+
+    this.runOnUIThread {
+      viewModel.accountEvents
         .subscribe(this::onAccountEvent)
+        .let { subscriptions.add(it) }
 
-    this.profileSubscription =
-      this.profilesController.profileEvents()
+      viewModel.profileEvents
         .subscribe(this::onProfileEvent)
+        .let { subscriptions.add(it) }
 
-    /*
-     * If named profiles are enabled, subscribe to profile timer events so that users are
-     * logged out after a period of inactivity.
-     */
+      /*
+       * Ensure the toolbar is properly configured after an orientation change.
+       */
 
-    when (this.profilesController.profileAnonymousEnabled()) {
-      ANONYMOUS_PROFILE_ENABLED -> {}
-      ANONYMOUS_PROFILE_DISABLED -> {
-        this.profilesController.profileIdleTimer().start()
-      }
+      configureToolbar()
+
+      /*
+       * Show the Toolbar
+       */
+
+      this.supportActionBar?.show()
     }
+  }
 
-    /*
-     * Show the Toolbar
-     */
-    this.supportActionBar?.show()
+  private fun onFragmentTransactionCompleted() {
+    val isRoot = (0 == bottomNavigator.backStackSize())
+    this.logger.debug(
+      "controller stack size changed [{}, isRoot={}]", bottomNavigator.backStackSize(), isRoot
+    )
+    configureToolbar()
+  }
+
+  private fun configureToolbar() {
+    val isRoot = (0 == bottomNavigator.backStackSize())
+    this.supportActionBar?.apply {
+      setHomeAsUpIndicator(null)
+      setHomeActionContentDescription(null)
+      setDisplayHomeAsUpEnabled(!isRoot)
+    }
   }
 
   private fun onAccountEvent(event: AccountEvent) {
-    return when (event) {
+    when (event) {
       /*
        * We don't know which fragments on the backstack might refer to accounts that
        * have been deleted so we need to clear the history when an account is deleted.
@@ -213,39 +282,26 @@ class MainFragment : Fragment() {
        */
 
       is AccountEventDeletion.AccountEventDeletionSucceeded -> {
-        this.uiThread.runOnUIThread {
-          try {
-            this.bottomNavigator.clearHistory()
-          } catch (e: Throwable) {
-            this.logger.error("could not clear history: ", e)
-          }
+        try {
+          this.bottomNavigator.clearHistory()
+        } catch (e: Throwable) {
+          this.logger.error("could not clear history: ", e)
         }
-      }
-
-      else -> {
       }
     }
   }
 
   private fun onProfileEvent(event: ProfileEvent) {
-    return when (event) {
+    when (event) {
       is ProfileUpdated.Succeeded ->
-        this.uiThread.runOnUIThread {
-          this.onProfileUpdateSucceeded(event)
-        }
+        this.onProfileUpdateSucceeded(event)
       is ProfileIdleTimeOutSoon ->
-        this.uiThread.runOnUIThread {
-          this.showTimeOutSoonDialog()
-        }
+        this.showTimeOutSoonDialog()
       is ProfileIdleTimedOut ->
-        this.uiThread.runOnUIThread {
-          this.onIdleTimedOut()
-        }
-      else -> {}
+        this.onIdleTimedOut()
     }
   }
 
-  @UiThread
   private fun onProfileUpdateSucceeded(event: ProfileUpdated.Succeeded) {
     val oldAccountId = event.oldDescription.preferences.mostRecentAccount
     val newAccountId = event.newDescription.preferences.mostRecentAccount
@@ -258,7 +314,7 @@ class MainFragment : Fragment() {
       event.oldDescription.preferences.dateOfBirth != event.newDescription.preferences.dateOfBirth
     ) {
       newAccountId?.let { id ->
-        val profile = this.profilesController.profileCurrent()
+        val profile = viewModel.profilesController.profileCurrent()
         val account = profile.account(id)
         val age = profile.preferences().dateOfBirth?.yearsOld(DateTime.now()) ?: 1
         this.bottomNavigator.clearHistory()
@@ -275,23 +331,17 @@ class MainFragment : Fragment() {
     }
   }
 
-  @UiThread
   private fun onIdleTimedOut() {
-    this.uiThread.checkIsUIThread()
-
     this.timeOutDialog?.dismiss()
     NavigationControllers.find(this.requireActivity(), ProfilesNavigationControllerType::class.java)
       .openProfileSelect()
   }
 
-  @UiThread
   private fun showTimeOutSoonDialog() {
-    this.uiThread.checkIsUIThread()
-
     val dialog = ProfileDialogs.createTimeOutDialog(this.requireContext())
     this.timeOutDialog = dialog
     dialog.setOnDismissListener {
-      this.profilesController.profileIdleTimer().reset()
+      viewModel.profilesController.profileIdleTimer().reset()
       this.timeOutDialog = null
     }
     dialog.show()
@@ -299,17 +349,12 @@ class MainFragment : Fragment() {
 
   override fun onStop() {
     super.onStop()
+    this.subscriptions.clear()
+  }
 
-    when (this.profilesController.profileAnonymousEnabled()) {
-      ANONYMOUS_PROFILE_ENABLED -> {
-      }
-      ANONYMOUS_PROFILE_DISABLED -> {
-        this.profilesController.profileIdleTimer().stop()
-      }
-    }
-
-    this.profileSubscription?.dispose()
-    this.accountSubscription?.dispose()
+  override fun onDetach() {
+    super.onDetach()
+    clearDelayedRunnables()
 
     this.navigationControllerDirectory.removeNavigationController(
       CatalogNavigationControllerType::class.java
@@ -323,5 +368,32 @@ class MainFragment : Fragment() {
     this.navigationControllerDirectory.removeNavigationController(
       NavigationControllerType::class.java
     )
+  }
+
+  override fun onDestroy() {
+    super.onDestroy()
+
+    when (viewModel.profilesController.profileAnonymousEnabled()) {
+      ANONYMOUS_PROFILE_ENABLED -> {
+      }
+      ANONYMOUS_PROFILE_DISABLED -> {
+        viewModel.profilesController.profileIdleTimer().stop()
+      }
+    }
+  }
+
+  private fun runOnUIThread(f: () -> Unit) {
+    val runnable = Runnable {
+      f.invoke()
+    }
+    handler.post(runnable)
+    delayedRunnables.add(runnable)
+  }
+
+  private fun clearDelayedRunnables() {
+    while (delayedRunnables.isNotEmpty()) {
+      val r = delayedRunnables.removeFirst()
+      handler.removeCallbacks(r)
+    }
   }
 }

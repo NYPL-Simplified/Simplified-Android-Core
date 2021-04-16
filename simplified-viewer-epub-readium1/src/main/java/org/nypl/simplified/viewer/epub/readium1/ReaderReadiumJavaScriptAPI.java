@@ -82,9 +82,12 @@ public final class ReaderReadiumJavaScriptAPI implements ReaderReadiumJavaScript
            * parsed.
            */
 
-          final BookLocation location =
-            BookLocationJSON.deserializeFromString(
-              this.json_objects, TextUtilities.unquote(value));
+          final BookLocation.BookLocationR1 location =
+            (BookLocation.BookLocationR1)
+              BookLocationJSON.INSTANCE.deserializeFromString(
+                this.json_objects,
+                TextUtilities.unquote(value)
+              );
 
           listener.onCurrentPageReceived(location);
         } catch (final Throwable x) {

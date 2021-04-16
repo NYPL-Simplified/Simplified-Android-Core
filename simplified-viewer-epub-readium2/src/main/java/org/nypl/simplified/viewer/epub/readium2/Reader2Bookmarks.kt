@@ -1,5 +1,7 @@
 package org.nypl.simplified.viewer.epub.readium2
 
+import org.librarysimplified.r2.api.SR2BookChapter
+import org.librarysimplified.r2.api.SR2BookMetadata
 import org.librarysimplified.r2.api.SR2Bookmark
 import org.librarysimplified.r2.api.SR2Locator
 import org.nypl.simplified.accounts.api.AccountID
@@ -45,7 +47,8 @@ object Reader2Bookmarks {
   fun loadBookmarks(
     bookmarkService: ReaderBookmarkServiceUsableType,
     accountID: AccountID,
-    bookID: BookID
+    bookID: BookID,
+    bookMetadata: SR2BookMetadata
   ): List<SR2Bookmark> {
     val rawBookmarks =
       this.loadRawBookmarks(
@@ -54,24 +57,14 @@ object Reader2Bookmarks {
         bookID = bookID
       )
     val lastRead =
-      rawBookmarks.lastRead?.let(this::toSR2Bookmark)
+      rawBookmarks.lastRead?.let { this.toSR2Bookmark(bookMetadata, it) }
     val explicits =
-      rawBookmarks.bookmarks.mapNotNull(this::toSR2Bookmark)
+      rawBookmarks.bookmarks.mapNotNull { this.toSR2Bookmark(bookMetadata, it) }
 
     val results = mutableListOf<SR2Bookmark>()
     lastRead?.let(results::add)
     results.addAll(explicits)
     return results.toList()
-  }
-
-  /**
-   * Convert a list of bookmarks to SR2 bookmarks.
-   */
-
-  fun toSR2Bookmarks(
-    bookmarks: ReaderBookmarks
-  ): List<SR2Bookmark> {
-    return bookmarks.bookmarks.mapNotNull(this::toSR2Bookmark)
   }
 
   /**
@@ -84,18 +77,15 @@ object Reader2Bookmarks {
     source: SR2Bookmark
   ): Bookmark {
     val progress = BookChapterProgress(
-      chapterIndex = source.locator.chapterIndex,
+      chapterHref = source.locator.chapterHref,
       chapterProgress = when (val locator = source.locator) {
         is SR2Locator.SR2LocatorPercent -> locator.chapterProgress
         is SR2Locator.SR2LocatorChapterEnd -> 1.0
       }
     )
 
-    val location = BookLocation(
-      progress = progress,
-      contentCFI = null,
-      idRef = null
-    )
+    val location =
+      BookLocation.BookLocationR2(progress)
 
     val kind = when (source.type) {
       SR2Bookmark.Type.EXPLICIT ->
@@ -104,10 +94,10 @@ object Reader2Bookmarks {
         BookmarkKind.ReaderBookmarkLastReadLocation
     }
 
-    return Bookmark(
+    return Bookmark.create(
       opdsId = bookEntry.feedEntry.id,
       location = location,
-      time = source.date.toLocalDateTime(),
+      time = source.date,
       kind = kind,
       chapterTitle = source.title,
       bookProgress = source.bookProgress,
@@ -121,25 +111,67 @@ object Reader2Bookmarks {
    */
 
   fun toSR2Bookmark(
+    bookMetadata: SR2BookMetadata,
     source: Bookmark
   ): SR2Bookmark? {
-    val progress = source.location.progress
-    return if (progress != null) {
-      SR2Bookmark(
-        date = source.time.toDateTime(),
-        type = when (source.kind) {
-          BookmarkKind.ReaderBookmarkLastReadLocation -> SR2Bookmark.Type.LAST_READ
-          BookmarkKind.ReaderBookmarkExplicit -> SR2Bookmark.Type.EXPLICIT
-        },
-        title = source.chapterTitle,
-        locator = SR2Locator.SR2LocatorPercent(
-          chapterIndex = progress.chapterIndex,
-          chapterProgress = progress.chapterProgress
-        ),
-        bookProgress = source.bookProgress
-      )
-    } else {
-      null
+    return when (val location = source.location) {
+      is BookLocation.BookLocationR2 ->
+        this.r2ToSR2Bookmark(source, location)
+      is BookLocation.BookLocationR1 ->
+        this.r1ToSR2Bookmark(bookMetadata, source, location)
     }
   }
+
+  private fun r1ToSR2Bookmark(
+    bookMetadata: SR2BookMetadata,
+    source: Bookmark,
+    location: BookLocation.BookLocationR1
+  ): SR2Bookmark? {
+    val chapter = bookMetadata.readingOrder.find { chapter -> chapter.title == location.idRef }
+    if (chapter != null) {
+      return toSR2Chapter(chapter, source)
+    }
+    return null
+  }
+
+  private fun toSR2Chapter(
+    chapter: SR2BookChapter,
+    source: Bookmark
+  ): SR2Bookmark {
+    return SR2Bookmark(
+      date = source.time.toDateTime(),
+      type = when (source.kind) {
+        BookmarkKind.ReaderBookmarkLastReadLocation ->
+          SR2Bookmark.Type.LAST_READ
+        BookmarkKind.ReaderBookmarkExplicit ->
+          SR2Bookmark.Type.EXPLICIT
+      },
+      title = source.chapterTitle,
+      locator = SR2Locator.SR2LocatorPercent(
+        chapterHref = chapter.chapterHref,
+        chapterProgress = source.chapterProgress
+      ),
+      bookProgress = source.bookProgress
+    )
+  }
+
+  private fun r2ToSR2Bookmark(
+    source: Bookmark,
+    location: BookLocation.BookLocationR2
+  ): SR2Bookmark =
+    SR2Bookmark(
+      date = source.time.toDateTime(),
+      type = when (source.kind) {
+        BookmarkKind.ReaderBookmarkLastReadLocation ->
+          SR2Bookmark.Type.LAST_READ
+        BookmarkKind.ReaderBookmarkExplicit ->
+          SR2Bookmark.Type.EXPLICIT
+      },
+      title = source.chapterTitle,
+      locator = SR2Locator.SR2LocatorPercent(
+        chapterHref = location.progress.chapterHref,
+        chapterProgress = location.progress.chapterProgress
+      ),
+      bookProgress = source.bookProgress
+    )
 }

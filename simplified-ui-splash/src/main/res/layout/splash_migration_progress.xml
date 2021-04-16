@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent">
+
+  <ImageView
+    android:id="@+id/splashMigrationProgressImage"
+    android:layout_width="64dp"
+    android:layout_height="64dp"
+    android:layout_marginBottom="16dp"
+    android:layout_centerInParent="true"
+    android:layout_above="@+id/splashMigrationProgress"
+    app:srcCompat="@drawable/migration_icon" />
+
+  <ProgressBar
+    android:id="@+id/splashMigrationProgress"
+    style="?android:attr/progressBarStyleHorizontal"
+    android:layout_width="128dp"
+    android:layout_height="32dp"
+    android:indeterminate="true"
+    android:layout_centerInParent="true" />
+
+  <TextView
+    android:id="@+id/splashMigrationProgressText"
+    android:layout_width="256dp"
+    android:layout_height="wrap_content"
+    android:layout_centerInParent="true"
+    android:layout_below="@id/splashMigrationProgress"
+    android:layout_margin="16dp"
+    android:gravity="center"
+    android:maxLines="3"
+    android:ellipsize="end"
+    android:freezesText="true"/>
+
+</RelativeLayout>

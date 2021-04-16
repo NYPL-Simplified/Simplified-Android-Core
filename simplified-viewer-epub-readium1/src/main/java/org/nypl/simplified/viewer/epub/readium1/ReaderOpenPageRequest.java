@@ -31,7 +31,7 @@ import org.nypl.simplified.books.api.BookLocation;
    */
 
   public static ReaderOpenPageRequestType fromBookLocation(
-    final BookLocation location)
+    final BookLocation.BookLocationR1 location)
   {
     NullCheck.notNull(location);
     return new FromElementCFIAndIDRef(location.getIdRef(), Option.of(location.getContentCFI()));

@@ -1,0 +1,17 @@
+dependencies {
+  api project(":simplified-profiles-controller-api")
+  api project(":simplified-services-api")
+  api project(":simplified-ui-branding")
+  api project(":simplified-ui-navigation-api")
+  api project(":simplified-ui-accounts")
+  api project(":simplified-ui-errorpage")
+
+  implementation libraries.androidx_appcompat
+  implementation libraries.androidx_lifecycle
+  implementation libraries.androidx_fragment
+  implementation libraries.google_material
+  implementation libraries.io7m_jfunctional
+  implementation libraries.io7m_junreachable
+  implementation libraries.kotlin_stdlib
+  implementation libraries.slf4j
+}

@@ -55,13 +55,13 @@ dependencies {
   api project(":simplified-services-api")
   api project(":simplified-threads")
   api project(":simplified-ui-announcements")
-  api project(":simplified-ui-branding")
   api project(":simplified-ui-images")
   api project(":simplified-ui-navigation-api")
   api project(":simplified-ui-navigation-tabs")
   api project(":simplified-ui-profiles")
   api project(":simplified-ui-screen")
   api project(":simplified-ui-splash")
+  api project(":simplified-ui-onboarding")
   api project(":simplified-ui-thread-api")
   api project(":simplified-viewer-api")
   api project(":simplified-viewer-audiobook")
@@ -73,6 +73,9 @@ dependencies {
   api libraries.koush_async
   api libraries.androidx_appcompat
   api libraries.kotlin_stdlib
+  api libraries.rxjava2
+  api libraries.rxandroid2
+  api libraries.rxjava2extensions
   api libraries.nypl_http_api
   api libraries.nypl_http_bearer_token
   api libraries.nypl_http_vanilla

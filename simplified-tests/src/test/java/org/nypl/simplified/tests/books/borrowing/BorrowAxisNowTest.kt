@@ -5,12 +5,12 @@ import io.reactivex.disposables.Disposable
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.joda.time.Instant
-import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-import org.junit.Assert.fail
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.fail
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.librarysimplified.http.api.LSHTTPClientConfiguration
 import org.librarysimplified.http.api.LSHTTPClientType
 import org.librarysimplified.http.vanilla.LSHTTPClients
@@ -50,15 +50,16 @@ import org.nypl.simplified.opds.core.OPDSAcquisitionPathElement
 import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskRecorderType
-import org.nypl.simplified.tests.MockAccountProviders
-import org.nypl.simplified.tests.MockAxisNowService
-import org.nypl.simplified.tests.MockBookDatabase
-import org.nypl.simplified.tests.MockBookDatabaseEntry
-import org.nypl.simplified.tests.MockBookDatabaseEntryFormatHandleEPUB
-import org.nypl.simplified.tests.MockBundledContentResolver
-import org.nypl.simplified.tests.MockContentResolver
-import org.nypl.simplified.tests.MockDRMInformationAxisHandle
 import org.nypl.simplified.tests.TestDirectories
+import org.nypl.simplified.tests.mocking.MockAccountProviders
+import org.nypl.simplified.tests.mocking.MockAxisNowService
+import org.nypl.simplified.tests.mocking.MockBookDatabase
+import org.nypl.simplified.tests.mocking.MockBookDatabaseEntry
+import org.nypl.simplified.tests.mocking.MockBookDatabaseEntryFormatHandleEPUB
+import org.nypl.simplified.tests.mocking.MockBorrowContext
+import org.nypl.simplified.tests.mocking.MockBundledContentResolver
+import org.nypl.simplified.tests.mocking.MockContentResolver
+import org.nypl.simplified.tests.mocking.MockDRMInformationAxisHandle
 import org.slf4j.LoggerFactory
 
 class BorrowAxisNowTest {
@@ -102,7 +103,7 @@ class BorrowAxisNowTest {
     assertEquals(clazz, registryStatus.javaClass)
   }
 
-  @Before
+  @BeforeEach
   fun testSetup() {
     this.webServer = MockWebServer()
     this.webServer.start(20000)
@@ -241,7 +242,7 @@ class BorrowAxisNowTest {
     this.bookEvents.add(event)
   }
 
-  @After
+  @AfterEach
   fun tearDown() {
     this.bookRegistrySub?.dispose()
     this.webServer.close()

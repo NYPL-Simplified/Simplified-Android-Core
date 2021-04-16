@@ -5,12 +5,12 @@ import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
 import io.reactivex.subjects.PublishSubject
 import org.joda.time.DateTime
-import org.junit.After
-import org.junit.Assert
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.ExpectedException
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Timeout
+import org.junit.jupiter.api.function.Executable
 import org.librarysimplified.http.api.LSHTTPClientType
 import org.mockito.Mockito
 import org.nypl.simplified.accounts.api.AccountEvent
@@ -65,18 +65,18 @@ import org.nypl.simplified.reader.api.ReaderFontSelection
 import org.nypl.simplified.reader.api.ReaderPreferences
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkEvent
 import org.nypl.simplified.tests.EventAssertions
-import org.nypl.simplified.tests.MockAccountCreationStringResources
-import org.nypl.simplified.tests.MockAccountDeletionStringResources
-import org.nypl.simplified.tests.MockAccountLoginStringResources
-import org.nypl.simplified.tests.MockAccountLogoutStringResources
-import org.nypl.simplified.tests.MockAccountProviderRegistry
-import org.nypl.simplified.tests.MockAccountProviderResolutionStrings
-import org.nypl.simplified.tests.MockAccountProviders
-import org.nypl.simplified.tests.MockAnalytics
-import org.nypl.simplified.tests.MockRevokeStringResources
 import org.nypl.simplified.tests.MutableServiceDirectory
-import org.nypl.simplified.tests.books.accounts.FakeAccountCredentialStorage
 import org.nypl.simplified.tests.books.idle_timer.InoperableIdleTimer
+import org.nypl.simplified.tests.mocking.FakeAccountCredentialStorage
+import org.nypl.simplified.tests.mocking.MockAccountCreationStringResources
+import org.nypl.simplified.tests.mocking.MockAccountDeletionStringResources
+import org.nypl.simplified.tests.mocking.MockAccountLoginStringResources
+import org.nypl.simplified.tests.mocking.MockAccountLogoutStringResources
+import org.nypl.simplified.tests.mocking.MockAccountProviderRegistry
+import org.nypl.simplified.tests.mocking.MockAccountProviderResolutionStrings
+import org.nypl.simplified.tests.mocking.MockAccountProviders
+import org.nypl.simplified.tests.mocking.MockAnalytics
+import org.nypl.simplified.tests.mocking.MockRevokeStringResources
 import org.slf4j.Logger
 import java.io.File
 import java.io.FileNotFoundException
@@ -85,12 +85,9 @@ import java.util.ArrayList
 import java.util.Collections
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 abstract class ProfilesControllerContract {
-
-  @JvmField
-  @Rule
-  var expected = ExpectedException.none()
 
   private lateinit var accountEvents: PublishSubject<AccountEvent>
   private lateinit var accountEventsReceived: MutableList<AccountEvent>
@@ -187,7 +184,7 @@ abstract class ProfilesControllerContract {
     )
   }
 
-  @Before
+  @BeforeEach
   @Throws(Exception::class)
   fun setUp() {
     this.audioBookManifestStrategies = Mockito.mock(AudioBookManifestStrategiesType::class.java)
@@ -213,7 +210,7 @@ abstract class ProfilesControllerContract {
     this.bookFormatSupport = Mockito.mock(BookFormatSupportType::class.java)
   }
 
-  @After
+  @AfterEach
   @Throws(Exception::class)
   fun tearDown() {
     this.executorBooks.shutdown()
@@ -255,7 +252,8 @@ abstract class ProfilesControllerContract {
    * @throws Exception On errors
    */
 
-  @Test(timeout = 3_000L)
+  @Test
+  @Timeout(value = 3L, unit = TimeUnit.SECONDS)
   @Throws(Exception::class)
   fun testProfilesCurrentNoneCurrent() {
     val profiles =
@@ -266,8 +264,12 @@ abstract class ProfilesControllerContract {
         accountProviders = MockAccountProviders.fakeAccountProviders()
       )
 
-    this.expected.expect(ProfileNoneCurrentException::class.java)
-    controller.profileCurrent()
+    Assertions.assertThrows(
+      ProfileNoneCurrentException::class.java,
+      Executable {
+        controller.profileCurrent()
+      }
+    )
   }
 
   /**
@@ -276,7 +278,8 @@ abstract class ProfilesControllerContract {
    * @throws Exception On errors
    */
 
-  @Test(timeout = 3_000L)
+  @Test
+  @Timeout(value = 3L, unit = TimeUnit.SECONDS)
   @Throws(Exception::class)
   fun testProfilesCurrentSelectCurrent() {
     val accountProvider =
@@ -300,7 +303,7 @@ abstract class ProfilesControllerContract {
     this.accountEventsReceived.forEach { this.logger.debug("event: {}", it) }
 
     val p = controller.profileCurrent()
-    Assert.assertEquals("Kermit", p.displayName)
+    Assertions.assertEquals("Kermit", p.displayName)
   }
 
   /**
@@ -309,7 +312,8 @@ abstract class ProfilesControllerContract {
    * @throws Exception On errors
    */
 
-  @Test(timeout = 3_000L)
+  @Test
+  @Timeout(value = 3L, unit = TimeUnit.SECONDS)
   @Throws(Exception::class)
   fun testProfilesCreateDuplicate() {
     val profiles =
@@ -340,7 +344,7 @@ abstract class ProfilesControllerContract {
       ProfileCreationFailed::class.java,
       this.profileEventsReceived,
       1
-    ) { e -> Assert.assertEquals(ERROR_DISPLAY_NAME_ALREADY_USED, e.errorCode()) }
+    ) { e -> Assertions.assertEquals(ERROR_DISPLAY_NAME_ALREADY_USED, e.errorCode()) }
   }
 
   /**
@@ -349,7 +353,8 @@ abstract class ProfilesControllerContract {
    * @throws Exception On errors
    */
 
-  @Test(timeout = 3_000L)
+  @Test
+  @Timeout(value = 3L, unit = TimeUnit.SECONDS)
   @Throws(Exception::class)
   fun testProfilesPreferences() {
     val profiles =
@@ -379,7 +384,7 @@ abstract class ProfilesControllerContract {
       this.profileEventsReceived,
       0
     ) { e ->
-      Assert.assertTrue("Preferences must not have changed", e.oldDescription == e.newDescription)
+      Assertions.assertTrue(e.oldDescription == e.newDescription, "Preferences must not have changed")
     }
 
     this.profileEventsReceived.clear()
@@ -402,7 +407,7 @@ abstract class ProfilesControllerContract {
       this.profileEventsReceived,
       0
     ) { e ->
-      Assert.assertTrue("Preferences must have changed", e.oldDescription != e.newDescription)
+      Assertions.assertTrue(e.oldDescription != e.newDescription, "Preferences must have changed")
     }
   }
 
@@ -412,7 +417,8 @@ abstract class ProfilesControllerContract {
    * @throws Exception On errors
    */
 
-  @Test(timeout = 3_000L)
+  @Test
+  @Timeout(value = 3L, unit = TimeUnit.SECONDS)
   @Throws(Exception::class)
   fun testProfilesFeed() {
     val accountProvider =
@@ -454,7 +460,7 @@ abstract class ProfilesControllerContract {
         )
       ).get()
 
-    Assert.assertEquals(0L, feed.size.toLong())
+    Assertions.assertEquals(0L, feed.size.toLong())
   }
 
   @Throws(ProfileDatabaseException::class)

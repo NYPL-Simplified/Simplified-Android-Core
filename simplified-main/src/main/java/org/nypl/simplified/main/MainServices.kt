@@ -76,6 +76,7 @@ import org.nypl.simplified.feeds.api.FeedHTTPTransport
 import org.nypl.simplified.feeds.api.FeedLoader
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.files.DirectoryUtilities
+import org.nypl.simplified.migration.api.MigrationsType
 import org.nypl.simplified.networkconnectivity.NetworkConnectivity
 import org.nypl.simplified.networkconnectivity.api.NetworkConnectivityType
 import org.nypl.simplified.notifications.NotificationsService
@@ -1050,6 +1051,12 @@ internal object MainServices {
       message = strings.bootingGeneral("card creator service"),
       interfaceType = CardCreatorServiceType::class.java,
       serviceConstructor = { CardCreatorService.createConditionally(context) }
+    )
+
+    addService(
+      message = strings.bootingGeneral("migrations"),
+      interfaceType = MigrationsType::class.java,
+      serviceConstructor = { MainMigrations.create(context, bookController) }
     )
 
     this.showThreads()

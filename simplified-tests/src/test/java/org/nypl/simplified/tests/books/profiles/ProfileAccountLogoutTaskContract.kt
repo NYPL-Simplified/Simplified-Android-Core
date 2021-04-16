@@ -4,10 +4,10 @@ import android.content.Context
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okio.Buffer
-import org.junit.After
-import org.junit.Assert
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.librarysimplified.http.api.LSHTTPClientConfiguration
 import org.librarysimplified.http.api.LSHTTPClientType
 import org.librarysimplified.http.vanilla.LSHTTPClients
@@ -41,10 +41,11 @@ import org.nypl.simplified.patron.PatronUserProfileParsers
 import org.nypl.simplified.patron.api.PatronUserProfileParsersType
 import org.nypl.simplified.profiles.api.ProfileID
 import org.nypl.simplified.profiles.api.ProfileReadableType
-import org.nypl.simplified.tests.MockAccountLogoutStringResources
+import org.nypl.simplified.tests.mocking.MockAccountLogoutStringResources
 import org.slf4j.Logger
 import java.io.InputStream
 import java.util.UUID
+import java.util.concurrent.TimeUnit
 
 abstract class ProfileAccountLogoutTaskContract {
 
@@ -65,13 +66,18 @@ abstract class ProfileAccountLogoutTaskContract {
 
   abstract val logger: Logger
 
-  @Before
+  @BeforeEach
   fun testSetup() {
     this.http =
       LSHTTPClients()
         .create(
           context = Mockito.mock(Context::class.java),
-          configuration = LSHTTPClientConfiguration("simplified-tests", "0.0.1")
+          configuration = LSHTTPClientConfiguration(
+            applicationName = "simplified-tests",
+            applicationVersion = "0.0.1",
+            tlsOverrides = null,
+            timeout = Pair(5L, TimeUnit.SECONDS)
+          )
         )
 
     this.profile =
@@ -100,7 +106,7 @@ abstract class ProfileAccountLogoutTaskContract {
     this.server.start()
   }
 
-  @After
+  @AfterEach
   fun testTearDown() {
     this.server.close()
   }
@@ -414,7 +420,7 @@ abstract class ProfileAccountLogoutTaskContract {
     val state =
       this.account.loginState as AccountLogoutFailed
 
-    Assert.assertEquals(credentials, state.credentials)
+    Assertions.assertEquals(credentials, state.credentials)
 
     Mockito.verify(this.bookDatabase, Mockito.times(0))
       .delete()

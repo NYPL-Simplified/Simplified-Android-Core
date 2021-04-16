@@ -76,13 +76,15 @@ dependencies {
   implementation libraries.io7m_jnull
   implementation libraries.jackson_databind
   implementation libraries.junit
+  implementation libraries.junit_jupiter_api
+  implementation libraries.junit_jupiter_engine
   implementation libraries.kotlin_stdlib
-  implementation libraries.okhttp3_mockwebserver
   implementation libraries.mockito_android
   implementation libraries.nypl_drm_core
   implementation libraries.nypl_http_api
-  implementation libraries.nypl_http_vanilla
   implementation libraries.nypl_http_bearer_token
+  implementation libraries.nypl_http_vanilla
+  implementation libraries.okhttp3_mockwebserver
   implementation libraries.slf4j
 
   testImplementation libraries.logback_classic

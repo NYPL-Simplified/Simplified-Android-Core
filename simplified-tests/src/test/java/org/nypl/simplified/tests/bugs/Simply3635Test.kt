@@ -10,9 +10,9 @@ import okhttp3.internal.closeQuietly
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.joda.time.DateTime
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.librarysimplified.http.api.LSHTTPClientConfiguration
 import org.librarysimplified.http.api.LSHTTPClientType
 import org.librarysimplified.http.vanilla.LSHTTPClients
@@ -67,10 +67,10 @@ import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimer
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimerType
 import org.nypl.simplified.reader.api.ReaderPreferences
-import org.nypl.simplified.tests.MockAccountProviders
-import org.nypl.simplified.tests.MockBundledContentResolver
-import org.nypl.simplified.tests.MockStrings
 import org.nypl.simplified.tests.TestDirectories
+import org.nypl.simplified.tests.mocking.MockAccountProviders
+import org.nypl.simplified.tests.mocking.MockBundledContentResolver
+import org.nypl.simplified.tests.mocking.MockStrings
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.util.concurrent.ExecutorService
@@ -112,7 +112,7 @@ class Simply3635Test {
   private lateinit var server: MockWebServer
   private lateinit var services: ServiceDirectoryType
 
-  @Before
+  @BeforeEach
   fun setup() {
     this.server = MockWebServer()
     this.server.start()
@@ -250,7 +250,7 @@ class Simply3635Test {
       )
   }
 
-  @After
+  @AfterEach
   fun tearDown() {
     try {
       this.executorService.shutdown()

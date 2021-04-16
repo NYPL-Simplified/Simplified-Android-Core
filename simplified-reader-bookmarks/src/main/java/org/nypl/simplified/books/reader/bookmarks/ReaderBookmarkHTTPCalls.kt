@@ -13,6 +13,7 @@ import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.json.core.JSONParserUtilities
 import org.nypl.simplified.reader.bookmarks.api.BookmarkAnnotation
+import org.nypl.simplified.reader.bookmarks.api.BookmarkAnnotationsJSON
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkHTTPCallsType
 import org.slf4j.LoggerFactory
 import java.io.ByteArrayInputStream
@@ -176,7 +177,10 @@ class ReaderBookmarkHTTPCalls(
     val node =
       this.objectMapper.readTree(value)
     val response =
-      BookmarkAnnotationsJSON.deserializeBookmarkAnnotationResponseFromJSON(node)
+      BookmarkAnnotationsJSON.deserializeBookmarkAnnotationResponseFromJSON(
+        objectMapper = this.objectMapper,
+        node = node
+      )
     return response.first.items
   }
 
