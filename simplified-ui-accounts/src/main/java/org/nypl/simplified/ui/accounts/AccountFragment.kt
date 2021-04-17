@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
@@ -12,18 +11,15 @@ import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
-import androidx.annotation.UiThread
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SwitchCompat
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProviders
-import com.google.common.util.concurrent.ListeningScheduledExecutorService
+import androidx.fragment.app.viewModels
 import com.io7m.junreachable.UnimplementedCodeException
 import com.io7m.junreachable.UnreachableCodeException
-import io.reactivex.disposables.Disposable
-import org.joda.time.DateTime
-import org.librarysimplified.documents.DocumentStoreType
+import io.reactivex.disposables.CompositeDisposable
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountEvent
@@ -38,22 +34,17 @@ import org.nypl.simplified.accounts.api.AccountLoginState.AccountNotLoggedIn
 import org.nypl.simplified.accounts.api.AccountPassword
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.api.AccountUsername
-import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.android.ktx.supportActionBar
-import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.cardcreator.CardCreatorServiceType
 import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.oauth.OAuthCallbackIntentParsing
-import org.nypl.simplified.profiles.api.ProfileDateOfBirth
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileUpdated
 import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest
 import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest.Basic
 import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest.OAuthWithIntermediaryCancel
 import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest.OAuthWithIntermediaryInitiate
-import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskStep
-import org.nypl.simplified.threads.NamedThreadPools
 import org.nypl.simplified.ui.accounts.AccountLoginButtonStatus.AsCancelButtonDisabled
 import org.nypl.simplified.ui.accounts.AccountLoginButtonStatus.AsCancelButtonEnabled
 import org.nypl.simplified.ui.accounts.AccountLoginButtonStatus.AsLoginButtonDisabled
@@ -64,7 +55,6 @@ import org.nypl.simplified.ui.accounts.saml20.AccountSAML20FragmentParameters
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.images.ImageAccountIcons
 import org.nypl.simplified.ui.images.ImageLoaderType
-import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.slf4j.LoggerFactory
 import java.net.URI
 import java.util.concurrent.atomic.AtomicBoolean
@@ -73,11 +63,22 @@ import java.util.concurrent.atomic.AtomicBoolean
  * A fragment that shows settings for a single account.
  */
 
-class AccountFragment : Fragment() {
+class AccountFragment : Fragment(R.layout.account) {
 
-  private val logger = LoggerFactory.getLogger(AccountFragment::class.java)
+  private val logger =
+    LoggerFactory.getLogger(AccountFragment::class.java)
 
-  private lateinit var account: AccountType
+  private val subscriptions: CompositeDisposable =
+    CompositeDisposable()
+
+  private val parameters: AccountFragmentParameters by lazy {
+    this.requireArguments()[PARAMETERS_ID] as AccountFragmentParameters
+  }
+
+  private val viewModel: AccountViewModel by viewModels(
+    factoryProducer = { AccountViewModelFactory(account = this.parameters.accountId) }
+  )
+
   private lateinit var accountCustomOPDS: ViewGroup
   private lateinit var accountCustomOPDSField: TextView
   private lateinit var accountIcon: ImageView
@@ -87,12 +88,9 @@ class AccountFragment : Fragment() {
   private lateinit var authenticationAlternatives: ViewGroup
   private lateinit var authenticationAlternativesButtons: ViewGroup
   private lateinit var authenticationViews: AccountAuthenticationViews
-  private lateinit var backgroundExecutor: ListeningScheduledExecutorService
   private lateinit var bookmarkSync: ViewGroup
   private lateinit var bookmarkSyncCheck: SwitchCompat
   private lateinit var bookmarkSyncLabel: View
-  private lateinit var buildConfig: BuildConfigurationServiceType
-  private lateinit var documents: DocumentStoreType
   private lateinit var eulaCheckbox: CheckBox
   private lateinit var imageLoader: ImageLoaderType
   private lateinit var loginProgress: ViewGroup
@@ -100,24 +98,18 @@ class AccountFragment : Fragment() {
   private lateinit var loginProgressBar: ProgressBar
   private lateinit var loginProgressText: TextView
   private lateinit var loginTitle: ViewGroup
-  private lateinit var parameters: AccountFragmentParameters
-  private lateinit var profilesController: ProfilesControllerType
   private lateinit var reportIssueEmail: TextView
   private lateinit var reportIssueGroup: ViewGroup
   private lateinit var reportIssueItem: View
   private lateinit var settingsCardCreator: ConstraintLayout
   private lateinit var signUpButton: Button
   private lateinit var signUpLabel: TextView
-  private lateinit var uiThread: UIThreadServiceType
-  private lateinit var viewModel: AccountFragmentViewModel
 
   private val cardCreatorResultCode = 101
   private val closing = AtomicBoolean(false)
   private val imageButtonLoadingTag = "IMAGE_BUTTON_LOADING"
   private val nyplCardCreatorScheme = "nypl.card-creator"
-  private var accountSubscription: Disposable? = null
   private var cardCreatorService: CardCreatorServiceType? = null
-  private var profileSubscription: Disposable? = null
 
   companion object {
 
@@ -129,59 +121,35 @@ class AccountFragment : Fragment() {
      */
 
     fun create(parameters: AccountFragmentParameters): AccountFragment {
-      val arguments = Bundle()
-      arguments.putSerializable(this.PARAMETERS_ID, parameters)
       val fragment = AccountFragment()
-      fragment.arguments = arguments
+      fragment.arguments = bundleOf(this.PARAMETERS_ID to parameters)
       return fragment
     }
   }
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    this.parameters = this.requireArguments()[PARAMETERS_ID] as AccountFragmentParameters
 
     val services = Services.serviceDirectory()
 
     this.cardCreatorService =
       services.optionalService(CardCreatorServiceType::class.java)
-    this.profilesController =
-      services.requireService(ProfilesControllerType::class.java)
-    this.documents =
-      services.requireService(DocumentStoreType::class.java)
     this.imageLoader =
       services.requireService(ImageLoaderType::class.java)
-    this.uiThread =
-      services.requireService(UIThreadServiceType::class.java)
-    this.buildConfig =
-      services.requireService(BuildConfigurationServiceType::class.java)
-
-    this.account =
-      this.profilesController.profileCurrent()
-        .account(this.parameters.accountId)
-
-    this.viewModel =
-      ViewModelProviders.of(this)
-        .get(AccountFragmentViewModel::class.java)
   }
 
-  override fun onCreateView(
-    inflater: LayoutInflater,
-    container: ViewGroup?,
-    savedInstanceState: Bundle?
-  ): View? {
-    val layout =
-      inflater.inflate(R.layout.account, container, false)
+  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    super.onViewCreated(view, savedInstanceState)
 
     this.accountTitle =
-      layout.findViewById(R.id.accountCellTitle)
+      view.findViewById(R.id.accountCellTitle)
     this.accountSubtitle =
-      layout.findViewById(R.id.accountCellSubtitle)
+      view.findViewById(R.id.accountCellSubtitle)
     this.accountIcon =
-      layout.findViewById(R.id.accountCellIcon)
+      view.findViewById(R.id.accountCellIcon)
 
     this.authentication =
-      layout.findViewById(R.id.auth)
+      view.findViewById(R.id.auth)
     this.authenticationViews =
       AccountAuthenticationViews(
         viewGroup = this.authentication,
@@ -189,43 +157,43 @@ class AccountFragment : Fragment() {
       )
 
     this.authenticationAlternatives =
-      layout.findViewById(R.id.accountAuthAlternatives)
+      view.findViewById(R.id.accountAuthAlternatives)
     this.authenticationAlternativesButtons =
-      layout.findViewById(R.id.accountAuthAlternativesButtons)
+      view.findViewById(R.id.accountAuthAlternativesButtons)
 
     this.bookmarkSync =
-      layout.findViewById(R.id.accountSyncBookmarks)
+      view.findViewById(R.id.accountSyncBookmarks)
     this.bookmarkSyncCheck =
       this.bookmarkSync.findViewById(R.id.accountSyncBookmarksCheck)
     this.bookmarkSyncLabel =
       this.bookmarkSync.findViewById(R.id.accountSyncBookmarksLabel)
 
     this.loginTitle =
-      layout.findViewById(R.id.accountTitleAnnounce)
+      view.findViewById(R.id.accountTitleAnnounce)
     this.loginProgress =
-      layout.findViewById(R.id.accountLoginProgress)
+      view.findViewById(R.id.accountLoginProgress)
     this.loginProgressBar =
-      layout.findViewById(R.id.accountLoginProgressBar)
+      view.findViewById(R.id.accountLoginProgressBar)
     this.loginProgressText =
-      layout.findViewById(R.id.accountLoginProgressText)
+      view.findViewById(R.id.accountLoginProgressText)
     this.loginButtonErrorDetails =
-      layout.findViewById(R.id.accountLoginButtonErrorDetails)
+      view.findViewById(R.id.accountLoginButtonErrorDetails)
     this.eulaCheckbox =
-      layout.findViewById(R.id.accountEULACheckbox)
+      view.findViewById(R.id.accountEULACheckbox)
     this.signUpButton =
-      layout.findViewById(R.id.accountCardCreatorSignUp)
+      view.findViewById(R.id.accountCardCreatorSignUp)
     this.signUpLabel =
-      layout.findViewById(R.id.accountCardCreatorLabel)
+      view.findViewById(R.id.accountCardCreatorLabel)
     this.settingsCardCreator =
-      layout.findViewById(R.id.accountCardCreator)
+      view.findViewById(R.id.accountCardCreator)
 
     this.accountCustomOPDS =
-      layout.findViewById(R.id.accountCustomOPDS)
+      view.findViewById(R.id.accountCustomOPDS)
     this.accountCustomOPDSField =
       this.accountCustomOPDS.findViewById(R.id.accountCustomOPDSField)
 
     this.reportIssueGroup =
-      layout.findViewById(R.id.accountReportIssue)
+      view.findViewById(R.id.accountReportIssue)
     this.reportIssueItem =
       this.reportIssueGroup.findViewById(R.id.accountReportIssueText)
     this.reportIssueEmail =
@@ -233,29 +201,85 @@ class AccountFragment : Fragment() {
 
     this.loginButtonErrorDetails.visibility = View.GONE
     this.loginProgressBar.visibility = View.INVISIBLE
-    this.loginProgressText.text = ""
     this.setLoginButtonStatus(AsLoginButtonDisabled)
+
+    if (savedInstanceState == null) {
+      this.loginProgressText.text = ""
+    }
 
     if (this.parameters.showPleaseLogInTitle) {
       this.loginTitle.visibility = View.VISIBLE
     } else {
       this.loginTitle.visibility = View.GONE
     }
-    return layout
+
+    /*
+    * Only show a EULA checkbox if there's actually a EULA.
+    */
+
+    val eula = this.viewModel.eula
+    if (eula != null) {
+      this.eulaCheckbox.visibility = View.VISIBLE
+      this.eulaCheckbox.isChecked = eula.hasAgreed
+      this.eulaCheckbox.setOnCheckedChangeListener { _, checked ->
+        eula.hasAgreed = checked
+        this.setLoginButtonStatus(this.determineLoginIsSatisfied())
+      }
+    } else {
+      this.eulaCheckbox.visibility = View.GONE
+    }
+
+    this.hideCardCreatorForNonNYPL()
+
+    this.accountTitle.text =
+      this.viewModel.account.provider.displayName
+    this.accountSubtitle.text =
+      this.viewModel.account.provider.subtitle
+
+    /*
+     * Conditionally enable sign up button
+     */
+
+    val signUpEnabled = this.shouldSignUpBeEnabled()
+    this.signUpButton.isEnabled = signUpEnabled
+    this.signUpLabel.isEnabled = signUpEnabled
+
+    /*
+     * Instantiate views for alternative authentication methods.
+     */
+
+    this.authenticationAlternativesMake()
+
+    /*
+     * Show/hide the custom OPDS feed section.
+     */
+
+    val catalogURIOverride = this.viewModel.account.preferences.catalogURIOverride
+    this.accountCustomOPDSField.text = catalogURIOverride?.toString() ?: ""
+    this.accountCustomOPDS.visibility =
+      if (catalogURIOverride != null) {
+        View.VISIBLE
+      } else {
+        View.GONE
+      }
+
+    this.reconfigureAccountUI()
   }
 
-  @UiThread
+  override fun onDestroyView() {
+    super.onDestroyView()
+    this.cancelImageButtonLoading()
+  }
+
   private fun onBasicUserPasswordChanged(
     username: AccountUsername,
     password: AccountPassword
   ) {
-    this.uiThread.checkIsUIThread()
     this.setLoginButtonStatus(this.determineLoginIsSatisfied())
   }
 
-  @UiThread
   private fun determineLoginIsSatisfied(): AccountLoginButtonStatus {
-    val authDescription = this.account.provider.authentication
+    val authDescription = this.viewModel.account.provider.authentication
     val eulaOk = this.determineEULAIsSatisfied()
     val loginPossible = authDescription.isLoginPossible
     val satisfiedFor = this.authenticationViews.isSatisfiedFor(authDescription)
@@ -272,16 +296,12 @@ class AccountFragment : Fragment() {
   }
 
   private fun determineEULAIsSatisfied(): Boolean {
-    val eula = this.documents.eula
-    return if (eula != null) {
-      eula.hasAgreed
-    } else {
-      true
-    }
+    val eula = this.viewModel.eula
+    return eula?.hasAgreed ?: true
   }
 
   private fun shouldSignUpBeEnabled(): Boolean {
-    val cardCreatorURI = this.account.provider.cardCreatorURI
+    val cardCreatorURI = this.viewModel.account.provider.cardCreatorURI
 
     /*
      * If there's any card creator URI, the button should be enabled...
@@ -304,7 +324,7 @@ class AccountFragment : Fragment() {
 
   private fun openCardCreator() {
     val cardCreator = this.cardCreatorService
-    val cardCreatorURI = this.account.provider.cardCreatorURI
+    val cardCreatorURI = this.viewModel.account.provider.cardCreatorURI
     if (cardCreatorURI != null) {
       if (cardCreatorURI.scheme == this.nyplCardCreatorScheme) {
         if (cardCreator != null) {
@@ -312,7 +332,7 @@ class AccountFragment : Fragment() {
             this,
             this.activity,
             this.cardCreatorResultCode,
-            this.account.loginState is AccountLoggedIn,
+            this.viewModel.account.loginState is AccountLoggedIn,
             this.authenticationViews.getBasicUser().value.trim()
           )
         } else {
@@ -329,39 +349,14 @@ class AccountFragment : Fragment() {
   override fun onStart() {
     super.onStart()
 
-    this.backgroundExecutor =
-      NamedThreadPools.namedThreadPool(1, "simplified-accounts-io", 19)
-
     this.configureToolbar(requireActivity())
-    this.hideCardCreatorForNonNYPL()
-
-    this.accountTitle.text =
-      this.account.provider.displayName
-    this.accountSubtitle.text =
-      this.account.provider.subtitle
 
     ImageAccountIcons.loadAccountLogoIntoView(
       this.imageLoader.loader,
-      this.account.provider.toDescription(),
+      this.viewModel.account.provider.toDescription(),
       R.drawable.account_default,
       this.accountIcon
     )
-
-    /*
-     * Only show a EULA checkbox if there's actually a EULA.
-     */
-
-    val eula = this.documents.eula
-    if (eula != null) {
-      this.eulaCheckbox.visibility = View.VISIBLE
-      this.eulaCheckbox.isChecked = eula.hasAgreed
-      this.eulaCheckbox.setOnCheckedChangeListener { _, checked ->
-        eula.hasAgreed = checked
-        this.setLoginButtonStatus(this.determineLoginIsSatisfied())
-      }
-    } else {
-      this.eulaCheckbox.visibility = View.GONE
-    }
 
     /*
      * Configure the COPPA age gate switch. If the user changes their age, a log out
@@ -369,17 +364,9 @@ class AccountFragment : Fragment() {
      */
 
     this.authenticationViews.setCOPPAState(
-      isOver13 = this.isOver13(),
+      isOver13 = this.viewModel.isOver13,
       onAgeCheckboxClicked = this.onAgeCheckboxClicked()
     )
-
-    /*
-     * Conditionally enable sign up button
-     */
-
-    val signUpEnabled = this.shouldSignUpBeEnabled()
-    this.signUpButton.isEnabled = signUpEnabled
-    this.signUpLabel.isEnabled = signUpEnabled
 
     /*
      * Launch Card Creator
@@ -392,31 +379,8 @@ class AccountFragment : Fragment() {
      */
 
     this.bookmarkSyncCheck.setOnCheckedChangeListener { _, isChecked ->
-      this.backgroundExecutor.execute {
-        this.account.setPreferences(
-          this.account.preferences.copy(bookmarkSyncingPermitted = isChecked)
-        )
-      }
+      this.viewModel.bookmarkSyncingPermitted = isChecked
     }
-
-    /*
-     * Instantiate views for alternative authentication methods.
-     */
-
-    this.authenticationAlternativesMake()
-
-    /*
-     * Show/hide the custom OPDS feed section.
-     */
-
-    val catalogURIOverride = this.account.preferences.catalogURIOverride
-    this.accountCustomOPDSField.text = catalogURIOverride?.toString() ?: ""
-    this.accountCustomOPDS.visibility =
-      if (catalogURIOverride != null) {
-        View.VISIBLE
-      } else {
-        View.GONE
-      }
 
     /*
      * Configure the "Report issue..." item.
@@ -424,18 +388,17 @@ class AccountFragment : Fragment() {
 
     this.configureReportIssue()
 
-    this.accountSubscription =
-      this.profilesController.accountEvents()
-        .subscribe(this::onAccountEvent)
-    this.profileSubscription =
-      this.profilesController.profileEvents()
-        .subscribe(this::onProfileEvent)
+    this.viewModel.accountEvents
+      .subscribe(this::onAccountEvent)
+      .let { this.subscriptions.add(it) }
 
-    this.reconfigureAccountUI()
+    this.viewModel.profileEvents
+      .subscribe(this::onProfileEvent)
+      .let { this.subscriptions.add(it) }
   }
 
   private fun instantiateAlternativeAuthenticationViews() {
-    for (alternative in this.account.provider.authenticationAlternatives) {
+    for (alternative in this.viewModel.account.provider.authenticationAlternatives) {
       when (alternative) {
         is AccountProviderAuthenticationDescription.COPPAAgeGate ->
           this.logger.warn("COPPA age gate is not currently supported as an alternative.")
@@ -475,7 +438,7 @@ class AccountFragment : Fragment() {
    */
 
   private fun configureReportIssue() {
-    val email = this.account.provider.supportEmail
+    val email = this.viewModel.account.provider.supportEmail
     if (email != null) {
       val address = email.removePrefix("mailto:")
 
@@ -529,9 +492,9 @@ class AccountFragment : Fragment() {
     authenticationDescription: AccountProviderAuthenticationDescription.SAML2_0
   ) {
     this.viewModel.loginExplicitlyRequested = true
-    this.profilesController.profileAccountLogin(
+    this.viewModel.tryLogin(
       ProfileAccountLoginRequest.SAML20Initiate(
-        accountId = this.account.id,
+        accountId = this.viewModel.account.id,
         description = authenticationDescription
       )
     )
@@ -539,7 +502,7 @@ class AccountFragment : Fragment() {
     this.findNavigationController()
       .openSAML20Login(
         AccountSAML20FragmentParameters(
-          accountID = this.account.id,
+          accountID = this.viewModel.account.id,
           authenticationDescription = authenticationDescription
         )
       )
@@ -549,9 +512,9 @@ class AccountFragment : Fragment() {
     authenticationDescription: AccountProviderAuthenticationDescription.OAuthWithIntermediary
   ) {
     this.viewModel.loginExplicitlyRequested = true
-    this.profilesController.profileAccountLogin(
+    this.viewModel.tryLogin(
       OAuthWithIntermediaryInitiate(
-        accountId = this.account.id,
+        accountId = this.viewModel.account.id,
         description = authenticationDescription
       )
     )
@@ -566,24 +529,24 @@ class AccountFragment : Fragment() {
 
     val request =
       Basic(
-        accountId = this.account.id,
+        accountId = this.viewModel.account.id,
         description = description,
         password = accountPassword,
         username = accountUsername
       )
 
-    this.profilesController.profileAccountLogin(request)
+    this.viewModel.tryLogin(request)
   }
 
   private fun sendOAuthIntent(
     authenticationDescription: AccountProviderAuthenticationDescription.OAuthWithIntermediary
   ) {
     val callbackScheme =
-      this.buildConfig.oauthCallbackScheme.scheme
+      this.viewModel.buildConfig.oauthCallbackScheme.scheme
     val callbackUrl =
       OAuthCallbackIntentParsing.createUri(
         requiredScheme = callbackScheme,
-        accountId = this.account.id.uuid
+        accountId = this.viewModel.account.id.uuid
       )
 
     /*
@@ -601,7 +564,7 @@ class AccountFragment : Fragment() {
   }
 
   private fun configureToolbar(activity: Activity) {
-    val providerName = this.account.provider.displayName
+    val providerName = this.viewModel.account.provider.displayName
     this.supportActionBar?.apply {
       title = getString(R.string.accounts)
       subtitle = providerName
@@ -628,43 +591,33 @@ class AccountFragment : Fragment() {
      */
 
     this.logger.debug("broadcasting login state")
-    this.account.setLoginState(this.account.loginState)
+    this.viewModel.account.setLoginState(this.viewModel.account.loginState)
 
-    this.backgroundExecutor.shutdown()
     this.accountIcon.setImageDrawable(null)
-    this.eulaCheckbox.setOnCheckedChangeListener(null)
     this.authenticationViews.clear()
-    this.accountSubscription?.dispose()
-    this.profileSubscription?.dispose()
+    this.subscriptions.clear()
   }
 
   private fun onProfileEvent(event: ProfileEvent) {
     return when (event) {
       is ProfileUpdated -> {
-        this.uiThread.runOnUIThread(
-          Runnable {
-            this.reconfigureAccountUI()
-          }
-        )
+        this.reconfigureAccountUI()
       }
       else -> {
       }
     }
   }
 
-  @UiThread
   private fun reconfigureAccountUI() {
-    this.uiThread.checkIsUIThread()
-
-    val isPermitted = this.account.preferences.bookmarkSyncingPermitted
-    val isSupported = this.account.provider.supportsSimplyESynchronization
+    val isPermitted = this.viewModel.account.preferences.bookmarkSyncingPermitted
+    val isSupported = this.viewModel.account.provider.supportsSimplyESynchronization
     this.bookmarkSyncCheck.isChecked = isPermitted
     this.bookmarkSyncCheck.isEnabled = isSupported
     this.bookmarkSyncLabel.isEnabled = isSupported
 
-    this.authenticationViews.showFor(this.account.provider.authentication)
+    this.authenticationViews.showFor(this.viewModel.account.provider.authentication)
 
-    return when (val loginState = this.account.loginState) {
+    return when (val loginState = this.viewModel.account.loginState) {
       AccountNotLoggedIn -> {
         this.authenticationViews.setBasicUserAndPass("", "")
 
@@ -705,9 +658,9 @@ class AccountFragment : Fragment() {
         this.loginFormLock()
         this.setLoginButtonStatus(
           AsCancelButtonEnabled {
-            this.profilesController.profileAccountLogin(
+            this.viewModel.tryLogin(
               OAuthWithIntermediaryCancel(
-                accountId = this.account.id,
+                accountId = this.viewModel.account.id,
                 description = loginState.description as AccountProviderAuthenticationDescription.OAuthWithIntermediary
               )
             )
@@ -760,13 +713,7 @@ class AccountFragment : Fragment() {
 
         if (this.viewModel.loginExplicitlyRequested && this.parameters.closeOnLoginSuccess) {
           this.logger.debug("scheduling explicit close of account fragment")
-          this.uiThread.runOnUIThreadDelayed(
-            {
-              this.explicitlyClose()
-            },
-            2_000L
-          )
-          return
+          this.explicitlyClose()
         } else {
           // Doing nothing.
         }
@@ -872,7 +819,7 @@ class AccountFragment : Fragment() {
    */
   private fun isNypl(): Boolean {
     var isNypl = false
-    val cardCreatorURI = this.account.provider.cardCreatorURI
+    val cardCreatorURI = this.viewModel.account.provider.cardCreatorURI
     if (cardCreatorURI != null) {
       isNypl = cardCreatorURI.scheme == this.nyplCardCreatorScheme
     }
@@ -894,29 +841,22 @@ class AccountFragment : Fragment() {
           view,
           object : com.squareup.picasso.Callback {
             override fun onSuccess() {
-              this@AccountFragment.uiThread.runOnUIThread {
-                onSuccess.invoke()
-              }
+              onSuccess.invoke()
             }
 
             override fun onError(e: Exception) {
               this@AccountFragment.logger.error("failed to load authentication logo: ", e)
-              this@AccountFragment.uiThread.runOnUIThread {
-                view.visibility = View.GONE
-              }
+              view.visibility = View.GONE
             }
           }
         )
     }
   }
 
-  @UiThread
   private fun openErrorPage(taskSteps: List<TaskStep>) {
-    this.uiThread.checkIsUIThread()
-
     val parameters =
       ErrorPageParameters(
-        emailAddress = this.buildConfig.supportErrorReportEmailAddress,
+        emailAddress = this.viewModel.buildConfig.supportErrorReportEmailAddress,
         body = "",
         subject = "[simplye-error-report]",
         attributes = sortedMapOf(),
@@ -928,7 +868,7 @@ class AccountFragment : Fragment() {
 
   private fun loginFormLock() {
     this.authenticationViews.setCOPPAState(
-      isOver13 = this.isOver13(),
+      isOver13 = this.viewModel.isOver13,
       onAgeCheckboxClicked = this.onAgeCheckboxClicked()
     )
 
@@ -941,7 +881,7 @@ class AccountFragment : Fragment() {
 
   private fun loginFormUnlock() {
     this.authenticationViews.setCOPPAState(
-      isOver13 = this.isOver13(),
+      isOver13 = this.viewModel.isOver13,
       onAgeCheckboxClicked = this.onAgeCheckboxClicked()
     )
 
@@ -957,7 +897,7 @@ class AccountFragment : Fragment() {
 
   private fun authenticationAlternativesMake() {
     this.authenticationAlternativesButtons.removeAllViews()
-    if (this.account.provider.authenticationAlternatives.isEmpty()) {
+    if (this.viewModel.account.provider.authenticationAlternatives.isEmpty()) {
       this.authenticationAlternativesHide()
     } else {
       this.instantiateAlternativeAuthenticationViews()
@@ -966,7 +906,7 @@ class AccountFragment : Fragment() {
   }
 
   private fun authenticationAlternativesShow() {
-    if (this.account.provider.authenticationAlternatives.isNotEmpty()) {
+    if (this.viewModel.account.provider.authenticationAlternatives.isNotEmpty()) {
       this.authenticationAlternatives.visibility = View.VISIBLE
     }
   }
@@ -979,11 +919,7 @@ class AccountFragment : Fragment() {
     return when (accountEvent) {
       is AccountEventLoginStateChanged ->
         if (accountEvent.accountID == this.parameters.accountId) {
-          this.uiThread.runOnUIThread(
-            Runnable {
-              this.reconfigureAccountUI()
-            }
-          )
+          this.reconfigureAccountUI()
         } else {
           // Don't care about events for other accounts
         }
@@ -996,7 +932,7 @@ class AccountFragment : Fragment() {
   private fun tryLogin() {
     this.viewModel.loginExplicitlyRequested = true
 
-    return when (val description = this.account.provider.authentication) {
+    return when (val description = this.viewModel.account.provider.authentication) {
       is AccountProviderAuthenticationDescription.SAML2_0 ->
         this.onTrySAML2Login(description)
       is AccountProviderAuthenticationDescription.OAuthWithIntermediary ->
@@ -1011,7 +947,7 @@ class AccountFragment : Fragment() {
   }
 
   private fun tryLogout() {
-    return when (this.account.provider.authentication) {
+    return when (this.viewModel.account.provider.authentication) {
       is AccountProviderAuthenticationDescription.Anonymous ->
         Unit
 
@@ -1024,39 +960,8 @@ class AccountFragment : Fragment() {
       is AccountProviderAuthenticationDescription.OAuthWithIntermediary,
       is AccountProviderAuthenticationDescription.COPPAAgeGate,
       is AccountProviderAuthenticationDescription.Basic -> {
-        this.profilesController.profileAccountLogout(this.account.id)
-        Unit
+        this.viewModel.tryLogout(this.viewModel.account.id)
       }
-    }
-  }
-
-  private fun setUnder13() {
-    this.profilesController.profileUpdate { description ->
-      description.copy(
-        preferences = description.preferences.copy(
-          dateOfBirth = this.synthesizeDateOfBirth(0)
-        )
-      )
-    }
-  }
-
-  private fun setOver13() {
-    this.profilesController.profileUpdate { description ->
-      description.copy(
-        preferences = description.preferences.copy(
-          dateOfBirth = this.synthesizeDateOfBirth(14)
-        )
-      )
-    }
-  }
-
-  private fun isOver13(): Boolean {
-    val profile = this.profilesController.profileCurrent()
-    val age = profile.preferences().dateOfBirth
-    return if (age != null) {
-      age.yearsOld(DateTime.now()) >= 13
-    } else {
-      false
     }
   }
 
@@ -1064,7 +969,7 @@ class AccountFragment : Fragment() {
    * Hides or show sign up options if is user in accessing the NYPL
    */
   private fun hideCardCreatorForNonNYPL() {
-    if (this.account.provider.cardCreatorURI != null) {
+    if (this.viewModel.account.provider.cardCreatorURI != null) {
       this.settingsCardCreator.visibility = View.VISIBLE
     }
   }
@@ -1075,7 +980,7 @@ class AccountFragment : Fragment() {
    */
 
   private fun onAgeCheckboxClicked(): (View) -> Unit = {
-    val isOver13 = this.isOver13()
+    val isOver13 = this.viewModel.isOver13
     AlertDialog.Builder(this.requireContext())
       .setTitle(R.string.accountCOPPADeleteBooks)
       .setMessage(R.string.accountCOPPADeleteBooksConfirm)
@@ -1087,22 +992,12 @@ class AccountFragment : Fragment() {
       }
       .setPositiveButton(R.string.accountDelete) { _, _ ->
         this.loginFormLock()
-        if (!isOver13) this.setOver13() else this.setUnder13()
+        this.viewModel.isOver13 = !isOver13
         this.tryLogout()
       }
       .create()
       .show()
   }
-
-  /**
-   * Synthesize a fake date of birth based on the current date and given age in years.
-   */
-
-  private fun synthesizeDateOfBirth(years: Int): ProfileDateOfBirth =
-    ProfileDateOfBirth(
-      date = DateTime.now().minusYears(years),
-      isSynthesized = true
-    )
 
   private fun findNavigationController(): AccountNavigationControllerType {
     return NavigationControllers.find(

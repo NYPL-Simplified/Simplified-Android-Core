@@ -1,5 +1,7 @@
 package org.nypl.simplified.ui.accounts.saml20
 
+import android.app.Application
+import android.content.Context
 import android.content.res.Resources
 import android.net.Uri
 import android.webkit.CookieManager
@@ -7,11 +9,15 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.lifecycle.ViewModel
-import io.reactivex.Observable
+import hu.akarnokd.rxjava2.subjects.UnicastWorkSubject
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.subjects.PublishSubject
+import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountCookie
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
+import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.ui.accounts.R
@@ -26,28 +32,50 @@ import java.util.concurrent.atomic.AtomicReference
  */
 
 class AccountSAML20ViewModel(
-  private val profiles: ProfilesControllerType,
+  private val application: Application,
   private val account: AccountID,
   private val description: AccountProviderAuthenticationDescription.SAML2_0,
-  private val resources: Resources,
-  private val webViewDataDir: File
 ) : ViewModel() {
 
   private val logger =
     LoggerFactory.getLogger(AccountSAML20ViewModel::class.java)
+
+  private val resources: Resources =
+    application.resources
+
+  private val webViewDataDir: File =
+    this.application.getDir("webview", Context.MODE_PRIVATE)
+
   private val eventSubject =
     PublishSubject.create<AccountSAML20Event>()
+
   private val authInfo =
     AtomicReference<AuthInfo>()
+
+  private val services =
+    Services.serviceDirectory()
+
+  private val buildConfig =
+    services.requireService(BuildConfigurationServiceType::class.java)
+
+  private val profilesController =
+    services.requireService(ProfilesControllerType::class.java)
+
+  private val subscriptions = CompositeDisposable(
+    eventSubject
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribe(
+        { event -> this.events.onNext(event) },
+        { error -> this.events.onError(error) },
+        { this.events.onComplete() }
+      )
+  )
 
   private data class AuthInfo(
     val token: String,
     val patronInfo: String,
     val cookies: List<AccountCookie>
   )
-
-  val events: Observable<AccountSAML20Event> =
-    this.eventSubject
 
   private class AccountSAML20WebClient(
     private val logger: Logger,
@@ -69,13 +97,13 @@ class AccountSAML20ViewModel(
        * know which cookies are which, so they all need to be removed.
        */
 
-      CookieManager.getInstance().removeAllCookies({
+      CookieManager.getInstance().removeAllCookies {
         isReady = true
 
         this.eventSubject.onNext(
           AccountSAML20Event.WebViewClientReady()
         )
-      })
+      }
     }
 
     override fun shouldOverrideUrlLoading(
@@ -155,7 +183,7 @@ class AccountSAML20ViewModel(
 
     if (this.authInfo.get() == null) {
       this.logger.debug("no access token obtained; cancelling login")
-      this.profiles.profileAccountLogin(
+      this.profilesController.profileAccountLogin(
         ProfileAccountLoginRequest.SAML20Cancel(
           accountId = this.account,
           description = this.description
@@ -164,6 +192,7 @@ class AccountSAML20ViewModel(
     }
 
     this.eventSubject.onComplete()
+    subscriptions.clear()
   }
 
   val webViewClient: WebViewClient =
@@ -171,7 +200,7 @@ class AccountSAML20ViewModel(
       account = this.account,
       eventSubject = this.eventSubject,
       logger = this.logger,
-      profiles = this.profiles,
+      profiles = this.profilesController,
       resources = this.resources,
       authInfo = this.authInfo,
       webViewDataDir = this.webViewDataDir
@@ -179,4 +208,10 @@ class AccountSAML20ViewModel(
 
   val isWebViewClientReady: Boolean
     get() = (this.webViewClient as AccountSAML20WebClient).isReady
+
+  val events: UnicastWorkSubject<AccountSAML20Event> =
+    UnicastWorkSubject.create()
+
+  val supportEmailAddress: String =
+    buildConfig.supportErrorReportEmailAddress
 }
