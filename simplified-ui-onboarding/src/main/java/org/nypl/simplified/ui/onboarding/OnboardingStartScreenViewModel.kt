@@ -31,7 +31,10 @@ class OnboardingStartScreenViewModel : ViewModel() {
       .requireService(ProfilesControllerType::class.java)
       .profileUpdate { profileDescription ->
         profileDescription.copy(
-          preferences = profileDescription.preferences.copy(hasSeenLibrarySelectionScreen = true)
+          preferences = profileDescription.preferences.copy(
+            hasSeenLibrarySelectionScreen = true,
+            requiresAge = true
+          )
         )
       }
   }

@@ -108,4 +108,9 @@ interface CatalogFeedViewModelType {
     search: FeedSearch,
     query: String
   ): CatalogFeedArguments
+
+  /**
+   * Set synthesized birthdate based on if user is over 13
+   * */
+  fun updateBirthYear(over13: Boolean)
 }

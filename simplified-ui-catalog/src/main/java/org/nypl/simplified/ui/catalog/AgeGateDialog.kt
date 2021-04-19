@@ -11,9 +11,7 @@ import android.widget.Spinner
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 import org.slf4j.LoggerFactory
-import java.lang.ClassCastException
 import java.util.Calendar
-import kotlin.collections.ArrayList
 
 /**
  * The AgeGateDialog is the solution to Google's policy violation of the SimplyE age gate not being
@@ -38,7 +36,7 @@ class AgeGateDialog : DialogFragment(), AdapterView.OnItemSelectedListener {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     try {
-      birthYearSelectedListener = requireContext() as BirthYearSelectedListener
+      birthYearSelectedListener = requireParentFragment() as BirthYearSelectedListener
     } catch (exception: ClassCastException) {
       throw ClassCastException("${context?.javaClass?.simpleName} must implement BirthYearSelectedListener")
     }
@@ -85,8 +83,6 @@ class AgeGateDialog : DialogFragment(), AdapterView.OnItemSelectedListener {
   override fun onNothingSelected(parent: AdapterView<*>?) {}
 
   companion object {
-    const val REQUEST_CODE = 13
-    const val TAG = "AgeGateDialog"
     fun create(): AgeGateDialog {
       return AgeGateDialog()
     }

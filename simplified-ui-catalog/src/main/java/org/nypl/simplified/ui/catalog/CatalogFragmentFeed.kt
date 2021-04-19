@@ -85,7 +85,7 @@ import java.net.URI
  * models for each of the different app sections that want to display feeds.
  */
 
-class CatalogFragmentFeed : Fragment() {
+class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener {
 
   companion object {
 
@@ -140,6 +140,7 @@ class CatalogFragmentFeed : Fragment() {
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var screenInformation: ScreenSizeInformationType
   private lateinit var uiThread: UIThreadServiceType
+  private lateinit var ageGateDialog: AgeGateDialog
 
   private val logger = LoggerFactory.getLogger(CatalogFragmentFeed::class.java)
   private val parametersId = PARAMETERS_ID
@@ -159,6 +160,7 @@ class CatalogFragmentFeed : Fragment() {
     super.onCreate(savedInstanceState)
     setHasOptionsMenu(true)
 
+    ageGateDialog = AgeGateDialog.create()
     this.parameters = this.requireArguments()[this.parametersId] as CatalogFeedArguments
     this.feedWithGroupsData = mutableListOf()
 
@@ -459,7 +461,9 @@ class CatalogFragmentFeed : Fragment() {
     @Suppress("UNUSED_PARAMETER") feedState: CatalogFeedAgeGate
   ) {
     this.uiThread.checkIsUIThread()
-
+    if (!ageGateDialog.isAdded) {
+      ageGateDialog.show(childFragmentManager, AgeGateDialog::class.simpleName)
+    }
     this.feedEmpty.visibility = View.INVISIBLE
     this.feedError.visibility = View.INVISIBLE
     this.feedLoading.visibility = View.INVISIBLE
@@ -487,7 +491,10 @@ class CatalogFragmentFeed : Fragment() {
         feedURI = account.catalogURIForAge(age),
         isSearchResults = false
       )
-      this.uiThread.runOnUIThread { this.feedModel.reloadFeed(newParameters) }
+      this.uiThread.runOnUIThread {
+        this.feedModel.reloadFeed(newParameters)
+        ageGateDialog.dismissAllowingStateLoss()
+      }
     }
   }
 
@@ -1084,5 +1091,9 @@ class CatalogFragmentFeed : Fragment() {
       attributes = taskFailure.attributes.toSortedMap(),
       taskSteps = taskFailure.steps
     )
+  }
+
+  override fun onBirthYearSelected(isOver13: Boolean) {
+    feedModel.updateBirthYear(isOver13)
   }
 }
