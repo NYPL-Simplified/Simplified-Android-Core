@@ -2,12 +2,9 @@ package org.nypl.simplified.ui.settings
 
 import android.app.Activity
 import android.app.AlertDialog
-import android.content.pm.PackageManager.NameNotFoundException
 import android.graphics.Color
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TableLayout
 import android.widget.TableRow
@@ -15,66 +12,25 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.SwitchCompat
 import androidx.fragment.app.Fragment
-import com.google.common.util.concurrent.MoreExecutors
-import io.reactivex.disposables.Disposable
-import org.joda.time.LocalDateTime
-import org.librarysimplified.services.api.Services
-import org.nypl.drm.core.AdobeAdeptExecutorType
-import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
+import androidx.fragment.app.viewModels
 import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions
-import org.nypl.simplified.analytics.api.AnalyticsEvent
-import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.android.ktx.supportActionBar
-import org.nypl.simplified.books.controller.api.BooksControllerType
-import org.nypl.simplified.boot.api.BootFailureTesting
-import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
-import org.nypl.simplified.cardcreator.CardCreatorDebugging
-import org.nypl.simplified.crashlytics.api.CrashlyticsServiceType
-import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.navigation.api.NavigationControllers
-import org.nypl.simplified.profiles.api.ProfileEvent
-import org.nypl.simplified.profiles.api.ProfileUpdated
-import org.nypl.simplified.profiles.api.ProfileUpdated.Succeeded
-import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
-import org.nypl.simplified.reports.Reports
 import org.nypl.simplified.taskrecorder.api.TaskStep
 import org.nypl.simplified.taskrecorder.api.TaskStepResolution
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
-import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.slf4j.LoggerFactory
 
 /**
  * A fragment that shows various debug options for testing app functionality at runtime.
  */
 
-class SettingsFragmentDebug : Fragment() {
+class SettingsFragmentDebug : Fragment(R.layout.settings_debug) {
 
-  private val logger =
-    LoggerFactory.getLogger(SettingsFragmentDebug::class.java)
+  private val logger = LoggerFactory.getLogger(SettingsFragmentDebug::class.java)
+  private val viewModel: SettingsDebugViewModel by viewModels()
 
-  private val appVersion by lazy {
-    try {
-      val context = this.requireContext()
-      val pkgManager = context.packageManager
-      val pkgInfo = pkgManager.getPackageInfo(context.packageName, 0)
-      pkgInfo.versionName
-    } catch (e: NameNotFoundException) {
-      "Unavailable"
-    }
-  }
-
-  private val navigationController by lazy {
-    NavigationControllers.find(
-      activity = this.requireActivity(),
-      interfaceType = SettingsNavigationControllerType::class.java
-    )
-  }
-
-  private lateinit var accountRegistry: AccountProviderRegistryType
   private lateinit var adobeDRMActivationTable: TableLayout
-  private lateinit var analytics: AnalyticsType
-  private lateinit var booksController: BooksControllerType
-  private lateinit var buildConfig: BuildConfigurationServiceType
   private lateinit var cacheButton: Button
   private lateinit var cardCreatorFakeLocation: SwitchCompat
   private lateinit var crashButton: Button
@@ -83,53 +39,17 @@ class SettingsFragmentDebug : Fragment() {
   private lateinit var drmTable: TableLayout
   private lateinit var enableR2: SwitchCompat
   private lateinit var failNextBoot: SwitchCompat
-  private lateinit var feedLoader: FeedLoaderType
   private lateinit var forgetAnnouncementsButton: Button
   private lateinit var hasSeenLibrarySelection: SwitchCompat
-  private lateinit var profilesController: ProfilesControllerType
   private lateinit var sendAnalyticsButton: Button
   private lateinit var sendReportButton: Button
   private lateinit var showErrorButton: Button
   private lateinit var showOnlySupportedBooks: SwitchCompat
   private lateinit var showTesting: SwitchCompat
   private lateinit var syncAccountsButton: Button
-  private lateinit var uiThread: UIThreadServiceType
-  private var adeptExecutor: AdobeAdeptExecutorType? = null
-  private var crashlytics: CrashlyticsServiceType? = null
-  private var profileEventSubscription: Disposable? = null
 
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-
-    val services = Services.serviceDirectory()
-
-    this.booksController =
-      services.requireService(BooksControllerType::class.java)
-    this.profilesController =
-      services.requireService(ProfilesControllerType::class.java)
-    this.accountRegistry =
-      services.requireService(AccountProviderRegistryType::class.java)
-    this.analytics =
-      services.requireService(AnalyticsType::class.java)
-    this.feedLoader =
-      services.requireService(FeedLoaderType::class.java)
-    this.uiThread =
-      services.requireService(UIThreadServiceType::class.java)
-    this.buildConfig =
-      services.requireService(BuildConfigurationServiceType::class.java)
-    this.adeptExecutor =
-      services.optionalService(AdobeAdeptExecutorType::class.java)
-    this.crashlytics =
-      services.optionalService(CrashlyticsServiceType::class.java)
-  }
-
-  override fun onCreateView(
-    inflater: LayoutInflater,
-    container: ViewGroup?,
-    savedInstanceState: Bundle?
-  ): View {
-    val view =
-      inflater.inflate(R.layout.settings_debug, container, false)
+  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    super.onViewCreated(view, savedInstanceState)
 
     this.crashButton =
       view.findViewById(R.id.settingsVersionDevCrash)
@@ -166,7 +86,33 @@ class SettingsFragmentDebug : Fragment() {
     this.crashlyticsId =
       view.findViewById(R.id.settingsVersionCrashlyticsID)
 
-    return view
+    this.drmTable.addView(
+      this.createDrmSupportRow("Adobe Acs", this.viewModel.adeptSupported)
+    )
+    this.drmTable.addView(
+      this.createDrmSupportRow("AxisNow", this.viewModel.axisNowSupported)
+    )
+
+    this.viewModel.adeptActivations.observe(this.viewLifecycleOwner) { activations ->
+      if (activations.isNotEmpty()) {
+        this.onAdobeDRMReceivedActivations(activations)
+      }
+    }
+
+    this.showTesting.isChecked =
+      this.viewModel.showTestingLibraries
+    this.failNextBoot.isChecked =
+      this.viewModel.isBootFailureEnabled
+    this.hasSeenLibrarySelection.isChecked =
+      this.viewModel.hasSeenLibrarySelection
+    this.cardCreatorFakeLocation.isChecked =
+      this.viewModel.cardCreatorFakeLocation
+    this.enableR2.isChecked =
+      this.viewModel.useExperimentalR2
+    this.showOnlySupportedBooks.isChecked =
+      this.viewModel.showOnlySupportedBooks
+    this.crashlyticsId.text =
+      this.viewModel.crashlyticsId
   }
 
   override fun onStart() {
@@ -178,29 +124,15 @@ class SettingsFragmentDebug : Fragment() {
     }
 
     this.cacheButton.setOnClickListener {
-      val context = this.requireContext()
-      val message = StringBuilder(128)
-      message.append("Cache directory is: ")
-      message.append(context.cacheDir)
-      message.append("\n")
-      message.append("\n")
-      message.append("Exists: ")
-      message.append(context.cacheDir?.isDirectory ?: false)
-      message.append("\n")
-
-      AlertDialog.Builder(context)
-        .setTitle("Cache Directory")
-        .setMessage(message.toString())
-        .show()
+      this.showCacheAlert()
     }
 
     this.sendReportButton.setOnClickListener {
-      Reports.sendReportsDefault(
-        context = this.requireContext(),
-        address = this.buildConfig.supportErrorReportEmailAddress,
-        subject = "[simplye-error-report] ${this.appVersion}",
-        body = ""
-      )
+      this.viewModel.sendErrorLogs()
+    }
+
+    this.showErrorButton.setOnClickListener {
+      this.showErrorPage()
     }
 
     /*
@@ -210,12 +142,7 @@ class SettingsFragmentDebug : Fragment() {
      */
 
     this.sendAnalyticsButton.setOnClickListener {
-      this.analytics.publishEvent(
-        AnalyticsEvent.SyncRequested(
-          timestamp = LocalDateTime.now(),
-          credentials = null
-        )
-      )
+      this.viewModel.sendAnalytics()
       Toast.makeText(
         this.requireContext(),
         "Triggered analytics send",
@@ -223,117 +150,13 @@ class SettingsFragmentDebug : Fragment() {
       ).show()
     }
 
-    this.showErrorButton.setOnClickListener {
-      this.showErrorPage()
-    }
-
     this.syncAccountsButton.setOnClickListener {
+      this.viewModel.syncAccounts()
       Toast.makeText(
         this.requireContext(),
         "Triggered sync of all accounts",
         Toast.LENGTH_SHORT
       ).show()
-
-      try {
-        this.profilesController.profileCurrent()
-          .accounts()
-          .values
-          .forEach { account ->
-            this.booksController.booksSync(account)
-          }
-      } catch (e: Exception) {
-        this.logger.error("ouch: ", e)
-      }
-    }
-
-    this.drmTable.removeAllViews()
-    this.drmTable.addView(this.drmACSSupportRow())
-    this.adobeDRMActivationTable.removeAllViews()
-
-    this.profileEventSubscription =
-      this.profilesController
-        .profileEvents()
-        .subscribe(this::onProfileEvent)
-
-    this.showTesting.isChecked =
-      this.profilesController
-        .profileCurrent()
-        .preferences()
-        .showTestingLibraries
-
-    this.enableR2.isChecked =
-      this.profilesController
-        .profileCurrent()
-        .preferences()
-        .useExperimentalR2
-
-    /*
-     * Configure the "fail next boot" switch to enable/disable boot failures.
-     */
-
-    this.failNextBoot.isChecked = isBootFailureEnabled()
-    this.failNextBoot.setOnCheckedChangeListener { _, checked ->
-      enableBootFailures(checked)
-    }
-
-    /*
-     * Configure the "has seen library selection" switch
-     */
-
-    this.hasSeenLibrarySelection.isChecked =
-      this.profilesController
-        .profileCurrent()
-        .preferences()
-        .hasSeenLibrarySelectionScreen
-    this.hasSeenLibrarySelection.setOnCheckedChangeListener { _, isChecked ->
-      this.profilesController.profileUpdate { description ->
-        description.copy(preferences = description.preferences.copy(hasSeenLibrarySelectionScreen = isChecked))
-      }
-    }
-
-    /*
-     * Configure the custom OPDS button.
-     */
-
-    this.customOPDS.setOnClickListener {
-      this.navigationController.openSettingsCustomOPDS()
-    }
-
-    /*
-     * Update the current profile's preferences whenever the testing switch is changed.
-     */
-
-    this.showTesting.setOnClickListener {
-      val show = this.showTesting.isChecked
-      this.profilesController.profileUpdate { description ->
-        description.copy(preferences = description.preferences.copy(showTestingLibraries = show))
-      }
-    }
-
-    this.cardCreatorFakeLocation.isChecked = CardCreatorDebugging.fakeNewYorkLocation
-    this.cardCreatorFakeLocation.setOnCheckedChangeListener { _, checked ->
-      this.logger.debug("card creator fake location: {}", checked)
-      CardCreatorDebugging.fakeNewYorkLocation = checked
-    }
-
-    /*
-     * Update the current profile's preferences whenever the R2 switch is changed.
-     */
-
-    this.enableR2.setOnClickListener {
-      val r2 = this.enableR2.isChecked
-      this.profilesController.profileUpdate { description ->
-        description.copy(preferences = description.preferences.copy(useExperimentalR2 = r2))
-      }
-    }
-
-    /*
-     * Update the feed loader when filtering options are changed.
-     */
-
-    this.showOnlySupportedBooks.isChecked = this.feedLoader.showOnlySupportedBooks
-    this.showOnlySupportedBooks.setOnClickListener {
-      this.feedLoader.showOnlySupportedBooks = this.showOnlySupportedBooks.isChecked
     }
 
     /*
@@ -341,35 +164,59 @@ class SettingsFragmentDebug : Fragment() {
      */
 
     this.forgetAnnouncementsButton.setOnClickListener {
-      this.forgetAllAnnouncements()
+      this.viewModel.forgetAllAnnouncements()
     }
 
     /*
-     * Show the current Crashlytics user ID.
+    * Update the current profile's preferences whenever the testing switch is changed.
+    */
+
+    this.showTesting.setOnCheckedChangeListener { _, checked ->
+      this.viewModel.showTestingLibraries = checked
+    }
+
+    /*
+     * Configure the "fail next boot" switch to enable/disable boot failures.
      */
 
-    val crash = this.crashlytics
-    if (crash != null) {
-      val id = crash.userId
-      if (id == "") {
-        this.crashlyticsId.text = "(Unassigned)"
-      } else {
-        this.crashlyticsId.text = crash.userId
-      }
-    } else {
-      this.crashlyticsId.text = "Crashlytics is not enabled."
+    this.failNextBoot.setOnCheckedChangeListener { _, checked ->
+      this.viewModel.isBootFailureEnabled = checked
     }
-  }
 
-  private fun forgetAllAnnouncements() {
-    try {
-      val profile = this.profilesController.profileCurrent()
-      val accounts = profile.accounts()
-      for ((_, account) in accounts) {
-        account.setPreferences(account.preferences.copy(announcementsAcknowledged = listOf()))
-      }
-    } catch (e: Exception) {
-      this.logger.error("could not forget announcements: ", e)
+    /*
+     * Configure the "has seen library selection" switch
+     */
+
+    this.hasSeenLibrarySelection.setOnCheckedChangeListener { _, checked ->
+      this.viewModel.hasSeenLibrarySelection = checked
+    }
+
+    this.cardCreatorFakeLocation.setOnCheckedChangeListener { _, checked ->
+      this.viewModel.cardCreatorFakeLocation = checked
+    }
+
+    /*
+    * Update the current profile's preferences whenever the R2 switch is changed.
+    */
+
+    this.enableR2.setOnCheckedChangeListener { _, changed ->
+      this.viewModel.useExperimentalR2 = changed
+    }
+
+    /*
+     * Update the feed loader when filtering options are changed.
+     */
+
+    this.showOnlySupportedBooks.setOnCheckedChangeListener { _, isChecked ->
+      this.viewModel.showOnlySupportedBooks = isChecked
+    }
+
+    /*
+     * Configure the custom OPDS button.
+     */
+
+    this.customOPDS.setOnClickListener {
+      this.findNavigationController().openSettingsCustomOPDS()
     }
   }
 
@@ -382,7 +229,7 @@ class SettingsFragmentDebug : Fragment() {
 
   private fun showErrorPage() {
     val attributes = sortedMapOf(
-      Pair("Version", this.appVersion)
+      Pair("Version", this.viewModel.appVersion)
     )
 
     val taskSteps =
@@ -397,52 +244,34 @@ class SettingsFragmentDebug : Fragment() {
 
     val parameters =
       ErrorPageParameters(
-        emailAddress = this.buildConfig.supportErrorReportEmailAddress,
+        emailAddress = this.viewModel.supportEmailAddress,
         body = "",
-        subject = "[simplye-error-report] ${this.appVersion}",
+        subject = "[simplye-error-report] ${this.viewModel.appVersion}",
         attributes = attributes,
         taskSteps = taskSteps
       )
 
-    this.navigationController.openErrorPage(parameters)
+    this.findNavigationController().openErrorPage(parameters)
   }
 
-  private fun enableBootFailures(enabled: Boolean) {
-    BootFailureTesting.enableBootFailures(
-      context = this.requireContext(),
-      enabled = enabled
-    )
+  private fun showCacheAlert() {
+    val context = this.requireContext()
+    val message = StringBuilder(128)
+    message.append("Cache directory is: ")
+    message.append(context.cacheDir)
+    message.append("\n")
+    message.append("\n")
+    message.append("Exists: ")
+    message.append(context.cacheDir?.isDirectory ?: false)
+    message.append("\n")
+
+    AlertDialog.Builder(context)
+      .setTitle("Cache Directory")
+      .setMessage(message.toString())
+      .show()
   }
 
-  private fun isBootFailureEnabled(): Boolean {
-    return BootFailureTesting.isBootFailureEnabled(this.requireContext())
-  }
-
-  private fun onProfileEvent(event: ProfileEvent) {
-    if (event is ProfileUpdated) {
-      this.uiThread.runOnUIThread(
-        Runnable {
-          this.showTesting.isChecked = this.profilesController
-            .profileCurrent()
-            .preferences()
-            .showTestingLibraries
-        }
-      )
-
-      if (event is Succeeded) {
-        val old = event.oldDescription.preferences
-        val new = event.newDescription.preferences
-        if (old.showTestingLibraries != new.showTestingLibraries) {
-          this.accountRegistry.clear()
-          this.accountRegistry.refresh(
-            includeTestingLibraries = new.showTestingLibraries
-          )
-        }
-      }
-    }
-  }
-
-  private fun drmACSSupportRow(): TableRow {
+  private fun createDrmSupportRow(name: String, isSupported: Boolean): TableRow {
     val row =
       this.layoutInflater.inflate(
         R.layout.settings_version_table_item, this.drmTable, false
@@ -452,48 +281,17 @@ class SettingsFragmentDebug : Fragment() {
     val value =
       row.findViewById<TextView>(R.id.value)
 
-    key.text = "Adobe ACS"
+    key.text = name
 
-    val executor = this.adeptExecutor
-    if (executor == null) {
+    if (isSupported) {
+      value.setTextColor(Color.GREEN)
+      value.text = "Supported"
+    } else {
       value.setTextColor(Color.RED)
       value.text = "Unsupported"
-      return row
     }
 
-    /*
-     * If we managed to get an executor, then fetch the current activations.
-     */
-
-    val adeptFuture =
-      AdobeDRMExtensions.getDeviceActivations(
-        executor,
-        { message -> this.logger.error("DRM: {}", message) },
-        { message -> this.logger.debug("DRM: {}", message) }
-      )
-
-    adeptFuture.addListener(
-      Runnable {
-        this.uiThread.runOnUIThread(
-          Runnable {
-            try {
-              this.onAdobeDRMReceivedActivations(adeptFuture.get())
-            } catch (e: Exception) {
-              this.onAdobeDRMReceivedActivationsError(e)
-            }
-          }
-        )
-      },
-      MoreExecutors.directExecutor()
-    )
-
-    value.setTextColor(Color.GREEN)
-    value.text = "Supported"
     return row
-  }
-
-  private fun onAdobeDRMReceivedActivationsError(e: Exception) {
-    this.logger.error("could not retrieve activations: ", e)
   }
 
   private fun onAdobeDRMReceivedActivations(activations: List<AdobeDRMExtensions.Activation>) {
@@ -548,16 +346,10 @@ class SettingsFragmentDebug : Fragment() {
     }
   }
 
-  override fun onStop() {
-    super.onStop()
-
-    this.profileEventSubscription?.dispose()
-    this.cacheButton.setOnClickListener(null)
-    this.crashButton.setOnClickListener(null)
-    this.customOPDS.setOnClickListener(null)
-    this.failNextBoot.setOnCheckedChangeListener(null)
-    this.sendReportButton.setOnClickListener(null)
-    this.showErrorButton.setOnClickListener(null)
-    this.showTesting.setOnClickListener(null)
+  private fun findNavigationController(): SettingsNavigationControllerType {
+    return NavigationControllers.find(
+      activity = this.requireActivity(),
+      interfaceType = SettingsNavigationControllerType::class.java
+    )
   }
 }

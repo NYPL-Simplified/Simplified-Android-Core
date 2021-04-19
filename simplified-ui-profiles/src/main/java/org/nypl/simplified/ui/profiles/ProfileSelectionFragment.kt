@@ -2,91 +2,68 @@ package org.nypl.simplified.ui.profiles
 
 import android.app.Activity
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Button
-import androidx.annotation.UiThread
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
-import io.reactivex.disposables.Disposable
-import org.librarysimplified.services.api.Services
+import io.reactivex.disposables.CompositeDisposable
 import org.nypl.simplified.android.ktx.supportActionBar
 import org.nypl.simplified.navigation.api.NavigationControllers
+import org.nypl.simplified.profiles.api.ProfileCreationEvent
 import org.nypl.simplified.profiles.api.ProfileDeletionEvent
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.profiles.api.ProfileSelection
-import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
-import org.nypl.simplified.ui.thread.api.UIThreadServiceType
+import org.nypl.simplified.profiles.api.ProfileUpdated
 
 /**
  * A fragment that displays a profile selection screen.
  */
 
-class ProfileSelectionFragment : Fragment() {
+class ProfileSelectionFragment : Fragment(R.layout.profile_selection) {
+
+  private val subscriptions = CompositeDisposable()
+  private val viewModel: ProfileSelectionViewModel by viewModels()
 
   private lateinit var create: Button
   private lateinit var list: RecyclerView
   private lateinit var listAdapter: ProfileAdapter
-  private lateinit var profiles: MutableList<ProfileReadableType>
-  private lateinit var profilesController: ProfilesControllerType
-  private lateinit var uiThread: UIThreadServiceType
-  private var profilesSubscription: Disposable? = null
 
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-
-    val services =
-      Services.serviceDirectory()
-
-    this.profilesController =
-      services.requireService(ProfilesControllerType::class.java)
-    this.uiThread =
-      services.requireService(UIThreadServiceType::class.java)
-
-    this.profiles = mutableListOf()
-  }
-
-  override fun onCreateView(
-    inflater: LayoutInflater,
-    container: ViewGroup?,
-    savedInstanceState: Bundle?
-  ): View? {
-    val layout =
-      inflater.inflate(R.layout.profile_selection, container, false)
+  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    super.onViewCreated(view, savedInstanceState)
 
     this.list =
-      layout.findViewById(R.id.profileList)
+      view.findViewById(R.id.profileList)
     this.create =
-      layout.findViewById(R.id.profileCreate)
+      view.findViewById(R.id.profileCreate)
     this.create.setOnClickListener {
       onProfileCreateRequested()
     }
 
     this.listAdapter =
       ProfileAdapter(
-        profiles = this.profiles,
         onProfileSelected = this::onProfileSelected,
         onProfileModifyRequested = this::onProfileModifyRequested,
         onProfileDeleteRequested = this::onProfileRemoveRequested
       )
 
-    this.list.adapter = this.listAdapter
-    this.list.setHasFixedSize(true)
-    this.list.setItemViewCacheSize(32)
-    this.list.layoutManager = LinearLayoutManager(this.context)
-    (this.list.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
+    this.updateProfileList()
 
-    return layout
+    with(this.list) {
+      adapter = this@ProfileSelectionFragment.listAdapter
+      setHasFixedSize(true)
+      setItemViewCacheSize(32)
+      layoutManager = LinearLayoutManager(this.context)
+      (itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
+    }
   }
 
   private fun onProfileCreateRequested() {
-    NavigationControllers.find(this.requireActivity(), ProfilesNavigationControllerType::class.java)
-      .openProfileCreate()
+    this.findNavigationController().openProfileCreate()
   }
 
   private fun onProfileRemoveRequested(profile: ProfileReadableType) {
@@ -95,30 +72,27 @@ class ProfileSelectionFragment : Fragment() {
       .setTitle(R.string.profileDeleteAsk)
       .setMessage(context.getString(R.string.profileDeleteAskMessage, profile.displayName))
       .setPositiveButton(R.string.profileDelete) { _, _ ->
-        this.profilesController.profileDelete(profile.id)
+        this.viewModel.deleteProfile(profile.id)
       }
       .create()
       .show()
   }
 
   private fun onProfileModifyRequested(profile: ProfileReadableType) {
-    NavigationControllers.find(this.requireActivity(), ProfilesNavigationControllerType::class.java)
-      .openProfileModify(profile.id)
+    this.findNavigationController().openProfileModify(profile.id)
   }
 
   private fun onProfileSelected(profile: ProfileReadableType) {
-    this.profilesController.profileSelect(profile.id)
+    this.viewModel.selectProfile(profile.id)
   }
 
   override fun onStart() {
     super.onStart()
     configureToolbar(this.requireActivity())
 
-    this.profilesSubscription =
-      this.profilesController.profileEvents()
-        .subscribe(this::onProfileEvent)
-
-    this.updateProfilesList()
+    this.viewModel.profileEvents
+      .subscribe(this::onProfileEvent)
+      .let { subscriptions.add(it) }
   }
 
   private fun configureToolbar(activity: Activity) {
@@ -128,28 +102,26 @@ class ProfileSelectionFragment : Fragment() {
     }
   }
 
+  private fun updateProfileList() {
+    val profiles = this.viewModel.profiles.sortedBy(ProfileReadableType::displayName)
+    this.listAdapter.submitList(profiles)
+  }
+
   private fun onProfileEvent(event: ProfileEvent) {
     when (event) {
       is ProfileSelection.ProfileSelectionCompleted ->
-        this.uiThread.runOnUIThread {
-          NavigationControllers.find(this.requireActivity(), ProfilesNavigationControllerType::class.java)
-            .openMain()
-        }
-      is ProfileDeletionEvent.ProfileDeletionSucceeded ->
-        this.uiThread.runOnUIThread {
-          this.updateProfilesList()
-        }
+        this.findNavigationController().openMain()
       is ProfileDeletionEvent.ProfileDeletionFailed ->
-        this.uiThread.runOnUIThread {
-          this.onProfileDeletionFailed(event)
-        }
+        this.onProfileDeletionFailed(event)
+      is ProfileCreationEvent.ProfileCreationSucceeded,
+      is ProfileUpdated.Succeeded,
+      is ProfileDeletionEvent.ProfileDeletionSucceeded -> {
+        this.updateProfileList()
+      }
     }
   }
 
-  @UiThread
   private fun onProfileDeletionFailed(event: ProfileDeletionEvent.ProfileDeletionFailed) {
-    this.uiThread.checkIsUIThread()
-
     val context = this.requireContext()
     AlertDialog.Builder(context)
       .setTitle(R.string.profileDeletionError)
@@ -158,23 +130,15 @@ class ProfileSelectionFragment : Fragment() {
       .show()
   }
 
-  @UiThread
-  private fun updateProfilesList() {
-    this.uiThread.checkIsUIThread()
-
-    this.profiles.clear()
-    this.profiles.addAll(
-      this.profilesController.profiles()
-        .values
-        .sortedBy(ProfileReadableType::displayName)
-    )
-    this.listAdapter.notifyDataSetChanged()
-  }
-
   override fun onStop() {
     super.onStop()
+    this.subscriptions.clear()
+  }
 
-    this.profilesSubscription?.dispose()
-    this.create.setOnClickListener(null)
+  private fun findNavigationController(): ProfilesNavigationControllerType {
+    return NavigationControllers.find(
+      activity = this.requireActivity(),
+      interfaceType = ProfilesNavigationControllerType::class.java
+    )
   }
 }

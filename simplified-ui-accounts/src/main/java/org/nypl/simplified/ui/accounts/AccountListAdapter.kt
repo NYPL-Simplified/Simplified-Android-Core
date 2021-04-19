@@ -7,6 +7,8 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.PopupMenu
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.ui.images.ImageAccountIcons
@@ -18,10 +20,9 @@ import org.nypl.simplified.ui.images.ImageLoaderType
 
 class AccountListAdapter(
   private val imageLoader: ImageLoaderType,
-  private val accounts: List<AccountType>,
   private val onItemClicked: (AccountType) -> Unit,
   private val onItemDeleteClicked: (AccountType) -> Unit
-) : RecyclerView.Adapter<AccountViewHolder>() {
+) : ListAdapter<AccountType, AccountListAdapter.AccountViewHolder>(AccountDiff) {
 
   override fun onCreateViewHolder(
     parent: ViewGroup,
@@ -37,89 +38,97 @@ class AccountListAdapter(
     )
   }
 
-  override fun getItemCount(): Int {
-    return this.accounts.size
-  }
-
   override fun onBindViewHolder(
     holder: AccountViewHolder,
     position: Int
   ) {
-    holder.bind(this.accounts[position])
+    holder.bind(this.getItem(position))
   }
-}
 
-class AccountViewHolder(
-  val itemView: View,
-  private val imageLoader: ImageLoaderType,
-  private val onItemClicked: (AccountType) -> Unit,
-  private val onItemDeleteClicked: (AccountType) -> Unit
-) : RecyclerView.ViewHolder(itemView) {
-  private val accountIcon =
-    itemView.findViewById<ImageView>(R.id.accountIcon)
-  private val accountTitleView =
-    itemView.findViewById<TextView>(R.id.accountTitle)
-  private val accountCaptionView =
-    itemView.findViewById<TextView>(R.id.accountCaption)
-  private val popupMenuIcon =
-    itemView.findViewById<View>(R.id.popupMenuIcon)
+  class AccountViewHolder(
+    val itemView: View,
+    private val imageLoader: ImageLoaderType,
+    private val onItemClicked: (AccountType) -> Unit,
+    private val onItemDeleteClicked: (AccountType) -> Unit
+  ) : RecyclerView.ViewHolder(itemView) {
+    private val accountIcon =
+      itemView.findViewById<ImageView>(R.id.accountIcon)
+    private val accountTitleView =
+      itemView.findViewById<TextView>(R.id.accountTitle)
+    private val accountCaptionView =
+      itemView.findViewById<TextView>(R.id.accountCaption)
+    private val popupMenuIcon =
+      itemView.findViewById<View>(R.id.popupMenuIcon)
 
-  private var accountItem: AccountType? = null
+    private var accountItem: AccountType? = null
 
-  init {
-    this.itemView.setOnClickListener {
-      this.accountItem?.let { account ->
-        this.onItemClicked.invoke(account)
-      }
-    }
-
-    val popupMenu =
-      PopupMenu(this.popupMenuIcon.context, this.popupMenuIcon, Gravity.END)
-        .apply {
-          inflate(R.menu.account_list_item)
+    init {
+      this.itemView.setOnClickListener {
+        this.accountItem?.let { account ->
+          this.onItemClicked.invoke(account)
         }
+      }
 
-    popupMenu.setOnMenuItemClickListener { menuItem ->
-      when (menuItem.itemId) {
-        R.id.menuItemDelete -> {
-          this.accountItem?.let { account ->
-            this.onItemDeleteClicked.invoke(account)
+      val popupMenu =
+        PopupMenu(this.popupMenuIcon.context, this.popupMenuIcon, Gravity.END)
+          .apply {
+            inflate(R.menu.account_list_item)
+          }
+
+      popupMenu.setOnMenuItemClickListener { menuItem ->
+        when (menuItem.itemId) {
+          R.id.menuItemDelete -> {
+            this.accountItem?.let { account ->
+              this.onItemDeleteClicked.invoke(account)
+            }
           }
         }
+        true
       }
-      true
+
+      this.popupMenuIcon
+        .apply {
+          visibility = View.VISIBLE
+        }
+        .setOnClickListener {
+          popupMenu.show()
+        }
     }
 
-    this.popupMenuIcon
-      .apply {
-        visibility = View.VISIBLE
+    fun bind(item: AccountType) {
+      this.accountTitleView.text = item.provider.displayName
+      this.accountCaptionView.text = item.provider.subtitle
+
+      item.preferences.catalogURIOverride?.let { uri ->
+        this.accountCaptionView.text = uri.toString()
       }
-      .setOnClickListener {
-        popupMenu.show()
-      }
+
+      this.accountCaptionView.visibility =
+        if (this.accountCaptionView.text.isNotEmpty()) {
+          View.VISIBLE
+        } else {
+          View.GONE
+        }
+
+      ImageAccountIcons.loadAccountLogoIntoView(
+        loader = this.imageLoader.loader,
+        account = item.provider.toDescription(),
+        defaultIcon = R.drawable.account_default,
+        iconView = this.accountIcon
+      )
+      this.accountItem = item
+    }
   }
 
-  fun bind(item: AccountType) {
-    this.accountTitleView.text = item.provider.displayName
-    this.accountCaptionView.text = item.provider.subtitle
-
-    item.preferences.catalogURIOverride?.let { uri ->
-      this.accountCaptionView.text = uri.toString()
+  object AccountDiff : DiffUtil.ItemCallback<AccountType>() {
+    override fun areItemsTheSame(oldItem: AccountType, newItem: AccountType): Boolean {
+      return oldItem.id.compareTo(newItem.id) == 0
     }
 
-    this.accountCaptionView.visibility =
-      if (this.accountCaptionView.text.isNotEmpty()) {
-        View.VISIBLE
-      } else {
-        View.GONE
-      }
-
-    ImageAccountIcons.loadAccountLogoIntoView(
-      loader = this.imageLoader.loader,
-      account = item.provider.toDescription(),
-      defaultIcon = R.drawable.account_default,
-      iconView = this.accountIcon
-    )
-    this.accountItem = item
+    override fun areContentsTheSame(oldItem: AccountType, newItem: AccountType): Boolean {
+      return oldItem.provider.displayName == newItem.provider.displayName &&
+        oldItem.provider.subtitle == newItem.provider.subtitle &&
+        oldItem.preferences.catalogURIOverride == newItem.preferences.catalogURIOverride
+    }
   }
 }
