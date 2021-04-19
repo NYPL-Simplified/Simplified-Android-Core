@@ -306,7 +306,7 @@ class FeedLoader private constructor(
           val id = e.bookID
           val bookWithStatus = this.bookRegistry.books().get(id)
           if (bookWithStatus != null) {
-            this.log.debug("updating entry {} from book registry", id)
+            this.log.trace("updating entry {} from book registry", id)
             val en = FeedEntry.FeedEntryOPDS(
               accountID = bookWithStatus.book.account,
               feedEntry = bookWithStatus.book.entry
@@ -325,7 +325,7 @@ class FeedLoader private constructor(
             val id = e.bookID
             val bookWithStatus = this.bookRegistry.books().get(id)
             if (bookWithStatus != null) {
-              this.log.debug("updating entry {} from book registry", id)
+              this.log.trace("updating entry {} from book registry", id)
               entries.set(
                 gi,
                 FeedEntry.FeedEntryOPDS(
