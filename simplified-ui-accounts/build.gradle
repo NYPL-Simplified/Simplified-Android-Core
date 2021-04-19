@@ -12,15 +12,18 @@ dependencies {
   implementation project(":simplified-ui-images")
   implementation project(":simplified-ui-navigation-api")
   implementation project(":simplified-ui-theme")
-  implementation project(":simplified-ui-thread-api")
   implementation project(":simplified-webview")
 
   implementation libraries.androidx_appcompat
   implementation libraries.androidx_constraintlayout
   implementation libraries.androidx_lifecycle
+  implementation libraries.androidx_fragment
   implementation libraries.androidx_recyclerview
   implementation libraries.google_material
   implementation libraries.kotlin_stdlib
+  implementation libraries.rxjava2
+  implementation libraries.rxjava2extensions
+  implementation libraries.rxandroid2
   implementation libraries.slf4j
 
   testImplementation libraries.junit

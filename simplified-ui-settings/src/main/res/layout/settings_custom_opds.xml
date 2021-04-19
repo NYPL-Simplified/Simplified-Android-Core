@@ -55,6 +55,7 @@
     android:gravity="start|top"
     android:scrollbarAlwaysDrawVerticalTrack="true"
     android:text="@string/accountPlaceholder"
+    android:freezesText="true"
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
