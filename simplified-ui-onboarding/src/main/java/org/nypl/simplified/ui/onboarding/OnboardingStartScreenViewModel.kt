@@ -32,8 +32,7 @@ class OnboardingStartScreenViewModel : ViewModel() {
       .profileUpdate { profileDescription ->
         profileDescription.copy(
           preferences = profileDescription.preferences.copy(
-            hasSeenLibrarySelectionScreen = true,
-            requiresAge = true
+            hasSeenLibrarySelectionScreen = true
           )
         )
       }

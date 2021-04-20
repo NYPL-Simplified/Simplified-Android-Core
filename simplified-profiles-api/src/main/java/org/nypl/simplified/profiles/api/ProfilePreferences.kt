@@ -44,7 +44,4 @@ data class ProfilePreferences(
   /** @return `true` if the debug settings should be visible. */
 
   val showDebugSettings: Boolean = false,
-
-  /** @return `true` if user selects SimplyE collection. */
-  val requiresAge: Boolean = false,
 )
