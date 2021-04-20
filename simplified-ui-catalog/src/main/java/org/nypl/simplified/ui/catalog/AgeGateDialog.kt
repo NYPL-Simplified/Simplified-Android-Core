@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.Button
 import android.widget.Spinner
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
@@ -28,6 +29,8 @@ class AgeGateDialog : DialogFragment(), AdapterView.OnItemSelectedListener {
   private val currentYear = Calendar.getInstance().get(Calendar.YEAR)
   private lateinit var birthYearSelectedListener: BirthYearSelectedListener
   private val century = 100
+  private val positiveButton: Button?
+    get() = (dialog as? AlertDialog)?.getButton(AlertDialog.BUTTON_POSITIVE)
 
   interface BirthYearSelectedListener {
     fun onBirthYearSelected(isOver13: Boolean)
@@ -78,9 +81,12 @@ class AgeGateDialog : DialogFragment(), AdapterView.OnItemSelectedListener {
 
   override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
     logger.debug("Year selected: ${birthYearSpinner.getItemAtPosition(position)}")
+    positiveButton?.isEnabled = position > 0
   }
 
-  override fun onNothingSelected(parent: AdapterView<*>?) {}
+  override fun onNothingSelected(parent: AdapterView<*>?) {
+    positiveButton?.isEnabled = false
+  }
 
   companion object {
     fun create(): AgeGateDialog {
