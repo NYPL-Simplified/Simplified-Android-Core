@@ -1,9 +1,18 @@
 package org.nypl.simplified.ui.accounts
 
+import android.Manifest
+import android.location.Location
+import android.location.LocationManager
+import androidx.annotation.RequiresPermission
 import androidx.lifecycle.ViewModel
 import hu.akarnokd.rxjava2.subjects.UnicastWorkSubject
+import io.reactivex.Observable
+import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
+import io.reactivex.subjects.BehaviorSubject
+import io.reactivex.subjects.Subject
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountProviderDescription
@@ -16,7 +25,7 @@ import org.nypl.simplified.threads.NamedThreadPools
 import org.slf4j.LoggerFactory
 import java.net.URI
 
-class AccountListRegistryViewModel : ViewModel() {
+class AccountListRegistryViewModel(private val locationManager: LocationManager) : ViewModel() {
 
   private val services =
     Services.serviceDirectory()
@@ -72,6 +81,13 @@ class AccountListRegistryViewModel : ViewModel() {
   val accountRegistryStatus: AccountProviderRegistryStatus
     get() = this.accountRegistry.status
 
+  private val displayNoLocationMessage: Subject<Boolean> =
+    BehaviorSubject.createDefault(false)
+  val displayNoLocationMessageEvents: Observable<Boolean>
+    get() = displayNoLocationMessage.hide().distinctUntilChanged()
+
+  private var activeLocation: Location? = null
+
   fun refreshAccountRegistry() {
     this.backgroundExecutor.execute {
       try {
@@ -89,6 +105,19 @@ class AccountListRegistryViewModel : ViewModel() {
 
   fun createAccount(id: URI) {
     this.profilesController.profileAccountCreate(id)
+  }
+
+  @RequiresPermission(value = Manifest.permission.ACCESS_COARSE_LOCATION)
+  fun getLocation(hasPermission: Boolean) {
+    if (hasPermission) {
+      tryAndGetLocation()
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(displayNoLocationMessage::onNext)
+        .let(subscriptions::add)
+    } else {
+      displayNoLocationMessage.onNext(true)
+    }
   }
 
   /**
@@ -112,5 +141,15 @@ class AccountListRegistryViewModel : ViewModel() {
 
     this.logger.debug("returning {} available providers", availableAccountProviders.size)
     return availableAccountProviders
+  }
+
+  @RequiresPermission(value = Manifest.permission.ACCESS_COARSE_LOCATION)
+  private fun tryAndGetLocation(): Single<Boolean> = Single.fromCallable {
+    val isNetworkLocationEnabled =
+      locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+    if (isNetworkLocationEnabled) {
+      activeLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+    }
+    activeLocation == null
   }
 }

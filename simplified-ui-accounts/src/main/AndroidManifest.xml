@@ -1,2 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest package="org.nypl.simplified.ui.accounts" />
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="org.nypl.simplified.ui.accounts">
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+</manifest>
