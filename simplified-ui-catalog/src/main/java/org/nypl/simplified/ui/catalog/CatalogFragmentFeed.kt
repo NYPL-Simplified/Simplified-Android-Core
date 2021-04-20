@@ -522,7 +522,6 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
   private fun onCatalogFeedNavigationUI(
     @Suppress("UNUSED_PARAMETER") feedState: CatalogFeedNavigation
   ) {
-
     this.feedEmpty.visibility = View.INVISIBLE
     this.feedError.visibility = View.INVISIBLE
     this.feedLoading.visibility = View.INVISIBLE
@@ -537,7 +536,6 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
   private fun onCatalogFeedWithoutGroupsUI(
     feedState: CatalogFeedWithoutGroups
   ) {
-
     this.feedEmpty.visibility = View.INVISIBLE
     this.feedError.visibility = View.INVISIBLE
     this.feedLoading.visibility = View.INVISIBLE
@@ -580,7 +578,6 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
   private fun onCatalogFeedWithGroupsUI(
     feedState: CatalogFeedWithGroups
   ) {
-
     this.feedEmpty.visibility = View.INVISIBLE
     this.feedError.visibility = View.INVISIBLE
     this.feedLoading.visibility = View.INVISIBLE
@@ -607,7 +604,6 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
   private fun onCatalogFeedLoadFailed(
     feedState: CatalogFeedLoadFailed
   ) {
-
     /*
      * If the feed can't be loaded due to an authentication failure, then open
      * the account screen (if possible).
