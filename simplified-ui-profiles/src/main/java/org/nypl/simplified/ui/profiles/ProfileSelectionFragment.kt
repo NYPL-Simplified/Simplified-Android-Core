@@ -137,7 +137,7 @@ class ProfileSelectionFragment : Fragment(R.layout.profile_selection) {
 
   private fun findNavigationController(): ProfilesNavigationControllerType {
     return NavigationControllers.find(
-      activity = this.requireActivity(),
+      viewModelStoreOwner = this,
       interfaceType = ProfilesNavigationControllerType::class.java
     )
   }

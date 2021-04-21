@@ -995,7 +995,7 @@ class CatalogFragmentBookDetail : Fragment() {
 
   private fun findNavigationController(): CatalogNavigationControllerType =
     NavigationControllers.find(
-      activity = this.requireActivity(),
+      viewModelStoreOwner = this,
       interfaceType = CatalogNavigationControllerType::class.java
     )
 }

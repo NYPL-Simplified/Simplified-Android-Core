@@ -348,7 +348,7 @@ class SettingsFragmentDebug : Fragment(R.layout.settings_debug) {
 
   private fun findNavigationController(): SettingsNavigationControllerType {
     return NavigationControllers.find(
-      activity = this.requireActivity(),
+      viewModelStoreOwner = this,
       interfaceType = SettingsNavigationControllerType::class.java
     )
   }

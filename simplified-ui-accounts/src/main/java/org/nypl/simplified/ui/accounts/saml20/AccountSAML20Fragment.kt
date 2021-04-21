@@ -113,7 +113,7 @@ class AccountSAML20Fragment : Fragment(R.layout.account_saml20) {
   }
 
   private fun onSAMLEventAccessTokenObtained() {
-    this.findNavigationController().popBackStack()
+    this.findNavigationController().onSAMLEventAccessTokenObtained()
   }
 
   private fun onSAMLEventFailed(event: AccountSAML20Event.Failed) {
@@ -165,7 +165,7 @@ class AccountSAML20Fragment : Fragment(R.layout.account_saml20) {
 
   private fun findNavigationController(): AccountNavigationControllerType {
     return NavigationControllers.find(
-      activity = this.requireActivity(),
+      viewModelStoreOwner = this,
       interfaceType = AccountNavigationControllerType::class.java
     )
   }

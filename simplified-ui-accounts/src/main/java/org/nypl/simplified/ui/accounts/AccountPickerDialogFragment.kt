@@ -109,7 +109,7 @@ class AccountPickerDialogFragment : BottomSheetDialogFragment(), OnAccountClickL
 
   override fun onAddAccountClick() {
     val navigationController = NavigationControllers.find(
-      activity = this.requireActivity(),
+      viewModelStoreOwner = this,
       interfaceType = AccountNavigationControllerType::class.java
     )
     navigationController.openSettingsAccountRegistry()

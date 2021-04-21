@@ -8,12 +8,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.FragmentResultListener
 import androidx.lifecycle.ViewModelProvider
+import io.reactivex.disposables.CompositeDisposable
 import org.joda.time.DateTime
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
-import org.nypl.simplified.navigation.api.NavigationControllerDirectoryType
+import org.nypl.simplified.navigation.api.NavigationAwareViewModelFactory
 import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.oauth.OAuthCallbackIntentParsing
 import org.nypl.simplified.oauth.OAuthParseResult
@@ -25,7 +26,6 @@ import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest.OA
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.ui.branding.BrandingSplashServiceType
 import org.nypl.simplified.ui.catalog.AgeGateDialog
-import org.nypl.simplified.ui.profiles.ProfilesNavigationControllerType
 import org.slf4j.LoggerFactory
 import java.util.ServiceLoader
 
@@ -41,11 +41,10 @@ class MainActivity :
   }
 
   private val logger = LoggerFactory.getLogger(MainActivity::class.java)
+  private val subscriptions = CompositeDisposable()
 
   private lateinit var mainViewModel: MainActivityViewModel
-  private lateinit var navigationControllerDirectory: NavigationControllerDirectoryType
-  private lateinit var profilesNavigationController: ProfilesNavigationController
-  private lateinit var startupNavigationController: StartupNavigationController
+  private lateinit var navigationDelegate: MainActivityNavigationDelegate
   private lateinit var configurationService: BuildConfigurationServiceType
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var ageGateDialog: AgeGateDialog
@@ -54,8 +53,6 @@ class MainActivity :
     this.logger.debug("onCreate (recreating {})", savedInstanceState != null)
     super.onCreate(savedInstanceState)
     this.logger.debug("onCreate (super completed)")
-
-    this.navigationControllerDirectory = NavigationControllers.findDirectory(this)
 
     val toolbar = this.findViewById(R.id.mainToolbar) as Toolbar
     this.setSupportActionBar(toolbar)
@@ -67,21 +64,12 @@ class MainActivity :
       ViewModelProvider(this)
         .get(MainActivityViewModel::class.java)
 
-    this.profilesNavigationController =
-      ProfilesNavigationController(this.supportFragmentManager, this.mainViewModel)
-    this.navigationControllerDirectory.updateNavigationController(
-      ProfilesNavigationControllerType::class.java, this.profilesNavigationController
-    )
-
-    this.startupNavigationController =
-      StartupNavigationController(this.supportFragmentManager)
-    this.navigationControllerDirectory.updateNavigationController(
-      StartupNavigationController::class.java, this.startupNavigationController
-    )
+    this.navigationDelegate =
+      MainActivityNavigationDelegate(supportFragmentManager, this.mainViewModel)
 
     if (savedInstanceState == null) {
       this.mainViewModel.clearHistory = true
-      this.startupNavigationController.openSplashScreen(SPLASH_RESULT_KEY)
+      this.navigationDelegate.openSplashScreen(SPLASH_RESULT_KEY)
     } else {
       if (savedInstanceState.getBoolean(STATE_ACTION_BAR_IS_SHOWING)) {
         this.supportActionBar?.show()
@@ -92,6 +80,28 @@ class MainActivity :
 
     supportFragmentManager.setFragmentResultListener(SPLASH_RESULT_KEY, this, this)
     supportFragmentManager.setFragmentResultListener(ONBOARDING_RESULT_KEY, this, this)
+  }
+
+  override fun onStart() {
+    super.onStart()
+
+    NavigationControllers
+      .findViewModel<MainActivityNavigationViewModel>(this)
+      .commandQueue
+      .subscribe(this.navigationDelegate::handleNavigationCommand)
+      .let { subscriptions.add(it) }
+  }
+
+  override fun onStop() {
+    super.onStop()
+    subscriptions.clear()
+  }
+
+  override fun getDefaultViewModelProviderFactory(): ViewModelProvider.Factory {
+    return NavigationAwareViewModelFactory(
+      MainActivityNavigationViewModel::class.java,
+      super.getDefaultViewModelProviderFactory()
+    )
   }
 
   override fun onSaveInstanceState(outState: Bundle) {
@@ -136,13 +146,13 @@ class MainActivity :
         this.logger.debug("shouldShowLibrarySelectionScreen=$shouldShowLibrarySelectionScreen")
 
         if (!hasNonDefaultAccount && shouldShowLibrarySelectionScreen) {
-          this.startupNavigationController.openOnboarding(ONBOARDING_RESULT_KEY)
+          this.navigationDelegate.openOnboarding(ONBOARDING_RESULT_KEY)
         } else {
           this.onOnboardingFinished()
         }
       }
       ANONYMOUS_PROFILE_DISABLED -> {
-        this.startupNavigationController.openProfileSelection()
+        this.navigationDelegate.openProfileSelection()
       }
     }
   }
@@ -152,7 +162,7 @@ class MainActivity :
       .get(MainActivityViewModel::class.java)
       .clearHistory = true
 
-    this.startupNavigationController.openMainFragment()
+    this.navigationDelegate.openMainFragment()
 
     val services = Services.serviceDirectory()
     this.configurationService =

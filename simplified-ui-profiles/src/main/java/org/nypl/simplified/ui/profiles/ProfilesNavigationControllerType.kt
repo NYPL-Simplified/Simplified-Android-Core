@@ -34,4 +34,8 @@ interface ProfilesNavigationControllerType : NavigationControllerType {
    */
 
   fun openProfileSelect()
+
+  fun onProfileModificationCancelled()
+
+  fun onProfileModificationSucceeded()
 }

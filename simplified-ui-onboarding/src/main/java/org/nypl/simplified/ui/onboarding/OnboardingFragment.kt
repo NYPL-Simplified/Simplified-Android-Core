@@ -7,10 +7,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
-import org.nypl.simplified.navigation.api.NavigationControllerDirectoryType
+import androidx.fragment.app.commit
+import androidx.lifecycle.ViewModelProvider
+import io.reactivex.disposables.CompositeDisposable
+import org.nypl.simplified.android.ktx.tryPopBackStack
+import org.nypl.simplified.android.ktx.tryPopToRoot
+import org.nypl.simplified.navigation.api.NavigationAwareViewModelFactory
 import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.ui.accounts.AccountListRegistryFragment
-import org.nypl.simplified.ui.accounts.AccountNavigationControllerType
+import org.slf4j.LoggerFactory
 
 class OnboardingFragment :
   Fragment(R.layout.onboarding_fragment),
@@ -25,19 +30,15 @@ class OnboardingFragment :
     }
   }
 
+  private val logger = LoggerFactory.getLogger(OnboardingFragment::class.java)
+  private val subscriptions = CompositeDisposable()
   private lateinit var resultKey: String
-  private lateinit var navControllerDirectory: NavigationControllerDirectoryType
-  private lateinit var onboardingNavController: OnboardingNavigationController
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
     resultKey =
       requireNotNull(requireArguments().getString(resultKeyKey))
-    navControllerDirectory =
-      NavigationControllers.findDirectory(requireActivity())
-    onboardingNavController =
-      OnboardingNavigationController(childFragmentManager)
 
     /*
     * Demand that onOptionsItemSelected be called.
@@ -60,7 +61,7 @@ class OnboardingFragment :
      */
 
     requireActivity().onBackPressedDispatcher.addCallback(this) {
-      if (onboardingNavController.popBackStack()) {
+      if (childFragmentManager.tryPopBackStack()) {
         return@addCallback
       }
 
@@ -82,37 +83,59 @@ class OnboardingFragment :
   }
 
   override fun onOptionsItemSelected(item: MenuItem): Boolean {
-    return when (item.itemId) {
-      android.R.id.home -> onboardingNavController.popToRoot()
-      else -> super.onOptionsItemSelected(item)
+    when (item.itemId) {
+      android.R.id.home ->
+        if (childFragmentManager.tryPopToRoot()) {
+          return true
+        }
     }
+
+    return super.onOptionsItemSelected(item)
   }
 
   override fun onStart() {
     super.onStart()
 
-    navControllerDirectory
-      .updateNavigationController(
-        AccountNavigationControllerType::class.java,
-        AccountNavigationController(childFragmentManager) {
-          requireActivity().supportFragmentManager.setFragmentResult(resultKey, Bundle())
-        }
-      )
-
-    navControllerDirectory
-      .updateNavigationController(
-        OnboardingNavigationController::class.java,
-        onboardingNavController
-      )
+    NavigationControllers
+      .findViewModel<OnboardingNavigationViewModel>(this)
+      .commandQueue
+      .subscribe(this::handleNavigationCommand)
+      .let { subscriptions.add(it) }
   }
 
   override fun onStop() {
     super.onStop()
+    subscriptions.clear()
+  }
 
-    navControllerDirectory
-      .removeNavigationController(AccountNavigationControllerType::class.java)
+  override fun getDefaultViewModelProviderFactory(): ViewModelProvider.Factory {
+    return NavigationAwareViewModelFactory(
+      OnboardingNavigationViewModel::class.java,
+      super.getDefaultViewModelProviderFactory()
+    )
+  }
 
-    navControllerDirectory
-      .removeNavigationController(OnboardingNavigationController::class.java)
+  private fun handleNavigationCommand(command: OnboardingNavigationCommand) {
+    when(command) {
+      OnboardingNavigationCommand.AccountNavigationCommand.OnAccountCreated ->
+        closeOnboarding()
+      OnboardingNavigationCommand.AccountNavigationCommand.OnSAMLCommandAccessTokenObtained ->
+        closeOnboarding()
+      OnboardingNavigationCommand.AccountNavigationCommand.OpenSettingsAccountRegistry ->
+        openSettingsAccountRegistry()
+    }
+  }
+
+  private fun closeOnboarding() {
+    requireActivity().supportFragmentManager.setFragmentResult(resultKey, Bundle())
+  }
+
+  private fun openSettingsAccountRegistry() {
+    this.logger.debug("openSettingsAccountRegistry")
+    val fragment = AccountListRegistryFragment()
+    this.childFragmentManager.commit {
+      replace(R.id.onboarding_fragment_container, fragment)
+      addToBackStack(null)
+    }
   }
 }

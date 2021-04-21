@@ -175,7 +175,7 @@ class CatalogSAML20Fragment : Fragment() {
 
   private fun onSAMLEventSucceeded() {
     this.uiThread.runOnUIThread {
-      this.findNavigationController().popBackStack()
+      this.findNavigationController().onSAML20LoginSucceeded()
       Unit
     }
   }
@@ -217,7 +217,7 @@ class CatalogSAML20Fragment : Fragment() {
 
   private fun findNavigationController(): CatalogNavigationControllerType {
     return NavigationControllers.find(
-      activity = this.requireActivity(),
+      viewModelStoreOwner = this,
       interfaceType = CatalogNavigationControllerType::class.java
     )
   }

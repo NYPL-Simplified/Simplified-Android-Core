@@ -51,9 +51,5 @@ interface CatalogNavigationControllerType :
     format: BookFormat
   )
 
-  /**
-   * Clear the history for the catalog.
-   */
-
-  fun clearHistory()
+  fun onSAML20LoginSucceeded()
 }

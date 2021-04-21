@@ -39,4 +39,8 @@ interface AccountNavigationControllerType : NavigationControllerType {
    */
 
   fun openCatalogAfterAuthentication()
+
+  fun onAccountCreated()
+
+  fun onSAMLEventAccessTokenObtained()
 }

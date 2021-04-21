@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import org.slf4j.LoggerFactory
 import java.util.concurrent.ConcurrentHashMap
 
-class NavigationControllerViewModel : ViewModel(), NavigationControllerDirectoryType {
+abstract class NavigationControllerViewModel : ViewModel(), NavigationControllerDirectoryType {
 
   private val logger =
     LoggerFactory.getLogger(NavigationControllerViewModel::class.java)
@@ -18,14 +18,7 @@ class NavigationControllerViewModel : ViewModel(), NavigationControllerDirectory
     return (this.navigationControllers[navigationClass] as T?)
   }
 
-  override fun <T : NavigationControllerType> removeNavigationController(
-    navigationClass: Class<T>
-  ) {
-    this.logger.debug("removing navigation controller: {}", navigationClass)
-    this.navigationControllers.remove(navigationClass)
-  }
-
-  override fun <T : NavigationControllerType> updateNavigationController(
+  protected fun <T : NavigationControllerType> updateNavigationController(
     navigationInterface: Class<T>,
     navigationInstance: T
   ) {

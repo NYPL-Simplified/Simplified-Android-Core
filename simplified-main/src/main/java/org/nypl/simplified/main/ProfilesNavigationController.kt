@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory
 internal class ProfilesNavigationController(
   private val supportFragmentManager: FragmentManager,
   private val mainViewModel: MainActivityViewModel
-) : BaseNavigationController(supportFragmentManager), ProfilesNavigationControllerType {
+) : ProfilesNavigationControllerType {
 
   private val logger =
     LoggerFactory.getLogger(ProfilesNavigationController::class.java)
@@ -70,5 +70,13 @@ internal class ProfilesNavigationController(
   override fun openProfileCreate() {
     this.logger.debug("openProfileCreate")
     this.openModificationFragment(ProfileModificationFragmentParameters(null))
+  }
+
+  override fun onProfileModificationSucceeded() {
+    this.supportFragmentManager.popBackStack()
+  }
+
+  override fun onProfileModificationCancelled() {
+    this.supportFragmentManager.popBackStack()
   }
 }

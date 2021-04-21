@@ -4,15 +4,20 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
 import org.nypl.simplified.ui.profiles.ProfileSelectionFragment
 import org.nypl.simplified.ui.onboarding.OnboardingFragment
+import org.nypl.simplified.ui.profiles.ProfilesNavigationControllerType
 import org.nypl.simplified.ui.splash.SplashFragment
 import org.slf4j.LoggerFactory
 
-internal class StartupNavigationController(
-  fragmentManager: FragmentManager,
-) : BaseNavigationController(fragmentManager) {
+internal class MainActivityNavigationDelegate(
+  private val fragmentManager: FragmentManager,
+  mainActivityViewModel: MainActivityViewModel
+) : ProfilesNavigationControllerType by ProfilesNavigationController(
+  fragmentManager, mainActivityViewModel
+) {
 
   private val logger =
-    LoggerFactory.getLogger(StartupNavigationController::class.java)
+    LoggerFactory.getLogger(MainActivityNavigationDelegate::class.java)
+
 
   fun openSplashScreen(resultKey: String) {
     this.logger.debug("openSplashScreen")
@@ -47,6 +52,23 @@ internal class StartupNavigationController(
     this.fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
     this.fragmentManager.commit {
       replace(R.id.mainFragmentHolder, mainFragment, "MAIN")
+    }
+  }
+
+  fun handleNavigationCommand(command: MainActivityNavigationCommand) {
+    when(command) {
+      MainActivityNavigationCommand.ProfileCommand.OnProfileModificationCancelled ->
+        this.onProfileModificationCancelled()
+      MainActivityNavigationCommand.ProfileCommand.OnProfileModificationSucceeded ->
+        this.onProfileModificationSucceeded()
+      MainActivityNavigationCommand.ProfileCommand.OpenMain ->
+        this.openMain()
+      MainActivityNavigationCommand.ProfileCommand.OpenProfileCreate ->
+        this.openProfileCreate()
+      is MainActivityNavigationCommand.ProfileCommand.OpenProfileModify ->
+        this.openProfileModify(command.id)
+      MainActivityNavigationCommand.ProfileCommand.OpenProfileSelect ->
+        this.openProfileSelect()
     }
   }
 }

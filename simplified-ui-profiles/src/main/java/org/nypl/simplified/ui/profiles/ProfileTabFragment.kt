@@ -75,7 +75,7 @@ class ProfileTabFragment : Fragment(R.layout.profile_tab) {
 
   private fun findNavigationController(): ProfilesNavigationControllerType {
     return NavigationControllers.find(
-      activity = this.requireActivity(),
+      viewModelStoreOwner = this,
       interfaceType = ProfilesNavigationControllerType::class.java
     )
   }

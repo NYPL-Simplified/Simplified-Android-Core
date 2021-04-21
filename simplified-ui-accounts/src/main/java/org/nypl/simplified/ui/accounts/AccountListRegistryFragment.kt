@@ -119,7 +119,7 @@ class AccountListRegistryFragment : Fragment(R.layout.account_list_registry) {
       }
 
       is AccountEventCreation.AccountEventCreationSucceeded -> {
-        this.findNavigationController().popBackStack()
+        this.findNavigationController().onAccountCreated()
       }
 
       is AccountEventCreation.AccountEventCreationFailed -> {
@@ -280,7 +280,7 @@ class AccountListRegistryFragment : Fragment(R.layout.account_list_registry) {
 
   private fun findNavigationController(): AccountNavigationControllerType {
     return NavigationControllers.find(
-      activity = this.requireActivity(),
+      viewModelStoreOwner = this,
       interfaceType = AccountNavigationControllerType::class.java
     )
   }

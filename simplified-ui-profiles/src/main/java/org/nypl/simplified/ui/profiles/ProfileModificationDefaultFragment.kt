@@ -61,7 +61,7 @@ class ProfileModificationDefaultFragment : Fragment(R.layout.profile_modificatio
       view.findViewById(R.id.profileButtonCreate)
 
     this.cancel.setOnClickListener {
-      this.findNavigationController().popBackStack()
+      this.findNavigationController().onProfileModificationCancelled()
     }
 
     val nameFieldListener = OnTextChangeListener(this::onNameChanged)
@@ -138,7 +138,7 @@ class ProfileModificationDefaultFragment : Fragment(R.layout.profile_modificatio
       }
       is ProfileCreationEvent.ProfileCreationSucceeded,
       is ProfileUpdated.Succeeded -> {
-        this.findNavigationController().popBackStack()
+        this.findNavigationController().onProfileModificationSucceeded()
       }
       is ProfileUpdated.Failed -> {
         this.showProfileUpdateError(event)
@@ -198,7 +198,7 @@ class ProfileModificationDefaultFragment : Fragment(R.layout.profile_modificatio
 
   private fun findNavigationController(): ProfilesNavigationControllerType {
     return NavigationControllers.find(
-      activity = this.requireActivity(),
+      viewModelStoreOwner = this,
       interfaceType = ProfilesNavigationControllerType::class.java
     )
   }

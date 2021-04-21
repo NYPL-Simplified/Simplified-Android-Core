@@ -7,6 +7,7 @@ import android.widget.ImageView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import org.nypl.simplified.navigation.api.NavigationControllers
+import org.nypl.simplified.ui.accounts.AccountNavigationControllerType
 
 class OnboardingStartScreenFragment : Fragment(R.layout.onboarding_start_screen) {
 
@@ -30,7 +31,7 @@ class OnboardingStartScreenFragment : Fragment(R.layout.onboarding_start_screen)
 
     this.selectionButton.setOnClickListener {
       NavigationControllers
-        .find(requireActivity(), OnboardingNavigationController::class.java)
+        .find(this, AccountNavigationControllerType::class.java)
         .openSettingsAccountRegistry()
     }
 

@@ -8,6 +8,7 @@ import android.view.MenuItem
 import android.view.View
 import androidx.activity.addCallback
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -19,8 +20,7 @@ import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventDeletion
 import org.nypl.simplified.android.ktx.supportActionBar
 import org.nypl.simplified.books.book_registry.BookRegistryType
-import org.nypl.simplified.navigation.api.NavigationControllerDirectoryType
-import org.nypl.simplified.navigation.api.NavigationControllerType
+import org.nypl.simplified.navigation.api.NavigationAwareViewModelFactory
 import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileUpdated
@@ -29,15 +29,11 @@ import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEna
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimeOutSoon
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimedOut
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
-import org.nypl.simplified.ui.accounts.AccountNavigationControllerType
 import org.nypl.simplified.ui.announcements.AnnouncementsController
 import org.nypl.simplified.ui.catalog.CatalogFeedArguments
 import org.nypl.simplified.ui.catalog.CatalogFeedOwnership
-import org.nypl.simplified.ui.catalog.CatalogNavigationControllerType
-import org.nypl.simplified.ui.navigation.tabs.TabbedNavigationController
 import org.nypl.simplified.ui.profiles.ProfileDialogs
 import org.nypl.simplified.ui.profiles.ProfilesNavigationControllerType
-import org.nypl.simplified.ui.settings.SettingsNavigationControllerType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.slf4j.LoggerFactory
 
@@ -52,13 +48,13 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
 
   private val logger = LoggerFactory.getLogger(MainFragment::class.java)
 
-  private lateinit var bottomNavigator: TabbedNavigationController
+  private lateinit var navigationDelegate: MainFragmentNavigationDelegate
   private lateinit var bottomView: BottomNavigationView
-  private lateinit var navigationControllerDirectory: NavigationControllerDirectoryType
   private var timeOutDialog: AlertDialog? = null
 
   private lateinit var activityViewModel: MainActivityViewModel
   private lateinit var viewModel: MainFragmentViewModel
+  private lateinit var navigationViewModel: MainFragmentNavigationViewModel
   private val subscriptions = CompositeDisposable()
 
   private val handler: Handler = Handler(Looper.getMainLooper())
@@ -67,9 +63,6 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
-    this.navigationControllerDirectory =
-      NavigationControllers.findDirectory(this.requireActivity())
-
     this.activityViewModel =
       ViewModelProvider(this.requireActivity())
         .get(MainActivityViewModel::class.java)
@@ -77,6 +70,10 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
     this.viewModel =
       ViewModelProvider(this)
         .get(MainFragmentViewModel::class.java)
+
+    this.navigationViewModel =
+      NavigationControllers
+        .findViewModel(requireActivity())
 
     /*
     * If named profiles are enabled, subscribe to profile timer events so that users are
@@ -123,7 +120,7 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
     )
 
     requireActivity().onBackPressedDispatcher.addCallback(this) {
-      if (bottomNavigator.popBackStack()) {
+      if (navigationDelegate.popBackStack()) {
         return@addCallback
       }
 
@@ -165,7 +162,7 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
   override fun onOptionsItemSelected(item: MenuItem): Boolean {
     return when (item.itemId) {
       android.R.id.home -> {
-        this.bottomNavigator.popToRoot()
+        this.navigationDelegate.popToRoot()
       }
       else -> super.onOptionsItemSelected(item)
     }
@@ -198,78 +195,40 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
      */
 
     this.runOnUIThread {
-      this.bottomNavigator =
-        TabbedNavigationController.create(
-          activity = this.requireActivity(),
+      this.navigationDelegate =
+        MainFragmentNavigationDelegate.create(
+          activity = this.requireActivity() as AppCompatActivity,
+          navigationController = navigationViewModel.navigationController,
           accountProviders = viewModel.accountProviders,
           profilesController = viewModel.profilesController,
           settingsConfiguration = viewModel.buildConfig,
           fragmentContainerId = R.id.tabbedFragmentHolder,
-          navigationView = this.bottomView,
-          listener = this::onFragmentTransactionCompleted
+          navigationView = this.bottomView
         )
 
       if (this.activityViewModel.clearHistory) {
-        this.bottomNavigator.clearHistory()
+        this.navigationDelegate.clearHistory()
         this.activityViewModel.clearHistory = false
       }
-
-      this.navigationControllerDirectory.updateNavigationController(
-        CatalogNavigationControllerType::class.java, this.bottomNavigator
-      )
-      this.navigationControllerDirectory.updateNavigationController(
-        AccountNavigationControllerType::class.java, this.bottomNavigator
-      )
-      this.navigationControllerDirectory.updateNavigationController(
-        SettingsNavigationControllerType::class.java, this.bottomNavigator
-      )
-      this.navigationControllerDirectory.updateNavigationController(
-        NavigationControllerType::class.java, this.bottomNavigator
-      )
     }
   }
 
   override fun onStart() {
     super.onStart()
 
-    this.runOnUIThread {
-      viewModel.accountEvents
-        .subscribe(this::onAccountEvent)
-        .let { subscriptions.add(it) }
+    viewModel.accountEvents
+      .subscribe(this::onAccountEvent)
+      .let { subscriptions.add(it) }
 
-      viewModel.profileEvents
-        .subscribe(this::onProfileEvent)
-        .let { subscriptions.add(it) }
+    viewModel.profileEvents
+      .subscribe(this::onProfileEvent)
+      .let { subscriptions.add(it) }
 
-      /*
-       * Ensure the toolbar is properly configured after an orientation change.
-       */
+    /*
+     * Show the Toolbar
+     */
 
-      configureToolbar()
-
-      /*
-       * Show the Toolbar
-       */
-
-      this.supportActionBar?.show()
-    }
-  }
-
-  private fun onFragmentTransactionCompleted() {
-    val isRoot = (0 == bottomNavigator.backStackSize())
-    this.logger.debug(
-      "controller stack size changed [{}, isRoot={}]", bottomNavigator.backStackSize(), isRoot
-    )
-    configureToolbar()
-  }
-
-  private fun configureToolbar() {
-    val isRoot = (0 == bottomNavigator.backStackSize())
-    this.supportActionBar?.apply {
-      setHomeAsUpIndicator(null)
-      setHomeActionContentDescription(null)
-      setDisplayHomeAsUpEnabled(!isRoot)
-    }
+    this.supportActionBar?.show()
   }
 
   private fun onAccountEvent(event: AccountEvent) {
@@ -283,7 +242,7 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
 
       is AccountEventDeletion.AccountEventDeletionSucceeded -> {
         try {
-          this.bottomNavigator.clearHistory()
+          this.navigationDelegate.clearHistory()
         } catch (e: Throwable) {
           this.logger.error("could not clear history: ", e)
         }
@@ -317,9 +276,9 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
         val profile = viewModel.profilesController.profileCurrent()
         val account = profile.account(id)
         val age = profile.preferences().dateOfBirth?.yearsOld(DateTime.now()) ?: 1
-        this.bottomNavigator.clearHistory()
-        this.bottomNavigator.popBackStack()
-        this.bottomNavigator.openFeed(
+        this.navigationDelegate.clearHistory()
+        this.navigationDelegate.popBackStack()
+        this.navigationViewModel.navigationController.openFeed(
           CatalogFeedArguments.CatalogFeedArgumentsRemote(
             title = getString(R.string.tabCatalog),
             ownership = CatalogFeedOwnership.OwnedByAccount(id),
@@ -333,7 +292,7 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
 
   private fun onIdleTimedOut() {
     this.timeOutDialog?.dismiss()
-    NavigationControllers.find(this.requireActivity(), ProfilesNavigationControllerType::class.java)
+    NavigationControllers.find(this, ProfilesNavigationControllerType::class.java)
       .openProfileSelect()
   }
 
@@ -350,24 +309,12 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
   override fun onStop() {
     super.onStop()
     this.subscriptions.clear()
+    this.navigationDelegate.dispose()
   }
 
   override fun onDetach() {
     super.onDetach()
     clearDelayedRunnables()
-
-    this.navigationControllerDirectory.removeNavigationController(
-      CatalogNavigationControllerType::class.java
-    )
-    this.navigationControllerDirectory.removeNavigationController(
-      AccountNavigationControllerType::class.java
-    )
-    this.navigationControllerDirectory.removeNavigationController(
-      SettingsNavigationControllerType::class.java
-    )
-    this.navigationControllerDirectory.removeNavigationController(
-      NavigationControllerType::class.java
-    )
   }
 
   override fun onDestroy() {
@@ -380,6 +327,13 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
         viewModel.profilesController.profileIdleTimer().stop()
       }
     }
+  }
+
+  override fun getDefaultViewModelProviderFactory(): ViewModelProvider.Factory {
+    return NavigationAwareViewModelFactory(
+      MainFragmentNavigationViewModel::class.java,
+      super.getDefaultViewModelProviderFactory()
+    )
   }
 
   private fun runOnUIThread(f: () -> Unit) {

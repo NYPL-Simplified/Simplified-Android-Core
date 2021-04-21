@@ -146,7 +146,7 @@ class CatalogFragmentFeed : Fragment() {
 
   private val navigationController by lazy {
     NavigationControllers.find(
-      this.requireActivity(),
+      this,
       interfaceType = CatalogNavigationControllerType::class.java
     )
   }
@@ -334,9 +334,7 @@ class CatalogFragmentFeed : Fragment() {
         true
       }
       android.R.id.home -> {
-        val isRoot =
-          (0 == this.navigationController.backStackSize())
-        if (isRoot) {
+        if (isAccountCatalogRoot()) {
           this.openAccountPickerDialog()
           true
         } else {
@@ -706,13 +704,8 @@ class CatalogFragmentFeed : Fragment() {
     }
 
     try {
-      val isRoot = (0 == this.navigationController.backStackSize())
-      if (isRoot) {
-        when (this.parameters.ownership) {
-          is OwnedByAccount -> showAccountPickerAction()
-          else -> {
-          } // do nothing
-        }
+      if (isAccountCatalogRoot()) {
+        showAccountPickerAction()
       }
     } catch (e: Exception) {
       // Nothing to do
@@ -1084,5 +1077,24 @@ class CatalogFragmentFeed : Fragment() {
       attributes = taskFailure.attributes.toSortedMap(),
       taskSteps = taskFailure.steps
     )
+  }
+
+  private fun isAccountCatalogRoot(): Boolean {
+    val parameters = this.parameters
+    if (parameters !is CatalogFeedArgumentsRemote) {
+      return false
+    }
+
+    val ownership = this.parameters.ownership
+    if (ownership !is OwnedByAccount) {
+      return false
+    }
+
+    val accountProvider =
+      this.profilesController.profileCurrent()
+        .account(ownership.accountId)
+        .provider
+
+    return accountProvider.feedIsRoot(parameters.feedURI)
   }
 }

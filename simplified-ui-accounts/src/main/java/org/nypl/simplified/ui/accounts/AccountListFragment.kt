@@ -205,7 +205,7 @@ class AccountListFragment : Fragment(R.layout.account_list) {
 
   private fun findNavigationController(): AccountNavigationControllerType {
     return NavigationControllers.find(
-      activity = this.requireActivity(),
+      viewModelStoreOwner = this,
       interfaceType = AccountNavigationControllerType::class.java
     )
   }
