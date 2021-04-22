@@ -12,7 +12,7 @@ data class OPDS2Catalog(
    * The catalog metadata.
    */
 
-  val metadata: OPDS2Metadata,
+  val metadata: OPDS2CatalogMetadata,
 
   /**
    * The catalog links

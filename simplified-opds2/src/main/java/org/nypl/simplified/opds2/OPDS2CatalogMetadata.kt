@@ -3,11 +3,7 @@ package org.nypl.simplified.opds2
 import org.joda.time.DateTime
 import java.net.URI
 
-/**
- * Metadata for an OPDS 2.0 feed.
- */
-
-data class OPDS2Metadata(
+data class OPDS2CatalogMetadata(
 
   /**
    * The unique identifier for the publication.
@@ -55,8 +51,28 @@ data class OPDS2Metadata(
    * The authors.
    */
 
-  override val author: List<OPDS2Contributor>
-) : Comparable<OPDS2Metadata>, OPDS2MetadataType {
-  override fun compareTo(other: OPDS2Metadata): Int =
+  override val author: List<OPDS2Contributor>,
+
+  /**
+   * The Adobe vendor ID
+   */
+
+  val adobeVendorId: String?,
+
+  /**
+   * `true` if the catalog is in production.
+   */
+
+  val isProduction: Boolean,
+
+  /**
+   * `true` if the catalog should be automatically added to new profiles.
+   */
+
+  val isAutomatic: Boolean
+
+) : Comparable<OPDS2CatalogMetadata>, OPDS2MetadataType {
+
+  override fun compareTo(other: OPDS2CatalogMetadata): Int =
     (this.sortAs ?: this.title.title).compareTo(other.sortAs ?: other.title.title)
 }

@@ -11,8 +11,10 @@ import one.irradia.opds2_0.api.OPDS20Publication
 import one.irradia.opds2_0.api.OPDS20Title
 import one.irradia.opds2_0.library_simplified.api.OPDS20Catalog
 import one.irradia.opds2_0.library_simplified.api.OPDS20CatalogList
+import one.irradia.opds2_0.library_simplified.api.OPDS20CatalogMetadata
 import org.nypl.simplified.links.Link
 import org.nypl.simplified.opds2.OPDS2Catalog
+import org.nypl.simplified.opds2.OPDS2CatalogMetadata
 import org.nypl.simplified.opds2.OPDS2Contributor
 import org.nypl.simplified.opds2.OPDS2Feed
 import org.nypl.simplified.opds2.OPDS2Group
@@ -21,47 +23,55 @@ import org.nypl.simplified.opds2.OPDS2Name
 import org.nypl.simplified.opds2.OPDS2Navigation
 import org.nypl.simplified.opds2.OPDS2Publication
 import org.nypl.simplified.opds2.OPDS2Title
+import org.nypl.simplified.parser.api.ParseError
+import org.nypl.simplified.parser.api.ParseResult
+import org.nypl.simplified.parser.api.ParseWarning
 
-/**
- * Functions to convert Irradia feeds to Simplified feeds.
- */
+class OPDS2IrradiaFeedConverter(
+  private val feed: OPDS20Feed
+) {
 
-internal object OPDS2IrradiaFeeds {
+  private val warnings =
+    mutableListOf<ParseWarning>()
+  private val errors =
+    mutableListOf<ParseError>()
 
-  /**
-   * Convert an Irradia OPDS 2.0 feed to a Simplified OPDS 2.0 feed. This is very nearly
-   * an identity conversion.
-   */
-
-  fun convert(
-    result: OPDS20Feed
-  ): OPDS2Feed {
+  fun convert(): ParseResult<OPDS2Feed> {
     val catalogs =
-      result.extensions.find { e -> e is OPDS20CatalogList } as OPDS20CatalogList?
+      this.feed.extensions.find { e -> e is OPDS20CatalogList } as OPDS20CatalogList?
+        ?: OPDS20CatalogList(listOf())
 
-    return OPDS2Feed(
-      uri = result.uri,
-      metadata = convertMetadata(result.metadata),
-      navigation = result.navigation?.let(this::convertNavigation),
-      publications = result.publications.map(this::convertPublication),
-      groups = result.groups.map(this::convertGroup),
-      links = result.links.map(this::convertLink),
-      catalogs = catalogs?.let(this::convertCatalogs) ?: listOf()
-    )
-  }
+    val catalogResults =
+      catalogs.catalogs.mapNotNull(this::convertCatalog)
+    val metadata =
+      this.convertMetadata(this.feed.metadata)
+    val navigation =
+      this.feed.navigation?.let(this::convertNavigation)
+    val publications =
+      this.feed.publications.map(this::convertPublication)
+    val groups =
+      this.feed.groups.map(this::convertGroup)
+    val links =
+      this.feed.links.map(this::convertLink)
 
-  private fun convertCatalogs(
-    catalogList: OPDS20CatalogList
-  ): List<OPDS2Catalog> {
-    return catalogList.catalogs.map(this::convertCatalog)
-  }
+    if (this.errors.isNotEmpty()) {
+      return ParseResult.Failure(
+        warnings = this.warnings.toList(),
+        errors = this.errors.toList()
+      )
+    }
 
-  private fun convertCatalog(
-    catalog: OPDS20Catalog
-  ): OPDS2Catalog {
-    return OPDS2Catalog(
-      metadata = convertMetadata(catalog.metadata),
-      links = catalog.links.map(this::convertLink)
+    return ParseResult.Success(
+      warnings = this.warnings.toList(),
+      result = OPDS2Feed(
+        uri = this.feed.uri,
+        metadata = metadata,
+        navigation = navigation,
+        publications = publications,
+        groups = groups,
+        links = links,
+        catalogs = catalogResults
+      )
     )
   }
 
@@ -69,7 +79,7 @@ internal object OPDS2IrradiaFeeds {
     group: OPDS20Group
   ): OPDS2Group {
     return OPDS2Group(
-      metadata = convertMetadata(group.metadata),
+      metadata = this.convertMetadata(group.metadata),
       navigation = group.navigation?.let(this::convertNavigation),
       publications = group.publications.map(this::convertPublication),
       links = group.links.map(this::convertLink)
@@ -80,7 +90,7 @@ internal object OPDS2IrradiaFeeds {
     publication: OPDS20Publication
   ): OPDS2Publication {
     return OPDS2Publication(
-      metadata = convertMetadata(publication.metadata),
+      metadata = this.convertMetadata(publication.metadata),
       links = publication.links.map(this::convertLink),
       readingOrder = publication.readingOrder.map(this::convertLink),
       resources = publication.resources.map(this::convertLink),
@@ -97,13 +107,41 @@ internal object OPDS2IrradiaFeeds {
     )
   }
 
+  private fun convertCatalog(
+    catalog: OPDS20Catalog
+  ): OPDS2Catalog? {
+    val catalogMetadata =
+      catalog.metadata.extensions.find { e -> e is OPDS20CatalogMetadata } as OPDS20CatalogMetadata?
+
+    if (catalogMetadata == null) {
+      this.errors.add(
+        ParseError(
+          source = this.feed.uri,
+          message = "Catalog '${catalog.metadata.title}' is missing NYPL metadata",
+          line = 0,
+          column = 0,
+          exception = null
+        )
+      )
+      return null
+    }
+
+    return OPDS2Catalog(
+      metadata = this.convertCatalogMetadata(
+        metadata = catalog.metadata,
+        catalogMetadata = catalogMetadata
+      ),
+      links = catalog.links.map(this::convertLink)
+    )
+  }
+
   private fun convertMetadata(
     metadata: OPDS20Metadata
   ): OPDS2Metadata {
     return OPDS2Metadata(
       identifier = metadata.identifier,
-      title = convertTitle(metadata.title),
-      subtitle = metadata.subtitle?.let { convertTitle(it) },
+      title = this.convertTitle(metadata.title),
+      subtitle = metadata.subtitle?.let(this::convertTitle),
       modified = metadata.modified,
       published = metadata.published,
       languages = metadata.languages,
@@ -112,11 +150,30 @@ internal object OPDS2IrradiaFeeds {
     )
   }
 
+  private fun convertCatalogMetadata(
+    metadata: OPDS20Metadata,
+    catalogMetadata: OPDS20CatalogMetadata,
+  ): OPDS2CatalogMetadata {
+    return OPDS2CatalogMetadata(
+      identifier = catalogMetadata.id ?: metadata.identifier,
+      title = this.convertTitle(metadata.title),
+      subtitle = metadata.subtitle?.let(this::convertTitle),
+      modified = catalogMetadata.updated ?: metadata.modified,
+      published = metadata.published,
+      languages = metadata.languages,
+      sortAs = metadata.sortAs,
+      author = metadata.author.map(this::convertAuthor),
+      adobeVendorId = catalogMetadata.adobeVendorId,
+      isAutomatic = catalogMetadata.isAutomatic,
+      isProduction = catalogMetadata.isProduction
+    )
+  }
+
   private fun convertAuthor(
     contributor: OPDS20Contributor
   ): OPDS2Contributor {
     return OPDS2Contributor(
-      name = convertName(contributor.name),
+      name = this.convertName(contributor.name),
       identifier = contributor.identifier,
       sortAs = contributor.sortAs,
       links = contributor.links.map(this::convertLink)

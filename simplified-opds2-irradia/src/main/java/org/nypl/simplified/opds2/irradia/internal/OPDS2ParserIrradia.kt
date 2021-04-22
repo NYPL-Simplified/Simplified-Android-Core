@@ -4,11 +4,14 @@ import one.irradia.opds2_0.api.OPDS20ParseError
 import one.irradia.opds2_0.api.OPDS20ParseResult
 import one.irradia.opds2_0.api.OPDS20ParseWarning
 import one.irradia.opds2_0.parser.api.OPDS20FeedParserType
+import org.joda.time.Duration
+import org.joda.time.Instant
 import org.nypl.simplified.opds2.OPDS2Feed
 import org.nypl.simplified.parser.api.ParseError
 import org.nypl.simplified.parser.api.ParseResult
 import org.nypl.simplified.parser.api.ParseWarning
 import org.nypl.simplified.parser.api.ParserType
+import org.slf4j.LoggerFactory
 import java.net.URI
 
 internal class OPDS2ParserIrradia(
@@ -17,67 +20,54 @@ internal class OPDS2ParserIrradia(
   private val warningsAsErrors: Boolean
 ) : ParserType<OPDS2Feed> {
 
-  private val warningAsError =
-    ParseError(
-      source = this.uri,
-      message = "One or more warnings were encountered, and we are treating warnings as errors.",
-      line = 0,
-      column = 0,
-      exception = null
-    )
+  private val logger =
+    LoggerFactory.getLogger(OPDS2ParserIrradia::class.java)
 
-  override fun parse(): ParseResult<OPDS2Feed> {
-    return when (val result = this.parser.parse()) {
+  private fun OPDS20ParseWarning.toParseWarning(): ParseWarning {
+    return ParseWarning(
+      source = this@OPDS2ParserIrradia.uri,
+      message = this.message,
+      line = this.position.line,
+      column = this.position.column,
+      exception = this.exception
+    )
+  }
+
+  private fun OPDS20ParseError.toParseError(): ParseError {
+    return ParseError(
+      source = this@OPDS2ParserIrradia.uri,
+      message = this.message,
+      line = this.position.line,
+      column = this.position.column,
+      exception = this.exception
+    )
+  }
+
+  private fun <T> OPDS20ParseResult<T>.toParseResult(): ParseResult<T> {
+    return when (this) {
       is OPDS20ParseResult.OPDS20ParseSucceeded ->
-        if (this.warningsAsErrors && result.warnings.isNotEmpty()) {
-          ParseResult.Failure(
-            warnings = this.mapWarnings(result.warnings),
-            errors = listOf(this.warningAsError)
-          )
-        } else {
-          ParseResult.Success(
-            warnings = this.mapWarnings(result.warnings),
-            result = OPDS2IrradiaFeeds.convert(result.result)
-          )
-        }
+        ParseResult.Success(
+          this.warnings.map { it.toParseWarning() },
+          this.result
+        )
       is OPDS20ParseResult.OPDS20ParseFailed ->
         ParseResult.Failure(
-          warnings = this.mapWarnings(result.warnings),
-          errors = this.mapErrors(result.errors)
+          this.warnings.map { it.toParseWarning() },
+          this.errors.map { it.toParseError() }
         )
     }
   }
 
-  private fun mapWarnings(warnings: List<OPDS20ParseWarning>): List<ParseWarning> {
-    return warnings.map(this::mapWarning)
-  }
-
-  private fun mapWarning(
-    warning: OPDS20ParseWarning
-  ): ParseWarning {
-    return ParseWarning(
-      source = this.uri,
-      message = warning.message,
-      line = warning.position.line,
-      column = warning.position.column,
-      exception = warning.exception
-    )
-  }
-
-  private fun mapErrors(errors: List<OPDS20ParseError>): List<ParseError> {
-    return errors.map(this::mapError)
-  }
-
-  private fun mapError(
-    warning: OPDS20ParseError
-  ): ParseError {
-    return ParseError(
-      source = this.uri,
-      message = warning.message,
-      line = warning.position.line,
-      column = warning.position.column,
-      exception = warning.exception
-    )
+  override fun parse(): ParseResult<OPDS2Feed> {
+    val timeThen = Instant.now()
+    try {
+      return this.parser.parse()
+        .toParseResult()
+        .flatMap { OPDS2IrradiaFeedConverter(it).convert() }
+    } finally {
+      val timeNow = Instant.now()
+      this.logger.debug("parsed feed in {}", Duration(timeThen, timeNow))
+    }
   }
 
   override fun close() {

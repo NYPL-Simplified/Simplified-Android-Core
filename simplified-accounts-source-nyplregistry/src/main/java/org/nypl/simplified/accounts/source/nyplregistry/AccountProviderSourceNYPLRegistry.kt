@@ -159,7 +159,7 @@ class AccountProviderSourceNYPLRegistry(
       synchronized(this.writeLock) {
         cacheFiles.fileTemp.outputStream().use { stream ->
           val meta =
-            AccountProviderDescriptionCollection.Metadata(null, "")
+            AccountProviderDescriptionCollection.Metadata("")
           val collection =
             AccountProviderDescriptionCollection(
               providers = mergedResults.values.toList(),
