@@ -78,7 +78,8 @@ class TransformProviders {
             subtitle = entry.subtitle,
             supportEmail = entry.supportEmail,
             supportsReservations = entry.supportsReservations,
-            updated = DateTime.parse(entry.updated)
+            updated = DateTime.parse(entry.updated),
+            location = null
           )
         providers.add(provider)
       }

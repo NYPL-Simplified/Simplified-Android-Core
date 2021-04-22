@@ -6,6 +6,10 @@ import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.databind.node.TextNode
 import org.joda.time.DateTime
+import org.nypl.simplified.accounts.api.AccountDistance
+import org.nypl.simplified.accounts.api.AccountDistanceUnit
+import org.nypl.simplified.accounts.api.AccountGeoLocation
+import org.nypl.simplified.accounts.api.AccountLibraryLocation
 import org.nypl.simplified.accounts.api.AccountProvider
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.Anonymous
@@ -246,6 +250,10 @@ object AccountProvidersJSON {
           ?.let { text -> DateTime.parse(text) }
           ?: DateTime.now()
 
+      val location: AccountLibraryLocation? =
+        JSONParserUtilities.getObjectOrNull(obj, "location")
+          ?.let(this::parseLocation)
+
       return AccountProvider(
         addAutomatically = addAutomatically,
         annotationsURI = annotationsURI,
@@ -269,11 +277,49 @@ object AccountProvidersJSON {
         subtitle = subtitle,
         supportEmail = supportEmail,
         supportsReservations = supportsReservations,
-        updated = updated
+        updated = updated,
+        location = location
       )
     } catch (e: JSONParseException) {
       throw JSONParseException("Unable to parse provider $idUUID", e)
     }
+  }
+
+  private fun parseLocation(
+    obj: ObjectNode
+  ): AccountLibraryLocation {
+    val distanceObj =
+      JSONParserUtilities.getObjectOrNull(obj, "distance")
+
+    val distance =
+      if (distanceObj != null) {
+        val distanceLength =
+          JSONParserUtilities.getDouble(distanceObj, "length")
+        val distanceUnit =
+          JSONParserUtilities.getString(distanceObj, "unit")
+        AccountDistance(
+          length = distanceLength,
+          unit = AccountDistanceUnit.valueOf(distanceUnit)
+        )
+      } else {
+        null
+      }
+
+    val latLong =
+      JSONParserUtilities.getObjectOrNull(obj, "latitudeLongitude")
+    if (latLong != null) {
+      val latitude =
+        JSONParserUtilities.getDouble(latLong, "latitude")
+      val longitude =
+        JSONParserUtilities.getDouble(latLong, "longitude")
+
+      return AccountLibraryLocation(
+        location = AccountGeoLocation.Coordinates(longitude, latitude),
+        distance = distance
+      )
+    }
+
+    throw JSONParseException("No recognized location type")
   }
 
   private fun parseAnnouncements(

@@ -212,6 +212,12 @@ interface AccountProviderType : Comparable<AccountProviderType> {
 
   val announcements: List<Announcement>
 
+  /**
+   * The location of the library, if any
+   */
+
+  val location: AccountLibraryLocation?
+
   fun toDescription(): AccountProviderDescription {
     val imageLinks = mutableListOf<Link>()
     this.logo?.let { uri ->
@@ -260,7 +266,8 @@ interface AccountProviderType : Comparable<AccountProviderType> {
         links = links.toList(),
         images = imageLinks.toList(),
         isAutomatic = addAutomatically,
-        isProduction = isProduction
+        isProduction = isProduction,
+        location = location
       )
 
     check((this.authenticationDocumentURI != null) == (accountProviderDescription.authenticationDocumentURI != null))

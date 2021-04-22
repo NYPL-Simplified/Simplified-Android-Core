@@ -59,7 +59,8 @@ class MockAccount(override val id: AccountID) : AccountType {
         subtitle = "Library ${this.id.uuid} Subtitle!",
         supportEmail = null,
         supportsReservations = false,
-        updated = DateTime()
+        updated = DateTime(),
+        location = null
       )
     }
 

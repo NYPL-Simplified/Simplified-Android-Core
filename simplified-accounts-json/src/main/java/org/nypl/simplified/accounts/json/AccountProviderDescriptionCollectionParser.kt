@@ -1,5 +1,7 @@
 package org.nypl.simplified.accounts.json
 
+import org.nypl.simplified.accounts.api.AccountGeoLocation
+import org.nypl.simplified.accounts.api.AccountLibraryLocation
 import org.nypl.simplified.accounts.api.AccountProviderDescription
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionCollection
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionCollectionParserType
@@ -32,6 +34,20 @@ class AccountProviderDescriptionCollectionParser internal constructor(
   ) {
     this.errors.add(
       ParseError(
+        source = this.feed.uri,
+        message = message,
+        line = 0,
+        column = 0,
+        exception = null
+      )
+    )
+  }
+
+  private fun logWarning(
+    message: String
+  ) {
+    this.warnings.add(
+      ParseWarning(
         source = this.feed.uri,
         message = message,
         line = 0,
@@ -85,6 +101,10 @@ class AccountProviderDescriptionCollectionParser internal constructor(
       this.logError("An 'updated' time is required for catalog ${catalog.metadata.title.title}")
     }
 
+    val location = catalog.metadata.location?.let { location ->
+      this.parseLocation(location, catalog.metadata.distance)
+    }
+
     val errorsNow = this.errors.size
     if (errorsNow != errorsThen) {
       return null
@@ -97,8 +117,33 @@ class AccountProviderDescriptionCollectionParser internal constructor(
       links = catalog.links,
       images = listOf(),
       isAutomatic = catalog.metadata.isAutomatic,
-      isProduction = catalog.metadata.isProduction
+      isProduction = catalog.metadata.isProduction,
+      location = location
     )
+  }
+
+  private fun parseLocation(
+    location: String,
+    distance: String?
+  ): AccountLibraryLocation? {
+    try {
+      val segments = location.split(',')
+      if (segments.size != 2) {
+        this.logWarning("Expected a lat/long coordinate pair. Received '$location'")
+        return null
+      }
+
+      val latitude = segments[0].trim().toDouble()
+      val longitude = segments[1].trim().toDouble()
+      return AccountLibraryLocation(
+        location = AccountGeoLocation.Coordinates(longitude, latitude),
+        distance = null
+      )
+    } catch (e: Exception) {
+      this.logger.warn("parse warning: ", e)
+      this.logWarning("Could not parse library location")
+      return null
+    }
   }
 
   private fun processMetadata(

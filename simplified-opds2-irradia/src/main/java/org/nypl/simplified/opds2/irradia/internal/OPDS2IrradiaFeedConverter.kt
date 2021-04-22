@@ -163,9 +163,11 @@ class OPDS2IrradiaFeedConverter(
       languages = metadata.languages,
       sortAs = metadata.sortAs,
       author = metadata.author.map(this::convertAuthor),
-      adobeVendorId = catalogMetadata.adobeVendorId,
       isAutomatic = catalogMetadata.isAutomatic,
-      isProduction = catalogMetadata.isProduction
+      isProduction = catalogMetadata.isProduction,
+      location = catalogMetadata.location,
+      distance = catalogMetadata.distance,
+      libraryType = catalogMetadata.libraryType
     )
   }
 

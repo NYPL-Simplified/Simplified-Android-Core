@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test
 import org.nypl.simplified.accounts.api.AccountProviderDescription
 import org.nypl.simplified.accounts.api.AccountProviderResolutionListenerType
 import org.nypl.simplified.accounts.api.AccountProviderType
+import org.nypl.simplified.accounts.api.AccountSearchQuery
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent.SourceFailed
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent.StatusChanged
@@ -400,7 +401,8 @@ abstract class AccountProviderDescriptionRegistryContract {
         links = listOf(),
         images = listOf(),
         isAutomatic = false,
-        isProduction = true
+        isProduction = true,
+        location = null
       )
 
     private fun fail(): TaskResult.Failure<AccountProviderType> {
@@ -422,7 +424,8 @@ abstract class AccountProviderDescriptionRegistryContract {
         links = listOf(),
         images = listOf(),
         isAutomatic = false,
-        isProduction = true
+        isProduction = true,
+        location = null
       )
 
     val description2 =
@@ -433,7 +436,8 @@ abstract class AccountProviderDescriptionRegistryContract {
         links = listOf(),
         images = listOf(),
         isAutomatic = false,
-        isProduction = true
+        isProduction = true,
+        location = null
       )
 
     val descriptionOld0 =
@@ -444,7 +448,8 @@ abstract class AccountProviderDescriptionRegistryContract {
         links = listOf(),
         images = listOf(),
         isAutomatic = false,
-        isProduction = true
+        isProduction = true,
+        location = null
       )
 
     val descriptionOld1 =
@@ -455,7 +460,8 @@ abstract class AccountProviderDescriptionRegistryContract {
         links = listOf(),
         images = listOf(),
         isAutomatic = false,
-        isProduction = true
+        isProduction = true,
+        location = null
       )
 
     val descriptionOld2 =
@@ -466,7 +472,8 @@ abstract class AccountProviderDescriptionRegistryContract {
         links = listOf(),
         images = listOf(),
         isAutomatic = false,
-        isProduction = true
+        isProduction = true,
+        location = null
       )
   }
 
@@ -479,6 +486,10 @@ abstract class AccountProviderDescriptionRegistryContract {
           Pair(descriptionOld2.id, descriptionOld2)
         )
       )
+    }
+
+    override fun query(context: Context, query: AccountSearchQuery): SourceResult {
+      return this.load(context, query.includeTestingLibraries)
     }
 
     override fun clear(context: Context) {}
@@ -506,6 +517,10 @@ abstract class AccountProviderDescriptionRegistryContract {
       )
     }
 
+    override fun query(context: Context, query: AccountSearchQuery): SourceResult {
+      return load(context, query.includeTestingLibraries)
+    }
+
     override fun clear(context: Context) {}
 
     override fun canResolve(description: AccountProviderDescription): Boolean {
@@ -522,6 +537,10 @@ abstract class AccountProviderDescriptionRegistryContract {
 
   class CrashingSource : AccountProviderSourceType {
     override fun load(context: Context, includeTestingLibraries: Boolean): SourceResult {
+      throw Exception()
+    }
+
+    override fun query(context: Context, query: AccountSearchQuery): SourceResult {
       throw Exception()
     }
 
@@ -542,6 +561,10 @@ abstract class AccountProviderDescriptionRegistryContract {
   class FailingSource : AccountProviderSourceType {
     override fun load(context: Context, includeTestingLibraries: Boolean): SourceResult {
       return SourceResult.SourceFailed(mapOf(), java.lang.Exception())
+    }
+
+    override fun query(context: Context, query: AccountSearchQuery): SourceResult {
+      return this.load(context, query.includeTestingLibraries)
     }
 
     override fun clear(context: Context) {}

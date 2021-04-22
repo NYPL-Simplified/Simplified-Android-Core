@@ -54,12 +54,6 @@ data class OPDS2CatalogMetadata(
   override val author: List<OPDS2Contributor>,
 
   /**
-   * The Adobe vendor ID
-   */
-
-  val adobeVendorId: String?,
-
-  /**
    * `true` if the catalog is in production.
    */
 
@@ -69,7 +63,31 @@ data class OPDS2CatalogMetadata(
    * `true` if the catalog should be automatically added to new profiles.
    */
 
-  val isAutomatic: Boolean
+  val isAutomatic: Boolean,
+
+  /**
+   * Library Simplified catalogs use a "location" property to express library service areas.
+   *
+   * @see "https://github.com/NYPL-Simplified/Simplified/wiki/LibraryRegistryPublicAPI#the-location-property"
+   */
+
+  val location: String?,
+
+  /**
+   * Library Simplified catalogs use a "distance" property to express the distance between the user and a library.
+   *
+   * @see "https://github.com/NYPL-Simplified/Simplified/wiki/LibraryRegistryPublicAPI#the-distance-property"
+   */
+
+  val distance: String?,
+
+  /**
+   * Library Simplified catalogs use a "library_type" property to describe library services.
+   *
+   * @see "https://github.com/NYPL-Simplified/Simplified/wiki/LibraryRegistryPublicAPI#the-library_type-property"
+   */
+
+  val libraryType: String?
 
 ) : Comparable<OPDS2CatalogMetadata>, OPDS2MetadataType {
 
