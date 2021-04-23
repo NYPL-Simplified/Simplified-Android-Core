@@ -35,7 +35,7 @@ final class OPDSAtom implements Serializable
   {
     final OptionType<Element> e_opt =
       OPDSXML.getFirstChildElementWithNameOptional(
-        e, OPDSFeedConstants.ATOM_URI, "published");
+        e, OPDSFeedConstants.DUBLIN_CORE_TERMS_URI, "issued");
 
     return e_opt.mapPartial(
       (PartialFunctionType<Element, DateTime, ParseException>) er -> {
