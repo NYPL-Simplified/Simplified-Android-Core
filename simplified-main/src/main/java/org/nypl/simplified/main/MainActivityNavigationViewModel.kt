@@ -1,11 +1,12 @@
 package org.nypl.simplified.main
 
 import hu.akarnokd.rxjava2.subjects.UnicastWorkSubject
+import org.nypl.simplified.navigation.api.NavigationControllerViewModel
 import org.nypl.simplified.profiles.api.ProfileID
 import org.nypl.simplified.ui.profiles.ProfilesNavigationControllerType
 
 class MainActivityNavigationViewModel :
-  MainFragmentNavigationViewModel(), // This is required because the BottomNavigator uses the Activity's FragmentManager
+  NavigationControllerViewModel(),
   ProfilesNavigationControllerType {
 
   val commandQueue: UnicastWorkSubject<MainActivityNavigationCommand> =

@@ -1,9 +1,6 @@
 package org.nypl.simplified.main
 
-import android.content.Context
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.MenuItem
 import android.view.View
 import androidx.activity.addCallback
@@ -32,6 +29,7 @@ import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.ui.announcements.AnnouncementsController
 import org.nypl.simplified.ui.catalog.CatalogFeedArguments
 import org.nypl.simplified.ui.catalog.CatalogFeedOwnership
+import org.nypl.simplified.ui.navigation.tabs.TabbedNavigator
 import org.nypl.simplified.ui.profiles.ProfileDialogs
 import org.nypl.simplified.ui.profiles.ProfilesNavigationControllerType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
@@ -48,17 +46,14 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
 
   private val logger = LoggerFactory.getLogger(MainFragment::class.java)
 
-  private lateinit var navigationDelegate: MainFragmentNavigationDelegate
   private lateinit var bottomView: BottomNavigationView
+  private lateinit var navigator: TabbedNavigator
   private var timeOutDialog: AlertDialog? = null
 
   private lateinit var activityViewModel: MainActivityViewModel
   private lateinit var viewModel: MainFragmentViewModel
   private lateinit var navigationViewModel: MainFragmentNavigationViewModel
   private val subscriptions = CompositeDisposable()
-
-  private val handler: Handler = Handler(Looper.getMainLooper())
-  private val delayedRunnables: MutableList<Runnable> = mutableListOf()
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -73,7 +68,7 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
 
     this.navigationViewModel =
       NavigationControllers
-        .findViewModel(requireActivity())
+        .findViewModel(this)
 
     /*
     * If named profiles are enabled, subscribe to profile timer events so that users are
@@ -120,7 +115,7 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
     )
 
     requireActivity().onBackPressedDispatcher.addCallback(this) {
-      if (navigationDelegate.popBackStack()) {
+      if (navigator.popBackStack()) {
         return@addCallback
       }
 
@@ -157,36 +152,29 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
     val profilesItem = this.bottomView.menu.findItem(R.id.tabProfile)
     profilesItem.isVisible = profilesVisible
     profilesItem.isEnabled = profilesVisible
-  }
 
-  override fun onOptionsItemSelected(item: MenuItem): Boolean {
-    return when (item.itemId) {
-      android.R.id.home -> {
-        this.navigationDelegate.popToRoot()
-      }
-      else -> super.onOptionsItemSelected(item)
-    }
-  }
+    this.navigator =
+      TabbedNavigator.create(
+        fragment = this,
+        fragmentContainerId = R.id.tabbedFragmentHolder,
+        navigationView = this.bottomView,
+        accountProviders = viewModel.accountProviders,
+        profilesController = viewModel.profilesController,
+        settingsConfiguration = viewModel.buildConfig,
+      )
 
-  override fun onAttach(context: Context) {
-    super.onAttach(context)
+    lifecycle.addObserver(
+      MainFragmentNavigationDelegate(
+        activity = this.requireActivity() as AppCompatActivity,
+        navigationController = navigationViewModel.navigationController,
+        profilesController = viewModel.profilesController,
+        settingsConfiguration = viewModel.buildConfig,
+        navigator = this.navigator
+      )
+    )
 
     /*
-     * This extremely unfortunate workaround (delaying the creation of the navigator by scheduling
-     * the creation on the UI thread) is necessary because the bottom navigator
-     * eagerly instantiates fragments and there's nothing we can do to stop it doing so.
-     * The actual issue this avoids is documented here:
-     *
-     * https://github.com/PandoraMedia/BottomNavigator/issues/13
-     *
-     * In other words, the current onStart method is currently executing in the middle of
-     * a fragment transaction, and the bottom navigator will _immediately_ try to start
-     * executing more transactions (leading to an exception). By deferring creation of
-     * the navigator here, we avoid this issue, but this does mean that code executing
-     * in the onStart() methods of fragments within the tabs will not have guaranteed
-     * access to a navigation controller.
-     *
-     * Additionally, because the BottomNavigator stores references to fragments and reuses
+     * Because the BottomNavigator stores references to fragments and reuses
      * them instead of instantiating them anew, it's necessary to aggressively clear the
      * "root fragments" in case any of them are holding references to stale data such as
      * profile and account identifiers. We use a view model to store a "clear history" flag
@@ -194,22 +182,18 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
      * foreground/background switches.
      */
 
-    this.runOnUIThread {
-      this.navigationDelegate =
-        MainFragmentNavigationDelegate.create(
-          activity = this.requireActivity() as AppCompatActivity,
-          navigationController = navigationViewModel.navigationController,
-          accountProviders = viewModel.accountProviders,
-          profilesController = viewModel.profilesController,
-          settingsConfiguration = viewModel.buildConfig,
-          fragmentContainerId = R.id.tabbedFragmentHolder,
-          navigationView = this.bottomView
-        )
+    if (this.activityViewModel.clearHistory) {
+      this.navigator.clearHistory()
+      this.activityViewModel.clearHistory = false
+    }
+  }
 
-      if (this.activityViewModel.clearHistory) {
-        this.navigationDelegate.clearHistory()
-        this.activityViewModel.clearHistory = false
+  override fun onOptionsItemSelected(item: MenuItem): Boolean {
+    return when (item.itemId) {
+      android.R.id.home -> {
+        this.navigator.popToRoot()
       }
+      else -> super.onOptionsItemSelected(item)
     }
   }
 
@@ -242,7 +226,7 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
 
       is AccountEventDeletion.AccountEventDeletionSucceeded -> {
         try {
-          this.navigationDelegate.clearHistory()
+          this.navigator.clearHistory()
         } catch (e: Throwable) {
           this.logger.error("could not clear history: ", e)
         }
@@ -276,8 +260,8 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
         val profile = viewModel.profilesController.profileCurrent()
         val account = profile.account(id)
         val age = profile.preferences().dateOfBirth?.yearsOld(DateTime.now()) ?: 1
-        this.navigationDelegate.clearHistory()
-        this.navigationDelegate.popBackStack()
+        this.navigator.clearHistory()
+        this.navigator.popBackStack()
         this.navigationViewModel.navigationController.openFeed(
           CatalogFeedArguments.CatalogFeedArgumentsRemote(
             title = getString(R.string.tabCatalog),
@@ -309,12 +293,6 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
   override fun onStop() {
     super.onStop()
     this.subscriptions.clear()
-    this.navigationDelegate.dispose()
-  }
-
-  override fun onDetach() {
-    super.onDetach()
-    clearDelayedRunnables()
   }
 
   override fun onDestroy() {
@@ -334,20 +312,5 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
       MainFragmentNavigationViewModel::class.java,
       super.getDefaultViewModelProviderFactory()
     )
-  }
-
-  private fun runOnUIThread(f: () -> Unit) {
-    val runnable = Runnable {
-      f.invoke()
-    }
-    handler.post(runnable)
-    delayedRunnables.add(runnable)
-  }
-
-  private fun clearDelayedRunnables() {
-    while (delayedRunnables.isNotEmpty()) {
-      val r = delayedRunnables.removeFirst()
-      handler.removeCallbacks(r)
-    }
   }
 }

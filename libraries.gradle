@@ -59,7 +59,7 @@ ext.versions = [
   nypl_readium                  : '0.30.0',
   nypl_readium2                 : '0.0.11',
   okhttp3                       : '4.8.1',
-  pandora_bottom_navigator      : '1.8',
+  pandora_bottom_navigator      : '1.9-SNAPSHOT',
   picasso                       : '2.71828',
   retrofit2                     : '2.8.1',
   robolectric                   : '4.4',

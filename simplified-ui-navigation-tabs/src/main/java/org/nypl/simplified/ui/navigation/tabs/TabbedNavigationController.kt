@@ -1,7 +1,6 @@
 package org.nypl.simplified.ui.navigation.tabs
 
 import android.app.Activity
-import com.pandora.bottomnavigator.BottomNavigator
 import com.pandora.bottomnavigator.NavigatorAction
 import hu.akarnokd.rxjava2.subjects.UnicastWorkSubject
 import io.reactivex.disposables.Disposable
@@ -26,14 +25,14 @@ class TabbedNavigationController
   val infoStream: UnicastWorkSubject<NavigatorAction> =
     UnicastWorkSubject.create()
 
-  fun subscribeInfoStream(bottomNavigator: BottomNavigator) {
+  fun subscribeInfoStream(navigator: TabbedNavigator) {
     if (infoStreamSubscription != null) {
       return
     }
 
     infoStreamSubscription =
-      bottomNavigator
-        .infoStream()
+      navigator
+        .infoStream
         .subscribe { action -> infoStream.onNext(action) }
   }
 

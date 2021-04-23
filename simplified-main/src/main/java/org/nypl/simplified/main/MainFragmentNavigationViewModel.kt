@@ -6,7 +6,7 @@ import org.nypl.simplified.ui.catalog.CatalogNavigationControllerType
 import org.nypl.simplified.ui.navigation.tabs.TabbedNavigationController
 import org.nypl.simplified.ui.settings.SettingsNavigationControllerType
 
-open class MainFragmentNavigationViewModel : NavigationControllerViewModel() {
+class MainFragmentNavigationViewModel : NavigationControllerViewModel() {
 
   val navigationController: TabbedNavigationController =
     TabbedNavigationController()
