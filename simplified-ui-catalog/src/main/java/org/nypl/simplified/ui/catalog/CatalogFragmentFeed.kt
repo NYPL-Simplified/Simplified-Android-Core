@@ -159,7 +159,8 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
     super.onCreate(savedInstanceState)
     setHasOptionsMenu(true)
 
-    ageGateDialog = AgeGateDialog.create()
+    ageGateDialog = (childFragmentManager.findFragmentByTag(AgeGateDialog::class.java.simpleName) as? AgeGateDialog)
+      ?: AgeGateDialog.create()
     this.parameters = this.requireArguments()[this.parametersId] as CatalogFeedArguments
     this.feedWithGroupsData = mutableListOf()
 

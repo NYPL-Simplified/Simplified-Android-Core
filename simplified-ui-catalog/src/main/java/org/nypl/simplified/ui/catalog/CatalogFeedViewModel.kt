@@ -201,10 +201,8 @@ class CatalogFeedViewModel(
     authentication: AccountProviderAuthenticationDescription,
     preferences: ProfilePreferences
   ): Boolean {
-    return (
-      authentication is AccountProviderAuthenticationDescription.COPPAAgeGate ||
-        buildConfig.showAgeGateUi
-      ) && preferences.dateOfBirth == null
+    val isCoppa = authentication is AccountProviderAuthenticationDescription.COPPAAgeGate
+    return isCoppa && buildConfig.showAgeGateUi && preferences.dateOfBirth == null
   }
 
   /**
