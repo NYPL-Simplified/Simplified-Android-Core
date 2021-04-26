@@ -185,4 +185,3 @@ class AccountListRegistryViewModel(private val locationManager: LocationManager)
     longitude, latitude
   )
 }
-
