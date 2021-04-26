@@ -127,8 +127,6 @@ class AccountListRegistryFragment : Fragment(R.layout.account_list_registry) {
       .let(this.subscriptions::add)
 
     this.reconfigureViewForRegistryStatus(this.viewModel.accountRegistryStatus)
-
-    this.viewModel.refreshAccountRegistry()
   }
 
   private fun onAccountEvent(event: AccountEvent) {
