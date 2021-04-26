@@ -8,6 +8,7 @@ import org.librarysimplified.http.api.LSHTTPClientType
 import org.nypl.simplified.accounts.api.AccountProviderDescription
 import org.nypl.simplified.accounts.api.AccountProviderResolutionListenerType
 import org.nypl.simplified.accounts.api.AccountProviderType
+import org.nypl.simplified.accounts.api.AccountSearchQuery
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent.SourceFailed
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent.StatusChanged
@@ -79,6 +80,37 @@ class AccountProviderRegistry private constructor(
       for (source in this.sources) {
         try {
           when (val result = source.load(this.context, includeTestingLibraries)) {
+            is AccountProviderSourceType.SourceResult.SourceSucceeded -> {
+              val newDescriptions = result.results
+              for (key in newDescriptions.keys) {
+                this.updateDescription(newDescriptions[key]!!)
+              }
+            }
+            is AccountProviderSourceType.SourceResult.SourceFailed -> {
+              this.eventsActual.onNext(SourceFailed(source.javaClass, result.exception))
+            }
+          }
+        } catch (e: Exception) {
+          this.eventsActual.onNext(SourceFailed(source.javaClass, e))
+        }
+      }
+    } finally {
+      this.initialized = true
+      this.statusRef = Idle
+      this.eventsActual.onNext(StatusChanged)
+    }
+  }
+
+  override fun query(query: AccountSearchQuery) {
+    this.logger.debug("refreshing account provider descriptions")
+
+    this.statusRef = Refreshing
+    this.eventsActual.onNext(StatusChanged)
+
+    try {
+      for (source in this.sources) {
+        try {
+          when (val result = source.query(this.context, query)) {
             is AccountProviderSourceType.SourceResult.SourceSucceeded -> {
               val newDescriptions = result.results
               for (key in newDescriptions.keys) {

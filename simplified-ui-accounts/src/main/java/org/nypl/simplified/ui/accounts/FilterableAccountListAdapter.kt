@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import org.nypl.simplified.accounts.api.AccountProviderDescription
+import org.nypl.simplified.ui.images.ImageAccountIcons
 import org.nypl.simplified.ui.images.ImageLoaderType
 import org.slf4j.LoggerFactory
 
@@ -96,8 +97,8 @@ class AccountItemViewHolder(
   private val imageLoader: ImageLoaderType,
   private val onItemClicked: (AccountProviderDescription) -> Unit
 ) : RecyclerView.ViewHolder(itemView) {
-  private val accountIcon =
-    itemView.findViewById<ImageView>(R.id.accountIcon)
+  private val accountIcon: ImageView? =
+    itemView.findViewById(R.id.accountIcon)
   private val accountTitleView =
     itemView.findViewById<TextView>(R.id.accountTitle)
   private val accountCaptionView =
@@ -122,6 +123,14 @@ class AccountItemViewHolder(
       } else {
         View.GONE
       }
+    if (this.accountIcon != null) {
+      ImageAccountIcons.loadAccountLogoIntoView(
+        loader = this.imageLoader.loader,
+        account = item,
+        defaultIcon = R.drawable.account_default,
+        iconView = this.accountIcon
+      )
+    }
     this.accountItem = item
   }
 }

@@ -1,6 +1,5 @@
 package org.nypl.simplified.accounts.api
 
-import org.nypl.drm.core.AdobeVendorID
 import org.nypl.simplified.links.Link
 
 /**
@@ -33,12 +32,6 @@ data class AccountProviderDescriptionCollection(
    */
 
   data class Metadata(
-
-    /**
-     * The Adobe vendor ID, if one is to be used.
-     */
-
-    val adobeVendorID: AdobeVendorID?,
 
     /**
      * The title of the collection.

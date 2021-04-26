@@ -1,0 +1,9 @@
+dependencies {
+  api project(":simplified-opds2")
+  api project(":simplified-opds2-parser-api")
+
+  implementation libraries.joda_time
+  implementation libraries.kotlin_stdlib
+  implementation libraries.r2_opds
+  implementation libraries.r2_shared
+}

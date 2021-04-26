@@ -54,7 +54,8 @@ class OEIAccountFallback : AccountProviderFallbackType {
       subtitle = "",
       supportEmail = null,
       supportsReservations = false,
-      updated = DateTime.parse("2020-05-10T00:00:00Z")
+      updated = DateTime.parse("2020-05-10T00:00:00Z"),
+      location = null
     )
   }
 }

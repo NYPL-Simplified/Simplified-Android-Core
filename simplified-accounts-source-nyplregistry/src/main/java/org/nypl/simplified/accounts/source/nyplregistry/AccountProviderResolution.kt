@@ -127,7 +127,8 @@ class AccountProviderResolution(
           subtitle = authDocument?.description,
           supportEmail = authDocument?.supportURI?.toString(),
           supportsReservations = supportsReservations,
-          updated = updated
+          updated = updated,
+          location = this.description.location
         )
 
       taskRecorder.finishSuccess(accountProvider)

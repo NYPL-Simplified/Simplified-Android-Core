@@ -58,7 +58,13 @@ data class AccountProviderDescription(
    * `true` if the library is a production library.
    */
 
-  val isProduction: Boolean
+  val isProduction: Boolean,
+
+  /**
+   * The location of the library, if any
+   */
+
+  val location: AccountLibraryLocation?
 
 ) : Comparable<AccountProviderDescription> {
 
