@@ -6,9 +6,6 @@
   <string name="feedByTitle">Title</string>
   <string name="feedCollection">Collection</string>
   <string name="feedCollectionAll">All</string>
-  <string name="feedCOPPAOver13">13 or Older</string>
-  <string name="feedCOPPAQuestion">You must be 13 years of age or older to download some of the books from this collection.\nHow old are you?</string>
-  <string name="feedCOPPAUnder13">Under 13</string>
   <string name="feedDetails">@string/catalogDetails</string>
   <string name="feedEmpty">No results.</string>
   <string name="feedLoadingError">An error occurred while loading the catalog.</string>
