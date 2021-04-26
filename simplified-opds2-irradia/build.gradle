@@ -1,0 +1,11 @@
+dependencies {
+  api project(":simplified-opds2")
+  api project(":simplified-opds2-parser-api")
+
+  implementation libraries.irradia_opds2_api
+  implementation libraries.irradia_opds2_parser_api
+  implementation libraries.irradia_opds2_parser_vanilla
+  implementation libraries.irradia_opds2_parser_librarysimplified
+  implementation libraries.joda_time
+  implementation libraries.kotlin_stdlib
+}

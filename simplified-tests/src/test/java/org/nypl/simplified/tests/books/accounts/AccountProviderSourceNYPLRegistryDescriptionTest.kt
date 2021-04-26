@@ -95,7 +95,8 @@ class AccountProviderSourceNYPLRegistryDescriptionTest {
         links = listOf(),
         images = listOf(),
         isProduction = true,
-        isAutomatic = false
+        isAutomatic = false,
+        location = null
       )
 
     val description =
@@ -136,7 +137,8 @@ class AccountProviderSourceNYPLRegistryDescriptionTest {
         ),
         images = listOf(),
         isProduction = true,
-        isAutomatic = false
+        isAutomatic = false,
+        location = null
       )
 
     val description =
@@ -181,7 +183,8 @@ class AccountProviderSourceNYPLRegistryDescriptionTest {
         ),
         images = listOf(),
         isProduction = true,
-        isAutomatic = false
+        isAutomatic = false,
+        location = null
       )
 
     val description =
@@ -219,7 +222,8 @@ class AccountProviderSourceNYPLRegistryDescriptionTest {
         ),
         images = listOf(),
         isProduction = true,
-        isAutomatic = false
+        isAutomatic = false,
+        location = null
       )
 
     val description =
@@ -271,7 +275,8 @@ class AccountProviderSourceNYPLRegistryDescriptionTest {
         ),
         images = listOf(),
         isProduction = true,
-        isAutomatic = false
+        isAutomatic = false,
+        location = null
       )
 
     val description =
@@ -416,7 +421,8 @@ class AccountProviderSourceNYPLRegistryDescriptionTest {
       subtitle = "Some library you've never heard of",
       supportEmail = "mailto:someone@example.com",
       supportsReservations = true,
-      updated = DateTime.parse("1970-01-01T00:00:00.000Z")
+      updated = DateTime.parse("1970-01-01T00:00:00.000Z"),
+      location = null
     )
 
     Assertions.assertEquals(provider, result.result)
@@ -441,7 +447,8 @@ class AccountProviderSourceNYPLRegistryDescriptionTest {
         ),
         images = listOf(),
         isProduction = true,
-        isAutomatic = false
+        isAutomatic = false,
+        location = null
       )
 
     val description =
@@ -566,7 +573,8 @@ class AccountProviderSourceNYPLRegistryDescriptionTest {
       subtitle = "Some library you've never heard of",
       supportEmail = "mailto:someone@example.com",
       supportsReservations = true,
-      updated = DateTime.parse("1970-01-01T00:00:00.000Z")
+      updated = DateTime.parse("1970-01-01T00:00:00.000Z"),
+      location = null
     )
 
     Assertions.assertEquals(provider, result.result)
@@ -591,7 +599,8 @@ class AccountProviderSourceNYPLRegistryDescriptionTest {
         ),
         images = listOf(),
         isProduction = true,
-        isAutomatic = false
+        isAutomatic = false,
+        location = null
       )
 
     val description =
@@ -696,7 +705,8 @@ class AccountProviderSourceNYPLRegistryDescriptionTest {
       subtitle = "Some library you've never heard of",
       supportEmail = "mailto:someone@example.com",
       supportsReservations = true,
-      updated = DateTime.parse("1970-01-01T00:00:00.000Z")
+      updated = DateTime.parse("1970-01-01T00:00:00.000Z"),
+      location = null
     )
 
     Assertions.assertEquals(provider, result.result)
@@ -721,7 +731,8 @@ class AccountProviderSourceNYPLRegistryDescriptionTest {
         ),
         images = listOf(),
         isProduction = true,
-        isAutomatic = false
+        isAutomatic = false,
+        location = null
       )
 
     val description =
@@ -833,7 +844,8 @@ class AccountProviderSourceNYPLRegistryDescriptionTest {
         ),
         images = listOf(),
         isProduction = true,
-        isAutomatic = false
+        isAutomatic = false,
+        location = null
       )
 
     val description =
@@ -944,7 +956,8 @@ class AccountProviderSourceNYPLRegistryDescriptionTest {
         ),
         images = listOf(),
         isProduction = true,
-        isAutomatic = false
+        isAutomatic = false,
+        location = null
       )
 
     val description =

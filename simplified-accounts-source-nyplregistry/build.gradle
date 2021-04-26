@@ -9,6 +9,7 @@ dependencies {
   implementation project(":simplified-accounts-json")
   implementation project(":simplified-files")
   implementation project(":simplified-opds-auth-document-api")
+  implementation project(":simplified-opds2-irradia")
 
   implementation libraries.nypl_http_api
   implementation libraries.slf4j

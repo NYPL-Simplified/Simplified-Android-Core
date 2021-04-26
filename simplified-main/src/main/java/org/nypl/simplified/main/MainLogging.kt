@@ -124,6 +124,7 @@ object MainLogging {
   }
 
   private fun configureLoggingPolicy() {
+    this.logbackLevel("one.irradia.fieldrush.vanilla.FRParsers", Level.INFO)
     this.logbackLevel("org.nypl.simplified.books.covers.BookCoverGenerator", Level.ERROR)
     this.logbackLevel("org.nypl.simplified.books.covers.BookCoverProvider", Level.ERROR)
     this.logbackLevel("org.nypl.simplified.files.FileLocking", Level.ERROR)

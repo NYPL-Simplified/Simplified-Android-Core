@@ -10,6 +10,7 @@ import com.google.common.util.concurrent.FluentFuture
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.PublishSubject
+import org.joda.time.DateTime
 import org.librarysimplified.services.api.ServiceDirectoryType
 import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
 import org.nypl.simplified.accounts.api.AccountEventLoginStateChanged
@@ -17,6 +18,7 @@ import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.books.controller.api.BooksControllerType
+import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.feeds.api.Feed
 import org.nypl.simplified.feeds.api.FeedFacet
 import org.nypl.simplified.feeds.api.FeedFacet.FeedFacetPseudo
@@ -30,6 +32,9 @@ import org.nypl.simplified.futures.FluentFutureExtensions.flatMap
 import org.nypl.simplified.futures.FluentFutureExtensions.fluentFutureOfAll
 import org.nypl.simplified.futures.FluentFutureExtensions.map
 import org.nypl.simplified.futures.FluentFutureExtensions.onAnyError
+import org.nypl.simplified.profiles.api.ProfileDateOfBirth
+import org.nypl.simplified.profiles.api.ProfileDescription
+import org.nypl.simplified.profiles.api.ProfilePreferences
 import org.nypl.simplified.profiles.controller.api.ProfileFeedRequest
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.ui.catalog.CatalogFeedArguments.CatalogFeedArgumentsLocalBooks
@@ -64,6 +69,8 @@ class CatalogFeedViewModel(
     this.services.requireService(BooksControllerType::class.java)
   private val profilesController: ProfilesControllerType =
     this.services.requireService(ProfilesControllerType::class.java)
+  private val buildConfig: BuildConfigurationServiceType =
+    this.services.requireService(BuildConfigurationServiceType::class.java)
   private val instanceId =
     UUID.randomUUID()
 
@@ -161,19 +168,14 @@ class CatalogFeedViewModel(
      * age gate!
      */
 
-    when (account.provider.authentication) {
-      is AccountProviderAuthenticationDescription.COPPAAgeGate -> {
-        val dateOfBirth = profile.preferences().dateOfBirth
-        if (dateOfBirth == null) {
-          this.logger.debug("[{}]: showing age gate", this.instanceId)
-          val newState = CatalogFeedState.CatalogFeedAgeGate(this.feedArguments)
-          synchronized(this.stateLock) {
-            this.state = newState
-          }
-          this.feedStatusSource.onNext(Unit)
-          return newState
-        }
+    if (shouldDisplayAgeGate(account.provider.authentication, profile.preferences())) {
+      this.logger.debug("[{}]: showing age gate", this.instanceId)
+      val newState = CatalogFeedState.CatalogFeedAgeGate(this.feedArguments)
+      synchronized(this.stateLock) {
+        this.state = newState
       }
+      this.feedStatusSource.onNext(Unit)
+      return newState
     }
 
     val loginState =
@@ -193,6 +195,14 @@ class CatalogFeedViewModel(
       arguments = arguments,
       future = future
     )
+  }
+
+  private fun shouldDisplayAgeGate(
+    authentication: AccountProviderAuthenticationDescription,
+    preferences: ProfilePreferences
+  ): Boolean {
+    val isCoppa = authentication is AccountProviderAuthenticationDescription.COPPAAgeGate
+    return isCoppa && buildConfig.showAgeGateUi && preferences.dateOfBirth == null
   }
 
   /**
@@ -588,5 +598,28 @@ class CatalogFeedViewModel(
         }
       }
     }
+  }
+
+  override fun updateBirthYear(over13: Boolean) {
+    profilesController.profileUpdate { description ->
+      val years = if (over13) 14 else 0
+      this.synthesizeDateOfBirthDescription(description, years)
+    }
+  }
+
+  private fun synthesizeDateOfBirthDescription(
+    description: ProfileDescription,
+    years: Int
+  ): ProfileDescription {
+    val newPreferences =
+      description.preferences.copy(dateOfBirth = this.synthesizeDateOfBirth(years))
+    return description.copy(preferences = newPreferences)
+  }
+
+  private fun synthesizeDateOfBirth(years: Int): ProfileDateOfBirth {
+    return ProfileDateOfBirth(
+      date = DateTime.now().minusYears(years),
+      isSynthesized = true
+    )
   }
 }

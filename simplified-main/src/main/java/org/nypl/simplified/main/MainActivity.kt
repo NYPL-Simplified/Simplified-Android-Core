@@ -8,7 +8,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.FragmentResultListener
 import androidx.lifecycle.ViewModelProvider
-import org.joda.time.DateTime
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
@@ -17,22 +16,18 @@ import org.nypl.simplified.navigation.api.NavigationControllerDirectoryType
 import org.nypl.simplified.navigation.api.NavigationControllers
 import org.nypl.simplified.oauth.OAuthCallbackIntentParsing
 import org.nypl.simplified.oauth.OAuthParseResult
-import org.nypl.simplified.profiles.api.ProfileDateOfBirth
-import org.nypl.simplified.profiles.api.ProfileDescription
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_DISABLED
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED
 import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest.OAuthWithIntermediaryComplete
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.ui.branding.BrandingSplashServiceType
-import org.nypl.simplified.ui.catalog.AgeGateDialog
 import org.nypl.simplified.ui.profiles.ProfilesNavigationControllerType
 import org.slf4j.LoggerFactory
 import java.util.ServiceLoader
 
 class MainActivity :
   AppCompatActivity(R.layout.main_host),
-  FragmentResultListener,
-  AgeGateDialog.BirthYearSelectedListener {
+  FragmentResultListener {
 
   companion object {
     private const val STATE_ACTION_BAR_IS_SHOWING = "ACTION_BAR_IS_SHOWING"
@@ -48,7 +43,6 @@ class MainActivity :
   private lateinit var startupNavigationController: StartupNavigationController
   private lateinit var configurationService: BuildConfigurationServiceType
   private lateinit var profilesController: ProfilesControllerType
-  private lateinit var ageGateDialog: AgeGateDialog
 
   override fun onCreate(savedInstanceState: Bundle?) {
     this.logger.debug("onCreate (recreating {})", savedInstanceState != null)
@@ -159,11 +153,6 @@ class MainActivity :
       services.requireService(BuildConfigurationServiceType::class.java)
     this.profilesController =
       services.requireService(ProfilesControllerType::class.java)
-    if (configurationService.showAgeGateUi &&
-      this.profilesController.profileCurrent().preferences().dateOfBirth == null
-    ) {
-      this.showAgeGate()
-    }
   }
 
   private fun getSplashService(): BrandingSplashServiceType {
@@ -234,44 +223,5 @@ class MainActivity :
         .profileIdleTimer()
         .reset()
     }
-  }
-
-  /**
-   * Shows age gate for verification
-   */
-  private fun showAgeGate() {
-    ageGateDialog = AgeGateDialog()
-    ageGateDialog.show(supportFragmentManager, AgeGateDialog.TAG)
-  }
-
-  /**
-   * Handle birth year sent back from Age Gate dialog
-   */
-  override fun onBirthYearSelected(isOver13: Boolean) {
-    if (isOver13) {
-      this.profilesController.profileUpdate { description ->
-        this.synthesizeDateOfBirthDescription(description, 14)
-      }
-    } else {
-      this.profilesController.profileUpdate { description ->
-        this.synthesizeDateOfBirthDescription(description, 0)
-      }
-    }
-  }
-
-  private fun synthesizeDateOfBirthDescription(
-    description: ProfileDescription,
-    years: Int
-  ): ProfileDescription {
-    val newPreferences =
-      description.preferences.copy(dateOfBirth = this.synthesizeDateOfBirth(years))
-    return description.copy(preferences = newPreferences)
-  }
-
-  private fun synthesizeDateOfBirth(years: Int): ProfileDateOfBirth {
-    return ProfileDateOfBirth(
-      date = DateTime.now().minusYears(years),
-      isSynthesized = true
-    )
   }
 }

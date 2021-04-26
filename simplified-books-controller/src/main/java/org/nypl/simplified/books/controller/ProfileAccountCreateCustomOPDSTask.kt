@@ -157,7 +157,8 @@ class ProfileAccountCreateCustomOPDSTask(
         links = links,
         images = listOf(),
         isProduction = true,
-        isAutomatic = false
+        isAutomatic = false,
+        location = null
       )
 
     /*

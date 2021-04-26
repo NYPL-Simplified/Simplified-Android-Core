@@ -7,6 +7,7 @@ import org.nypl.simplified.accounts.json.AccountProviderDescriptionCollectionSer
 import org.nypl.simplified.accounts.source.spi.AccountProviderSourceFactoryType
 import org.nypl.simplified.accounts.source.spi.AccountProviderSourceType
 import org.nypl.simplified.opds.auth_document.api.AuthenticationDocumentParsersType
+import org.nypl.simplified.opds2.irradia.OPDS2ParsersIrradia
 import java.util.ServiceLoader
 
 /**
@@ -28,7 +29,7 @@ class AccountProviderSourceNYPLFactory : AccountProviderSourceFactoryType {
     return AccountProviderSourceNYPLRegistry(
       http = http,
       authDocumentParsers = this.findAuthenticationDocumentParsers(),
-      parsers = AccountProviderDescriptionCollectionParsers(),
+      parsers = AccountProviderDescriptionCollectionParsers(OPDS2ParsersIrradia),
       serializers = AccountProviderDescriptionCollectionSerializers()
     )
   }
