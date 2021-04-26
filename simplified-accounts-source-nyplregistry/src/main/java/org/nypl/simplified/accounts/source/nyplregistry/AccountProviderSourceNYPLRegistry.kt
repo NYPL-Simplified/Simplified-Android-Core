@@ -1,13 +1,15 @@
 package org.nypl.simplified.accounts.source.nyplregistry
 
 import android.content.Context
-import com.io7m.jfunctional.OptionType
-import com.io7m.jfunctional.Some
 import org.joda.time.DateTime
 import org.joda.time.DateTimeZone
 import org.joda.time.Duration
 import org.librarysimplified.http.api.LSHTTPClientType
 import org.librarysimplified.http.api.LSHTTPResponseStatus
+import org.nypl.simplified.accounts.api.AccountDistance
+import org.nypl.simplified.accounts.api.AccountDistanceUnit.KILOMETERS
+import org.nypl.simplified.accounts.api.AccountGeoLocation
+import org.nypl.simplified.accounts.api.AccountLibraryLocation
 import org.nypl.simplified.accounts.api.AccountProviderDescription
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionCollection
 import org.nypl.simplified.accounts.api.AccountProviderDescriptionCollectionParsersType
@@ -15,6 +17,7 @@ import org.nypl.simplified.accounts.api.AccountProviderDescriptionCollectionSeri
 import org.nypl.simplified.accounts.api.AccountProviderResolutionListenerType
 import org.nypl.simplified.accounts.api.AccountProviderResolutionStringsType
 import org.nypl.simplified.accounts.api.AccountProviderType
+import org.nypl.simplified.accounts.api.AccountSearchQuery
 import org.nypl.simplified.accounts.source.nyplregistry.AccountProviderSourceNYPLRegistryException.ServerConnectionFailure
 import org.nypl.simplified.accounts.source.nyplregistry.AccountProviderSourceNYPLRegistryException.ServerReturnedError
 import org.nypl.simplified.accounts.source.spi.AccountProviderSourceResolutionStrings
@@ -66,7 +69,10 @@ class AccountProviderSourceNYPLRegistry(
   /** The default time to retain the disk cache. */
   private val defaultCacheDuration = Duration.standardHours(4)
 
-  override fun load(context: Context, includeTestingLibraries: Boolean): SourceResult {
+  override fun load(
+    context: Context,
+    includeTestingLibraries: Boolean
+  ): SourceResult {
     if (this.stringResources == null) {
       this.stringResources =
         AccountProviderSourceResolutionStrings(
@@ -105,6 +111,39 @@ class AccountProviderSourceNYPLRegistry(
     } catch (e: Exception) {
       this.logger.error("failed to fetch providers: ", e)
       SourceResult.SourceFailed(diskResults, e)
+    }
+  }
+
+  override fun query(
+    context: Context,
+    query: AccountSearchQuery
+  ): SourceResult {
+    val result = this.load(
+      context = context,
+      includeTestingLibraries = query.includeTestingLibraries
+    )
+
+    /*
+     * XXX: Fake testing data. This sets the location of every library to Fort Peck, and derives
+     * a distance value from the library identifier.
+     */
+
+    return when (result) {
+      is SourceResult.SourceFailed -> result
+      is SourceResult.SourceSucceeded ->
+        SourceResult.SourceSucceeded(
+          result.results.mapValues { entry ->
+            entry.value.copy(
+              location = AccountLibraryLocation(
+                location = AccountGeoLocation.Coordinates(
+                  longitude = 48.009720957177684,
+                  latitude = -106.42124352031094
+                ),
+                distance = AccountDistance(entry.value.id.hashCode() * 0.00001, KILOMETERS)
+              )
+            )
+          }
+        )
     }
   }
 
@@ -159,7 +198,7 @@ class AccountProviderSourceNYPLRegistry(
       synchronized(this.writeLock) {
         cacheFiles.fileTemp.outputStream().use { stream ->
           val meta =
-            AccountProviderDescriptionCollection.Metadata(null, "")
+            AccountProviderDescriptionCollection.Metadata("")
           val collection =
             AccountProviderDescriptionCollection(
               providers = mergedResults.values.toList(),
@@ -315,11 +354,4 @@ class AccountProviderSourceNYPLRegistry(
         )
     }
   }
-
-  private fun <T> someOrNull(o: OptionType<T>): T? =
-    if (o is Some<T>) {
-      o.get()
-    } else {
-      null
-    }
 }

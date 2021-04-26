@@ -25,6 +25,13 @@ class AccountProviderDescriptionSerializer internal constructor(
     metaNode.put("isProduction", this.document.isProduction)
     metaNode.put("isAutomatic", this.document.isAutomatic)
 
+    this.document.location?.let { location ->
+      metaNode.put("location", location.location.toText())
+      location.distance?.let { distance ->
+        metaNode.put("distance", distance.toText())
+      }
+    }
+
     val imagesNode = this.mapper.createArrayNode()
     this.document.images.forEach { link ->
       imagesNode.add(LinkSerialization.serializeLink(link))
