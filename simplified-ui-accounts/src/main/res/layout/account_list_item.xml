@@ -1,68 +1,105 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-  xmlns:tools="http://schemas.android.com/tools"
-  android:layout_width="match_parent"
-  android:layout_height="?android:listPreferredItemHeight"
-  android:background="?attr/selectableItemBackground"
-  android:clickable="true"
-  android:focusable="true"
-  android:orientation="horizontal"
-  android:paddingStart="16dp"
-  android:paddingEnd="16dp"
-  tools:ignore="UseCompoundDrawables">
-
-  <ImageView
-    android:id="@+id/accountIcon"
-    android:layout_width="32dp"
-    android:layout_height="32dp"
-    android:layout_gravity="center_vertical"
-    android:layout_marginEnd="16dp"
-    android:contentDescription="@null"
-    android:src="@drawable/account_default" />
-
-  <LinearLayout
-    android:layout_width="0dp"
-    android:layout_height="match_parent"
-    android:layout_weight="1"
-    android:gravity="center_vertical"
-    android:orientation="vertical">
-
-    <TextView
-      android:id="@+id/accountTitle"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:ellipsize="end"
-      android:maxLines="1"
-      android:singleLine="true"
-      android:textAppearance="@style/TextAppearance.AppCompat.Small"
-      tools:text="New York Public Library" />
-
-    <TextView
-      android:id="@+id/accountCaption"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:ellipsize="end"
-      android:maxLines="1"
-      android:singleLine="true"
-      android:textAppearance="@style/TextAppearance.AppCompat.Small"
-      android:textSize="12sp"
-      android:textStyle="italic"
-      android:visibility="gone"
-      tools:text="Inspire lifelong learning, advance knowledge, and strengthen our communities."
-      tools:visibility="visible" />
-  </LinearLayout>
-
-  <ImageButton
-    android:id="@+id/popupMenuIcon"
-    android:layout_width="32dp"
-    android:layout_height="32dp"
-    android:layout_gravity="center_vertical"
-    android:layout_marginStart="16dp"
-    android:background="?selectableItemBackgroundBorderless"
-    android:contentDescription="@string/accountMore"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="16dp"
+    android:background="@drawable/bg_account_list_item"
+    android:clickable="true"
     android:focusable="true"
-    android:foregroundTint="@android:color/primary_text_light"
-    android:src="@drawable/ic_more_vert"
-    android:visibility="gone"
-    tools:visibility="visible" />
-</LinearLayout>
+    android:minHeight="?android:listPreferredItemHeight"
+    android:orientation="horizontal"
+    android:padding="16dp"
+    tools:ignore="UseCompoundDrawables"
+    tools:layout_marginVertical="16dp">
+
+    <TextView
+        android:id="@+id/accountTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:singleLine="true"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintEnd_toStartOf="@id/accountBarrier"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="New York Public Library" />
+
+
+    <TextView
+        android:id="@+id/accountCaption"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:singleLine="true"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        android:textSize="12sp"
+        android:textStyle="italic"
+        android:visibility="gone"
+        app:layout_constraintEnd_toStartOf="@id/accountBarrier"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/accountTitle"
+        tools:text="Inspire lifelong learning, advance knowledge, and strengthen our communities."
+        tools:visibility="visible" />
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/accountLocation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:constraint_referenced_ids="accountDistance,accountZipCode" />
+
+    <TextView
+        android:id="@+id/accountDistance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="2dp"
+        android:textAlignment="viewEnd"
+        android:textAllCaps="true"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Online" />
+
+    <TextView
+        android:id="@+id/accountZipCode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="2dp"
+        android:textAlignment="viewEnd"
+        android:textAllCaps="true"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/accountDistance"
+        tools:text="Online" />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/accountBarrier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="start"
+        app:constraint_referenced_ids="accountBadge,accountZipCode,accountDistance" />
+
+    <TextView
+        android:id="@+id/accountBadge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_account_badge"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="2dp"
+        android:text="TODO"
+        android:textAlignment="center"
+        android:textColor="@android:color/white"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

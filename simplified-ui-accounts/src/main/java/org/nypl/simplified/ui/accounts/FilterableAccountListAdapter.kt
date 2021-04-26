@@ -9,7 +9,6 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import org.nypl.simplified.accounts.api.AccountProviderDescription
-import org.nypl.simplified.ui.images.ImageAccountIcons
 import org.nypl.simplified.ui.images.ImageLoaderType
 import org.slf4j.LoggerFactory
 
@@ -123,13 +122,6 @@ class AccountItemViewHolder(
       } else {
         View.GONE
       }
-
-    ImageAccountIcons.loadAccountLogoIntoView(
-      loader = this.imageLoader.loader,
-      account = item,
-      defaultIcon = R.drawable.account_default,
-      iconView = this.accountIcon
-    )
     this.accountItem = item
   }
 }
