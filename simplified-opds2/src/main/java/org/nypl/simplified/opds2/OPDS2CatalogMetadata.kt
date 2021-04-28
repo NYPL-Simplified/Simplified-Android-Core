@@ -66,12 +66,12 @@ data class OPDS2CatalogMetadata(
   val isAutomatic: Boolean,
 
   /**
-   * Library Simplified catalogs use a "location" property to express library service areas.
+   * Library Simplified catalogs use a "areaServed" property to express library service areas.
    *
-   * @see "https://github.com/NYPL-Simplified/Simplified/wiki/LibraryRegistryPublicAPI#the-location-property"
+   * @see "https://github.com/NYPL-Simplified/Simplified/wiki/LibraryRegistryPublicAPI#the-schemaareaserved-property"
    */
 
-  val location: String?,
+  val areaServed: String?,
 
   /**
    * Library Simplified catalogs use a "distance" property to express the distance between the user and a library.
@@ -80,14 +80,6 @@ data class OPDS2CatalogMetadata(
    */
 
   val distance: String?,
-
-  /**
-   * Library Simplified catalogs use a "library_type" property to describe library services.
-   *
-   * @see "https://github.com/NYPL-Simplified/Simplified/wiki/LibraryRegistryPublicAPI#the-library_type-property"
-   */
-
-  val libraryType: String?
 
 ) : Comparable<OPDS2CatalogMetadata>, OPDS2MetadataType {
 

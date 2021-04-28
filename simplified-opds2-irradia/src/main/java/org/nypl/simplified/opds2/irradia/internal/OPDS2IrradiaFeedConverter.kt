@@ -53,6 +53,8 @@ class OPDS2IrradiaFeedConverter(
       this.feed.groups.map(this::convertGroup)
     val links =
       this.feed.links.map(this::convertLink)
+    val images =
+      this.feed.images.map(this::convertLink)
 
     if (this.errors.isNotEmpty()) {
       return ParseResult.Failure(
@@ -70,6 +72,7 @@ class OPDS2IrradiaFeedConverter(
         publications = publications,
         groups = groups,
         links = links,
+        images = images,
         catalogs = catalogResults
       )
     )
@@ -131,7 +134,8 @@ class OPDS2IrradiaFeedConverter(
         metadata = catalog.metadata,
         catalogMetadata = catalogMetadata
       ),
-      links = catalog.links.map(this::convertLink)
+      links = catalog.links.map(this::convertLink),
+      images = catalog.images.map(this::convertLink)
     )
   }
 
@@ -165,9 +169,8 @@ class OPDS2IrradiaFeedConverter(
       author = metadata.author.map(this::convertAuthor),
       isAutomatic = catalogMetadata.isAutomatic,
       isProduction = catalogMetadata.isProduction,
-      location = catalogMetadata.location,
-      distance = catalogMetadata.distance,
-      libraryType = catalogMetadata.libraryType
+      areaServed = catalogMetadata.areaServed,
+      distance = catalogMetadata.distance
     )
   }
 
