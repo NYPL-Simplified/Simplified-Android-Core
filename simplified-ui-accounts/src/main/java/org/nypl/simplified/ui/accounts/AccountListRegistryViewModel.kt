@@ -1,12 +1,24 @@
 package org.nypl.simplified.ui.accounts
 
+import android.Manifest
+import android.location.Location
+import android.location.LocationManager
+import androidx.annotation.RequiresPermission
 import androidx.lifecycle.ViewModel
 import hu.akarnokd.rxjava2.subjects.UnicastWorkSubject
+import io.reactivex.Completable
+import io.reactivex.Observable
+import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
+import io.reactivex.subjects.BehaviorSubject
+import io.reactivex.subjects.Subject
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountEvent
+import org.nypl.simplified.accounts.api.AccountGeoLocation
 import org.nypl.simplified.accounts.api.AccountProviderDescription
+import org.nypl.simplified.accounts.api.AccountSearchQuery
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryStatus
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
@@ -16,7 +28,7 @@ import org.nypl.simplified.threads.NamedThreadPools
 import org.slf4j.LoggerFactory
 import java.net.URI
 
-class AccountListRegistryViewModel : ViewModel() {
+class AccountListRegistryViewModel(private val locationManager: LocationManager) : ViewModel() {
 
   private val services =
     Services.serviceDirectory()
@@ -36,6 +48,9 @@ class AccountListRegistryViewModel : ViewModel() {
   private val logger =
     LoggerFactory.getLogger(AccountListRegistryViewModel::class.java)
 
+  private val locationUpdates = BehaviorSubject.create<Unit>()
+  private val queries = BehaviorSubject.createDefault("")
+
   private val subscriptions: CompositeDisposable =
     CompositeDisposable(
       this.accountRegistry.events
@@ -43,7 +58,12 @@ class AccountListRegistryViewModel : ViewModel() {
         .subscribe(this::onAccountRegistryEvent),
       this.profilesController.accountEvents()
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(this::onAccountEvent)
+        .subscribe(this::onAccountEvent),
+      Observable.combineLatest(queries, locationUpdates) { query, _ -> createQuery(query) }
+        .switchMapCompletable(this::executeQuery)
+        .subscribeOn(Schedulers.io())
+        .onErrorComplete()
+        .subscribe()
     )
 
   private fun onAccountRegistryEvent(event: AccountProviderRegistryEvent) {
@@ -72,6 +92,17 @@ class AccountListRegistryViewModel : ViewModel() {
   val accountRegistryStatus: AccountProviderRegistryStatus
     get() = this.accountRegistry.status
 
+  private val displayNoLocationMessage: Subject<Boolean> =
+    BehaviorSubject.createDefault(false)
+  val displayNoLocationMessageEvents: Observable<Boolean>
+    get() = displayNoLocationMessage.hide().distinctUntilChanged()
+
+  private var activeLocation: Location? = null
+    set(value) {
+      field = value
+      locationUpdates.onNext(Unit)
+    }
+
   fun refreshAccountRegistry() {
     this.backgroundExecutor.execute {
       try {
@@ -89,6 +120,19 @@ class AccountListRegistryViewModel : ViewModel() {
 
   fun createAccount(id: URI) {
     this.profilesController.profileAccountCreate(id)
+  }
+
+  @RequiresPermission(value = Manifest.permission.ACCESS_COARSE_LOCATION)
+  fun getLocation(hasPermission: Boolean) {
+    if (hasPermission) {
+      tryAndGetLocation()
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(displayNoLocationMessage::onNext)
+        .let(subscriptions::add)
+    } else {
+      displayNoLocationMessage.onNext(true)
+    }
   }
 
   /**
@@ -113,4 +157,31 @@ class AccountListRegistryViewModel : ViewModel() {
     this.logger.debug("returning {} available providers", availableAccountProviders.size)
     return availableAccountProviders
   }
+
+  @RequiresPermission(value = Manifest.permission.ACCESS_COARSE_LOCATION)
+  private fun tryAndGetLocation(): Single<Boolean> = Single.fromCallable {
+    val isNetworkLocationEnabled =
+      locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+    if (isNetworkLocationEnabled) {
+      activeLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+    }
+    activeLocation == null
+  }
+
+  private fun createQuery(query: String) = AccountSearchQuery(
+    location = activeLocation?.toAccountGeoLocation(),
+    searchQuery = query,
+    includeTestingLibraries = this.profilesController
+      .profileCurrent()
+      .preferences()
+      .showTestingLibraries
+  )
+
+  private fun executeQuery(query: AccountSearchQuery) = Completable.fromAction {
+    accountRegistry.query(query)
+  }
+
+  private fun Location.toAccountGeoLocation() = AccountGeoLocation.Coordinates(
+    longitude, latitude
+  )
 }
