@@ -6,5 +6,3 @@ sealed class OnboardingNavigationCommand {
     val command: org.nypl.simplified.ui.accounts.AccountsNavigationCommand
   ) : OnboardingNavigationCommand()
 }
-
-

@@ -1048,8 +1048,7 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
       val selected = choices[checked]
       this.logger.debug("selected facet: {}", selected)
       this.sendCatalogCommand(
-        CatalogNavigationCommand.OpenFeed(this.feedModel.resolveFacet(selected)
-        )
+        CatalogNavigationCommand.OpenFeed(this.feedModel.resolveFacet(selected))
       )
       dialog.dismiss()
     }

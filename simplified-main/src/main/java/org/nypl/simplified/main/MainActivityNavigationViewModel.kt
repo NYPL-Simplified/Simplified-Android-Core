@@ -10,8 +10,7 @@ class MainActivityNavigationViewModel : NavigationViewModel<MainActivityNavigati
   private val commandQueue: UnicastWorkSubject<MainActivityNavigationCommand> =
     UnicastWorkSubject.create()
 
-  private var subscription: Disposable? =
-    null
+  private var subscription: Disposable? = null
 
   override fun registerHandler(callback: (MainActivityNavigationCommand) -> Unit) {
     this.subscription =

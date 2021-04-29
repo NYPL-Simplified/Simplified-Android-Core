@@ -1,6 +1,8 @@
 package org.nypl.simplified.main
 
+import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
@@ -10,6 +12,7 @@ import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.feeds.api.FeedEntry
+import org.nypl.simplified.navigation.api.NavigationViewModel
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.ui.accounts.AccountFragment
 import org.nypl.simplified.ui.accounts.AccountFragmentParameters
@@ -39,28 +42,43 @@ import org.slf4j.LoggerFactory
 import java.net.URI
 
 internal class MainFragmentNavigationDelegate(
-  private val activity: AppCompatActivity,
-  private val navigationViewModel: MainFragmentNavigationViewModel,
+  private val fragment: Fragment,
+  private val navigationViewModel: NavigationViewModel<MainFragmentNavigationCommand>,
   private val navigator: TabbedNavigator,
   private val profilesController: ProfilesControllerType,
   private val settingsConfiguration: BuildConfigurationServiceType
-): LifecycleObserver {
-
-  init {
-    this.navigationViewModel.subscribeInfoStream(navigator)
-  }
-
+) : LifecycleObserver {
   private val logger =
     LoggerFactory.getLogger(MainFragmentNavigationDelegate::class.java)
 
   private val subscriptions =
     CompositeDisposable()
 
+  @OnLifecycleEvent(Lifecycle.Event.ON_CREATE)
+  fun onCreate() {
+    this.configureToolbar()
+
+    val activity = this.fragment.requireActivity() as AppCompatActivity
+
+    activity.onBackPressedDispatcher.addCallback(this.fragment) {
+      if (navigator.popBackStack()) {
+        return@addCallback
+      }
+
+      try {
+        isEnabled = false
+        activity.onBackPressed()
+      } finally {
+        isEnabled = true
+      }
+    }
+  }
+
   @OnLifecycleEvent(Lifecycle.Event.ON_START)
   fun onStart() {
-      this.navigationViewModel.registerHandler(this::handleCommand)
+    this.navigationViewModel.registerHandler(this::handleCommand)
 
-    this.navigationViewModel.infoStream
+    this.navigator.infoStream
       .subscribe { action ->
         this.logger.debug(action.toString())
         this.onFragmentTransactionCompleted()
@@ -84,7 +102,8 @@ internal class MainFragmentNavigationDelegate(
 
   private fun configureToolbar() {
     val isRoot = (0 == this.navigator.backStackSize())
-    this.activity.supportActionBar?.apply {
+    val activity = this.fragment.requireActivity() as AppCompatActivity
+    activity.supportActionBar?.apply {
       setHomeAsUpIndicator(null)
       setHomeActionContentDescription(null)
       setDisplayHomeAsUpEnabled(!isRoot)
@@ -103,7 +122,7 @@ internal class MainFragmentNavigationDelegate(
   }
 
   private fun handleCatalogCommand(command: CatalogNavigationCommand) {
-    return when(command) {
+    return when (command) {
       CatalogNavigationCommand.OnSAML20LoginSucceeded ->
         this.popBackStack()
       is CatalogNavigationCommand.OpenBookDetail ->
@@ -118,7 +137,7 @@ internal class MainFragmentNavigationDelegate(
   }
 
   private fun handleAccountsCommand(command: AccountsNavigationCommand) {
-    return when(command) {
+    return when (command) {
       AccountsNavigationCommand.OnAccountCreated ->
         this.popBackStack()
       AccountsNavigationCommand.OnSAMLEventAccessTokenObtained ->
@@ -137,7 +156,7 @@ internal class MainFragmentNavigationDelegate(
   }
 
   private fun handleSettingsCommand(command: SettingsNavigationCommand) {
-    return when(command) {
+    return when (command) {
       SettingsNavigationCommand.OpenSettingsAbout ->
         this.openSettingsAbout()
       SettingsNavigationCommand.OpenSettingsAccounts ->
@@ -199,12 +218,12 @@ internal class MainFragmentNavigationDelegate(
     )
   }
 
- private fun openSettingsCustomOPDS() {
+  private fun openSettingsCustomOPDS() {
     this.navigator.addFragment(
       fragment = SettingsFragmentCustomOPDS(),
       tab = R.id.tabSettings
     )
- }
+  }
 
   private fun openErrorPage(parameters: ErrorPageParameters) {
     this.navigator.addFragment(
@@ -292,7 +311,7 @@ internal class MainFragmentNavigationDelegate(
       )
 
     Viewers.openViewer(
-      activity = activity,
+      activity = this.fragment.requireActivity(),
       preferences = viewerPreferences,
       book = book,
       format = format

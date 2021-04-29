@@ -1,20 +1,17 @@
 package org.nypl.simplified.main
 
 import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.commit
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.navigation.api.NavigationViewModel
 import org.nypl.simplified.profiles.api.ProfileID
-import org.nypl.simplified.ui.onboarding.OnboardingFragment
 import org.nypl.simplified.ui.profiles.ProfileModificationDefaultFragment
 import org.nypl.simplified.ui.profiles.ProfileModificationFragmentParameters
 import org.nypl.simplified.ui.profiles.ProfileModificationFragmentServiceType
 import org.nypl.simplified.ui.profiles.ProfileSelectionFragment
 import org.nypl.simplified.ui.profiles.ProfilesNavigationCommand
-import org.nypl.simplified.ui.splash.SplashFragment
 import org.slf4j.LoggerFactory
 
 internal class MainActivityNavigationDelegate(
@@ -36,51 +33,15 @@ internal class MainActivityNavigationDelegate(
     this.navigationViewModel.unregisterHandler()
   }
 
-  fun openSplashScreen(resultKey: String) {
-    this.logger.debug("openSplashScreen")
-    val splashFragment = SplashFragment.newInstance(resultKey)
-    this.fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
-    this.fragmentManager.commit {
-      replace(R.id.mainFragmentHolder, splashFragment, "SPLASH_MAIN")
-    }
-  }
-
-  fun openOnboarding(resultKey: String) {
-    this.logger.debug("openOnboarding")
-    val onboardingFragment = OnboardingFragment.newInstance(resultKey)
-    this.fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
-    this.fragmentManager.commit {
-      replace(R.id.mainFragmentHolder, onboardingFragment)
-    }
-  }
-
-  fun openProfileSelection() {
-    this.logger.debug("openProfileSelection")
-    val profilesFragment = ProfileSelectionFragment()
-    this.fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
-    this.fragmentManager.commit {
-      replace(R.id.mainFragmentHolder, profilesFragment)
-    }
-  }
-
-  fun openMainFragment() {
-    this.logger.debug("openMainFragment")
-    val mainFragment = MainFragment()
-    this.fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
-    this.fragmentManager.commit {
-      replace(R.id.mainFragmentHolder, mainFragment, "MAIN")
-    }
-  }
-
-  fun handleCommand(command: MainActivityNavigationCommand) {
-    return when(command) {
+  private fun handleCommand(command: MainActivityNavigationCommand) {
+    return when (command) {
       is MainActivityNavigationCommand.ProfilesNavigationCommand ->
         this.handleProfilesCommand(command.command)
     }
   }
 
   private fun handleProfilesCommand(command: ProfilesNavigationCommand) {
-    return when(command) {
+    return when (command) {
       ProfilesNavigationCommand.OnProfileModificationCancelled ->
         this.onProfileModificationCancelled()
       ProfilesNavigationCommand.OnProfileModificationSucceeded ->

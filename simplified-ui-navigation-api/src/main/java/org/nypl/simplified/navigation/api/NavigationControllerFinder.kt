@@ -12,14 +12,13 @@ object NavigationControllerFinder {
     interfaceType: Class<T>,
     recursive: Boolean = true
   ): (T) -> Unit {
-
     if (viewModelStoreOwner is HasDefaultViewModelProviderFactory &&
-      viewModelStoreOwner.defaultViewModelProviderFactory is NavigationAwareViewModelFactory<*>) {
-
+      viewModelStoreOwner.defaultViewModelProviderFactory is NavigationAwareViewModelFactory<*>
+    ) {
       ViewModelProvider(viewModelStoreOwner).getNavigation<T>()
         .navigationControllerIfAvailable(interfaceType)
         ?.let { return it }
-  }
+    }
 
     if (viewModelStoreOwner !is Fragment || !recursive) {
       throw IllegalArgumentException(

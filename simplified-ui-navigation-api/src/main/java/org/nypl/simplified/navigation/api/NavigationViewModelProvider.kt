@@ -9,7 +9,7 @@ private val PROVIDER_KEY: String =
  * Obtain access to the navigation ViewModel directly associated with the given viewModelStoreOwner.
  */
 
-internal fun <T: Any> ViewModelProvider.getNavigation(): NavigationViewModel<T> {
+internal fun <T : Any> ViewModelProvider.getNavigation(): NavigationViewModel<T> {
   @Suppress("UNCHECKED_CAST")
   return this.get(PROVIDER_KEY, NavigationViewModel::class.java) as NavigationViewModel<T>
 }

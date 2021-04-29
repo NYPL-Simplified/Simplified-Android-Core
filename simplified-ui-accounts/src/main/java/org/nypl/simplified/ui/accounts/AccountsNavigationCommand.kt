@@ -37,19 +37,19 @@ sealed class AccountsNavigationCommand {
    * Open the account registry.
    */
 
-  object OpenSettingsAccountRegistry
-    : AccountsNavigationCommand()
+  object OpenSettingsAccountRegistry :
+    AccountsNavigationCommand()
 
   /**
    * Switch to whichever tab contains the catalog, forcing a reset of the tab.
    */
 
-  object OpenCatalogAfterAuthentication
-    : AccountsNavigationCommand()
+  object OpenCatalogAfterAuthentication :
+    AccountsNavigationCommand()
 
-  object OnAccountCreated
-    : AccountsNavigationCommand()
+  object OnAccountCreated :
+    AccountsNavigationCommand()
 
-  object OnSAMLEventAccessTokenObtained
-    : AccountsNavigationCommand()
+  object OnSAMLEventAccessTokenObtained :
+    AccountsNavigationCommand()
 }

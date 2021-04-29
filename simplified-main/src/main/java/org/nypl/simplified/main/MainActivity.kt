@@ -4,9 +4,12 @@ import android.app.ActionBar
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentResultListener
+import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountID
@@ -22,6 +25,9 @@ import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEna
 import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest.OAuthWithIntermediaryComplete
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.ui.branding.BrandingSplashServiceType
+import org.nypl.simplified.ui.onboarding.OnboardingFragment
+import org.nypl.simplified.ui.profiles.ProfileSelectionFragment
+import org.nypl.simplified.ui.splash.SplashFragment
 import org.slf4j.LoggerFactory
 import java.util.ServiceLoader
 
@@ -37,10 +43,14 @@ class MainActivity :
 
   private val logger = LoggerFactory.getLogger(MainActivity::class.java)
   private val navViewModel: NavigationViewModel<MainActivityNavigationCommand> by navViewModels()
-  private lateinit var mainViewModel: MainActivityViewModel
-  private lateinit var navigationDelegate: MainActivityNavigationDelegate
-  private lateinit var configurationService: BuildConfigurationServiceType
-  private lateinit var profilesController: ProfilesControllerType
+  private val mainViewModel: MainActivityViewModel by viewModels()
+
+  private val defaultViewModelFactory: ViewModelProvider.Factory by lazy {
+    NavigationAwareViewModelFactory(
+      MainActivityNavigationViewModel::class.java,
+      super.getDefaultViewModelProviderFactory()
+    )
+  }
 
   override fun onCreate(savedInstanceState: Bundle?) {
     this.logger.debug("onCreate (recreating {})", savedInstanceState != null)
@@ -53,16 +63,17 @@ class MainActivity :
     this.supportActionBar?.setDisplayShowHomeEnabled(true)
     this.supportActionBar?.hide() // Hide toolbar until requested
 
-    this.mainViewModel =
-      ViewModelProvider(this)
-        .get(MainActivityViewModel::class.java)
-
-    this.navigationDelegate =
-      MainActivityNavigationDelegate(navViewModel, supportFragmentManager, this.mainViewModel)
+    this.lifecycle.addObserver(
+      MainActivityNavigationDelegate(
+        navViewModel,
+        supportFragmentManager,
+        this.mainViewModel
+      )
+    )
 
     if (savedInstanceState == null) {
       this.mainViewModel.clearHistory = true
-      this.navigationDelegate.openSplashScreen(SPLASH_RESULT_KEY)
+      this.openSplashScreen(SPLASH_RESULT_KEY)
     } else {
       if (savedInstanceState.getBoolean(STATE_ACTION_BAR_IS_SHOWING)) {
         this.supportActionBar?.show()
@@ -76,10 +87,7 @@ class MainActivity :
   }
 
   override fun getDefaultViewModelProviderFactory(): ViewModelProvider.Factory {
-    return NavigationAwareViewModelFactory(
-      MainActivityNavigationViewModel::class.java,
-      super.getDefaultViewModelProviderFactory()
-    )
+    return this.defaultViewModelFactory
   }
 
   override fun onSaveInstanceState(outState: Bundle) {
@@ -124,13 +132,13 @@ class MainActivity :
         this.logger.debug("shouldShowLibrarySelectionScreen=$shouldShowLibrarySelectionScreen")
 
         if (!hasNonDefaultAccount && shouldShowLibrarySelectionScreen) {
-          this.navigationDelegate.openOnboarding(ONBOARDING_RESULT_KEY)
+          this.openOnboarding(ONBOARDING_RESULT_KEY)
         } else {
           this.onOnboardingFinished()
         }
       }
       ANONYMOUS_PROFILE_DISABLED -> {
-        this.navigationDelegate.openProfileSelection()
+        this.openProfileSelection()
       }
     }
   }
@@ -140,13 +148,7 @@ class MainActivity :
       .get(MainActivityViewModel::class.java)
       .clearHistory = true
 
-    this.navigationDelegate.openMainFragment()
-
-    val services = Services.serviceDirectory()
-    this.configurationService =
-      services.requireService(BuildConfigurationServiceType::class.java)
-    this.profilesController =
-      services.requireService(ProfilesControllerType::class.java)
+    this.openMainFragment()
   }
 
   private fun getSplashService(): BrandingSplashServiceType {
@@ -216,6 +218,42 @@ class MainActivity :
         .requireService(ProfilesControllerType::class.java)
         .profileIdleTimer()
         .reset()
+    }
+  }
+
+  private fun openSplashScreen(resultKey: String) {
+    this.logger.debug("openSplashScreen")
+    val splashFragment = SplashFragment.newInstance(resultKey)
+    this.supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+    this.supportFragmentManager.commit {
+      replace(R.id.mainFragmentHolder, splashFragment, "SPLASH_MAIN")
+    }
+  }
+
+  private fun openOnboarding(resultKey: String) {
+    this.logger.debug("openOnboarding")
+    val onboardingFragment = OnboardingFragment.newInstance(resultKey)
+    this.supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+    this.supportFragmentManager.commit {
+      replace(R.id.mainFragmentHolder, onboardingFragment)
+    }
+  }
+
+  private fun openProfileSelection() {
+    this.logger.debug("openProfileSelection")
+    val profilesFragment = ProfileSelectionFragment()
+    this.supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+    this.supportFragmentManager.commit {
+      replace(R.id.mainFragmentHolder, profilesFragment)
+    }
+  }
+
+  private fun openMainFragment() {
+    this.logger.debug("openMainFragment")
+    val mainFragment = MainFragment()
+    this.supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+    this.supportFragmentManager.commit {
+      replace(R.id.mainFragmentHolder, mainFragment, "MAIN")
     }
   }
 }

@@ -3,14 +3,13 @@ package org.nypl.simplified.main
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
-import androidx.activity.addCallback
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import io.reactivex.disposables.CompositeDisposable
-import org.joda.time.DateTime
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accessibility.AccessibilityService
 import org.nypl.simplified.accounts.api.AccountEvent
@@ -18,6 +17,7 @@ import org.nypl.simplified.accounts.api.AccountEventDeletion
 import org.nypl.simplified.android.ktx.supportActionBar
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.navigation.api.NavigationAwareViewModelFactory
+import org.nypl.simplified.navigation.api.NavigationViewModel
 import org.nypl.simplified.navigation.api.navControllers
 import org.nypl.simplified.navigation.api.navViewModels
 import org.nypl.simplified.profiles.api.ProfileEvent
@@ -28,9 +28,6 @@ import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimeOutSoon
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimedOut
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.ui.announcements.AnnouncementsController
-import org.nypl.simplified.ui.catalog.CatalogFeedArguments
-import org.nypl.simplified.ui.catalog.CatalogFeedOwnership
-import org.nypl.simplified.ui.catalog.CatalogNavigationCommand
 import org.nypl.simplified.ui.navigation.tabs.TabbedNavigator
 import org.nypl.simplified.ui.profiles.ProfileDialogs
 import org.nypl.simplified.ui.profiles.ProfilesNavigationCommand
@@ -47,31 +44,28 @@ import org.slf4j.LoggerFactory
 class MainFragment : Fragment(R.layout.main_tabbed_host) {
 
   private val logger = LoggerFactory.getLogger(MainFragment::class.java)
+  private val subscriptions = CompositeDisposable()
+
+  private val activityViewModel: MainActivityViewModel by activityViewModels()
+  private val viewModel: MainFragmentViewModel by viewModels()
+
+  private val sendProfilesCommand: (ProfilesNavigationCommand) -> Unit by navControllers()
+  private val navViewModel: NavigationViewModel<MainFragmentNavigationCommand> by navViewModels()
+
+  private val defaultViewModelFactory: ViewModelProvider.Factory by lazy {
+    NavigationAwareViewModelFactory(
+      MainFragmentNavigationViewModel::class.java,
+      super.getDefaultViewModelProviderFactory()
+    )
+  }
 
   private lateinit var bottomView: BottomNavigationView
   private lateinit var navigator: TabbedNavigator
+
   private var timeOutDialog: AlertDialog? = null
-
-  private lateinit var activityViewModel: MainActivityViewModel
-  private lateinit var viewModel: MainFragmentViewModel
-  private val sendCatalogCommand: (CatalogNavigationCommand) -> Unit by navControllers()
-  private val sendProfilesCommand: (ProfilesNavigationCommand) -> Unit by navControllers()
-  private val navViewModel: MainFragmentNavigationViewModel by lazy {
-    navViewModels<MainFragmentNavigationCommand>().value as MainFragmentNavigationViewModel
-  }
-
-  private val subscriptions = CompositeDisposable()
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-
-    this.activityViewModel =
-      ViewModelProvider(this.requireActivity())
-        .get(MainActivityViewModel::class.java)
-
-    this.viewModel =
-      ViewModelProvider(this)
-        .get(MainFragmentViewModel::class.java)
 
     /*
     * If named profiles are enabled, subscribe to profile timer events so that users are
@@ -116,19 +110,6 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
         uiThread = services.requireService(UIThreadServiceType::class.java)
       )
     )
-
-    requireActivity().onBackPressedDispatcher.addCallback(this) {
-      if (navigator.popBackStack()) {
-        return@addCallback
-      }
-
-      try {
-        isEnabled = false
-        requireActivity().onBackPressed()
-      } finally {
-        isEnabled = true
-      }
-    }
   }
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -168,7 +149,7 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
 
     lifecycle.addObserver(
       MainFragmentNavigationDelegate(
-        activity = this.requireActivity() as AppCompatActivity,
+        fragment = this,
         navigationViewModel = navViewModel,
         profilesController = viewModel.profilesController,
         settingsConfiguration = viewModel.buildConfig,
@@ -259,23 +240,7 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
     if (oldAccountId != newAccountId ||
       event.oldDescription.preferences.dateOfBirth != event.newDescription.preferences.dateOfBirth
     ) {
-      newAccountId?.let { id ->
-        val profile = viewModel.profilesController.profileCurrent()
-        val account = profile.account(id)
-        val age = profile.preferences().dateOfBirth?.yearsOld(DateTime.now()) ?: 1
-        this.navigator.clearHistory()
-        this.navigator.popBackStack()
-        this.sendCatalogCommand(
-          CatalogNavigationCommand.OpenFeed(
-            CatalogFeedArguments.CatalogFeedArgumentsRemote(
-              title = getString(R.string.tabCatalog),
-              ownership = CatalogFeedOwnership.OwnedByAccount(id),
-              feedURI = account.catalogURIForAge(age),
-              isSearchResults = false
-            )
-          )
-        )
-      }
+      this.navigator.clearHistory()
     }
   }
 
@@ -312,9 +277,6 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
   }
 
   override fun getDefaultViewModelProviderFactory(): ViewModelProvider.Factory {
-    return NavigationAwareViewModelFactory(
-      MainFragmentNavigationViewModel::class.java,
-      super.getDefaultViewModelProviderFactory()
-    )
+    return this.defaultViewModelFactory
   }
 }

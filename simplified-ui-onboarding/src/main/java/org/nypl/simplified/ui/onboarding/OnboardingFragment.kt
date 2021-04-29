@@ -37,6 +37,13 @@ class OnboardingFragment :
 
   private val navViewModel: NavigationViewModel<OnboardingNavigationCommand> by navViewModels()
 
+  private val defaultViewModelFactory: ViewModelProvider.Factory by lazy {
+    NavigationAwareViewModelFactory(
+      OnboardingNavigationViewModel::class.java,
+      super.getDefaultViewModelProviderFactory()
+    )
+  }
+
   private lateinit var resultKey: String
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -109,21 +116,18 @@ class OnboardingFragment :
   }
 
   override fun getDefaultViewModelProviderFactory(): ViewModelProvider.Factory {
-    return NavigationAwareViewModelFactory(
-      OnboardingNavigationViewModel::class.java,
-      super.getDefaultViewModelProviderFactory()
-    )
+    return this.defaultViewModelFactory
   }
 
   private fun handleNavigationCommand(command: OnboardingNavigationCommand) {
-    return when(command) {
+    return when (command) {
       is OnboardingNavigationCommand.AccountsNavigationCommand ->
         this.handleAccountNavigationCommand(command.command)
     }
   }
 
   private fun handleAccountNavigationCommand(command: AccountsNavigationCommand) {
-    return when(command) {
+    return when (command) {
       AccountsNavigationCommand.OnAccountCreated ->
         this.closeOnboarding()
       AccountsNavigationCommand.OnSAMLEventAccessTokenObtained ->

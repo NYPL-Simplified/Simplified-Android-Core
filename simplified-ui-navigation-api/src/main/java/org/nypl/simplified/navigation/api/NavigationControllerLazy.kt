@@ -4,16 +4,15 @@ import androidx.activity.ComponentActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelStoreOwner
 
-inline fun <reified C: Any> ComponentActivity.navControllers(
+inline fun <reified C : Any> ComponentActivity.navControllers(
   viewModelStoreOwner: ViewModelStoreOwner = this,
   interfaceType: Class<C> = C::class.java,
 ): Lazy<(C) -> Unit> = NavigationControllerLazy(viewModelStoreOwner, interfaceType)
 
-inline fun <reified C: Any> Fragment.navControllers(
+inline fun <reified C : Any> Fragment.navControllers(
   viewModelStoreOwner: ViewModelStoreOwner = this,
   interfaceType: Class<C> = C::class.java,
 ): Lazy<(C) -> Unit> = NavigationControllerLazy(viewModelStoreOwner, interfaceType)
-
 
 class NavigationControllerLazy<C : Any>(
   private val viewModelStoreOwner: ViewModelStoreOwner,

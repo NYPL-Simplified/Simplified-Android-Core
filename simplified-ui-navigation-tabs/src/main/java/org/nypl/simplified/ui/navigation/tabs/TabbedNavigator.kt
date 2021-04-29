@@ -28,7 +28,6 @@ class TabbedNavigator private constructor (private val navigator: BottomNavigato
       profilesController: ProfilesControllerType,
       settingsConfiguration: BuildConfigurationServiceType,
     ): TabbedNavigator {
-
       val bottomNavigator =
         BottomNavigators.create(
           fragment = fragment,

@@ -42,7 +42,7 @@ class ProfileModificationDefaultFragment : Fragment(R.layout.profile_modificatio
 
   private val subscriptions = CompositeDisposable()
   private val viewModel: ProfileModificationDefaultViewModel by viewModels()
-  private val sendNavCommand: (ProfilesNavigationCommand)-> Unit by navControllers()
+  private val sendNavCommand: (ProfilesNavigationCommand) -> Unit by navControllers()
 
   private val parameters: ProfileModificationFragmentParameters by lazy {
     this.requireArguments()[PARAMETERS_ID] as ProfileModificationFragmentParameters

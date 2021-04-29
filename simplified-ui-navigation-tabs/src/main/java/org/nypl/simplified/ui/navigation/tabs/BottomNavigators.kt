@@ -42,7 +42,7 @@ object BottomNavigators {
     accountProviders: AccountProviderRegistryType,
     profilesController: ProfilesControllerType,
     settingsConfiguration: BuildConfigurationServiceType,
-  ): BottomNavigator{
+  ): BottomNavigator {
     logger.debug("creating bottom navigator")
 
     val context =
