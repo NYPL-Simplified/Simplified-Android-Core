@@ -487,7 +487,8 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
         isSearchResults = false
       )
       this.feedModel.reloadFeed(newParameters)
-      ageGateDialog.dismissAllowingStateLoss()
+      if (ageGateDialog.isVisible)
+        ageGateDialog.dismissAllowingStateLoss()
     }
   }
 
