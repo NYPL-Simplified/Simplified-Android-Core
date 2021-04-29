@@ -17,12 +17,13 @@ import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
-import org.nypl.simplified.navigation.api.NavigationControllers
+import org.nypl.simplified.navigation.api.navControllers
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskStep
+import org.nypl.simplified.ui.accounts.AccountsNavigationCommand
 import org.nypl.simplified.ui.accounts.saml20.AccountSAML20
-import org.nypl.simplified.ui.catalog.CatalogNavigationControllerType
+import org.nypl.simplified.ui.catalog.CatalogNavigationCommand
 import org.nypl.simplified.ui.catalog.R
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
@@ -51,6 +52,9 @@ class CatalogSAML20Fragment : Fragment() {
       return fragment
     }
   }
+
+  private val sendAccountCommand: (AccountsNavigationCommand) -> Unit by navControllers()
+  private val sendCatalogCommand: (CatalogNavigationCommand) -> Unit by navControllers()
 
   private lateinit var profiles: ProfilesControllerType
   private lateinit var booksController: BooksControllerType
@@ -175,7 +179,7 @@ class CatalogSAML20Fragment : Fragment() {
 
   private fun onSAMLEventSucceeded() {
     this.uiThread.runOnUIThread {
-      this.findNavigationController().onSAML20LoginSucceeded()
+      this.sendCatalogCommand(CatalogNavigationCommand.OnSAML20LoginSucceeded)
       Unit
     }
   }
@@ -202,7 +206,7 @@ class CatalogSAML20Fragment : Fragment() {
         taskSteps = taskSteps
       )
 
-    this.findNavigationController().openErrorPage(parameters)
+    this.sendAccountCommand(AccountsNavigationCommand.OpenErrorPage(parameters))
   }
 
   private fun onSAMLEventException(exception: Throwable) {
@@ -213,13 +217,6 @@ class CatalogSAML20Fragment : Fragment() {
 
   private fun onSAMLEventFinished() {
     // Don't care
-  }
-
-  private fun findNavigationController(): CatalogNavigationControllerType {
-    return NavigationControllers.find(
-      viewModelStoreOwner = this,
-      interfaceType = CatalogNavigationControllerType::class.java
-    )
   }
 
   override fun onStop() {

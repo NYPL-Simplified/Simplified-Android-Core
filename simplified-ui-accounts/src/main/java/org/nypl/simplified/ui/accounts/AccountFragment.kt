@@ -36,7 +36,7 @@ import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.api.AccountUsername
 import org.nypl.simplified.android.ktx.supportActionBar
 import org.nypl.simplified.cardcreator.CardCreatorServiceType
-import org.nypl.simplified.navigation.api.NavigationControllers
+import org.nypl.simplified.navigation.api.navControllers
 import org.nypl.simplified.oauth.OAuthCallbackIntentParsing
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileUpdated
@@ -70,6 +70,8 @@ class AccountFragment : Fragment(R.layout.account) {
 
   private val subscriptions: CompositeDisposable =
     CompositeDisposable()
+
+  private val sendNavCommand: (AccountsNavigationCommand) -> Unit by navControllers()
 
   private val parameters: AccountFragmentParameters by lazy {
     this.requireArguments()[PARAMETERS_ID] as AccountFragmentParameters
@@ -499,13 +501,14 @@ class AccountFragment : Fragment(R.layout.account) {
       )
     )
 
-    this.findNavigationController()
-      .openSAML20Login(
+    this.sendNavCommand(
+      AccountsNavigationCommand.OpenSAML20Login(
         AccountSAML20FragmentParameters(
           accountID = this.viewModel.account.id,
           authenticationDescription = authenticationDescription
         )
       )
+    )
   }
 
   private fun onTryOAuthLogin(
@@ -574,8 +577,7 @@ class AccountFragment : Fragment(R.layout.account) {
   private fun explicitlyClose() {
     if (this.closing.compareAndSet(false, true)) {
       this.logger.debug("explicitlyClose: popping backstack")
-      this.findNavigationController()
-        .openCatalogAfterAuthentication()
+      this.sendNavCommand(AccountsNavigationCommand.OpenCatalogAfterAuthentication)
     }
   }
 
@@ -863,7 +865,7 @@ class AccountFragment : Fragment(R.layout.account) {
         taskSteps = taskSteps
       )
 
-    this.findNavigationController().openErrorPage(parameters)
+    this.sendNavCommand(AccountsNavigationCommand.OpenErrorPage(parameters))
   }
 
   private fun loginFormLock() {
@@ -997,13 +999,6 @@ class AccountFragment : Fragment(R.layout.account) {
       }
       .create()
       .show()
-  }
-
-  private fun findNavigationController(): AccountNavigationControllerType {
-    return NavigationControllers.find(
-      viewModelStoreOwner = this,
-      interfaceType = AccountNavigationControllerType::class.java
-    )
   }
 
   override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

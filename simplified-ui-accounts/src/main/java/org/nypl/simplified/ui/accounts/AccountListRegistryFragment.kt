@@ -26,7 +26,7 @@ import org.nypl.simplified.accounts.api.AccountProviderDescription
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryStatus
 import org.nypl.simplified.android.ktx.supportActionBar
-import org.nypl.simplified.navigation.api.NavigationControllers
+import org.nypl.simplified.navigation.api.navControllers
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.images.ImageLoaderType
 import org.slf4j.LoggerFactory
@@ -40,6 +40,7 @@ class AccountListRegistryFragment : Fragment(R.layout.account_list_registry) {
   private val logger = LoggerFactory.getLogger(AccountListRegistryFragment::class.java)
   private val subscriptions = CompositeDisposable()
   private val viewModel: AccountListRegistryViewModel by viewModels()
+  private val sendNavCommand: (AccountsNavigationCommand) -> Unit by navControllers()
 
   private lateinit var accountList: RecyclerView
   private lateinit var accountListAdapter: FilterableAccountListAdapter
@@ -119,7 +120,7 @@ class AccountListRegistryFragment : Fragment(R.layout.account_list_registry) {
       }
 
       is AccountEventCreation.AccountEventCreationSucceeded -> {
-        this.findNavigationController().onAccountCreated()
+        this.sendNavCommand(AccountsNavigationCommand.OnAccountCreated)
       }
 
       is AccountEventCreation.AccountEventCreationFailed -> {
@@ -275,13 +276,6 @@ class AccountListRegistryFragment : Fragment(R.layout.account_list_registry) {
         taskSteps = accountEvent.taskResult.steps
       )
 
-    this.findNavigationController().openErrorPage(parameters)
-  }
-
-  private fun findNavigationController(): AccountNavigationControllerType {
-    return NavigationControllers.find(
-      viewModelStoreOwner = this,
-      interfaceType = AccountNavigationControllerType::class.java
-    )
+    this.sendNavCommand(AccountsNavigationCommand.OpenErrorPage(parameters))
   }
 }

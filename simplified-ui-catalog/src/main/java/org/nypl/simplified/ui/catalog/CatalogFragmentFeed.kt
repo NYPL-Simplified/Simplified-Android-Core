@@ -54,12 +54,13 @@ import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderFailure.FeedLoad
 import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderFailure.FeedLoaderFailedGeneral
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.feeds.api.FeedSearch
-import org.nypl.simplified.navigation.api.NavigationControllers
+import org.nypl.simplified.navigation.api.navControllers
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileUpdated
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.ui.accounts.AccountFragmentParameters
+import org.nypl.simplified.ui.accounts.AccountsNavigationCommand
 import org.nypl.simplified.ui.accounts.AccountPickerDialogFragment
 import org.nypl.simplified.ui.catalog.CatalogFeedArguments.CatalogFeedArgumentsRemote
 import org.nypl.simplified.ui.catalog.CatalogFeedOwnership.CollectedFromAccounts
@@ -143,13 +144,8 @@ class CatalogFragmentFeed : Fragment() {
 
   private val logger = LoggerFactory.getLogger(CatalogFragmentFeed::class.java)
   private val parametersId = PARAMETERS_ID
-
-  private val navigationController by lazy {
-    NavigationControllers.find(
-      this,
-      interfaceType = CatalogNavigationControllerType::class.java
-    )
-  }
+  private val sendCatalogCommand: (CatalogNavigationCommand) -> Unit by navControllers()
+  private val sendAccountCommand: (AccountsNavigationCommand) -> Unit by navControllers()
 
   private var accountSubscription: Disposable? = null
   private var profileSubscription: Disposable? = null
@@ -392,13 +388,15 @@ class CatalogFragmentFeed : Fragment() {
   }
 
   private fun onBookSelected(opdsEntry: FeedEntry.FeedEntryOPDS) {
-    this.navigationController
-      .openBookDetail(this.parameters, opdsEntry)
+    this.sendCatalogCommand(
+      CatalogNavigationCommand.OpenBookDetail(this.parameters, opdsEntry)
+    )
   }
 
   private fun onFeedSelected(title: String, uri: URI) {
-    this.navigationController
-      .openFeed(this.feedModel.resolveFeed(title, uri, false))
+    this.sendCatalogCommand(
+      CatalogNavigationCommand.OpenFeed(this.feedModel.resolveFeed(title, uri, false))
+    )
   }
 
   @UiThread
@@ -565,7 +563,8 @@ class CatalogFragmentFeed : Fragment() {
         borrowViewModel = this.borrowViewModel,
         buttonCreator = this.buttonCreator,
         context = requireActivity(),
-        navigation = this::navigationController,
+        sendCatalogCommand = this.sendCatalogCommand,
+        sendAccountCommand = this.sendAccountCommand,
         onBookSelected = this::onBookSelected,
         services = Services.serviceDirectory(),
         ownership = feedState.arguments.ownership
@@ -641,14 +640,15 @@ class CatalogFragmentFeed : Fragment() {
                */
 
               this.uiThread.runOnUIThread {
-                this.navigationController
-                  .openSettingsAccount(
+                this.sendAccountCommand(
+                  AccountsNavigationCommand.OpenSettingsAccount(
                     AccountFragmentParameters(
                       accountId = ownership.accountId,
                       closeOnLoginSuccess = true,
                       showPleaseLogInTitle = true
                     )
                   )
+                )
               }
             }
           }
@@ -676,8 +676,11 @@ class CatalogFragmentFeed : Fragment() {
 
     this.feedErrorDetails.isEnabled = true
     this.feedErrorDetails.setOnClickListener {
-      this.navigationController
-        .openErrorPage(this.errorPageParameters(feedState.failure))
+      this.sendAccountCommand(
+        AccountsNavigationCommand.OpenErrorPage(
+          this.errorPageParameters(feedState.failure)
+        )
+      )
     }
   }
 
@@ -747,13 +750,12 @@ class CatalogFragmentFeed : Fragment() {
   private fun openAccountPickerDialog() {
     return when (val ownership = this.parameters.ownership) {
       is OwnedByAccount -> {
-        val fm = requireActivity().supportFragmentManager
         val dialog =
           AccountPickerDialogFragment.create(
             currentId = ownership.accountId,
             showAddAccount = this.configurationService.allowAccountsAccess
           )
-        dialog.show(fm, dialog.tag)
+        dialog.show(parentFragmentManager, dialog.tag)
       }
       CollectedFromAccounts -> {
         throw IllegalStateException("Can't switch account from collected feed!")
@@ -773,8 +775,10 @@ class CatalogFragmentFeed : Fragment() {
     fun performSearch(searchView: TextView) {
       val query = searchView.text.toString().trim()
       this@CatalogFragmentFeed.logSearchToAnalytics(query)
-      this@CatalogFragmentFeed.navigationController.openFeed(
-        this@CatalogFragmentFeed.feedModel.resolveSearch(search, query)
+      this@CatalogFragmentFeed.sendCatalogCommand(
+        CatalogNavigationCommand.OpenFeed(
+          this@CatalogFragmentFeed.feedModel.resolveSearch(search, query)
+        )
       )
     }
 
@@ -999,7 +1003,9 @@ class CatalogFragmentFeed : Fragment() {
       button.setTextColor(this.colorStateListForFacetTabs())
       button.setOnClickListener {
         this.logger.debug("selected entry point facet: {}", facet.title)
-        this.navigationController.openFeed(this.feedModel.resolveFacet(facet))
+        this.sendCatalogCommand(
+          CatalogNavigationCommand.OpenFeed(this.feedModel.resolveFacet(facet))
+        )
       }
       facetTabs.addView(button)
     }
@@ -1055,7 +1061,10 @@ class CatalogFragmentFeed : Fragment() {
     alertBuilder.setSingleChoiceItems(names, checkedItem) { dialog, checked ->
       val selected = choices[checked]
       this.logger.debug("selected facet: {}", selected)
-      this.navigationController.openFeed(this.feedModel.resolveFacet(selected))
+      this.sendCatalogCommand(
+        CatalogNavigationCommand.OpenFeed(this.feedModel.resolveFacet(selected)
+        )
+      )
       dialog.dismiss()
     }
     alertBuilder.create().show()

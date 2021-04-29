@@ -1,61 +1,52 @@
 package org.nypl.simplified.ui.settings
 
-import org.nypl.simplified.navigation.api.NavigationControllerType
-import org.nypl.simplified.ui.accounts.AccountNavigationControllerType
-
-/**
- * Navigation functions for the settings screens.
- */
-
-interface SettingsNavigationControllerType :
-  NavigationControllerType,
-  AccountNavigationControllerType {
+sealed class SettingsNavigationCommand {
 
   /**
    * The settings screen wants to open the "about" section.
    */
 
-  fun openSettingsAbout()
+  object OpenSettingsAbout : SettingsNavigationCommand()
 
   /**
    * The settings screen wants to open the list of accounts.
    */
 
-  fun openSettingsAccounts()
+  object OpenSettingsAccounts : SettingsNavigationCommand()
 
   /**
    * The settings screen wants to open the "acknowledgements" section.
    */
 
-  fun openSettingsAcknowledgements()
+  object OpenSettingsAcknowledgements : SettingsNavigationCommand()
 
   /**
    * The settings screen wants to open the "EULA" section.
    */
 
-  fun openSettingsEULA()
+  object OpenSettingsEULA : SettingsNavigationCommand()
 
   /**
    * The settings screen wants to open the "FAQ" section.
    */
 
-  fun openSettingsFaq()
+  object OpenSettingsFaq : SettingsNavigationCommand()
 
   /**
    * The settings screen wants to open the "license" section.
    */
 
-  fun openSettingsLicense()
+  object OpenSettingsLicense : SettingsNavigationCommand()
 
   /**
    * The settings screen wants to open the version screen.
    */
 
-  fun openSettingsVersion()
+  object OpenSettingsVersion : SettingsNavigationCommand()
 
   /**
    * The settings screen wants to open the custom OPDS creation form.
    */
 
-  fun openSettingsCustomOPDS()
+  object OpenSettingsCustomOPDS : SettingsNavigationCommand()
 }

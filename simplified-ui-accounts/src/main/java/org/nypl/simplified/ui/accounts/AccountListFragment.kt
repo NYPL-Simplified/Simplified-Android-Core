@@ -22,7 +22,7 @@ import org.nypl.simplified.accounts.api.AccountEventDeletion.AccountEventDeletio
 import org.nypl.simplified.accounts.api.AccountEventUpdated
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.android.ktx.supportActionBar
-import org.nypl.simplified.navigation.api.NavigationControllers
+import org.nypl.simplified.navigation.api.navControllers
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.images.ImageLoaderType
 
@@ -50,6 +50,7 @@ class AccountListFragment : Fragment(R.layout.account_list) {
 
   private val subscriptions = CompositeDisposable()
   private val viewModel: AccountListViewModel by viewModels()
+  private val sendNavCommand: (AccountsNavigationCommand) -> Unit by navControllers()
 
   private val parameters: AccountListFragmentParameters by lazy {
     this.requireArguments()[PARAMETERS_ID] as AccountListFragmentParameters
@@ -91,11 +92,13 @@ class AccountListFragment : Fragment(R.layout.account_list) {
   }
 
   private fun onAccountClicked(account: AccountType) {
-    this.findNavigationController().openSettingsAccount(
-      AccountFragmentParameters(
-        accountId = account.id,
-        closeOnLoginSuccess = false,
-        showPleaseLogInTitle = false
+    this.sendNavCommand(
+      AccountsNavigationCommand.OpenSettingsAccount(
+        AccountFragmentParameters(
+          accountId = account.id,
+          closeOnLoginSuccess = false,
+          showPleaseLogInTitle = false
+        )
       )
     )
   }
@@ -142,7 +145,7 @@ class AccountListFragment : Fragment(R.layout.account_list) {
   override fun onOptionsItemSelected(item: MenuItem): Boolean {
     return when (item.itemId) {
       R.id.accountsMenuActionAccountAdd -> {
-        this.findNavigationController().openSettingsAccountRegistry()
+        this.sendNavCommand(AccountsNavigationCommand.OpenSettingsAccountRegistry)
         true
       }
       else -> super.onOptionsItemSelected(item)
@@ -195,18 +198,11 @@ class AccountListFragment : Fragment(R.layout.account_list) {
         taskSteps = accountEvent.taskResult.steps
       )
 
-    this.findNavigationController().openErrorPage(parameters)
+    this.sendNavCommand(AccountsNavigationCommand.OpenErrorPage(parameters))
   }
 
   override fun onStop() {
     super.onStop()
     this.subscriptions.clear()
-  }
-
-  private fun findNavigationController(): AccountNavigationControllerType {
-    return NavigationControllers.find(
-      viewModelStoreOwner = this,
-      interfaceType = AccountNavigationControllerType::class.java
-    )
   }
 }

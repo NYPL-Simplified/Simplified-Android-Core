@@ -3,7 +3,7 @@ package org.nypl.simplified.navigation.api
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 
-class NavigationAwareViewModelFactory<T : NavigationControllerViewModel>(
+class NavigationAwareViewModelFactory<T : NavigationViewModel<*>>(
   private val navigationViewModelClass: Class<T>,
   private val fallbackFactory: ViewModelProvider.Factory
 ) : ViewModelProvider.NewInstanceFactory() {
@@ -11,7 +11,7 @@ class NavigationAwareViewModelFactory<T : NavigationControllerViewModel>(
   @Suppress("UNCHECKED_CAST")
   override fun <T : ViewModel> create(modelClass: Class<T>): T =
     when {
-      modelClass.isAssignableFrom(NavigationControllerViewModel::class.java) ->
+      modelClass.isAssignableFrom(NavigationViewModel::class.java) ->
         navigationViewModelClass.getDeclaredConstructor().newInstance() as T
       else ->
         fallbackFactory.create(modelClass)

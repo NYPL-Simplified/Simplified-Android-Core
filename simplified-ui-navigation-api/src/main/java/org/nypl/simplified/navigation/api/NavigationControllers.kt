@@ -9,40 +9,40 @@ import androidx.lifecycle.ViewModelStoreOwner
  * Functions to obtain access to navigation controllers.
  */
 
-object NavigationControllers {
+internal object NavigationControllers {
 
   val PROVIDER_KEY: String =
-    "org.nypl.simplified.navigation.NavigationControllerViewModel.provider.key"
+    "org.nypl.simplified.navigation.NavigationViewModel.provider.key"
 
 
   /**
    * Obtain access to the navigation controller directory associated with the given activity.
    */
 
-  fun <T: NavigationControllerViewModel> findViewModel(
+  fun <T: Any> findNavigationViewModel(
     viewModelStoreOwner: ViewModelStoreOwner
-  ): T {
+  ): NavigationViewModel<T> {
     @Suppress("UNCHECKED_CAST")
     return ViewModelProvider(viewModelStoreOwner)
-      .get(PROVIDER_KEY, NavigationControllerViewModel::class.java)
-      as T
+      .get(PROVIDER_KEY, NavigationViewModel::class.java)
+      as NavigationViewModel<T>
   }
 
   /**
    * Obtain access to the navigation controller associated with the given activity.
    */
 
-  fun <T : NavigationControllerType> find(
+  fun <T : Any> findCommandSender(
     viewModelStoreOwner: ViewModelStoreOwner,
     interfaceType: Class<T>
-  ): T {
+  ): (T) -> Unit {
 
     if (viewModelStoreOwner is HasDefaultViewModelProviderFactory &&
       viewModelStoreOwner.defaultViewModelProviderFactory is NavigationAwareViewModelFactory<*>) {
 
       val navigationViewModel =
         ViewModelProvider(viewModelStoreOwner)
-          .get(PROVIDER_KEY, NavigationControllerViewModel::class.java)
+          .get(PROVIDER_KEY, NavigationViewModel::class.java)
 
       navigationViewModel
         .navigationControllerIfAvailable(interfaceType)
@@ -58,6 +58,6 @@ object NavigationControllers {
     val parentStoreOwner =
         viewModelStoreOwner.parentFragment ?: viewModelStoreOwner.requireActivity()
 
-    return this.find(parentStoreOwner, interfaceType)
+    return this.findCommandSender(parentStoreOwner, interfaceType)
   }
 }

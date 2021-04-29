@@ -6,8 +6,8 @@ import android.widget.Button
 import android.widget.ImageView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import org.nypl.simplified.navigation.api.NavigationControllers
-import org.nypl.simplified.ui.accounts.AccountNavigationControllerType
+import org.nypl.simplified.navigation.api.navControllers
+import org.nypl.simplified.ui.accounts.AccountsNavigationCommand
 
 class OnboardingStartScreenFragment : Fragment(R.layout.onboarding_start_screen) {
 
@@ -16,6 +16,7 @@ class OnboardingStartScreenFragment : Fragment(R.layout.onboarding_start_screen)
   private lateinit var selectionImageView: ImageView
 
   private val viewModel: OnboardingStartScreenViewModel by viewModels()
+  private val sendAccountCommand: (AccountsNavigationCommand) -> Unit by navControllers()
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
@@ -30,9 +31,7 @@ class OnboardingStartScreenFragment : Fragment(R.layout.onboarding_start_screen)
     super.onStart()
 
     this.selectionButton.setOnClickListener {
-      NavigationControllers
-        .find(this, AccountNavigationControllerType::class.java)
-        .openSettingsAccountRegistry()
+      this.sendAccountCommand(AccountsNavigationCommand.OpenSettingsAccountRegistry)
     }
 
     this.selectionAlternateButton.setOnClickListener {

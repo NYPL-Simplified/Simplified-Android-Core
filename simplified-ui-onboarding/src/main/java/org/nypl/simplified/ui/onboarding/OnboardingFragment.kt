@@ -9,12 +9,15 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
-import io.reactivex.disposables.CompositeDisposable
+import com.io7m.junreachable.UnreachableCodeException
 import org.nypl.simplified.android.ktx.tryPopBackStack
 import org.nypl.simplified.android.ktx.tryPopToRoot
 import org.nypl.simplified.navigation.api.NavigationAwareViewModelFactory
-import org.nypl.simplified.navigation.api.NavigationControllers
+import org.nypl.simplified.navigation.api.NavigationViewModel
+import org.nypl.simplified.navigation.api.navViewModels
 import org.nypl.simplified.ui.accounts.AccountListRegistryFragment
+import org.nypl.simplified.ui.accounts.AccountsNavigationCommand
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 class OnboardingFragment :
@@ -30,8 +33,10 @@ class OnboardingFragment :
     }
   }
 
-  private val logger = LoggerFactory.getLogger(OnboardingFragment::class.java)
-  private val subscriptions = CompositeDisposable()
+  private val logger: Logger = LoggerFactory.getLogger(OnboardingFragment::class.java)
+
+  private val navViewModel: NavigationViewModel<OnboardingNavigationCommand> by navViewModels()
+
   private lateinit var resultKey: String
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -95,17 +100,12 @@ class OnboardingFragment :
 
   override fun onStart() {
     super.onStart()
-
-    NavigationControllers
-      .findViewModel<OnboardingNavigationViewModel>(this)
-      .commandQueue
-      .subscribe(this::handleNavigationCommand)
-      .let { subscriptions.add(it) }
+    this.navViewModel.registerHandler(this::handleNavigationCommand)
   }
 
   override fun onStop() {
     super.onStop()
-    subscriptions.clear()
+    this.navViewModel.unregisterHandler()
   }
 
   override fun getDefaultViewModelProviderFactory(): ViewModelProvider.Factory {
@@ -116,13 +116,28 @@ class OnboardingFragment :
   }
 
   private fun handleNavigationCommand(command: OnboardingNavigationCommand) {
-    when(command) {
-      OnboardingNavigationCommand.AccountNavigationCommand.OnAccountCreated ->
-        closeOnboarding()
-      OnboardingNavigationCommand.AccountNavigationCommand.OnSAMLCommandAccessTokenObtained ->
-        closeOnboarding()
-      OnboardingNavigationCommand.AccountNavigationCommand.OpenSettingsAccountRegistry ->
-        openSettingsAccountRegistry()
+    return when(command) {
+      is OnboardingNavigationCommand.AccountsNavigationCommand ->
+        this.handleAccountNavigationCommand(command.command)
+    }
+  }
+
+  private fun handleAccountNavigationCommand(command: AccountsNavigationCommand) {
+    return when(command) {
+      AccountsNavigationCommand.OnAccountCreated ->
+        this.closeOnboarding()
+      AccountsNavigationCommand.OnSAMLEventAccessTokenObtained ->
+        this.closeOnboarding()
+      AccountsNavigationCommand.OpenSettingsAccountRegistry ->
+        this.openSettingsAccountRegistry()
+      AccountsNavigationCommand.OpenCatalogAfterAuthentication ->
+        throw UnreachableCodeException()
+      is AccountsNavigationCommand.OpenErrorPage ->
+        throw UnreachableCodeException()
+      is AccountsNavigationCommand.OpenSAML20Login ->
+        throw UnreachableCodeException()
+      is AccountsNavigationCommand.OpenSettingsAccount ->
+        throw UnreachableCodeException()
     }
   }
 

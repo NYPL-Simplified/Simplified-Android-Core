@@ -8,14 +8,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.FragmentResultListener
 import androidx.lifecycle.ViewModelProvider
-import io.reactivex.disposables.CompositeDisposable
 import org.joda.time.DateTime
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.navigation.api.NavigationAwareViewModelFactory
-import org.nypl.simplified.navigation.api.NavigationControllers
+import org.nypl.simplified.navigation.api.NavigationViewModel
+import org.nypl.simplified.navigation.api.navViewModels
 import org.nypl.simplified.oauth.OAuthCallbackIntentParsing
 import org.nypl.simplified.oauth.OAuthParseResult
 import org.nypl.simplified.profiles.api.ProfileDateOfBirth
@@ -41,8 +41,7 @@ class MainActivity :
   }
 
   private val logger = LoggerFactory.getLogger(MainActivity::class.java)
-  private val subscriptions = CompositeDisposable()
-
+  private val navViewModel: NavigationViewModel<MainActivityNavigationCommand> by navViewModels()
   private lateinit var mainViewModel: MainActivityViewModel
   private lateinit var navigationDelegate: MainActivityNavigationDelegate
   private lateinit var configurationService: BuildConfigurationServiceType
@@ -65,7 +64,7 @@ class MainActivity :
         .get(MainActivityViewModel::class.java)
 
     this.navigationDelegate =
-      MainActivityNavigationDelegate(supportFragmentManager, this.mainViewModel)
+      MainActivityNavigationDelegate(navViewModel, supportFragmentManager, this.mainViewModel)
 
     if (savedInstanceState == null) {
       this.mainViewModel.clearHistory = true
@@ -80,21 +79,6 @@ class MainActivity :
 
     supportFragmentManager.setFragmentResultListener(SPLASH_RESULT_KEY, this, this)
     supportFragmentManager.setFragmentResultListener(ONBOARDING_RESULT_KEY, this, this)
-  }
-
-  override fun onStart() {
-    super.onStart()
-
-    NavigationControllers
-      .findViewModel<MainActivityNavigationViewModel>(this)
-      .commandQueue
-      .subscribe(this.navigationDelegate::handleNavigationCommand)
-      .let { subscriptions.add(it) }
-  }
-
-  override fun onStop() {
-    super.onStop()
-    subscriptions.clear()
   }
 
   override fun getDefaultViewModelProviderFactory(): ViewModelProvider.Factory {

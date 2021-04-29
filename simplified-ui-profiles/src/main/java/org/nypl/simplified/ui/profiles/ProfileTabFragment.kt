@@ -8,7 +8,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.android.ktx.supportActionBar
-import org.nypl.simplified.navigation.api.NavigationControllers
+import org.nypl.simplified.navigation.api.navControllers
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 
 /**
@@ -16,6 +16,8 @@ import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
  */
 
 class ProfileTabFragment : Fragment(R.layout.profile_tab) {
+
+  val sendProfileCommand: (ProfilesNavigationCommand) -> Unit by navControllers()
 
   private lateinit var loggedInAs: TextView
   private lateinit var logOut: Button
@@ -56,7 +58,7 @@ class ProfileTabFragment : Fragment(R.layout.profile_tab) {
     ProfileDialogs.createSwitchConfirmDialog(
       context = activity,
       onConfirm = {
-        this.findNavigationController().openProfileSelect()
+        this.sendProfileCommand(ProfilesNavigationCommand.OpenProfileSelect)
       }
     ).show()
   }
@@ -71,12 +73,5 @@ class ProfileTabFragment : Fragment(R.layout.profile_tab) {
       title = getString(R.string.profileTitle)
       subtitle = null
     }
-  }
-
-  private fun findNavigationController(): ProfilesNavigationControllerType {
-    return NavigationControllers.find(
-      viewModelStoreOwner = this,
-      interfaceType = ProfilesNavigationControllerType::class.java
-    )
   }
 }

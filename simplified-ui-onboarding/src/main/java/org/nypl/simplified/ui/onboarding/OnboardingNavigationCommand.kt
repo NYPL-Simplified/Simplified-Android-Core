@@ -2,12 +2,9 @@ package org.nypl.simplified.ui.onboarding
 
 sealed class OnboardingNavigationCommand {
 
-  sealed class AccountNavigationCommand : OnboardingNavigationCommand() {
-
-    object OpenSettingsAccountRegistry : AccountNavigationCommand()
-
-    object OnAccountCreated : AccountNavigationCommand()
-
-    object OnSAMLCommandAccessTokenObtained : AccountNavigationCommand()
-  }
+  data class AccountsNavigationCommand(
+    val command: org.nypl.simplified.ui.accounts.AccountsNavigationCommand
+  ) : OnboardingNavigationCommand()
 }
+
+

@@ -1,51 +1,35 @@
 package org.nypl.simplified.main
 
 import hu.akarnokd.rxjava2.subjects.UnicastWorkSubject
-import org.nypl.simplified.navigation.api.NavigationControllerViewModel
-import org.nypl.simplified.profiles.api.ProfileID
-import org.nypl.simplified.ui.profiles.ProfilesNavigationControllerType
+import io.reactivex.disposables.Disposable
+import org.nypl.simplified.navigation.api.NavigationViewModel
+import org.nypl.simplified.ui.profiles.ProfilesNavigationCommand
 
-class MainActivityNavigationViewModel :
-  NavigationControllerViewModel(),
-  ProfilesNavigationControllerType {
+class MainActivityNavigationViewModel : NavigationViewModel<MainActivityNavigationCommand>() {
 
-  val commandQueue: UnicastWorkSubject<MainActivityNavigationCommand> =
+  private val commandQueue: UnicastWorkSubject<MainActivityNavigationCommand> =
     UnicastWorkSubject.create()
 
-  init {
-    this.updateNavigationController(
-      ProfilesNavigationControllerType::class.java,
-      this
-    )
+  private var subscription: Disposable? =
+    null
+
+  override fun registerHandler(callback: (MainActivityNavigationCommand) -> Unit) {
+    this.subscription =
+      commandQueue.subscribe { command ->
+        callback(command)
+      }
   }
 
-  override fun openMain() {
-    val command = MainActivityNavigationCommand.ProfileCommand.OpenMain
-    commandQueue.onNext(command)
+  override fun unregisterHandler() {
+    this.subscription?.dispose()
+    this.subscription = null
   }
 
-  override fun openProfileModify(id: ProfileID) {
-    val command = MainActivityNavigationCommand.ProfileCommand.OpenProfileModify(id)
-    commandQueue.onNext(command)
-  }
+  override val navigationControllers: Map<Class<*>, Any> =
+    mapOf(ProfilesNavigationCommand::class.java to this::handleProfilesCommand)
 
-  override fun openProfileCreate() {
-    val command = MainActivityNavigationCommand.ProfileCommand.OpenProfileCreate
-    commandQueue.onNext(command)
-  }
-
-  override fun openProfileSelect() {
-    val command = MainActivityNavigationCommand.ProfileCommand.OpenProfileSelect
-    commandQueue.onNext(command)
-  }
-
-  override fun onProfileModificationCancelled() {
-    val command = MainActivityNavigationCommand.ProfileCommand.OnProfileModificationCancelled
-    commandQueue.onNext(command)
-  }
-
-  override fun onProfileModificationSucceeded() {
-    val command = MainActivityNavigationCommand.ProfileCommand.OnProfileModificationSucceeded
-    commandQueue.onNext(command)
+  private fun handleProfilesCommand(command: ProfilesNavigationCommand) {
+    val embeddingCommand = MainActivityNavigationCommand.ProfilesNavigationCommand(command)
+    commandQueue.onNext(embeddingCommand)
   }
 }

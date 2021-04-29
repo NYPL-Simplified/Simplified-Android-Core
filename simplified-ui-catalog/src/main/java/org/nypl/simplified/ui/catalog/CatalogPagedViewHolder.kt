@@ -33,6 +33,7 @@ import org.nypl.simplified.futures.FluentFutureExtensions.map
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.ui.accounts.AccountFragmentParameters
+import org.nypl.simplified.ui.accounts.AccountsNavigationCommand
 import org.nypl.simplified.ui.catalog.R.string
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
@@ -47,7 +48,8 @@ class CatalogPagedViewHolder(
   private val borrowViewModel: CatalogBorrowViewModel,
   private val buttonCreator: CatalogButtons,
   private val context: FragmentActivity,
-  private val navigation: () -> CatalogNavigationControllerType,
+  private val sendCatalogCommand: (CatalogNavigationCommand) -> Unit,
+  private val sendAccountCommand: (AccountsNavigationCommand) -> Unit,
   private val onBookSelected: (FeedEntryOPDS) -> Unit,
   private val parent: View,
   private val registrySubscriptions: CompositeDisposable,
@@ -502,14 +504,14 @@ class CatalogPagedViewHolder(
       is BookFormat.BookFormatEPUB -> {
         this.idleButtons.addView(
           this.buttonCreator.createReadButton {
-            this.navigation().openViewer(this.context, book, format)
+            this.sendCatalogCommand(CatalogNavigationCommand.OpenViewer(book, format))
           }
         )
       }
       is BookFormat.BookFormatAudioBook -> {
         this.idleButtons.addView(
           this.buttonCreator.createListenButton {
-            this.navigation().openViewer(this.context, book, format)
+            this.sendCatalogCommand(CatalogNavigationCommand.OpenViewer(book, format))
           }
         )
       }
@@ -570,9 +572,11 @@ class CatalogPagedViewHolder(
     if (!this.isDownloadLoginVisible) {
       this.isDownloadLoginVisible = true
 
-      this.navigation().openBookDownloadLogin(
-        bookID = status.id,
-        downloadURI = status.downloadURI
+      this.sendCatalogCommand(
+        CatalogNavigationCommand.OpenBookDownloadLogin(
+          bookID = status.id,
+          downloadURI = status.downloadURI
+        )
       )
     }
   }
@@ -640,14 +644,15 @@ class CatalogPagedViewHolder(
     this.uiThread.checkIsUIThread()
 
     if (this.borrowViewModel.isLoginRequired(accountID)) {
-      this.navigation()
-        .openSettingsAccount(
+      this.sendAccountCommand(
+        AccountsNavigationCommand.OpenSettingsAccount(
           AccountFragmentParameters(
             accountId = accountID,
             closeOnLoginSuccess = true,
             showPleaseLogInTitle = true
           )
         )
+      )
     }
   }
 
@@ -664,6 +669,6 @@ class CatalogPagedViewHolder(
       attributes = result.attributes.toSortedMap(),
       taskSteps = result.steps
     )
-    this.navigation().openErrorPage(errorPageParameters)
+    this.sendAccountCommand(AccountsNavigationCommand.OpenErrorPage(errorPageParameters))
   }
 }

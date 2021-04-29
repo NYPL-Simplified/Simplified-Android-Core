@@ -16,7 +16,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.database.api.AccountType
-import org.nypl.simplified.navigation.api.NavigationControllers
+import org.nypl.simplified.navigation.api.navControllers
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.ui.accounts.AccountPickerAdapter.OnAccountClickListener
 import org.nypl.simplified.ui.images.ImageAccountIcons
@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory
 class AccountPickerDialogFragment : BottomSheetDialogFragment(), OnAccountClickListener {
 
   private val logger = LoggerFactory.getLogger(AccountPickerDialogFragment::class.java)
+  private val sendNavCommand: (AccountsNavigationCommand) -> Unit by navControllers()
 
   private lateinit var recyclerView: RecyclerView
   private lateinit var imageLoader: ImageLoaderType
@@ -108,11 +109,7 @@ class AccountPickerDialogFragment : BottomSheetDialogFragment(), OnAccountClickL
   }
 
   override fun onAddAccountClick() {
-    val navigationController = NavigationControllers.find(
-      viewModelStoreOwner = this,
-      interfaceType = AccountNavigationControllerType::class.java
-    )
-    navigationController.openSettingsAccountRegistry()
+    this.sendNavCommand(AccountsNavigationCommand.OpenSettingsAccountRegistry)
     dismiss()
   }
 }

@@ -16,22 +16,23 @@ import org.nypl.simplified.ui.accounts.AccountFragmentParameters
 import org.nypl.simplified.ui.accounts.AccountListFragment
 import org.nypl.simplified.ui.accounts.AccountListFragmentParameters
 import org.nypl.simplified.ui.accounts.AccountListRegistryFragment
+import org.nypl.simplified.ui.accounts.AccountsNavigationCommand
 import org.nypl.simplified.ui.accounts.saml20.AccountSAML20Fragment
 import org.nypl.simplified.ui.accounts.saml20.AccountSAML20FragmentParameters
 import org.nypl.simplified.ui.catalog.CatalogFeedArguments
 import org.nypl.simplified.ui.catalog.CatalogFragmentBookDetail
 import org.nypl.simplified.ui.catalog.CatalogFragmentBookDetailParameters
 import org.nypl.simplified.ui.catalog.CatalogFragmentFeed
+import org.nypl.simplified.ui.catalog.CatalogNavigationCommand
 import org.nypl.simplified.ui.catalog.saml20.CatalogSAML20Fragment
 import org.nypl.simplified.ui.catalog.saml20.CatalogSAML20FragmentParameters
 import org.nypl.simplified.ui.errorpage.ErrorPageFragment
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.navigation.tabs.R
-import org.nypl.simplified.ui.navigation.tabs.TabbedNavigationCommand
-import org.nypl.simplified.ui.navigation.tabs.TabbedNavigationController
 import org.nypl.simplified.ui.navigation.tabs.TabbedNavigator
 import org.nypl.simplified.ui.settings.SettingsFragmentCustomOPDS
 import org.nypl.simplified.ui.settings.SettingsFragmentDebug
+import org.nypl.simplified.ui.settings.SettingsNavigationCommand
 import org.nypl.simplified.viewer.api.Viewers
 import org.nypl.simplified.viewer.spi.ViewerPreferences
 import org.slf4j.LoggerFactory
@@ -39,14 +40,14 @@ import java.net.URI
 
 internal class MainFragmentNavigationDelegate(
   private val activity: AppCompatActivity,
-  private val navigationController: TabbedNavigationController,
+  private val navigationViewModel: MainFragmentNavigationViewModel,
   private val navigator: TabbedNavigator,
   private val profilesController: ProfilesControllerType,
   private val settingsConfiguration: BuildConfigurationServiceType
 ): LifecycleObserver {
 
   init {
-    this.navigationController.subscribeInfoStream(navigator)
+    this.navigationViewModel.subscribeInfoStream(navigator)
   }
 
   private val logger =
@@ -57,11 +58,9 @@ internal class MainFragmentNavigationDelegate(
 
   @OnLifecycleEvent(Lifecycle.Event.ON_START)
   fun onStart() {
-      this.navigationController.commandQueue
-        .subscribe(this::handleCommand)
-        .let { subscriptions.add(it) }
+      this.navigationViewModel.registerHandler(this::handleCommand)
 
-    this.navigationController.infoStream
+    this.navigationViewModel.infoStream
       .subscribe { action ->
         this.logger.debug(action.toString())
         this.onFragmentTransactionCompleted()
@@ -71,6 +70,7 @@ internal class MainFragmentNavigationDelegate(
 
   @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
   fun onStop() {
+    this.navigationViewModel.unregisterHandler()
     subscriptions.clear()
   }
 
@@ -91,51 +91,74 @@ internal class MainFragmentNavigationDelegate(
     }
   }
 
-  fun handleCommand(command: TabbedNavigationCommand) {
-    when(command) {
-      TabbedNavigationCommand.AccountCommand.OnAccountCreated ->
-        navigator.popBackStack()
-      TabbedNavigationCommand.AccountCommand.OnSAMLEventAccessTokenObtained ->
-        navigator.popBackStack()
-      TabbedNavigationCommand.AccountCommand.OpenCatalogAfterAuthentication ->
-        openCatalogAfterAuthentication()
-      is TabbedNavigationCommand.AccountCommand.OpenErrorPage ->
-        openErrorPage(command.parameters)
-      is TabbedNavigationCommand.AccountCommand.OpenSAML20Login ->
-        openSAML20Login(command.parameters)
-      is TabbedNavigationCommand.AccountCommand.OpenSettingsAccount ->
-        openSettingsAccount(command.parameters)
-      TabbedNavigationCommand.AccountCommand.OpenSettingsAccountRegistry ->
-        openSettingsAccountRegistry()
-
-      TabbedNavigationCommand.CatalogCommand.OnSAML20LoginSucceeded ->
-        navigator.popBackStack()
-      is TabbedNavigationCommand.CatalogCommand.OpenBookDetail ->
-        openBookDetail(command.feedArguments, command.entry)
-      is TabbedNavigationCommand.CatalogCommand.OpenBookDownloadLogin ->
-        openBookDownloadLogin(command.bookID, command.downloadURI)
-      is TabbedNavigationCommand.CatalogCommand.OpenFeed ->
-        openFeed(command.feedArguments)
-      is TabbedNavigationCommand.CatalogCommand.OpenViewer ->
-        openViewer(command.book, command.format)
-
-      TabbedNavigationCommand.SettingsCommand.OpenSettingsAbout ->
-        openSettingsAbout()
-      TabbedNavigationCommand.SettingsCommand.OpenSettingsAccounts ->
-        openSettingsAccounts()
-      TabbedNavigationCommand.SettingsCommand.OpenSettingsAcknowledgements ->
-        openSettingsAcknowledgements()
-      TabbedNavigationCommand.SettingsCommand.OpenSettingsCustomOPDS ->
-        openSettingsCustomOPDS()
-      TabbedNavigationCommand.SettingsCommand.OpenSettingsEULA ->
-        openSettingsEULA()
-      TabbedNavigationCommand.SettingsCommand.OpenSettingsFaq ->
-        openSettingsFaq()
-      TabbedNavigationCommand.SettingsCommand.OpenSettingsLicense ->
-        openSettingsLicense()
-      TabbedNavigationCommand.SettingsCommand.OpenSettingsVersion ->
-        openSettingsVersion()
+  private fun handleCommand(command: MainFragmentNavigationCommand) {
+    return when (command) {
+      is MainFragmentNavigationCommand.CatalogNavigationCommand ->
+        this.handleCatalogCommand(command.command)
+      is MainFragmentNavigationCommand.AccountsNavigationCommand ->
+        this.handleAccountsCommand(command.command)
+      is MainFragmentNavigationCommand.SettingsNavigationCommand ->
+        this.handleSettingsCommand(command.command)
     }
+  }
+
+  private fun handleCatalogCommand(command: CatalogNavigationCommand) {
+    return when(command) {
+      CatalogNavigationCommand.OnSAML20LoginSucceeded ->
+        this.popBackStack()
+      is CatalogNavigationCommand.OpenBookDetail ->
+        this.openBookDetail(command.feedArguments, command.entry)
+      is CatalogNavigationCommand.OpenBookDownloadLogin ->
+        this.openBookDownloadLogin(command.bookID, command.downloadURI)
+      is CatalogNavigationCommand.OpenFeed ->
+        this.openFeed(command.feedArguments)
+      is CatalogNavigationCommand.OpenViewer ->
+        this.openViewer(command.book, command.format)
+    }
+  }
+
+  private fun handleAccountsCommand(command: AccountsNavigationCommand) {
+    return when(command) {
+      AccountsNavigationCommand.OnAccountCreated ->
+        this.popBackStack()
+      AccountsNavigationCommand.OnSAMLEventAccessTokenObtained ->
+        this.popBackStack()
+      AccountsNavigationCommand.OpenCatalogAfterAuthentication ->
+        this.openCatalogAfterAuthentication()
+      is AccountsNavigationCommand.OpenErrorPage ->
+        this.openErrorPage(command.parameters)
+      is AccountsNavigationCommand.OpenSAML20Login ->
+        this.openSAML20Login(command.parameters)
+      is AccountsNavigationCommand.OpenSettingsAccount ->
+        this.openSettingsAccount(command.parameters)
+      AccountsNavigationCommand.OpenSettingsAccountRegistry ->
+        this.openSettingsAccountRegistry()
+    }
+  }
+
+  private fun handleSettingsCommand(command: SettingsNavigationCommand) {
+    return when(command) {
+      SettingsNavigationCommand.OpenSettingsAbout ->
+        this.openSettingsAbout()
+      SettingsNavigationCommand.OpenSettingsAccounts ->
+        this.openSettingsAccounts()
+      SettingsNavigationCommand.OpenSettingsAcknowledgements ->
+        this.openSettingsAcknowledgements()
+      SettingsNavigationCommand.OpenSettingsCustomOPDS ->
+        this.openSettingsCustomOPDS()
+      SettingsNavigationCommand.OpenSettingsEULA ->
+        this.openSettingsEULA()
+      SettingsNavigationCommand.OpenSettingsFaq ->
+        this.openSettingsFaq()
+      SettingsNavigationCommand.OpenSettingsLicense ->
+        this.openSettingsLicense()
+      SettingsNavigationCommand.OpenSettingsVersion ->
+        this.openSettingsVersion()
+    }
+  }
+
+  private fun popBackStack() {
+    this.navigator.popBackStack()
   }
 
   private fun openSettingsAbout() {

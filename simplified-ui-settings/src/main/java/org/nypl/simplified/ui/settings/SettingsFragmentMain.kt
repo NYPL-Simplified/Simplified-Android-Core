@@ -7,7 +7,8 @@ import androidx.fragment.app.viewModels
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import org.nypl.simplified.android.ktx.supportActionBar
-import org.nypl.simplified.navigation.api.NavigationControllers
+import org.nypl.simplified.navigation.api.navControllers
+import org.nypl.simplified.ui.accounts.AccountsNavigationCommand
 import org.slf4j.LoggerFactory
 
 /**
@@ -18,6 +19,8 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
 
   private val logger = LoggerFactory.getLogger(SettingsFragmentMain::class.java)
   private val viewModel: SettingsMainViewModel by viewModels()
+  private val sendSettingsCommand: (SettingsNavigationCommand) -> Unit by navControllers()
+  private val sendAccountCommand: (AccountsNavigationCommand) -> Unit by navControllers()
 
   private lateinit var settingsAbout: Preference
   private lateinit var settingsAcknowledgements: Preference
@@ -78,7 +81,7 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
     preference.isEnabled = this.viewModel.documents.acknowledgements != null
     preference.onPreferenceClickListener =
       Preference.OnPreferenceClickListener {
-        this.findNavigationController().openSettingsAcknowledgements()
+        this.sendSettingsCommand(SettingsNavigationCommand.OpenSettingsAcknowledgements)
         true
       }
   }
@@ -108,7 +111,7 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
 
   private fun configureDebug(preference: Preference) {
     preference.setOnPreferenceClickListener {
-      this.findNavigationController().openSettingsVersion()
+      this.sendSettingsCommand(SettingsNavigationCommand.OpenSettingsVersion)
       true
     }
 
@@ -120,7 +123,7 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
     preference.isEnabled = this.viewModel.documents.licenses != null
     preference.onPreferenceClickListener =
       Preference.OnPreferenceClickListener {
-        this.findNavigationController().openSettingsLicense()
+        this.sendSettingsCommand(SettingsNavigationCommand.OpenSettingsLicense)
         true
       }
   }
@@ -129,7 +132,7 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
     preference.isEnabled = false
     preference.onPreferenceClickListener =
       Preference.OnPreferenceClickListener {
-        this.findNavigationController().openSettingsFaq()
+        this.sendSettingsCommand(SettingsNavigationCommand.OpenSettingsFaq)
         true
       }
   }
@@ -138,7 +141,7 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
     preference.isEnabled = this.viewModel.documents.eula != null
     preference.onPreferenceClickListener =
       Preference.OnPreferenceClickListener {
-        this.findNavigationController().openSettingsEULA()
+        this.sendSettingsCommand(SettingsNavigationCommand.OpenSettingsEULA)
         true
       }
   }
@@ -148,7 +151,7 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
       preference.isEnabled = true
       preference.onPreferenceClickListener =
         Preference.OnPreferenceClickListener {
-          this.findNavigationController().openSettingsAccounts()
+          this.sendSettingsCommand(SettingsNavigationCommand.OpenSettingsAccounts)
           true
         }
     } else {
@@ -161,7 +164,7 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
     preference.isEnabled = this.viewModel.documents.about != null
     preference.onPreferenceClickListener =
       Preference.OnPreferenceClickListener {
-        this.findNavigationController().openSettingsAbout()
+        this.sendSettingsCommand(SettingsNavigationCommand.OpenSettingsAbout)
         true
       }
   }
@@ -201,12 +204,5 @@ class SettingsFragmentMain : PreferenceFragmentCompat() {
       }
       this.tapToDebugSettings -= 1
     }
-  }
-
-  private fun findNavigationController(): SettingsNavigationControllerType {
-    return NavigationControllers.find(
-      viewModelStoreOwner = this,
-      interfaceType = SettingsNavigationControllerType::class.java
-    )
   }
 }

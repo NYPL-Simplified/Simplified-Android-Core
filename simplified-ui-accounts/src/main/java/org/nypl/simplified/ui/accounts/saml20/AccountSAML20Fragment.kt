@@ -10,10 +10,10 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import io.reactivex.disposables.CompositeDisposable
 import org.nypl.simplified.accounts.database.api.AccountType
-import org.nypl.simplified.navigation.api.NavigationControllers
+import org.nypl.simplified.navigation.api.navControllers
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskStep
-import org.nypl.simplified.ui.accounts.AccountNavigationControllerType
+import org.nypl.simplified.ui.accounts.AccountsNavigationCommand
 import org.nypl.simplified.ui.accounts.R
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 
@@ -41,6 +41,8 @@ class AccountSAML20Fragment : Fragment(R.layout.account_saml20) {
 
   private val eventSubscriptions: CompositeDisposable =
     CompositeDisposable()
+
+  private val sendNavCommand: (AccountsNavigationCommand) -> Unit by navControllers()
 
   private val parameters: AccountSAML20FragmentParameters by lazy {
     this.requireArguments()[PARAMETERS_ID] as AccountSAML20FragmentParameters
@@ -113,7 +115,7 @@ class AccountSAML20Fragment : Fragment(R.layout.account_saml20) {
   }
 
   private fun onSAMLEventAccessTokenObtained() {
-    this.findNavigationController().onSAMLEventAccessTokenObtained()
+    this.sendNavCommand(AccountsNavigationCommand.OnSAMLEventAccessTokenObtained)
   }
 
   private fun onSAMLEventFailed(event: AccountSAML20Event.Failed) {
@@ -147,7 +149,7 @@ class AccountSAML20Fragment : Fragment(R.layout.account_saml20) {
         taskSteps = taskSteps
       )
 
-    this.findNavigationController().openErrorPage(parameters)
+    this.sendNavCommand(AccountsNavigationCommand.OpenErrorPage(parameters))
   }
 
   private fun onSAMLEventException(exception: Throwable) {
@@ -161,12 +163,5 @@ class AccountSAML20Fragment : Fragment(R.layout.account_saml20) {
   override fun onStop() {
     super.onStop()
     this.eventSubscriptions.clear()
-  }
-
-  private fun findNavigationController(): AccountNavigationControllerType {
-    return NavigationControllers.find(
-      viewModelStoreOwner = this,
-      interfaceType = AccountNavigationControllerType::class.java
-    )
   }
 }

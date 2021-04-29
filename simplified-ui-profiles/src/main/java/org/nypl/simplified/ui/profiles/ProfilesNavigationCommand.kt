@@ -1,13 +1,8 @@
 package org.nypl.simplified.ui.profiles
 
-import org.nypl.simplified.navigation.api.NavigationControllerType
 import org.nypl.simplified.profiles.api.ProfileID
 
-/**
- * A navigation controller for profiles-related functionality.
- */
-
-interface ProfilesNavigationControllerType : NavigationControllerType {
+sealed class ProfilesNavigationCommand {
 
   /**
    * Open the "main" part of the application (in other words, whatever lives beyond the profile
@@ -15,27 +10,27 @@ interface ProfilesNavigationControllerType : NavigationControllerType {
    * not doing so will lead to undefined results.
    */
 
-  fun openMain()
+  object OpenMain : ProfilesNavigationCommand()
 
   /**
    * Open the profile modification screen for profile `id`.
    */
 
-  fun openProfileModify(id: ProfileID)
+  object OpenProfileSelect : ProfilesNavigationCommand()
 
   /**
    * Open a profile creation screen.
    */
 
-  fun openProfileCreate()
+  class OpenProfileModify(val id: ProfileID) : ProfilesNavigationCommand()
 
   /**
    * Open the profile selection screen.
    */
 
-  fun openProfileSelect()
+  object OpenProfileCreate : ProfilesNavigationCommand()
 
-  fun onProfileModificationCancelled()
+  object OnProfileModificationSucceeded : ProfilesNavigationCommand()
 
-  fun onProfileModificationSucceeded()
+  object OnProfileModificationCancelled : ProfilesNavigationCommand()
 }

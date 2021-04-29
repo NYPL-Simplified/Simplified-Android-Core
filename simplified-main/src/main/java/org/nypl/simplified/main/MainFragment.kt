@@ -18,7 +18,8 @@ import org.nypl.simplified.accounts.api.AccountEventDeletion
 import org.nypl.simplified.android.ktx.supportActionBar
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.navigation.api.NavigationAwareViewModelFactory
-import org.nypl.simplified.navigation.api.NavigationControllers
+import org.nypl.simplified.navigation.api.navControllers
+import org.nypl.simplified.navigation.api.navViewModels
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileUpdated
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_DISABLED
@@ -29,9 +30,10 @@ import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.ui.announcements.AnnouncementsController
 import org.nypl.simplified.ui.catalog.CatalogFeedArguments
 import org.nypl.simplified.ui.catalog.CatalogFeedOwnership
+import org.nypl.simplified.ui.catalog.CatalogNavigationCommand
 import org.nypl.simplified.ui.navigation.tabs.TabbedNavigator
 import org.nypl.simplified.ui.profiles.ProfileDialogs
-import org.nypl.simplified.ui.profiles.ProfilesNavigationControllerType
+import org.nypl.simplified.ui.profiles.ProfilesNavigationCommand
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.slf4j.LoggerFactory
 
@@ -52,7 +54,12 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
 
   private lateinit var activityViewModel: MainActivityViewModel
   private lateinit var viewModel: MainFragmentViewModel
-  private lateinit var navigationViewModel: MainFragmentNavigationViewModel
+  private val sendCatalogCommand: (CatalogNavigationCommand) -> Unit by navControllers()
+  private val sendProfilesCommand: (ProfilesNavigationCommand) -> Unit by navControllers()
+  private val navViewModel: MainFragmentNavigationViewModel by lazy {
+    navViewModels<MainFragmentNavigationCommand>().value as MainFragmentNavigationViewModel
+  }
+
   private val subscriptions = CompositeDisposable()
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -65,10 +72,6 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
     this.viewModel =
       ViewModelProvider(this)
         .get(MainFragmentViewModel::class.java)
-
-    this.navigationViewModel =
-      NavigationControllers
-        .findViewModel(this)
 
     /*
     * If named profiles are enabled, subscribe to profile timer events so that users are
@@ -166,7 +169,7 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
     lifecycle.addObserver(
       MainFragmentNavigationDelegate(
         activity = this.requireActivity() as AppCompatActivity,
-        navigationController = navigationViewModel.navigationController,
+        navigationViewModel = navViewModel,
         profilesController = viewModel.profilesController,
         settingsConfiguration = viewModel.buildConfig,
         navigator = this.navigator
@@ -262,12 +265,14 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
         val age = profile.preferences().dateOfBirth?.yearsOld(DateTime.now()) ?: 1
         this.navigator.clearHistory()
         this.navigator.popBackStack()
-        this.navigationViewModel.navigationController.openFeed(
-          CatalogFeedArguments.CatalogFeedArgumentsRemote(
-            title = getString(R.string.tabCatalog),
-            ownership = CatalogFeedOwnership.OwnedByAccount(id),
-            feedURI = account.catalogURIForAge(age),
-            isSearchResults = false
+        this.sendCatalogCommand(
+          CatalogNavigationCommand.OpenFeed(
+            CatalogFeedArguments.CatalogFeedArgumentsRemote(
+              title = getString(R.string.tabCatalog),
+              ownership = CatalogFeedOwnership.OwnedByAccount(id),
+              feedURI = account.catalogURIForAge(age),
+              isSearchResults = false
+            )
           )
         )
       }
@@ -276,8 +281,7 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
 
   private fun onIdleTimedOut() {
     this.timeOutDialog?.dismiss()
-    NavigationControllers.find(this, ProfilesNavigationControllerType::class.java)
-      .openProfileSelect()
+    this.sendProfilesCommand(ProfilesNavigationCommand.OpenProfileSelect)
   }
 
   private fun showTimeOutSoonDialog() {

@@ -15,9 +15,10 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions
 import org.nypl.simplified.android.ktx.supportActionBar
-import org.nypl.simplified.navigation.api.NavigationControllers
+import org.nypl.simplified.navigation.api.navControllers
 import org.nypl.simplified.taskrecorder.api.TaskStep
 import org.nypl.simplified.taskrecorder.api.TaskStepResolution
+import org.nypl.simplified.ui.accounts.AccountsNavigationCommand
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.slf4j.LoggerFactory
 
@@ -29,6 +30,8 @@ class SettingsFragmentDebug : Fragment(R.layout.settings_debug) {
 
   private val logger = LoggerFactory.getLogger(SettingsFragmentDebug::class.java)
   private val viewModel: SettingsDebugViewModel by viewModels()
+  private val sendSettingsCommand: (SettingsNavigationCommand) -> Unit by navControllers()
+  private val sendAccountCommand: (AccountsNavigationCommand) -> Unit by navControllers()
 
   private lateinit var adobeDRMActivationTable: TableLayout
   private lateinit var cacheButton: Button
@@ -216,7 +219,7 @@ class SettingsFragmentDebug : Fragment(R.layout.settings_debug) {
      */
 
     this.customOPDS.setOnClickListener {
-      this.findNavigationController().openSettingsCustomOPDS()
+      this.sendSettingsCommand(SettingsNavigationCommand.OpenSettingsCustomOPDS)
     }
   }
 
@@ -251,7 +254,7 @@ class SettingsFragmentDebug : Fragment(R.layout.settings_debug) {
         taskSteps = taskSteps
       )
 
-    this.findNavigationController().openErrorPage(parameters)
+    this.sendAccountCommand(AccountsNavigationCommand.OpenErrorPage(parameters))
   }
 
   private fun showCacheAlert() {
@@ -344,12 +347,5 @@ class SettingsFragmentDebug : Fragment(R.layout.settings_debug) {
 
       this.adobeDRMActivationTable.addView(row)
     }
-  }
-
-  private fun findNavigationController(): SettingsNavigationControllerType {
-    return NavigationControllers.find(
-      viewModelStoreOwner = this,
-      interfaceType = SettingsNavigationControllerType::class.java
-    )
   }
 }

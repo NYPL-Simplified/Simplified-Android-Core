@@ -1,54 +1,35 @@
 package org.nypl.simplified.ui.onboarding
 
 import hu.akarnokd.rxjava2.subjects.UnicastWorkSubject
-import org.nypl.simplified.navigation.api.NavigationControllerViewModel
-import org.nypl.simplified.ui.accounts.AccountFragmentParameters
-import org.nypl.simplified.ui.accounts.AccountNavigationControllerType
-import org.nypl.simplified.ui.accounts.saml20.AccountSAML20FragmentParameters
-import org.nypl.simplified.ui.errorpage.ErrorPageParameters
+import io.reactivex.disposables.Disposable
+import org.nypl.simplified.navigation.api.NavigationViewModel
+import org.nypl.simplified.ui.accounts.AccountsNavigationCommand
 
-class OnboardingNavigationViewModel :
-  NavigationControllerViewModel(),
-  AccountNavigationControllerType {
+class OnboardingNavigationViewModel : NavigationViewModel<OnboardingNavigationCommand>() {
 
-  val commandQueue: UnicastWorkSubject<OnboardingNavigationCommand> =
+  private val commandQueue: UnicastWorkSubject<OnboardingNavigationCommand> =
     UnicastWorkSubject.create()
 
-  init {
-    this.updateNavigationController(
-      AccountNavigationControllerType::class.java,
-      this
-    )
+  private var subscription: Disposable? =
+    null
+
+  override fun registerHandler(callback: (OnboardingNavigationCommand) -> Unit) {
+    this.subscription =
+      commandQueue.subscribe { command ->
+        callback(command)
+      }
   }
 
-  override fun openSettingsAccountRegistry() {
-    val command = OnboardingNavigationCommand.AccountNavigationCommand.OpenSettingsAccountRegistry
-    commandQueue.onNext(command)
+  override fun unregisterHandler() {
+    this.subscription?.dispose()
+    this.subscription = null
   }
 
-  override fun onAccountCreated() {
-    val command = OnboardingNavigationCommand.AccountNavigationCommand.OnAccountCreated
-    commandQueue.onNext(command)
-  }
+  override val navigationControllers: Map<Class<*>, Any> =
+    mapOf(AccountsNavigationCommand::class.java to this::handleAccountCommand)
 
-  override fun onSAMLEventAccessTokenObtained() {
-    val command = OnboardingNavigationCommand.AccountNavigationCommand.OnSAMLCommandAccessTokenObtained
-    commandQueue.onNext(command)
-  }
-
-  override fun openSettingsAccount(parameters: AccountFragmentParameters) {
-    TODO("Not yet implemented")
-  }
-
-  override fun openSAML20Login(parameters: AccountSAML20FragmentParameters) {
-    TODO("Not yet implemented")
-  }
-
-  override fun openErrorPage(parameters: ErrorPageParameters) {
-    TODO("Not yet implemented")
-  }
-
-  override fun openCatalogAfterAuthentication() {
-    TODO("Not yet implemented")
+  private fun handleAccountCommand(command: AccountsNavigationCommand) {
+    val embeddingCommand = OnboardingNavigationCommand.AccountsNavigationCommand(command)
+    commandQueue.onNext(embeddingCommand)
   }
 }

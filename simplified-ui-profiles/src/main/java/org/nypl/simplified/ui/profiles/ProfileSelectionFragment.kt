@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import io.reactivex.disposables.CompositeDisposable
 import org.nypl.simplified.android.ktx.supportActionBar
-import org.nypl.simplified.navigation.api.NavigationControllers
+import org.nypl.simplified.navigation.api.navControllers
 import org.nypl.simplified.profiles.api.ProfileCreationEvent
 import org.nypl.simplified.profiles.api.ProfileDeletionEvent
 import org.nypl.simplified.profiles.api.ProfileEvent
@@ -28,6 +28,7 @@ class ProfileSelectionFragment : Fragment(R.layout.profile_selection) {
 
   private val subscriptions = CompositeDisposable()
   private val viewModel: ProfileSelectionViewModel by viewModels()
+  private val sendNavCommand: (ProfilesNavigationCommand) -> Unit by navControllers()
 
   private lateinit var create: Button
   private lateinit var list: RecyclerView
@@ -63,7 +64,7 @@ class ProfileSelectionFragment : Fragment(R.layout.profile_selection) {
   }
 
   private fun onProfileCreateRequested() {
-    this.findNavigationController().openProfileCreate()
+    this.sendNavCommand(ProfilesNavigationCommand.OpenProfileCreate)
   }
 
   private fun onProfileRemoveRequested(profile: ProfileReadableType) {
@@ -79,7 +80,7 @@ class ProfileSelectionFragment : Fragment(R.layout.profile_selection) {
   }
 
   private fun onProfileModifyRequested(profile: ProfileReadableType) {
-    this.findNavigationController().openProfileModify(profile.id)
+    this.sendNavCommand(ProfilesNavigationCommand.OpenProfileModify(profile.id))
   }
 
   private fun onProfileSelected(profile: ProfileReadableType) {
@@ -110,7 +111,7 @@ class ProfileSelectionFragment : Fragment(R.layout.profile_selection) {
   private fun onProfileEvent(event: ProfileEvent) {
     when (event) {
       is ProfileSelection.ProfileSelectionCompleted ->
-        this.findNavigationController().openMain()
+        this.sendNavCommand(ProfilesNavigationCommand.OpenMain)
       is ProfileDeletionEvent.ProfileDeletionFailed ->
         this.onProfileDeletionFailed(event)
       is ProfileCreationEvent.ProfileCreationSucceeded,
@@ -133,12 +134,5 @@ class ProfileSelectionFragment : Fragment(R.layout.profile_selection) {
   override fun onStop() {
     super.onStop()
     this.subscriptions.clear()
-  }
-
-  private fun findNavigationController(): ProfilesNavigationControllerType {
-    return NavigationControllers.find(
-      viewModelStoreOwner = this,
-      interfaceType = ProfilesNavigationControllerType::class.java
-    )
   }
 }
