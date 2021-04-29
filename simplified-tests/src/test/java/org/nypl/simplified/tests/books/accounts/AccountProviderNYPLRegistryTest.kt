@@ -20,6 +20,7 @@ import org.nypl.simplified.accounts.source.nyplregistry.AccountProviderSourceNYP
 import org.nypl.simplified.accounts.source.spi.AccountProviderSourceType
 import org.nypl.simplified.accounts.source.spi.AccountProviderSourceType.SourceResult.SourceSucceeded
 import org.nypl.simplified.opds.auth_document.AuthenticationDocumentParsers
+import org.nypl.simplified.opds2.irradia.OPDS2ParsersIrradia
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -36,6 +37,8 @@ class AccountProviderNYPLRegistryTest {
 
   private val logger: Logger =
     LoggerFactory.getLogger(AccountProviderNYPLRegistryTest::class.java)
+
+  private val opdsParsers = OPDS2ParsersIrradia
 
   @Throws(Exception::class)
   private fun readAllFromResource(name: String): InputStream {
@@ -91,14 +94,14 @@ class AccountProviderNYPLRegistryTest {
     this.server.enqueue(
       MockResponse()
         .setResponseCode(200)
-        .setBody(Buffer().readFrom(readAllFromResource("libraryregistry.json")))
+        .setBody(Buffer().readFrom(this.readAllFromResource("libraryregistry.json")))
     )
 
     val provider =
       AccountProviderSourceNYPLRegistry(
         http = this.http,
         authDocumentParsers = AuthenticationDocumentParsers(),
-        parsers = AccountProviderDescriptionCollectionParsers(),
+        parsers = AccountProviderDescriptionCollectionParsers(this.opdsParsers),
         serializers = AccountProviderDescriptionCollectionSerializers(),
         uriProduction = this.server.url("production").toUri(),
         uriQA = this.server.url("qa").toUri()
@@ -120,20 +123,20 @@ class AccountProviderNYPLRegistryTest {
     this.server.enqueue(
       MockResponse()
         .setResponseCode(200)
-        .setBody(Buffer().readFrom(readAllFromResource("libraryregistry-qa.json")))
+        .setBody(Buffer().readFrom(this.readAllFromResource("libraryregistry-qa.json")))
     )
 
     this.server.enqueue(
       MockResponse()
         .setResponseCode(200)
-        .setBody(Buffer().readFrom(readAllFromResource("libraryregistry.json")))
+        .setBody(Buffer().readFrom(this.readAllFromResource("libraryregistry.json")))
     )
 
     val provider =
       AccountProviderSourceNYPLRegistry(
         http = this.http,
         authDocumentParsers = AuthenticationDocumentParsers(),
-        parsers = AccountProviderDescriptionCollectionParsers(),
+        parsers = AccountProviderDescriptionCollectionParsers(this.opdsParsers),
         serializers = AccountProviderDescriptionCollectionSerializers(),
         uriProduction = this.server.url("production").toUri(),
         uriQA = this.server.url("qa").toUri()
@@ -154,14 +157,14 @@ class AccountProviderNYPLRegistryTest {
   fun testProvidersFromDiskCacheOK() {
     val cacheFile = File(this.cacheDir, "org.nypl.simplified.accounts.source.nyplregistry.json")
     cacheFile.outputStream().use { output ->
-      readAllFromResource("libraryregistry.json").use { input -> input.copyTo(output) }
+      this.readAllFromResource("libraryregistry.json").use { input -> input.copyTo(output) }
     }
 
     val provider =
       AccountProviderSourceNYPLRegistry(
         http = this.http,
         authDocumentParsers = AuthenticationDocumentParsers(),
-        parsers = AccountProviderDescriptionCollectionParsers(),
+        parsers = AccountProviderDescriptionCollectionParsers(this.opdsParsers),
         serializers = AccountProviderDescriptionCollectionSerializers(),
         uriProduction = this.server.url("production").toUri(),
         uriQA = this.server.url("qa").toUri()
@@ -187,14 +190,14 @@ class AccountProviderNYPLRegistryTest {
     this.server.enqueue(
       MockResponse()
         .setResponseCode(200)
-        .setBody(Buffer().readFrom(readAllFromResource("libraryregistry-qa.json")))
+        .setBody(Buffer().readFrom(this.readAllFromResource("libraryregistry-qa.json")))
     )
 
     val provider =
       AccountProviderSourceNYPLRegistry(
         http = this.http,
         authDocumentParsers = AuthenticationDocumentParsers(),
-        parsers = AccountProviderDescriptionCollectionParsers(),
+        parsers = AccountProviderDescriptionCollectionParsers(this.opdsParsers),
         serializers = AccountProviderDescriptionCollectionSerializers(),
         uriProduction = this.server.url("production").toUri(),
         uriQA = this.server.url("qa").toUri()
@@ -224,7 +227,7 @@ class AccountProviderNYPLRegistryTest {
       AccountProviderSourceNYPLRegistry(
         http = this.http,
         authDocumentParsers = AuthenticationDocumentParsers(),
-        parsers = AccountProviderDescriptionCollectionParsers(),
+        parsers = AccountProviderDescriptionCollectionParsers(this.opdsParsers),
         serializers = AccountProviderDescriptionCollectionSerializers(),
         uriProduction = this.server.url("production").toUri(),
         uriQA = this.server.url("qa").toUri()
@@ -245,20 +248,20 @@ class AccountProviderNYPLRegistryTest {
   fun testProvidersRefreshOK() {
     val cacheFile = File(this.cacheDir, "org.nypl.simplified.accounts.source.nyplregistry.json")
     cacheFile.outputStream().use { output ->
-      readAllFromResource("libraryregistry.json").use { input -> input.copyTo(output) }
+      this.readAllFromResource("libraryregistry.json").use { input -> input.copyTo(output) }
     }
 
     val provider =
       AccountProviderSourceNYPLRegistry(
         http = this.http,
         authDocumentParsers = AuthenticationDocumentParsers(),
-        parsers = AccountProviderDescriptionCollectionParsers(),
+        parsers = AccountProviderDescriptionCollectionParsers(this.opdsParsers),
         serializers = AccountProviderDescriptionCollectionSerializers(),
         uriProduction = this.server.url("production").toUri(),
         uriQA = this.server.url("qa").toUri()
       )
 
-    run {
+    this.run {
       val result = provider.load(this.context, true)
       this.logger.debug("status: {}", result)
       val success = result as SourceSucceeded
@@ -269,19 +272,19 @@ class AccountProviderNYPLRegistryTest {
     this.server.enqueue(
       MockResponse()
         .setResponseCode(200)
-        .setBody(Buffer().readFrom(readAllFromResource("libraryregistry-qa.json")))
+        .setBody(Buffer().readFrom(this.readAllFromResource("libraryregistry-qa.json")))
     )
 
     this.server.enqueue(
       MockResponse()
         .setResponseCode(200)
-        .setBody(Buffer().readFrom(readAllFromResource("libraryregistry.json")))
+        .setBody(Buffer().readFrom(this.readAllFromResource("libraryregistry.json")))
     )
 
     // Expire the cache
     DateTimeUtils.setCurrentMillisOffset(1000 * 43200)
 
-    run {
+    this.run {
       val result = provider.load(this.context, true)
       this.logger.debug("status: {}", result)
       val success = result as SourceSucceeded
@@ -301,27 +304,27 @@ class AccountProviderNYPLRegistryTest {
   fun testClearDiskCacheOK() {
     val cacheFile = File(this.cacheDir, "org.nypl.simplified.accounts.source.nyplregistry.json")
     cacheFile.outputStream().use { output ->
-      readAllFromResource("libraryregistry.json").use { input -> input.copyTo(output) }
+      this.readAllFromResource("libraryregistry.json").use { input -> input.copyTo(output) }
     }
 
     val provider =
       AccountProviderSourceNYPLRegistry(
         http = this.http,
         authDocumentParsers = AuthenticationDocumentParsers(),
-        parsers = AccountProviderDescriptionCollectionParsers(),
+        parsers = AccountProviderDescriptionCollectionParsers(this.opdsParsers),
         serializers = AccountProviderDescriptionCollectionSerializers(),
         uriProduction = this.server.url("production").toUri(),
         uriQA = this.server.url("qa").toUri()
       )
 
-    run {
+    this.run {
       val result1 = provider.load(this.context, true)
       this.logger.debug("status: {}", result1)
       val success1 = result1 as SourceSucceeded
       Assertions.assertEquals(43, success1.results.size)
 
       // Bust the cache
-      provider.clear(context)
+      provider.clear(this.context)
       Assertions.assertFalse(cacheFile.exists())
     }
   }

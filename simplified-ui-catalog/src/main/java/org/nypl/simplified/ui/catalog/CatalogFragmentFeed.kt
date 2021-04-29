@@ -27,10 +27,11 @@ import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import org.joda.time.DateTime
 import org.joda.time.LocalDateTime
@@ -76,7 +77,6 @@ import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.images.ImageLoaderType
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
 import org.nypl.simplified.ui.theme.ThemeControl
-import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.slf4j.LoggerFactory
 import java.net.URI
 
@@ -86,7 +86,7 @@ import java.net.URI
  * models for each of the different app sections that want to display feeds.
  */
 
-class CatalogFragmentFeed : Fragment() {
+class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener {
 
   companion object {
 
@@ -140,7 +140,7 @@ class CatalogFragmentFeed : Fragment() {
   private lateinit var parameters: CatalogFeedArguments
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var screenInformation: ScreenSizeInformationType
-  private lateinit var uiThread: UIThreadServiceType
+  private lateinit var ageGateDialog: AgeGateDialog
 
   private val logger = LoggerFactory.getLogger(CatalogFragmentFeed::class.java)
   private val parametersId = PARAMETERS_ID
@@ -155,6 +155,8 @@ class CatalogFragmentFeed : Fragment() {
     super.onCreate(savedInstanceState)
     setHasOptionsMenu(true)
 
+    ageGateDialog = (childFragmentManager.findFragmentByTag(AgeGateDialog::class.java.simpleName) as? AgeGateDialog)
+      ?: AgeGateDialog.create()
     this.parameters = this.requireArguments()[this.parametersId] as CatalogFeedArguments
     this.feedWithGroupsData = mutableListOf()
 
@@ -174,8 +176,6 @@ class CatalogFragmentFeed : Fragment() {
       services.requireService(BuildConfigurationServiceType::class.java)
     this.feedLoader =
       services.requireService(FeedLoaderType::class.java)
-    this.uiThread =
-      services.requireService(UIThreadServiceType::class.java)
     this.imageLoader =
       services.requireService(ImageLoaderType::class.java)
   }
@@ -272,12 +272,10 @@ class CatalogFragmentFeed : Fragment() {
       )
     this.feedWithGroupsList.adapter = this.feedWithGroupsAdapter
 
-    this.feedStatusSubscription =
-      this.feedModel.feedStatus.subscribe {
-        this.uiThread.runOnUIThread {
-          this.reconfigureUI(this.feedModel.feedState())
-        }
-      }
+    this.feedStatusSubscription = this.feedModel.feedStatus
+      .map { this.feedModel.feedState() }
+      .observeOn(AndroidSchedulers.mainThread())
+      .subscribe(this::reconfigureUI)
 
     this.feedWithGroupsList.layoutManager!!.onRestoreInstanceState(
       this.feedModel.restoreFeedWithGroupsViewState()
@@ -292,9 +290,11 @@ class CatalogFragmentFeed : Fragment() {
 
     this.accountSubscription =
       this.profilesController.accountEvents()
+        .observeOn(AndroidSchedulers.mainThread())
         .subscribe(this::onAccountEvent)
     this.profileSubscription =
       this.profilesController.profileEvents()
+        .observeOn(AndroidSchedulers.mainThread())
         .subscribe(this::onProfileEvent)
 
     /*
@@ -377,7 +377,7 @@ class CatalogFragmentFeed : Fragment() {
   }
 
   private fun createOrGetFeedModel(): CatalogFeedViewModel {
-    return ViewModelProviders.of(
+    return ViewModelProvider(
       this,
       CatalogFeedViewModelFactory(
         context = this.requireContext(),
@@ -401,8 +401,6 @@ class CatalogFragmentFeed : Fragment() {
 
   @UiThread
   private fun reconfigureUI(feedState: CatalogFeedState) {
-    this.uiThread.checkIsUIThread()
-
     val activity = this.activity
     if (activity == null) {
       this.logger.warn("fragment is not attached")
@@ -454,8 +452,9 @@ class CatalogFragmentFeed : Fragment() {
   private fun onCatalogFeedAgeGateUI(
     @Suppress("UNUSED_PARAMETER") feedState: CatalogFeedAgeGate
   ) {
-    this.uiThread.checkIsUIThread()
-
+    if (!ageGateDialog.isAdded) {
+      ageGateDialog.show(childFragmentManager, AgeGateDialog::class.simpleName)
+    }
     this.feedEmpty.visibility = View.INVISIBLE
     this.feedError.visibility = View.INVISIBLE
     this.feedLoading.visibility = View.INVISIBLE
@@ -483,7 +482,8 @@ class CatalogFragmentFeed : Fragment() {
         feedURI = account.catalogURIForAge(age),
         isSearchResults = false
       )
-      this.uiThread.runOnUIThread { this.feedModel.reloadFeed(newParameters) }
+      this.feedModel.reloadFeed(newParameters)
+      ageGateDialog.dismissAllowingStateLoss()
     }
   }
 
@@ -491,8 +491,6 @@ class CatalogFragmentFeed : Fragment() {
   private fun onCatalogFeedEmpty(
     @Suppress("UNUSED_PARAMETER") feedState: CatalogFeedEmpty
   ) {
-    this.uiThread.checkIsUIThread()
-
     this.feedEmpty.visibility = View.VISIBLE
     this.feedError.visibility = View.INVISIBLE
     this.feedLoading.visibility = View.INVISIBLE
@@ -507,8 +505,6 @@ class CatalogFragmentFeed : Fragment() {
   private fun onCatalogFeedLoadingUI(
     @Suppress("UNUSED_PARAMETER") feedState: CatalogFeedLoading
   ) {
-    this.uiThread.checkIsUIThread()
-
     this.feedEmpty.visibility = View.INVISIBLE
     this.feedError.visibility = View.INVISIBLE
     this.feedLoading.visibility = View.VISIBLE
@@ -523,8 +519,6 @@ class CatalogFragmentFeed : Fragment() {
   private fun onCatalogFeedNavigationUI(
     @Suppress("UNUSED_PARAMETER") feedState: CatalogFeedNavigation
   ) {
-    this.uiThread.checkIsUIThread()
-
     this.feedEmpty.visibility = View.INVISIBLE
     this.feedError.visibility = View.INVISIBLE
     this.feedLoading.visibility = View.INVISIBLE
@@ -539,8 +533,6 @@ class CatalogFragmentFeed : Fragment() {
   private fun onCatalogFeedWithoutGroupsUI(
     feedState: CatalogFeedWithoutGroups
   ) {
-    this.uiThread.checkIsUIThread()
-
     this.feedEmpty.visibility = View.INVISIBLE
     this.feedError.visibility = View.INVISIBLE
     this.feedLoading.visibility = View.INVISIBLE
@@ -584,8 +576,6 @@ class CatalogFragmentFeed : Fragment() {
   private fun onCatalogFeedWithGroupsUI(
     feedState: CatalogFeedWithGroups
   ) {
-    this.uiThread.checkIsUIThread()
-
     this.feedEmpty.visibility = View.INVISIBLE
     this.feedError.visibility = View.INVISIBLE
     this.feedLoading.visibility = View.INVISIBLE
@@ -612,8 +602,6 @@ class CatalogFragmentFeed : Fragment() {
   private fun onCatalogFeedLoadFailed(
     feedState: CatalogFeedLoadFailed
   ) {
-    this.uiThread.checkIsUIThread()
-
     /*
      * If the feed can't be loaded due to an authentication failure, then open
      * the account screen (if possible).
@@ -639,17 +627,15 @@ class CatalogFragmentFeed : Fragment() {
                * for the navigator library.
                */
 
-              this.uiThread.runOnUIThread {
-                this.sendAccountCommand(
-                  AccountsNavigationCommand.OpenSettingsAccount(
-                    AccountFragmentParameters(
-                      accountId = ownership.accountId,
-                      closeOnLoginSuccess = true,
-                      showPleaseLogInTitle = true
-                    )
+              this.sendAccountCommand(
+                AccountsNavigationCommand.OpenSettingsAccount(
+                  AccountFragmentParameters(
+                    accountId = ownership.accountId,
+                    closeOnLoginSuccess = true,
+                    showPleaseLogInTitle = true
                   )
                 )
-              }
+              )
             }
           }
           CollectedFromAccounts -> {
@@ -1105,5 +1091,9 @@ class CatalogFragmentFeed : Fragment() {
         .provider
 
     return accountProvider.feedIsRoot(parameters.feedURI)
+  }
+
+  override fun onBirthYearSelected(isOver13: Boolean) {
+    feedModel.updateBirthYear(isOver13)
   }
 }

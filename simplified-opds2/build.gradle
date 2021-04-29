@@ -1,0 +1,6 @@
+dependencies {
+  api project(":simplified-links")
+
+  implementation libraries.joda_time
+  implementation libraries.kotlin_stdlib
+}

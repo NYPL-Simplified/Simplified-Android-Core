@@ -1,5 +1,6 @@
 dependencies {
   api project(':simplified-accounts-api')
+  api project(':simplified-opds2-parser-api')
   api project(':simplified-parser-api')
 
   implementation project(':simplified-files')

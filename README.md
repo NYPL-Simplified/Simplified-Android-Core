@@ -315,6 +315,7 @@ coupled as possible. New features should typically be implemented as new modules
 
 |Module|Description|
 |------|-----------|
+|[org.librarysimplified.accessibility](simplified-accessibility)|Accessibility APIs and functionality|
 |[org.librarysimplified.accounts.api](simplified-accounts-api)|Accounts API|
 |[org.librarysimplified.accounts.database](simplified-accounts-database)|Accounts database implementation|
 |[org.librarysimplified.accounts.database.api](simplified-accounts-database-api)|Accounts database API|
@@ -329,6 +330,8 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.analytics.circulation](simplified-analytics-circulation)|Circulation manager analytics implementation|
 |[org.librarysimplified.android.ktx](simplified-android-ktx)|Kotlin Android Extensions|
 |[org.librarysimplified.announcements](simplified-announcements)|Announcements API|
+|[org.nypl.labs.OpenEbooks.app](simplified-app-openebooks)|Open eBooks Application|
+|[org.librarysimplified.simplye.app](simplified-app-simplye)|SimplyE Application|
 |[org.librarysimplified.app.vanilla](simplified-app-vanilla)|Vanilla application|
 |[org.librarysimplified.books.api](simplified-books-api)|Book types|
 |[org.librarysimplified.books.audio](simplified-books-audio)|Audio book support code|
@@ -367,6 +370,10 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.opds.auth_document](simplified-opds-auth-document)|OPDS authentication document parser implementation|
 |[org.librarysimplified.opds.auth_document.api](simplified-opds-auth-document-api)|OPDS authentication document parser API|
 |[org.librarysimplified.opds.core](simplified-opds-core)|OPDS feed parser|
+|[org.librarysimplified.opds2](simplified-opds2)|OPDS 2.0 model definitions|
+|[org.librarysimplified.opds2.irradia](simplified-opds2-irradia)|OPDS 2.0 Parser (Irradia)|
+|[org.librarysimplified.opds2.parser.api](simplified-opds2-parser-api)|OPDS 2.0 parser API|
+|[org.librarysimplified.opds2.r2](simplified-opds2-r2)|OPDS 2.0 Parser (R2)|
 |[org.librarysimplified.parser.api](simplified-parser-api)|Parser API|
 |[org.librarysimplified.patron](simplified-patron)|Patron user profile parser implementation|
 |[org.librarysimplified.patron.api](simplified-patron-api)|Patron user profile parser API|
@@ -391,8 +398,8 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.ui.errorpage](simplified-ui-errorpage)|Error details screen|
 |[org.librarysimplified.ui.images](simplified-ui-images)|Image loader API for general image resources|
 |[org.librarysimplified.ui.navigation.api](simplified-ui-navigation-api)|Navigation API|
-|[org.librarysimplified.ui.onboarding](simplified-ui-onboarding)|Onboarding|
 |[org.librarysimplified.ui.tabs](simplified-ui-navigation-tabs)|Tabbed UI|
+|[org.librarysimplified.ui.onboarding](simplified-ui-onboarding)|Onboarding|
 |[org.librarysimplified.ui.profiles](simplified-ui-profiles)|Profiles UI|
 |[org.librarysimplified.ui.screen](simplified-ui-screen)|Screen API|
 |[org.librarysimplified.ui.settings](simplified-ui-settings)|Settings screens|
@@ -405,6 +412,7 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.viewer.epub.readium2](simplified-viewer-epub-readium2)|Readium 2 EPUB reader|
 |[org.librarysimplified.viewer.pdf](simplified-viewer-pdf)|PDF reader|
 |[org.librarysimplified.viewer.spi](simplified-viewer-spi)|Viewer SPI|
+|[org.librarysimplified.webview](simplified-webview)|WebView utilities|
 
 _The above table is generated with [ReadMe.java](src/misc/ReadMe.java)._
 

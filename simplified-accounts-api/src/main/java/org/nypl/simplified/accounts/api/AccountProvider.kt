@@ -27,7 +27,8 @@ data class AccountProvider(
   override val patronSettingsURI: URI?,
   override val annotationsURI: URI?,
   override val updated: DateTime,
-  override val announcements: List<Announcement> = listOf()
+  override val announcements: List<Announcement> = listOf(),
+  override val location: AccountLibraryLocation?
 ) : AccountProviderType {
   override fun compareTo(other: AccountProviderType): Int {
     return this.id.compareTo(other.id)
@@ -71,7 +72,8 @@ data class AccountProvider(
         supportEmail = other.supportEmail,
         supportsReservations = other.supportsReservations,
         updated = other.updated,
-        announcements = other.announcements
+        announcements = other.announcements,
+        location = other.location
       )
     }
   }
