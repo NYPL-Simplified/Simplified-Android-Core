@@ -56,7 +56,7 @@ dependencies {
   api project(":simplified-threads")
   api project(":simplified-ui-announcements")
   api project(":simplified-ui-images")
-  api project(":simplified-ui-navigation-api")
+  api project(':simplified-ui-listeners-api')
   api project(":simplified-ui-navigation-tabs")
   api project(":simplified-ui-profiles")
   api project(":simplified-ui-screen")

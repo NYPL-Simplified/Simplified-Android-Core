@@ -2,8 +2,6 @@ dependencies {
   api project(":simplified-books-api")
   api project(":simplified-books-covers")
   api project(":simplified-feeds-api")
-  api project(":simplified-ui-accounts")
-  api project(":simplified-ui-errorpage")
   api project(":simplified-webview")
 
   implementation project(":simplified-adobe-extensions")
@@ -16,10 +14,12 @@ dependencies {
   implementation project(":simplified-profiles-controller-api")
   implementation project(":simplified-services-api")
   implementation project(":simplified-ui-images")
-  implementation project(":simplified-ui-navigation-api")
+  implementation project(':simplified-ui-listeners-api')
   implementation project(":simplified-ui-screen")
   implementation project(":simplified-ui-theme")
   implementation project(":simplified-ui-thread-api")
+  implementation project(":simplified-ui-accounts")
+  implementation project(":simplified-ui-errorpage")
 
   implementation libraries.androidx_appcompat
   implementation libraries.androidx_cardview

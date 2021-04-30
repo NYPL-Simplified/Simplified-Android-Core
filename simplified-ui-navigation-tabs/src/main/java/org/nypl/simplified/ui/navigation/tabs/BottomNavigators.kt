@@ -21,7 +21,7 @@ import org.nypl.simplified.ui.catalog.CatalogFeedArguments
 import org.nypl.simplified.ui.catalog.CatalogFeedOwnership
 import org.nypl.simplified.ui.catalog.CatalogFragmentFeed
 import org.nypl.simplified.ui.profiles.ProfileTabFragment
-import org.nypl.simplified.ui.settings.SettingsFragmentMain
+import org.nypl.simplified.ui.settings.SettingsMainFragment
 import org.nypl.simplified.ui.theme.ThemeControl
 import org.slf4j.LoggerFactory
 
@@ -177,7 +177,7 @@ object BottomNavigators {
 
   private fun createSettingsFragment(id: Int): Fragment {
     logger.debug("[{}]: creating settings fragment", id)
-    return SettingsFragmentMain()
+    return SettingsMainFragment()
   }
 
   private fun createHoldsFragment(

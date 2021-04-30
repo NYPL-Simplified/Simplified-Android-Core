@@ -3,7 +3,7 @@ dependencies {
   api project(":simplified-services-api")
   api project(":simplified-android-ktx")
   api project(":simplified-ui-branding")
-  api project(":simplified-ui-navigation-api")
+  api project(':simplified-ui-listeners-api')
   api project(":simplified-ui-accounts")
   api project(":simplified-ui-errorpage")
 

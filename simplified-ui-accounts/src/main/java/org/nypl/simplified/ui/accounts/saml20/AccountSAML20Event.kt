@@ -1,35 +1,20 @@
 package org.nypl.simplified.ui.accounts.saml20
 
-import org.nypl.simplified.accounts.api.AccountCookie
-
-/**
- * Events raised during the SAML login process.
- */
+import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 
 sealed class AccountSAML20Event {
 
   /**
-   * The web view client is ready for use. The login page should not be loaded until this event has
-   * fired.
+   * The patron has successfully logged into the account.
    */
 
-  class WebViewClientReady() : AccountSAML20Event()
+  object AccessTokenObtained : AccountSAML20Event()
 
   /**
-   * The process failed.
+   * Login has failed and the patron wants to see some details about the error.
    */
 
-  data class Failed(
-    val message: String
-  ) : AccountSAML20Event()
-
-  /**
-   * An access token was obtained.
-   */
-
-  data class AccessTokenObtained(
-    val token: String,
-    val patronInfo: String,
-    val cookies: List<AccountCookie>
+  data class OpenErrorPage(
+    val parameters: ErrorPageParameters
   ) : AccountSAML20Event()
 }

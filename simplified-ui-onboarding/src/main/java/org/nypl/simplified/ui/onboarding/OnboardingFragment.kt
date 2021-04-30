@@ -4,19 +4,20 @@ import android.os.Bundle
 import android.view.MenuItem
 import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
-import com.io7m.junreachable.UnreachableCodeException
 import org.nypl.simplified.android.ktx.tryPopBackStack
 import org.nypl.simplified.android.ktx.tryPopToRoot
-import org.nypl.simplified.navigation.api.NavigationAwareViewModelFactory
-import org.nypl.simplified.navigation.api.NavigationViewModel
-import org.nypl.simplified.navigation.api.navViewModels
+import org.nypl.simplified.listeners.api.FragmentListenerType
+import org.nypl.simplified.listeners.api.ListenerRepository
+import org.nypl.simplified.listeners.api.fragmentListeners
+import org.nypl.simplified.listeners.api.listenerRepositories
 import org.nypl.simplified.ui.accounts.AccountListRegistryFragment
-import org.nypl.simplified.ui.accounts.AccountsNavigationCommand
+import org.nypl.simplified.ui.accounts.AccountListRegistryEvent
+import org.nypl.simplified.ui.errorpage.ErrorPageFragment
+import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -24,33 +25,17 @@ class OnboardingFragment :
   Fragment(R.layout.onboarding_fragment),
   FragmentManager.OnBackStackChangedListener {
 
-  companion object {
-
-    private const val resultKeyKey = "org.nypl.simplified.onboarding.result.key"
-
-    fun newInstance(resultKey: String) = OnboardingFragment().apply {
-      arguments = bundleOf(resultKeyKey to resultKey)
-    }
-  }
-
   private val logger: Logger = LoggerFactory.getLogger(OnboardingFragment::class.java)
 
-  private val navViewModel: NavigationViewModel<OnboardingNavigationCommand> by navViewModels()
+  private val listenerRepo: ListenerRepository<OnboardingListenedEvent, Unit> by listenerRepositories()
+  private val listener: FragmentListenerType<OnboardingEvent> by fragmentListeners()
 
   private val defaultViewModelFactory: ViewModelProvider.Factory by lazy {
-    NavigationAwareViewModelFactory(
-      OnboardingNavigationViewModel::class.java,
-      super.getDefaultViewModelProviderFactory()
-    )
+    OnboardingDefaultViewModelFactory(super.getDefaultViewModelProviderFactory())
   }
-
-  private lateinit var resultKey: String
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-
-    resultKey =
-      requireNotNull(requireArguments().getString(resultKeyKey))
 
     /*
     * Demand that onOptionsItemSelected be called.
@@ -59,14 +44,6 @@ class OnboardingFragment :
     setHasOptionsMenu(true)
 
     childFragmentManager.addOnBackStackChangedListener(this)
-
-    /*
-    * Finish the onboarding when a child fragment explicitly terminates.
-    */
-
-    childFragmentManager.setFragmentResultListener("", this) { _, _ ->
-      requireActivity().supportFragmentManager.setFragmentResult(resultKey, Bundle())
-    }
 
     /*
      * Handle back pressed event by popping from the back stack if possible.
@@ -107,46 +84,56 @@ class OnboardingFragment :
 
   override fun onStart() {
     super.onStart()
-    this.navViewModel.registerHandler(this::handleNavigationCommand)
+    this.listenerRepo.registerHandler(this::handleEvent)
   }
 
   override fun onStop() {
     super.onStop()
-    this.navViewModel.unregisterHandler()
+    this.listenerRepo.unregisterHandler()
   }
 
   override fun getDefaultViewModelProviderFactory(): ViewModelProvider.Factory {
     return this.defaultViewModelFactory
   }
 
-  private fun handleNavigationCommand(command: OnboardingNavigationCommand) {
-    return when (command) {
-      is OnboardingNavigationCommand.AccountsNavigationCommand ->
-        this.handleAccountNavigationCommand(command.command)
+  private fun handleEvent(event: OnboardingListenedEvent, state: Unit) {
+    return when (event) {
+      is OnboardingListenedEvent.AccountListRegistryEvent ->
+        this.handleAccountListRegistryEvent(event.event)
+      is OnboardingListenedEvent.OnboardingStartScreenEvent ->
+        this.handleOnboardingStartScreenEvent(event.event)
     }
   }
 
-  private fun handleAccountNavigationCommand(command: AccountsNavigationCommand) {
-    return when (command) {
-      AccountsNavigationCommand.OnAccountCreated ->
-        this.closeOnboarding()
-      AccountsNavigationCommand.OnSAMLEventAccessTokenObtained ->
-        this.closeOnboarding()
-      AccountsNavigationCommand.OpenSettingsAccountRegistry ->
+  private fun handleAccountListRegistryEvent(event: AccountListRegistryEvent) {
+    return when (event) {
+      AccountListRegistryEvent.AccountCreated ->
+        this.onOnboardingCompleted()
+      is AccountListRegistryEvent.OpenErrorPage ->
+        this.openErrorPage(event.parameters)
+    }
+  }
+
+  private fun handleOnboardingStartScreenEvent(event: OnboardingStartScreenEvent) {
+    return when (event) {
+      OnboardingStartScreenEvent.AddLibraryLater ->
+        this.onOnboardingCompleted()
+      OnboardingStartScreenEvent.FindLibrary ->
         this.openSettingsAccountRegistry()
-      AccountsNavigationCommand.OpenCatalogAfterAuthentication ->
-        throw UnreachableCodeException()
-      is AccountsNavigationCommand.OpenErrorPage ->
-        throw UnreachableCodeException()
-      is AccountsNavigationCommand.OpenSAML20Login ->
-        throw UnreachableCodeException()
-      is AccountsNavigationCommand.OpenSettingsAccount ->
-        throw UnreachableCodeException()
     }
   }
 
-  private fun closeOnboarding() {
-    requireActivity().supportFragmentManager.setFragmentResult(resultKey, Bundle())
+  private fun onOnboardingCompleted() {
+    this.listener.post(OnboardingEvent.OnboardingCompleted)
+  }
+
+  private fun openErrorPage(parameters: ErrorPageParameters) {
+    this.logger.debug("openErrorPage")
+    val fragment = ErrorPageFragment.create(parameters)
+    this.childFragmentManager.commit {
+      replace(R.id.onboarding_fragment_container, fragment)
+      addToBackStack(null)
+    }
   }
 
   private fun openSettingsAccountRegistry() {

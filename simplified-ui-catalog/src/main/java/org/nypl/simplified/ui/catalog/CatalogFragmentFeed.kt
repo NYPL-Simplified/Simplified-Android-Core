@@ -55,13 +55,12 @@ import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderFailure.FeedLoad
 import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderFailure.FeedLoaderFailedGeneral
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.feeds.api.FeedSearch
-import org.nypl.simplified.navigation.api.navControllers
+import org.nypl.simplified.listeners.api.FragmentListenerType
+import org.nypl.simplified.listeners.api.fragmentListeners
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileUpdated
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
-import org.nypl.simplified.ui.accounts.AccountFragmentParameters
-import org.nypl.simplified.ui.accounts.AccountsNavigationCommand
 import org.nypl.simplified.ui.accounts.AccountPickerDialogFragment
 import org.nypl.simplified.ui.catalog.CatalogFeedArguments.CatalogFeedArgumentsRemote
 import org.nypl.simplified.ui.catalog.CatalogFeedOwnership.CollectedFromAccounts
@@ -144,8 +143,7 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
 
   private val logger = LoggerFactory.getLogger(CatalogFragmentFeed::class.java)
   private val parametersId = PARAMETERS_ID
-  private val sendCatalogCommand: (CatalogNavigationCommand) -> Unit by navControllers()
-  private val sendAccountCommand: (AccountsNavigationCommand) -> Unit by navControllers()
+  private val listener: FragmentListenerType<CatalogFeedEvent> by fragmentListeners()
 
   private var accountSubscription: Disposable? = null
   private var profileSubscription: Disposable? = null
@@ -388,14 +386,14 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
   }
 
   private fun onBookSelected(opdsEntry: FeedEntry.FeedEntryOPDS) {
-    this.sendCatalogCommand(
-      CatalogNavigationCommand.OpenBookDetail(this.parameters, opdsEntry)
+    this.listener.post(
+      CatalogFeedEvent.OpenBookDetail(this.parameters, opdsEntry)
     )
   }
 
   private fun onFeedSelected(title: String, uri: URI) {
-    this.sendCatalogCommand(
-      CatalogNavigationCommand.OpenFeed(this.feedModel.resolveFeed(title, uri, false))
+    this.listener.post(
+      CatalogFeedEvent.OpenFeed(this.feedModel.resolveFeed(title, uri, false))
     )
   }
 
@@ -555,8 +553,7 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
         borrowViewModel = this.borrowViewModel,
         buttonCreator = this.buttonCreator,
         context = requireActivity(),
-        sendCatalogCommand = this.sendCatalogCommand,
-        sendAccountCommand = this.sendAccountCommand,
+        listener = this.listener,
         onBookSelected = this::onBookSelected,
         services = Services.serviceDirectory(),
         ownership = feedState.arguments.ownership
@@ -627,15 +624,7 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
                * for the navigator library.
                */
 
-              this.sendAccountCommand(
-                AccountsNavigationCommand.OpenSettingsAccount(
-                  AccountFragmentParameters(
-                    accountId = ownership.accountId,
-                    closeOnLoginSuccess = true,
-                    showPleaseLogInTitle = true
-                  )
-                )
-              )
+              this.listener.post(CatalogFeedEvent.LoginRequired(ownership.accountId))
             }
           }
           CollectedFromAccounts -> {
@@ -662,8 +651,8 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
 
     this.feedErrorDetails.isEnabled = true
     this.feedErrorDetails.setOnClickListener {
-      this.sendAccountCommand(
-        AccountsNavigationCommand.OpenErrorPage(
+      this.listener.post(
+        CatalogFeedEvent.OpenErrorPage(
           this.errorPageParameters(feedState.failure)
         )
       )
@@ -761,8 +750,8 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
     fun performSearch(searchView: TextView) {
       val query = searchView.text.toString().trim()
       this@CatalogFragmentFeed.logSearchToAnalytics(query)
-      this@CatalogFragmentFeed.sendCatalogCommand(
-        CatalogNavigationCommand.OpenFeed(
+      this@CatalogFragmentFeed.listener.post(
+        CatalogFeedEvent.OpenFeed(
           this@CatalogFragmentFeed.feedModel.resolveSearch(search, query)
         )
       )
@@ -989,8 +978,8 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
       button.setTextColor(this.colorStateListForFacetTabs())
       button.setOnClickListener {
         this.logger.debug("selected entry point facet: {}", facet.title)
-        this.sendCatalogCommand(
-          CatalogNavigationCommand.OpenFeed(this.feedModel.resolveFacet(facet))
+        this.listener.post(
+          CatalogFeedEvent.OpenFeed(this.feedModel.resolveFacet(facet))
         )
       }
       facetTabs.addView(button)
@@ -1047,8 +1036,8 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
     alertBuilder.setSingleChoiceItems(names, checkedItem) { dialog, checked ->
       val selected = choices[checked]
       this.logger.debug("selected facet: {}", selected)
-      this.sendCatalogCommand(
-        CatalogNavigationCommand.OpenFeed(this.feedModel.resolveFacet(selected))
+      this.listener.post(
+        CatalogFeedEvent.OpenFeed(this.feedModel.resolveFacet(selected))
       )
       dialog.dismiss()
     }

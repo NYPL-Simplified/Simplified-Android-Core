@@ -397,7 +397,7 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.ui.catalog](simplified-ui-catalog)|Catalog components|
 |[org.librarysimplified.ui.errorpage](simplified-ui-errorpage)|Error details screen|
 |[org.librarysimplified.ui.images](simplified-ui-images)|Image loader API for general image resources|
-|[org.librarysimplified.ui.navigation.api](simplified-ui-navigation-api)|Navigation API|
+|[org.librarysimplified.ui.listeners.api](simplified-ui-listeners-api)|Listeners API|
 |[org.librarysimplified.ui.tabs](simplified-ui-navigation-tabs)|Tabbed UI|
 |[org.librarysimplified.ui.onboarding](simplified-ui-onboarding)|Onboarding|
 |[org.librarysimplified.ui.profiles](simplified-ui-profiles)|Profiles UI|

@@ -14,8 +14,8 @@ class AccountViewModelFactory(
 
   @Suppress("UNCHECKED_CAST")
   override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-    if (modelClass == AccountViewModel::class.java) {
-      return AccountViewModel(
+    if (modelClass == AccountDetailViewModel::class.java) {
+      return AccountDetailViewModel(
         accountId = this.account
       ) as T
     }

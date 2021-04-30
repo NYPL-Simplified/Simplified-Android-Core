@@ -22,7 +22,8 @@ import org.nypl.simplified.accounts.api.AccountEventDeletion.AccountEventDeletio
 import org.nypl.simplified.accounts.api.AccountEventUpdated
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.android.ktx.supportActionBar
-import org.nypl.simplified.navigation.api.navControllers
+import org.nypl.simplified.listeners.api.FragmentListenerType
+import org.nypl.simplified.listeners.api.fragmentListeners
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.images.ImageLoaderType
 
@@ -50,7 +51,7 @@ class AccountListFragment : Fragment(R.layout.account_list) {
 
   private val subscriptions = CompositeDisposable()
   private val viewModel: AccountListViewModel by viewModels()
-  private val sendNavCommand: (AccountsNavigationCommand) -> Unit by navControllers()
+  private val listener: FragmentListenerType<AccountListEvent> by fragmentListeners()
 
   private val parameters: AccountListFragmentParameters by lazy {
     this.requireArguments()[PARAMETERS_ID] as AccountListFragmentParameters
@@ -92,15 +93,7 @@ class AccountListFragment : Fragment(R.layout.account_list) {
   }
 
   private fun onAccountClicked(account: AccountType) {
-    this.sendNavCommand(
-      AccountsNavigationCommand.OpenSettingsAccount(
-        AccountFragmentParameters(
-          accountId = account.id,
-          closeOnLoginSuccess = false,
-          showPleaseLogInTitle = false
-        )
-      )
-    )
+    this.listener.post(AccountListEvent.AccountSelected(account.id))
   }
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -145,7 +138,7 @@ class AccountListFragment : Fragment(R.layout.account_list) {
   override fun onOptionsItemSelected(item: MenuItem): Boolean {
     return when (item.itemId) {
       R.id.accountsMenuActionAccountAdd -> {
-        this.sendNavCommand(AccountsNavigationCommand.OpenSettingsAccountRegistry)
+        this.listener.post(AccountListEvent.AddAccount)
         true
       }
       else -> super.onOptionsItemSelected(item)
@@ -198,7 +191,7 @@ class AccountListFragment : Fragment(R.layout.account_list) {
         taskSteps = accountEvent.taskResult.steps
       )
 
-    this.sendNavCommand(AccountsNavigationCommand.OpenErrorPage(parameters))
+    this.listener.post(AccountListEvent.OpenErrorPage(parameters))
   }
 
   override fun onStop() {

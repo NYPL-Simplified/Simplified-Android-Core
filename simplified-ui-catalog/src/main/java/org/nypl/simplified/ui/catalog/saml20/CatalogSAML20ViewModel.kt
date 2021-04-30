@@ -39,7 +39,7 @@ class CatalogSAML20ViewModel(
   private val logger =
     LoggerFactory.getLogger(CatalogSAML20ViewModel::class.java)
   private val eventSubject =
-    PublishSubject.create<CatalogSAML20Event>()
+    PublishSubject.create<CatalogSAML20InternalEvent>()
   private val downloadInfo =
     AtomicReference<DownloadInfo>()
 
@@ -47,7 +47,7 @@ class CatalogSAML20ViewModel(
     val mimeType: String?
   )
 
-  val events: Observable<CatalogSAML20Event> =
+  val events: Observable<CatalogSAML20InternalEvent> =
     this.eventSubject
 
   init {
@@ -70,7 +70,7 @@ class CatalogSAML20ViewModel(
   private class CatalogSAML20WebClient(
     private val logger: Logger,
     private val booksController: BooksControllerType,
-    private val eventSubject: PublishSubject<CatalogSAML20Event>,
+    private val eventSubject: PublishSubject<CatalogSAML20InternalEvent>,
     private val bookRegistry: BookRegistryType,
     private val bookID: BookID,
     private val downloadInfo: AtomicReference<DownloadInfo>,
@@ -100,7 +100,7 @@ class CatalogSAML20ViewModel(
         isReady = true
 
         this.eventSubject.onNext(
-          CatalogSAML20Event.WebViewClientReady()
+          CatalogSAML20InternalEvent.WebViewClientReady()
         )
       })
     }
@@ -162,7 +162,7 @@ class CatalogSAML20ViewModel(
         }
 
         this.eventSubject.onNext(
-          CatalogSAML20Event.Succeeded()
+          CatalogSAML20InternalEvent.Succeeded()
         )
       }
     }

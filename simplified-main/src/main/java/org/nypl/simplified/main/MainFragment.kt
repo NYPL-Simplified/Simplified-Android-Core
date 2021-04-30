@@ -16,10 +16,10 @@ import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventDeletion
 import org.nypl.simplified.android.ktx.supportActionBar
 import org.nypl.simplified.books.book_registry.BookRegistryType
-import org.nypl.simplified.navigation.api.NavigationAwareViewModelFactory
-import org.nypl.simplified.navigation.api.NavigationViewModel
-import org.nypl.simplified.navigation.api.navControllers
-import org.nypl.simplified.navigation.api.navViewModels
+import org.nypl.simplified.listeners.api.FragmentListenerType
+import org.nypl.simplified.listeners.api.ListenerRepository
+import org.nypl.simplified.listeners.api.fragmentListeners
+import org.nypl.simplified.listeners.api.listenerRepositories
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileUpdated
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_DISABLED
@@ -30,7 +30,6 @@ import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.ui.announcements.AnnouncementsController
 import org.nypl.simplified.ui.navigation.tabs.TabbedNavigator
 import org.nypl.simplified.ui.profiles.ProfileDialogs
-import org.nypl.simplified.ui.profiles.ProfilesNavigationCommand
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.slf4j.LoggerFactory
 
@@ -49,14 +48,11 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
   private val activityViewModel: MainActivityViewModel by activityViewModels()
   private val viewModel: MainFragmentViewModel by viewModels()
 
-  private val sendProfilesCommand: (ProfilesNavigationCommand) -> Unit by navControllers()
-  private val navViewModel: NavigationViewModel<MainFragmentNavigationCommand> by navViewModels()
+  private val listener: FragmentListenerType<MainFragmentEvent> by fragmentListeners()
+  private val listenerRepo: ListenerRepository<MainFragmentListenedEvent, MainFragmentState> by listenerRepositories()
 
   private val defaultViewModelFactory: ViewModelProvider.Factory by lazy {
-    NavigationAwareViewModelFactory(
-      MainFragmentNavigationViewModel::class.java,
-      super.getDefaultViewModelProviderFactory()
-    )
+    MainFragmentDefaultViewModelFactory(super.getDefaultViewModelProviderFactory())
   }
 
   private lateinit var bottomView: BottomNavigationView
@@ -148,9 +144,10 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
       )
 
     lifecycle.addObserver(
-      MainFragmentNavigationDelegate(
+      MainFragmentListenerDelegate(
         fragment = this,
-        navigationViewModel = navViewModel,
+        listenerRepository = listenerRepo,
+        listener = listener,
         profilesController = viewModel.profilesController,
         settingsConfiguration = viewModel.buildConfig,
         navigator = this.navigator
@@ -235,25 +232,22 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
     this.logger.debug("oldAccountId={}, newAccountId={}", oldAccountId, newAccountId)
 
     // Reload the catalog feed, the patron's account preference has changed
-    // Or if the user's age has changed
 
-    if (oldAccountId != newAccountId ||
-      event.oldDescription.preferences.dateOfBirth != event.newDescription.preferences.dateOfBirth
-    ) {
+    if (oldAccountId != newAccountId) {
       this.navigator.clearHistory()
     }
   }
 
   private fun onIdleTimedOut() {
     this.timeOutDialog?.dismiss()
-    this.sendProfilesCommand(ProfilesNavigationCommand.OpenProfileSelect)
+    this.listener.post(MainFragmentEvent.ProfileIdleTimedOut)
   }
 
   private fun showTimeOutSoonDialog() {
     val dialog = ProfileDialogs.createTimeOutDialog(this.requireContext())
     this.timeOutDialog = dialog
     dialog.setOnDismissListener {
-      viewModel.profilesController.profileIdleTimer().reset()
+      this.viewModel.profilesController.profileIdleTimer().reset()
       this.timeOutDialog = null
     }
     dialog.show()

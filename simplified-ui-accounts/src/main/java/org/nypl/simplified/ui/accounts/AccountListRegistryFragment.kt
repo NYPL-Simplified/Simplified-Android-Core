@@ -26,7 +26,8 @@ import org.nypl.simplified.accounts.api.AccountProviderDescription
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryStatus
 import org.nypl.simplified.android.ktx.supportActionBar
-import org.nypl.simplified.navigation.api.navControllers
+import org.nypl.simplified.listeners.api.FragmentListenerType
+import org.nypl.simplified.listeners.api.fragmentListeners
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.images.ImageLoaderType
 import org.slf4j.LoggerFactory
@@ -40,7 +41,7 @@ class AccountListRegistryFragment : Fragment(R.layout.account_list_registry) {
   private val logger = LoggerFactory.getLogger(AccountListRegistryFragment::class.java)
   private val subscriptions = CompositeDisposable()
   private val viewModel: AccountListRegistryViewModel by viewModels()
-  private val sendNavCommand: (AccountsNavigationCommand) -> Unit by navControllers()
+  private val listener: FragmentListenerType<AccountListRegistryEvent> by fragmentListeners()
 
   private lateinit var accountList: RecyclerView
   private lateinit var accountListAdapter: FilterableAccountListAdapter
@@ -120,7 +121,7 @@ class AccountListRegistryFragment : Fragment(R.layout.account_list_registry) {
       }
 
       is AccountEventCreation.AccountEventCreationSucceeded -> {
-        this.sendNavCommand(AccountsNavigationCommand.OnAccountCreated)
+        this.listener.post(AccountListRegistryEvent.AccountCreated)
       }
 
       is AccountEventCreation.AccountEventCreationFailed -> {
@@ -276,6 +277,6 @@ class AccountListRegistryFragment : Fragment(R.layout.account_list_registry) {
         taskSteps = accountEvent.taskResult.steps
       )
 
-    this.sendNavCommand(AccountsNavigationCommand.OpenErrorPage(parameters))
+    this.listener.post(AccountListRegistryEvent.OpenErrorPage(parameters))
   }
 }
