@@ -1,0 +1,5 @@
+apply plugin: 'com.google.gms.google-services'
+
+dependencies {
+  implementation libraries.firebase_analytics
+}
