@@ -153,7 +153,8 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
     super.onCreate(savedInstanceState)
     setHasOptionsMenu(true)
 
-    ageGateDialog = (childFragmentManager.findFragmentByTag(AgeGateDialog::class.java.simpleName) as? AgeGateDialog)
+    ageGateDialog =
+      (childFragmentManager.findFragmentByTag(AgeGateDialog::class.java.simpleName) as? AgeGateDialog)
       ?: AgeGateDialog.create()
     this.parameters = this.requireArguments()[this.parametersId] as CatalogFeedArguments
     this.feedWithGroupsData = mutableListOf()
@@ -355,21 +356,19 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
   }
 
   private fun onProfileEvent(event: ProfileEvent) {
-    return when (event) {
+    when (event) {
       is ProfileUpdated.Succeeded -> {
         val feedState = this.feedModel.feedState()
         when (val ownership = feedState.arguments.ownership) {
           is OwnedByAccount -> {
-            val account =
-              this.profilesController.profileCurrent()
-                .account(ownership.accountId)
-            onAgeUpdateSuccess(account, ownership, event)
-          }
-          else -> {
+            val ageChanged =
+              event.newDescription.preferences.dateOfBirth != event.oldDescription.preferences.dateOfBirth
+            if (ageChanged) {
+              val account = this.profilesController.profileCurrent().account(ownership.accountId)
+              onAgeUpdateSuccess(account, ownership, event)
+            }
           }
         }
-      }
-      else -> {
       }
     }
   }
@@ -481,7 +480,9 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
         isSearchResults = false
       )
       this.feedModel.reloadFeed(newParameters)
-      ageGateDialog.dismissAllowingStateLoss()
+      if (ageGateDialog.isVisible) {
+        ageGateDialog.dismissAllowingStateLoss()
+      }
     }
   }
 

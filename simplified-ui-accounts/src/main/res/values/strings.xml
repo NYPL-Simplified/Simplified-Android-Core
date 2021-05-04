@@ -28,6 +28,7 @@
   <string name="accountRegistryRefresh">Refresh</string>
   <string name="accountRegistryRetrieving">Retrieving accounts from registry…</string>
   <string name="accountRegistrySelect">Please select a library…</string>
+  <string name="accountRegistryNoLocation">You can search for your library by name, branch location, or your own location.</string>
   <string name="accountReportIssue">Report an issue…</string>
   <string name="accounts">Accounts</string>
   <string name="accountsDelete">@string/accountDelete</string>
