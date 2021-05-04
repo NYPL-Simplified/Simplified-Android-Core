@@ -5,8 +5,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.PopupMenu
 import android.widget.TextView
+import androidx.appcompat.widget.PopupMenu
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -29,7 +29,7 @@ class AccountListAdapter(
     viewType: Int
   ): AccountViewHolder {
     val inflater = LayoutInflater.from(parent.context)
-    val itemView = inflater.inflate(R.layout.account_list_item, parent, false)
+    val itemView = inflater.inflate(R.layout.account_list_item_old, parent, false)
     return AccountViewHolder(
       itemView,
       imageLoader,

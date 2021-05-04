@@ -96,6 +96,7 @@ class AccountListRegistryFragment : Fragment(R.layout.account_list_registry) {
       setHasFixedSize(true)
       layoutManager = LinearLayoutManager(this.context)
       adapter = this@AccountListRegistryFragment.accountListAdapter
+      addItemDecoration(SpaceItemDecoration(RecyclerView.VERTICAL, requireContext()))
     }
     requestLocationPermission.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
   }
