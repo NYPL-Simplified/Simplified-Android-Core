@@ -76,6 +76,8 @@ import org.nypl.simplified.feeds.api.FeedHTTPTransport
 import org.nypl.simplified.feeds.api.FeedLoader
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.files.DirectoryUtilities
+import org.nypl.simplified.metrics.MetricService
+import org.nypl.simplified.metrics.api.MetricServiceType
 import org.nypl.simplified.migration.api.MigrationsType
 import org.nypl.simplified.networkconnectivity.NetworkConnectivity
 import org.nypl.simplified.networkconnectivity.api.NetworkConnectivityType
@@ -941,6 +943,12 @@ internal object MainServices {
       message = strings.bootingGeneral("audio book manifest strategies"),
       interfaceType = AudioBookManifestStrategiesType::class.java,
       serviceConstructor = { return@addService AudioBookManifests }
+    )
+
+    addService(
+      message = strings.bootingGeneral("metrics service"),
+      interfaceType = MetricServiceType::class.java,
+      serviceConstructor = { MetricService(context) }
     )
 
     val bookController = this.run {
