@@ -17,13 +17,13 @@ import org.slf4j.LoggerFactory
  */
 
 class CatalogPagedAdapter(
-    private val borrowViewModel: CatalogBorrowViewModel,
-    private val buttonCreator: CatalogButtons,
-    private val context: FragmentActivity,
-    private val listener: FragmentListenerType<CatalogFeedEvent>,
-    private val onBookSelected: (FeedEntry.FeedEntryOPDS) -> Unit,
-    private val services: ServiceDirectoryType,
-    private val ownership: CatalogFeedOwnership
+  private val borrowViewModel: CatalogBorrowViewModel,
+  private val buttonCreator: CatalogButtons,
+  private val context: FragmentActivity,
+  private val listener: FragmentListenerType<CatalogFeedEvent>,
+  private val onBookSelected: (FeedEntry.FeedEntryOPDS) -> Unit,
+  private val services: ServiceDirectoryType,
+  private val ownership: CatalogFeedOwnership
 ) : PagedListAdapter<FeedEntry, CatalogPagedViewHolder>(CatalogPagedAdapterDiffing.comparisonCallback) {
 
   private val logger =
