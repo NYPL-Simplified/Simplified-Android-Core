@@ -945,7 +945,7 @@ internal object MainServices {
       serviceConstructor = { return@addService AudioBookManifests }
     )
 
-    addService(
+    addServiceFromServiceLoaderOptionally(
       message = strings.bootingGeneral("metrics service"),
       interfaceType = MetricServiceType::class.java,
       serviceConstructor = { MetricService(context) }

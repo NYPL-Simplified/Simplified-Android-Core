@@ -54,7 +54,7 @@ class ProfileAccountDeleteTask(
       val profile = this.profiles.currentProfileUnsafe()
       val account = profile.deleteAccountByProvider(this.accountProviderID)
 
-      this.metrics?.logMetric(MetricEvent.LibraryRemoved(account.uuid.toString()))
+      this.metrics?.logMetric(MetricEvent.LibraryRemoved(this.accountProviderID.toString()))
       this.publishSuccessEvent(account)
       this.taskRecorder.finishSuccess(Unit)
     } catch (e: AccountsDatabaseLastAccountException) {
