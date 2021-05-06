@@ -6,7 +6,7 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import org.nypl.simplified.metrics.api.MetricEvent
 import org.nypl.simplified.metrics.api.MetricServiceType
 
-class MetricService(context: Context) : MetricServiceType {
+class MetricService internal constructor(context: Context) : MetricServiceType {
   private val analytics: FirebaseAnalytics by lazy { FirebaseAnalytics.getInstance(context) }
   override fun logMetric(event: MetricEvent) {
     val args = when (event) {

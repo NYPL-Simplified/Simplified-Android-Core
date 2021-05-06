@@ -76,7 +76,7 @@ import org.nypl.simplified.feeds.api.FeedHTTPTransport
 import org.nypl.simplified.feeds.api.FeedLoader
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.files.DirectoryUtilities
-import org.nypl.simplified.metrics.MetricService
+import org.nypl.simplified.metrics.api.MetricServiceFactoryType
 import org.nypl.simplified.metrics.api.MetricServiceType
 import org.nypl.simplified.migration.api.MigrationsType
 import org.nypl.simplified.networkconnectivity.NetworkConnectivity
@@ -260,6 +260,10 @@ internal object MainServices {
   ): AxisNowServiceType? {
     return optionalFromServiceLoader(AxisNowServiceFactoryType::class.java)
       ?.create(httpClient)
+  }
+
+  private fun createMetricService(context: Context): MetricServiceType? {
+    return optionalFromServiceLoader(MetricServiceFactoryType::class.java)?.create(context)
   }
 
   private fun createLocalImageLoader(context: Context): ImageLoaderType {
@@ -945,10 +949,10 @@ internal object MainServices {
       serviceConstructor = { return@addService AudioBookManifests }
     )
 
-    addServiceFromServiceLoaderOptionally(
-      message = strings.bootingGeneral("metrics service"),
+    addServiceOptionally(
+      message = "metrics service factory",
       interfaceType = MetricServiceType::class.java,
-      serviceConstructor = { MetricService(context) }
+      serviceConstructor = { createMetricService(context) }
     )
 
     val bookController = this.run {

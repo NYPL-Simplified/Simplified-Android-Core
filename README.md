@@ -85,7 +85,7 @@ support the use of any other IDE at the moment.
 
 #### JDK
 
-Install a reasonably modern JDK: Java 11 is the curt long-term support (LTS) release of Java. We
+Install a reasonably modern JDK: Java 11 is the current long-term support (LTS) release of Java. We
 perform nightly builds using the current LTS Java release, and the current bleeding-edge Java
 release in order to try to detect any upcoming compatibility issues, but we don't recommend building
 on anything other than the current LTS JDK for everyday usage.
