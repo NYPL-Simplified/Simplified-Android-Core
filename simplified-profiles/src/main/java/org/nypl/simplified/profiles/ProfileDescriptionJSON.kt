@@ -311,7 +311,7 @@ object ProfileDescriptionJSON {
     objectMapper: ObjectMapper,
     node: ObjectNode?
   ): ReaderPreferences {
-    return JSONParserUtilities.getObjectOptional(node, "reader-preferences")
+    return JSONParserUtilities.getObjectOptional(node, "readerPreferences")
       .mapPartial<ReaderPreferences, JSONParseException> { prefsNode ->
         ReaderPreferencesJSON.deserializeFromJSON(objectMapper, prefsNode)
       }

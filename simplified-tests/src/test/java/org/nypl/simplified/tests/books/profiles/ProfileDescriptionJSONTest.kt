@@ -5,7 +5,7 @@ import org.joda.time.DateTime
 import org.joda.time.DateTimeUtils
 import org.joda.time.DateTimeZone
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -14,6 +14,8 @@ import org.nypl.simplified.profiles.api.ProfileAttributes
 import org.nypl.simplified.profiles.api.ProfileDateOfBirth
 import org.nypl.simplified.profiles.api.ProfileDescription
 import org.nypl.simplified.profiles.api.ProfilePreferences
+import org.nypl.simplified.reader.api.ReaderColorScheme
+import org.nypl.simplified.reader.api.ReaderFontSelection
 import org.nypl.simplified.reader.api.ReaderPreferences
 import org.slf4j.LoggerFactory
 
@@ -66,7 +68,7 @@ class ProfileDescriptionJSONTest {
       ProfileDescriptionJSON.deserializeFromJSON(mapper, node)
 
     this.logger.debug("{}", ProfileDescriptionJSON.serializeToString(ObjectMapper(), description_1))
-    Assertions.assertEquals(description_0, description_1)
+    assertEquals(description_0, description_1)
   }
 
   @Test
@@ -77,8 +79,8 @@ class ProfileDescriptionJSONTest {
       ProfileDescriptionJSON.deserializeFromText(mapper, this.ofResource("profile-lfa-0.json"))
 
     this.logger.debug("{}", ProfileDescriptionJSON.serializeToString(ObjectMapper(), description))
-    Assertions.assertEquals("Eggbert", description.displayName)
-    Assertions.assertEquals("developer", description.attributes.role)
+    assertEquals("Eggbert", description.displayName)
+    assertEquals("developer", description.attributes.role)
   }
 
   @Test
@@ -89,11 +91,11 @@ class ProfileDescriptionJSONTest {
       ProfileDescriptionJSON.deserializeFromText(mapper, this.ofResource("profile-lfa-1.json"))
 
     this.logger.debug("{}", ProfileDescriptionJSON.serializeToString(ObjectMapper(), description))
-    Assertions.assertEquals("Newbert", description.displayName)
-    Assertions.assertEquals("male", description.attributes.gender)
-    Assertions.assertEquals("student", description.attributes.role)
-    Assertions.assertEquals("ຊັ້ນ 8", description.attributes.grade)
-    Assertions.assertEquals("ສົ້ນຂົວ", description.attributes.school)
+    assertEquals("Newbert", description.displayName)
+    assertEquals("male", description.attributes.gender)
+    assertEquals("student", description.attributes.role)
+    assertEquals("ຊັ້ນ 8", description.attributes.grade)
+    assertEquals("ສົ້ນຂົວ", description.attributes.school)
   }
 
   @Test
@@ -104,7 +106,20 @@ class ProfileDescriptionJSONTest {
       ProfileDescriptionJSON.deserializeFromText(mapper, this.ofResource("profile-nypl-0.json"))
 
     this.logger.debug("{}", ProfileDescriptionJSON.serializeToString(ObjectMapper(), description))
-    Assertions.assertEquals("", description.displayName)
+    assertEquals("", description.displayName)
+  }
+
+  @Test
+  fun testSMA92() {
+    val mapper = ObjectMapper()
+    val description =
+      ProfileDescriptionJSON.deserializeFromText(mapper, this.ofResource("profile-sma-92.json"))
+
+    assertEquals("", description.displayName)
+    assertEquals(1.0, description.preferences.readerPreferences.brightness())
+    assertEquals(100.0, description.preferences.readerPreferences.fontScale())
+    assertEquals(ReaderFontSelection.READER_FONT_OPEN_DYSLEXIC, description.preferences.readerPreferences.fontFamily())
+    assertEquals(ReaderColorScheme.SCHEME_WHITE_ON_BLACK, description.preferences.readerPreferences.colorScheme())
   }
 
   private fun ofResource(name: String): String {
