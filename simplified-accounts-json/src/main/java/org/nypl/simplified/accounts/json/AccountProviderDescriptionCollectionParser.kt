@@ -101,7 +101,7 @@ class AccountProviderDescriptionCollectionParser internal constructor(
       this.logError("An 'updated' time is required for catalog ${catalog.metadata.title.title}")
     }
 
-    val location = catalog.metadata.location?.let { location ->
+    val location = catalog.metadata.areaServed?.let { location ->
       this.parseLocation(location, catalog.metadata.distance)
     }
 

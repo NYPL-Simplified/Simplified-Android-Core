@@ -18,6 +18,12 @@ data class OPDS2Catalog(
    * The catalog links
    */
 
-  val links: List<Link>
+  val links: List<Link>,
+
+  /**
+   * The catalog images
+   */
+
+  val images: List<Link>
 
 ) : OPDS2ElementType

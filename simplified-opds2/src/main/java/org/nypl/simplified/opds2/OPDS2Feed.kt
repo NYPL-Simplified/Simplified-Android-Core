@@ -46,6 +46,12 @@ data class OPDS2Feed(
   val links: List<Link>,
 
   /**
+   * The feed images
+   */
+
+  val images: List<Link>,
+
+  /**
    * The catalogs, if any.
    */
 
