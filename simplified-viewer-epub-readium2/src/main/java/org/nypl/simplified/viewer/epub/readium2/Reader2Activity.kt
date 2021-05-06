@@ -242,6 +242,7 @@ class Reader2Activity : AppCompatActivity() {
       SR2ReaderParameters(
         streamer = streamer,
         bookFile = bookFile,
+        bookId = this.parameters.entry.feedEntry.id,
         theme = initialTheme,
         controllers = SR2Controllers()
       )
