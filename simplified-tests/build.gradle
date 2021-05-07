@@ -39,6 +39,8 @@ dependencies {
   api project(":simplified-json-core")
   api project(":simplified-migration-from3master")
   api project(":simplified-migration-spi")
+  api project(":simplified-metrics")
+  api project(":simplified-metrics-api")
   api project(":simplified-notifications")
   api project(":simplified-oauth")
   api project(":simplified-opds-auth-document")

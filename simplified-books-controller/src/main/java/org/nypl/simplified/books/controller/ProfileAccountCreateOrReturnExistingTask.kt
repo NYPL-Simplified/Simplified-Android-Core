@@ -6,6 +6,7 @@ import org.nypl.simplified.accounts.api.AccountEventCreation.AccountEventCreatio
 import org.nypl.simplified.accounts.api.AccountEventCreation.AccountEventCreationSucceeded
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
+import org.nypl.simplified.metrics.api.MetricServiceType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.profiles.controller.api.ProfileAccountCreationStringResourcesType
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
@@ -19,7 +20,8 @@ class ProfileAccountCreateOrReturnExistingTask(
   private val accountProviderID: URI,
   private val accountProviders: AccountProviderRegistryType,
   private val profiles: ProfilesDatabaseType,
-  private val strings: ProfileAccountCreationStringResourcesType
+  private val strings: ProfileAccountCreationStringResourcesType,
+  private val metrics: MetricServiceType?
 ) : Callable<TaskResult<AccountType>> {
 
   private val logger = LoggerFactory.getLogger(ProfileAccountCreateOrReturnExistingTask::class.java)
@@ -42,7 +44,8 @@ class ProfileAccountCreateOrReturnExistingTask(
         accountProviderID = this.accountProviderID,
         accountProviders = this.accountProviders,
         profiles = this.profiles,
-        strings = this.strings
+        strings = this.strings,
+        metrics = this.metrics
       ).call()
     } catch (e: Throwable) {
       this.logger.error("account creation failed: ", e)

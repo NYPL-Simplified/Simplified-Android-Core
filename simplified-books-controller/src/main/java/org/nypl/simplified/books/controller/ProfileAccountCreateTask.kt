@@ -10,6 +10,8 @@ import org.nypl.simplified.accounts.api.AccountUnknownProviderException
 import org.nypl.simplified.accounts.api.AccountUnresolvableProviderException
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
+import org.nypl.simplified.metrics.api.MetricEvent
+import org.nypl.simplified.metrics.api.MetricServiceType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.profiles.controller.api.ProfileAccountCreationStringResourcesType
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
@@ -24,7 +26,8 @@ class ProfileAccountCreateTask(
   private val accountProviderID: URI,
   private val accountProviders: AccountProviderRegistryType,
   private val profiles: ProfilesDatabaseType,
-  private val strings: ProfileAccountCreationStringResourcesType
+  private val strings: ProfileAccountCreationStringResourcesType,
+  private val metrics: MetricServiceType?
 ) : Callable<TaskResult<AccountType>> {
 
   private val logger = LoggerFactory.getLogger(ProfileAccountCreateTask::class.java)
@@ -35,6 +38,7 @@ class ProfileAccountCreateTask(
       this.logger.debug("creating account for provider {}", this.accountProviderID)
       val accountProvider = this.resolveAccountProvider()
       val account = this.createAccount(accountProvider)
+      metrics?.logMetric(MetricEvent.LibraryAdded(account.provider.id.toString()))
       this.publishSuccessEvent(account)
       this.taskRecorder.finishSuccess(account)
     } catch (e: Throwable) {

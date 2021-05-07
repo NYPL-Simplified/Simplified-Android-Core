@@ -1,0 +1,6 @@
+dependencies {
+  implementation project(":simplified-metrics-api")
+
+  implementation libraries.kotlin_stdlib
+  implementation libraries.firebase_analytics
+}
