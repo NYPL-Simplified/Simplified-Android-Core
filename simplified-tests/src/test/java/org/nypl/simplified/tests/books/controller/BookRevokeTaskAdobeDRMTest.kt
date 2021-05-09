@@ -35,6 +35,7 @@ import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.accounts.api.AccountPassword
+import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.api.AccountUsername
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.api.Book
@@ -64,6 +65,9 @@ import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess
 import org.nypl.simplified.opds.core.OPDSFeedParser
 import org.nypl.simplified.opds.core.OPDSSearchParser
+import org.nypl.simplified.profiles.api.ProfileID
+import org.nypl.simplified.profiles.api.ProfileType
+import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.tests.mocking.MockRevokeStringResources
 import org.slf4j.Logger
@@ -76,6 +80,7 @@ import java.net.URI
 import java.util.ArrayList
 import java.util.Collections
 import java.util.UUID
+import java.util.concurrent.ConcurrentSkipListMap
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
@@ -87,6 +92,9 @@ class BookRevokeTaskAdobeDRMTest {
 
   val accountID =
     AccountID(UUID.fromString("46d17029-14ba-4e34-bcaa-def02713575a"))
+
+  val profileID =
+    ProfileID(UUID.fromString("06fa7899-658a-4480-a796-ebf2ff00d5ec"))
 
   private val logger: Logger =
     LoggerFactory.getLogger(BookRevokeTaskAdobeDRMTest::class.java)
@@ -209,6 +217,12 @@ class BookRevokeTaskAdobeDRMTest {
   fun testRevokeDRMNonReturnable() {
     val account =
       Mockito.mock(AccountType::class.java)
+    val accountProvider =
+      Mockito.mock(AccountProviderType::class.java)
+    val profile =
+      Mockito.mock(ProfileType::class.java)
+    val profilesDatabase =
+      Mockito.mock(ProfilesDatabaseType::class.java)
     val bookDatabase =
       Mockito.mock(BookDatabaseType::class.java)
     val bookDatabaseEntry =
@@ -267,6 +281,16 @@ class BookRevokeTaskAdobeDRMTest {
 
     Mockito.`when`(account.id)
       .thenReturn(this.accountID)
+    Mockito.`when`(profile.id)
+      .thenReturn(this.profileID)
+    Mockito.`when`(profilesDatabase.profiles())
+      .thenReturn(ConcurrentSkipListMap(mapOf(this.profileID to profile)))
+    Mockito.`when`(profile.account(this.accountID))
+      .thenReturn(account)
+    Mockito.`when`(account.provider)
+      .thenReturn(accountProvider)
+    Mockito.`when`(accountProvider.displayName)
+      .thenReturn("Display name")
     Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.entry(bookId))
@@ -284,7 +308,9 @@ class BookRevokeTaskAdobeDRMTest {
 
     val task =
       BookRevokeTask(
-        account = account,
+        accountID = account.id,
+        profileID = profile.id,
+        profiles = profilesDatabase,
         adobeDRM = adobeExecutor,
         bookID = bookId,
         bookRegistry = this.bookRegistry,
@@ -309,6 +335,12 @@ class BookRevokeTaskAdobeDRMTest {
   fun testRevokeDRMUnsupported() {
     val account =
       Mockito.mock(AccountType::class.java)
+    val accountProvider =
+      Mockito.mock(AccountProviderType::class.java)
+    val profile =
+      Mockito.mock(ProfileType::class.java)
+    val profilesDatabase =
+      Mockito.mock(ProfilesDatabaseType::class.java)
     val bookDatabase =
       Mockito.mock(BookDatabaseType::class.java)
     val bookDatabaseEntry =
@@ -364,6 +396,16 @@ class BookRevokeTaskAdobeDRMTest {
 
     Mockito.`when`(account.id)
       .thenReturn(this.accountID)
+    Mockito.`when`(profile.id)
+      .thenReturn(this.profileID)
+    Mockito.`when`(profilesDatabase.profiles())
+      .thenReturn(ConcurrentSkipListMap(mapOf(this.profileID to profile)))
+    Mockito.`when`(profile.account(this.accountID))
+      .thenReturn(account)
+    Mockito.`when`(account.provider)
+      .thenReturn(accountProvider)
+    Mockito.`when`(accountProvider.displayName)
+      .thenReturn("Display name")
     Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.entry(bookId))
@@ -381,7 +423,9 @@ class BookRevokeTaskAdobeDRMTest {
 
     val task =
       BookRevokeTask(
-        account = account,
+        accountID = account.id,
+        profileID = profile.id,
+        profiles = profilesDatabase,
         adobeDRM = null,
         bookID = bookId,
         bookRegistry = this.bookRegistry,
@@ -407,6 +451,12 @@ class BookRevokeTaskAdobeDRMTest {
   fun testRevokeDRMOK() {
     val account =
       Mockito.mock(AccountType::class.java)
+    val accountProvider =
+      Mockito.mock(AccountProviderType::class.java)
+    val profile =
+      Mockito.mock(ProfileType::class.java)
+    val profilesDatabase =
+      Mockito.mock(ProfilesDatabaseType::class.java)
     val bookDatabase =
       Mockito.mock(BookDatabaseType::class.java)
     val bookDatabaseEntry =
@@ -481,7 +531,16 @@ class BookRevokeTaskAdobeDRMTest {
           )
         )
       )
-
+    Mockito.`when`(profile.id)
+      .thenReturn(this.profileID)
+    Mockito.`when`(profilesDatabase.profiles())
+      .thenReturn(ConcurrentSkipListMap(mapOf(this.profileID to profile)))
+    Mockito.`when`(profile.account(this.accountID))
+      .thenReturn(account)
+    Mockito.`when`(account.provider)
+      .thenReturn(accountProvider)
+    Mockito.`when`(accountProvider.displayName)
+      .thenReturn("Display name")
     Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.entry(bookId))
@@ -522,7 +581,9 @@ class BookRevokeTaskAdobeDRMTest {
 
     val task =
       BookRevokeTask(
-        account = account,
+        accountID = account.id,
+        profileID = profile.id,
+        profiles = profilesDatabase,
         adobeDRM = adobeExecutor,
         bookID = bookId,
         bookRegistry = this.bookRegistry,
@@ -548,6 +609,12 @@ class BookRevokeTaskAdobeDRMTest {
   fun testRevokeDRMDidNothing() {
     val account =
       Mockito.mock(AccountType::class.java)
+    val accountProvider =
+      Mockito.mock(AccountProviderType::class.java)
+    val profile =
+      Mockito.mock(ProfileType::class.java)
+    val profilesDatabase =
+      Mockito.mock(ProfilesDatabaseType::class.java)
     val bookDatabase =
       Mockito.mock(BookDatabaseType::class.java)
     val bookDatabaseEntry =
@@ -620,7 +687,16 @@ class BookRevokeTaskAdobeDRMTest {
           )
         )
       )
-
+    Mockito.`when`(profile.id)
+      .thenReturn(this.profileID)
+    Mockito.`when`(profilesDatabase.profiles())
+      .thenReturn(ConcurrentSkipListMap(mapOf(this.profileID to profile)))
+    Mockito.`when`(profile.account(this.accountID))
+      .thenReturn(account)
+    Mockito.`when`(account.provider)
+      .thenReturn(accountProvider)
+    Mockito.`when`(accountProvider.displayName)
+      .thenReturn("Display name")
     Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.entry(bookId))
@@ -655,7 +731,9 @@ class BookRevokeTaskAdobeDRMTest {
 
     val task =
       BookRevokeTask(
-        account = account,
+        accountID = account.id,
+        profileID = profile.id,
+        profiles = profilesDatabase,
         adobeDRM = adobeExecutor,
         bookID = bookId,
         bookRegistry = this.bookRegistry,
@@ -678,6 +756,12 @@ class BookRevokeTaskAdobeDRMTest {
   fun testRevokeDRMRaisedException() {
     val account =
       Mockito.mock(AccountType::class.java)
+    val accountProvider =
+      Mockito.mock(AccountProviderType::class.java)
+    val profile =
+      Mockito.mock(ProfileType::class.java)
+    val profilesDatabase =
+      Mockito.mock(ProfilesDatabaseType::class.java)
     val bookDatabase =
       Mockito.mock(BookDatabaseType::class.java)
     val bookDatabaseEntry =
@@ -750,7 +834,16 @@ class BookRevokeTaskAdobeDRMTest {
           )
         )
       )
-
+    Mockito.`when`(profile.id)
+      .thenReturn(this.profileID)
+    Mockito.`when`(profilesDatabase.profiles())
+      .thenReturn(ConcurrentSkipListMap(mapOf(this.profileID to profile)))
+    Mockito.`when`(profile.account(this.accountID))
+      .thenReturn(account)
+    Mockito.`when`(account.provider)
+      .thenReturn(accountProvider)
+    Mockito.`when`(accountProvider.displayName)
+      .thenReturn("Display name")
     Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.entry(bookId))
@@ -784,7 +877,9 @@ class BookRevokeTaskAdobeDRMTest {
 
     val task =
       BookRevokeTask(
-        account = account,
+        accountID = account.id,
+        profileID = profile.id,
+        profiles = profilesDatabase,
         adobeDRM = adobeExecutor,
         bookID = bookId,
         bookRegistry = this.bookRegistry,
@@ -807,6 +902,12 @@ class BookRevokeTaskAdobeDRMTest {
   fun testRevokeDRMRaisedErrorCode() {
     val account =
       Mockito.mock(AccountType::class.java)
+    val accountProvider =
+      Mockito.mock(AccountProviderType::class.java)
+    val profile =
+      Mockito.mock(ProfileType::class.java)
+    val profilesDatabase =
+      Mockito.mock(ProfilesDatabaseType::class.java)
     val bookDatabase =
       Mockito.mock(BookDatabaseType::class.java)
     val bookDatabaseEntry =
@@ -881,7 +982,16 @@ class BookRevokeTaskAdobeDRMTest {
           )
         )
       )
-
+    Mockito.`when`(profile.id)
+      .thenReturn(this.profileID)
+    Mockito.`when`(profilesDatabase.profiles())
+      .thenReturn(ConcurrentSkipListMap(mapOf(this.profileID to profile)))
+    Mockito.`when`(profile.account(this.accountID))
+      .thenReturn(account)
+    Mockito.`when`(account.provider)
+      .thenReturn(accountProvider)
+    Mockito.`when`(accountProvider.displayName)
+      .thenReturn("Display name")
     Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.entry(bookId))
@@ -921,7 +1031,9 @@ class BookRevokeTaskAdobeDRMTest {
 
     val task =
       BookRevokeTask(
-        account = account,
+        accountID = account.id,
+        profileID = profile.id,
+        profiles = profilesDatabase,
         adobeDRM = this.adobeExecutor,
         bookID = bookId,
         bookRegistry = this.bookRegistry,
@@ -945,6 +1057,12 @@ class BookRevokeTaskAdobeDRMTest {
   fun testRevokeDRMNotActivated() {
     val account =
       Mockito.mock(AccountType::class.java)
+    val accountProvider =
+      Mockito.mock(AccountProviderType::class.java)
+    val profile =
+      Mockito.mock(ProfileType::class.java)
+    val profilesDatabase =
+      Mockito.mock(ProfilesDatabaseType::class.java)
     val bookDatabase =
       Mockito.mock(BookDatabaseType::class.java)
     val bookDatabaseEntry =
@@ -1016,7 +1134,16 @@ class BookRevokeTaskAdobeDRMTest {
           )
         )
       )
-
+    Mockito.`when`(profile.id)
+      .thenReturn(this.profileID)
+    Mockito.`when`(profilesDatabase.profiles())
+      .thenReturn(ConcurrentSkipListMap(mapOf(this.profileID to profile)))
+    Mockito.`when`(profile.account(this.accountID))
+      .thenReturn(account)
+    Mockito.`when`(account.provider)
+      .thenReturn(accountProvider)
+    Mockito.`when`(accountProvider.displayName)
+      .thenReturn("Display name")
     Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.entry(bookId))
@@ -1034,7 +1161,9 @@ class BookRevokeTaskAdobeDRMTest {
 
     val task =
       BookRevokeTask(
-        account = account,
+        accountID = account.id,
+        profileID = profile.id,
+        profiles = profilesDatabase,
         adobeDRM = this.adobeExecutor,
         bookID = bookId,
         bookRegistry = this.bookRegistry,
@@ -1058,6 +1187,12 @@ class BookRevokeTaskAdobeDRMTest {
   fun testRevokeDRMNotAuthenticated() {
     val account =
       Mockito.mock(AccountType::class.java)
+    val accountProvider =
+      Mockito.mock(AccountProviderType::class.java)
+    val profile =
+      Mockito.mock(ProfileType::class.java)
+    val profilesDatabase =
+      Mockito.mock(ProfilesDatabaseType::class.java)
     val bookDatabase =
       Mockito.mock(BookDatabaseType::class.java)
     val bookDatabaseEntry =
@@ -1115,7 +1250,16 @@ class BookRevokeTaskAdobeDRMTest {
       .thenReturn(this.accountID)
     Mockito.`when`(account.loginState)
       .thenReturn(AccountLoginState.AccountNotLoggedIn)
-
+    Mockito.`when`(profile.id)
+      .thenReturn(this.profileID)
+    Mockito.`when`(profilesDatabase.profiles())
+      .thenReturn(ConcurrentSkipListMap(mapOf(this.profileID to profile)))
+    Mockito.`when`(profile.account(this.accountID))
+      .thenReturn(account)
+    Mockito.`when`(account.provider)
+      .thenReturn(accountProvider)
+    Mockito.`when`(accountProvider.displayName)
+      .thenReturn("Display name")
     Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.entry(bookId))
@@ -1133,7 +1277,9 @@ class BookRevokeTaskAdobeDRMTest {
 
     val task =
       BookRevokeTask(
-        account = account,
+        accountID = account.id,
+        profileID = profile.id,
+        profiles = profilesDatabase,
         adobeDRM = this.adobeExecutor,
         bookID = bookId,
         bookRegistry = this.bookRegistry,
@@ -1157,6 +1303,12 @@ class BookRevokeTaskAdobeDRMTest {
   fun testRevokeDRMDeleteCredentials() {
     val account =
       Mockito.mock(AccountType::class.java)
+    val accountProvider =
+      Mockito.mock(AccountProviderType::class.java)
+    val profile =
+      Mockito.mock(ProfileType::class.java)
+    val profilesDatabase =
+      Mockito.mock(ProfilesDatabaseType::class.java)
     val bookDatabase =
       Mockito.mock(BookDatabaseType::class.java)
     val bookDatabaseEntry =
@@ -1231,7 +1383,16 @@ class BookRevokeTaskAdobeDRMTest {
           )
         )
       )
-
+    Mockito.`when`(profile.id)
+      .thenReturn(this.profileID)
+    Mockito.`when`(profilesDatabase.profiles())
+      .thenReturn(ConcurrentSkipListMap(mapOf(this.profileID to profile)))
+    Mockito.`when`(profile.account(this.accountID))
+      .thenReturn(account)
+    Mockito.`when`(account.provider)
+      .thenReturn(accountProvider)
+    Mockito.`when`(accountProvider.displayName)
+      .thenReturn("Display name")
     Mockito.`when`(account.bookDatabase)
       .thenReturn(bookDatabase)
     Mockito.`when`(bookDatabase.entry(bookId))
@@ -1276,7 +1437,9 @@ class BookRevokeTaskAdobeDRMTest {
 
     val task =
       BookRevokeTask(
-        account = account,
+        accountID = account.id,
+        profileID = profile.id,
+        profiles = profilesDatabase,
         adobeDRM = adobeExecutor,
         bookID = bookId,
         bookRegistry = this.bookRegistry,

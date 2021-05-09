@@ -10,6 +10,7 @@ import org.nypl.drm.core.AdobeAdeptLoan
 import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePostActivationCredentials
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
+import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions
 import org.nypl.simplified.books.api.Book
@@ -43,18 +44,23 @@ import org.nypl.simplified.opds.core.OPDSAvailabilityLoanable
 import org.nypl.simplified.opds.core.OPDSAvailabilityLoaned
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess
 import org.nypl.simplified.opds.core.OPDSAvailabilityRevoked
+import org.nypl.simplified.profiles.api.ProfileID
+import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
+import org.nypl.simplified.taskrecorder.api.TaskRecorderType
 import org.nypl.simplified.taskrecorder.api.TaskResult
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.net.URI
-import java.util.concurrent.Callable
 import java.util.concurrent.CancellationException
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 
 class BookRevokeTask(
-  private val account: AccountType,
+  private val accountID: AccountID,
+  profileID: ProfileID,
+  profiles: ProfilesDatabaseType,
   private val adobeDRM: AdobeAdeptExecutorType?,
   private val bookID: BookID,
   private val bookRegistry: BookRegistryType,
@@ -62,14 +68,33 @@ class BookRevokeTask(
   private val revokeStrings: BookRevokeStringResourcesType,
   private val revokeACSTimeoutDuration: Duration = Duration.standardMinutes(1L),
   private val revokeServerTimeoutDuration: Duration = Duration.standardMinutes(3L)
-) : Callable<TaskResult<Unit>> {
+) : AbstractBookTask(accountID, profileID, profiles) {
 
   private lateinit var databaseEntry: BookDatabaseEntryType
-
   private val adobeACS = "Adobe ACS"
-  private val logger = LoggerFactory.getLogger(BookRevokeTask::class.java)
-  private val steps = TaskRecorder.create()
   private var databaseEntryInitialized: Boolean = false
+
+  override val logger: Logger =
+    LoggerFactory.getLogger(BookRevokeTask::class.java)
+
+  override val taskRecorder: TaskRecorderType =
+    TaskRecorder.create()
+
+  override fun execute(account: AccountType): TaskResult.Success<Unit> {
+    this.debug("revoke")
+    this.taskRecorder.beginNewStep(this.revokeStrings.revokeStarted)
+    this.publishRequestingRevokeStatus()
+    this.setupBookDatabaseEntry(account)
+    this.revokeFormatHandle(account)
+    this.revokeNotifyServer(account)
+    this.revokeNotifyServerDeleteBook()
+    this.bookRegistry.clearFor(this.bookID)
+    return this.taskRecorder.finishSuccess(Unit)
+  }
+
+  override fun onFailure(result: TaskResult.Failure<Unit>) {
+    this.publishBookStatus(BookStatus.FailedRevoke(this.bookID, result))
+  }
 
   private fun debug(message: String, vararg arguments: Any?) =
     this.logger.debug("[{}] $message", this.bookID.brief(), *arguments)
@@ -105,7 +130,7 @@ class BookRevokeTask(
 
         Book(
           this.bookID,
-          this.account.id,
+          this.accountID,
           null,
           null,
           entry,
@@ -124,37 +149,9 @@ class BookRevokeTask(
     this.publishBookStatus(BookStatus.Revoked(this.bookID))
   }
 
-  override fun call(): TaskResult<Unit> {
-    return try {
-      this.steps.beginNewStep(this.revokeStrings.revokeStarted)
-      this.debug("revoke")
-
-      this.publishRequestingRevokeStatus()
-      this.setupBookDatabaseEntry()
-      this.revokeFormatHandle()
-      this.revokeNotifyServer()
-      this.revokeNotifyServerDeleteBook()
-      this.bookRegistry.clearFor(this.bookID)
-
-      this.steps.finishSuccess(Unit)
-    } catch (e: Throwable) {
-      this.error("revoke failed: ", e)
-
-      this.steps.currentStepFailedAppending(
-        this.revokeStrings.revokeUnexpectedException, "unexpectedException", e
-      )
-
-      val failure = this.steps.finishFailure<Unit>()
-      this.publishBookStatus(BookStatus.FailedRevoke(this.bookID, failure))
-      failure
-    } finally {
-      this.debug("finished")
-    }
-  }
-
-  private fun revokeNotifyServer() {
+  private fun revokeNotifyServer(account: AccountType) {
     this.debug("notifying server of revocation")
-    this.steps.beginNewStep(this.revokeStrings.revokeServerNotify)
+    this.taskRecorder.beginNewStep(this.revokeStrings.revokeServerNotify)
     this.publishRequestingRevokeStatus()
 
     val availability = this.databaseEntry.book.entry.availability
@@ -164,10 +161,10 @@ class BookRevokeTask(
       is OPDSAvailabilityHeldReady -> {
         val uriOpt = availability.revoke
         if (uriOpt is Some<URI>) {
-          this.revokeNotifyServerURI(uriOpt.get(), RevokeType.HOLD)
+          this.revokeNotifyServerURI(uriOpt.get(), RevokeType.HOLD, account)
         } else {
           this.debug("no revoke URI, nothing to do")
-          this.steps.currentStepSucceeded(this.revokeStrings.revokeServerNotifyNoURI)
+          this.taskRecorder.currentStepSucceeded(this.revokeStrings.revokeServerNotifyNoURI)
           Unit
         }
       }
@@ -175,10 +172,10 @@ class BookRevokeTask(
       is OPDSAvailabilityHeld -> {
         val uriOpt = availability.revoke
         if (uriOpt is Some<URI>) {
-          this.revokeNotifyServerURI(uriOpt.get(), RevokeType.HOLD)
+          this.revokeNotifyServerURI(uriOpt.get(), RevokeType.HOLD, account)
         } else {
           this.debug("no revoke URI, nothing to do")
-          this.steps.currentStepSucceeded(this.revokeStrings.revokeServerNotifyNoURI)
+          this.taskRecorder.currentStepSucceeded(this.revokeStrings.revokeServerNotifyNoURI)
           Unit
         }
       }
@@ -187,17 +184,17 @@ class BookRevokeTask(
         val exception = BookRevokeExceptionNotRevocable()
         val message =
           this.revokeStrings.revokeServerNotifyNotRevocable(availability.javaClass.simpleName)
-        this.steps.currentStepFailed(message, "notRevocable", exception)
-        throw exception
+        this.taskRecorder.currentStepFailed(message, "notRevocable", exception)
+        throw TaskFailedHandled(exception)
       }
 
       is OPDSAvailabilityLoaned -> {
         val uriOpt = availability.revoke
         if (uriOpt is Some<URI>) {
-          this.revokeNotifyServerURI(uriOpt.get(), RevokeType.LOAN)
+          this.revokeNotifyServerURI(uriOpt.get(), RevokeType.LOAN, account)
         } else {
           this.debug("no revoke URI, nothing to do")
-          this.steps.currentStepSucceeded(this.revokeStrings.revokeServerNotifyNoURI)
+          this.taskRecorder.currentStepSucceeded(this.revokeStrings.revokeServerNotifyNoURI)
           Unit
         }
       }
@@ -206,23 +203,23 @@ class BookRevokeTask(
         val exception = BookRevokeExceptionNotRevocable()
         val message =
           this.revokeStrings.revokeServerNotifyNotRevocable(availability.javaClass.simpleName)
-        this.steps.currentStepFailed(message, "notRevocable", exception)
-        throw exception
+        this.taskRecorder.currentStepFailed(message, "notRevocable", exception)
+        throw TaskFailedHandled(exception)
       }
 
       is OPDSAvailabilityOpenAccess -> {
         val uriOpt = availability.revoke
         if (uriOpt is Some<URI>) {
-          this.revokeNotifyServerURI(uriOpt.get(), RevokeType.LOAN)
+          this.revokeNotifyServerURI(uriOpt.get(), RevokeType.LOAN, account)
         } else {
           this.debug("no revoke URI, nothing to do")
-          this.steps.currentStepSucceeded(this.revokeStrings.revokeServerNotifyNoURI)
+          this.taskRecorder.currentStepSucceeded(this.revokeStrings.revokeServerNotifyNoURI)
           Unit
         }
       }
 
       is OPDSAvailabilityRevoked ->
-        this.revokeNotifyServerURI(availability.revoke, RevokeType.LOAN)
+        this.revokeNotifyServerURI(availability.revoke, RevokeType.LOAN, account)
 
       else ->
         throw UnreachableCodeException()
@@ -231,14 +228,15 @@ class BookRevokeTask(
 
   private fun revokeNotifyServerURI(
     targetURI: URI,
-    revokeType: RevokeType
+    revokeType: RevokeType,
+    account: AccountType
   ) {
     this.debug("notifying server of {} revocation via {}", revokeType, targetURI)
-    this.steps.beginNewStep(this.revokeStrings.revokeServerNotifyURI(targetURI))
+    this.taskRecorder.beginNewStep(this.revokeStrings.revokeServerNotifyURI(targetURI))
     this.publishRequestingRevokeStatus()
 
     val feed =
-      this.revokeNotifyServerURIFeed(targetURI)
+      this.revokeNotifyServerURIFeed(targetURI, account)
     val entry =
       this.revokeNotifyServerURIProcessFeed(feed)
 
@@ -247,36 +245,28 @@ class BookRevokeTask(
 
   private fun revokeNotifyServerSaveNewEntry(entry: FeedEntryOPDS) {
     this.debug("saving received OPDS entry")
-    this.steps.beginNewStep(this.revokeStrings.revokeServerNotifySavingEntry)
+    this.taskRecorder.beginNewStep(this.revokeStrings.revokeServerNotifySavingEntry)
     this.publishRequestingRevokeStatus()
 
     try {
       this.databaseEntry.writeOPDSEntry(entry.feedEntry)
     } catch (e: Exception) {
-      this.steps.currentStepFailed(
+      this.taskRecorder.currentStepFailed(
         this.revokeStrings.revokeServerNotifySavingEntryFailed, "unexpectedException", e
       )
-      throw e
+      throw TaskFailedHandled(e)
     }
   }
 
   private fun revokeNotifyServerDeleteBook() {
     this.debug("deleting book")
-    this.steps.beginNewStep(this.revokeStrings.revokeDeleteBook)
+    this.taskRecorder.beginNewStep(this.revokeStrings.revokeDeleteBook)
     this.publishRevokedStatus()
-
-    try {
-      this.databaseEntry.delete()
-    } catch (e: Throwable) {
-      this.steps.currentStepFailed(
-        this.revokeStrings.revokeUnexpectedException, "unexpectedException", e
-      )
-      throw e
-    }
+    this.databaseEntry.delete()
   }
 
-  private fun revokeNotifyServerURIFeed(targetURI: URI): Feed {
-    val httpAuth = this.createHttpAuthIfRequired()
+  private fun revokeNotifyServerURIFeed(targetURI: URI, account: AccountType): Feed {
+    val httpAuth = this.createHttpAuthIfRequired(account)
 
     /*
      * Hitting a revoke link yields a single OPDS entry indicating
@@ -286,58 +276,58 @@ class BookRevokeTask(
 
     val feedResult = try {
       this.feedLoader.fetchURI(
-        this.account.id,
+        account.id,
         targetURI,
         httpAuth,
         "PUT"
       ).get(this.revokeServerTimeoutDuration.standardSeconds, TimeUnit.SECONDS)
     } catch (e: TimeoutException) {
       val message = this.revokeStrings.revokeServerNotifyFeedTimedOut
-      this.steps.currentStepFailed(message, "timedOut", e)
-      throw e
+      this.taskRecorder.currentStepFailed(message, "timedOut", e)
+      throw TaskFailedHandled(e)
     } catch (e: ExecutionException) {
       val ex = e.cause!!
       if (ex is FeedHTTPTransportException) {
-        this.steps.addAttributesIfPresent(ex.report?.toMap())
+        this.taskRecorder.addAttributesIfPresent(ex.report?.toMap())
       }
 
       val message = this.revokeStrings.revokeServerNotifyFeedTimedOut
-      this.steps.currentStepFailed(message, "feedLoaderFailed", ex)
-      throw ex
+      this.taskRecorder.currentStepFailed(message, "feedLoaderFailed", ex)
+      throw TaskFailedHandled(ex)
     }
 
     return when (feedResult) {
       is FeedLoaderSuccess -> {
-        this.steps.currentStepSucceeded(this.revokeStrings.revokeServerNotifyFeedOK)
+        this.taskRecorder.currentStepSucceeded(this.revokeStrings.revokeServerNotifyFeedOK)
         feedResult.feed
       }
 
       is FeedLoaderFailedGeneral -> {
         val message = this.revokeStrings.revokeServerNotifyFeedFailed
-        this.steps.addAttributesIfPresent(feedResult.problemReport?.toMap())
-        this.steps.currentStepFailed(message, "feedLoaderFailed", feedResult.exception)
-        throw feedResult.exception
+        this.taskRecorder.addAttributesIfPresent(feedResult.problemReport?.toMap())
+        this.taskRecorder.currentStepFailed(message, "feedLoaderFailed", feedResult.exception)
+        throw TaskFailedHandled(feedResult.exception)
       }
 
       is FeedLoaderFailedAuthentication -> {
         val message = this.revokeStrings.revokeServerNotifyFeedFailed
-        this.steps.addAttributesIfPresent(feedResult.problemReport?.toMap())
-        this.steps.currentStepFailed(message, "feedLoaderFailed", feedResult.exception)
-        throw feedResult.exception
+        this.taskRecorder.addAttributesIfPresent(feedResult.problemReport?.toMap())
+        this.taskRecorder.currentStepFailed(message, "feedLoaderFailed", feedResult.exception)
+        throw TaskFailedHandled(feedResult.exception)
       }
     }
   }
 
   private fun revokeNotifyServerURIProcessFeed(feed: Feed): FeedEntryOPDS {
     this.debug("processing server revocation feed")
-    this.steps.beginNewStep(this.revokeStrings.revokeServerNotifyProcessingFeed)
+    this.taskRecorder.beginNewStep(this.revokeStrings.revokeServerNotifyProcessingFeed)
     this.publishRequestingRevokeStatus()
 
     if (feed.size == 0) {
       val exception = BookRevokeExceptionBadFeed()
       val message = this.revokeStrings.revokeServerNotifyFeedEmpty
-      this.steps.currentStepFailed(message, "feedLoaderFailed", exception)
-      throw exception
+      this.taskRecorder.currentStepFailed(message, "feedLoaderFailed", exception)
+      throw TaskFailedHandled(exception)
     }
 
     return when (feed) {
@@ -346,8 +336,8 @@ class BookRevokeTask(
           is FeedEntryCorrupt -> {
             val exception = BookRevokeExceptionBadFeed()
             val message = this.revokeStrings.revokeServerNotifyFeedCorrupt
-            this.steps.currentStepFailed(message, "feedCorrupted", feedEntry.error)
-            throw exception
+            this.taskRecorder.currentStepFailed(message, "feedCorrupted", feedEntry.error)
+            throw TaskFailedHandled(exception)
           }
           is FeedEntryOPDS ->
             feedEntry
@@ -356,42 +346,42 @@ class BookRevokeTask(
       is Feed.FeedWithGroups -> {
         val exception = BookRevokeExceptionBadFeed()
         val message = this.revokeStrings.revokeServerNotifyFeedWithGroups
-        this.steps.currentStepFailed(message, "feedUnusable", exception)
-        throw exception
+        this.taskRecorder.currentStepFailed(message, "feedUnusable", exception)
+        throw TaskFailedHandled(exception)
       }
     }
   }
 
-  private fun revokeFormatHandle() {
+  private fun revokeFormatHandle(account: AccountType) {
     this.debug("revoking via format handle")
-    this.steps.beginNewStep(this.revokeStrings.revokeFormat)
+    this.taskRecorder.beginNewStep(this.revokeStrings.revokeFormat)
     this.publishRequestingRevokeStatus()
 
     return when (val handle = this.databaseEntry.findPreferredFormatHandle()) {
       is BookDatabaseEntryFormatHandleEPUB ->
-        this.revokeFormatHandleEPUB(handle)
+        this.revokeFormatHandleEPUB(handle, account)
       is BookDatabaseEntryFormatHandlePDF ->
         this.revokeFormatHandlePDF(handle)
       is BookDatabaseEntryFormatHandleAudioBook ->
         this.revokeFormatHandleAudioBook(handle)
       null -> {
         this.debug("no format handle available, nothing to do!")
-        this.steps.currentStepSucceeded(this.revokeStrings.revokeFormatNothingToDo)
+        this.taskRecorder.currentStepSucceeded(this.revokeStrings.revokeFormatNothingToDo)
         Unit
       }
     }
   }
 
-  private fun revokeFormatHandleEPUB(handle: BookDatabaseEntryFormatHandleEPUB) {
+  private fun revokeFormatHandleEPUB(handle: BookDatabaseEntryFormatHandleEPUB, account: AccountType) {
     this.debug("revoking via EPUB format handle")
-    this.steps.beginNewStep(this.revokeStrings.revokeFormatSpecific("EPUB"))
+    this.taskRecorder.beginNewStep(this.revokeStrings.revokeFormatSpecific("EPUB"))
     this.publishRequestingRevokeStatus()
 
     return when (val drm = handle.drmInformationHandle) {
       is BookDRMInformationHandle.ACSHandle -> {
         val adobeRights = drm.info.rights
         if (adobeRights != null) {
-          this.revokeFormatHandleEPUBAdobe(handle, adobeRights.second)
+          this.revokeFormatHandleEPUBAdobe(handle, adobeRights.second, account)
         } else {
           this.debug("no Adobe rights, nothing to do!")
         }
@@ -406,10 +396,11 @@ class BookRevokeTask(
 
   private fun revokeFormatHandleEPUBAdobe(
     handle: BookDatabaseEntryFormatHandleEPUB,
-    adobeRights: AdobeAdeptLoan
+    adobeRights: AdobeAdeptLoan,
+    account: AccountType
   ) {
     this.debug("revoking Adobe ACS loan")
-    this.steps.beginNewStep(this.revokeStrings.revokeACSLoan)
+    this.taskRecorder.beginNewStep(this.revokeStrings.revokeACSLoan)
     this.publishRequestingRevokeStatus()
 
     /*
@@ -418,7 +409,7 @@ class BookRevokeTask(
 
     if (!adobeRights.isReturnable) {
       this.debug("loan is not returnable")
-      this.steps.currentStepSucceeded(this.revokeStrings.revokeACSLoanNotReturnable)
+      this.taskRecorder.currentStepSucceeded(this.revokeStrings.revokeACSLoanNotReturnable)
       this.deleteAdobeRights(handle)
       return
     }
@@ -432,12 +423,12 @@ class BookRevokeTask(
 
     if (this.adobeDRM == null) {
       this.debug("DRM is not supported")
-      this.steps.currentStepSucceeded(this.revokeStrings.revokeACSLoanNotSupported)
+      this.taskRecorder.currentStepSucceeded(this.revokeStrings.revokeACSLoanNotSupported)
       this.deleteAdobeRights(handle)
       return
     }
 
-    this.revokeFormatHandleEPUBAdobeExecute(this.adobeDRM, adobeRights)
+    this.revokeFormatHandleEPUBAdobeExecute(this.adobeDRM, adobeRights, account)
     this.deleteAdobeRights(handle)
   }
 
@@ -447,12 +438,13 @@ class BookRevokeTask(
 
   private fun revokeFormatHandleEPUBAdobeExecute(
     adobeDRM: AdobeAdeptExecutorType,
-    adobeRights: AdobeAdeptLoan
+    adobeRights: AdobeAdeptLoan,
+    account: AccountType
   ) {
     val credentials =
-      this.revokeFormatHandleEPUBAdobeWithConnectorGetCredentials()
+      this.revokeFormatHandleEPUBAdobeWithConnectorGetCredentials(account)
 
-    this.steps.beginNewStep(this.revokeStrings.revokeACSExecute)
+    this.taskRecorder.beginNewStep(this.revokeStrings.revokeACSExecute)
     this.publishRequestingRevokeStatus()
 
     val adeptFuture =
@@ -462,31 +454,31 @@ class BookRevokeTask(
       adeptFuture.get(this.revokeACSTimeoutDuration.standardSeconds, TimeUnit.SECONDS)
     } catch (e: TimeoutException) {
       val message = this.revokeStrings.revokeACSTimedOut
-      this.steps.currentStepFailed(message, "timedOut", e)
-      throw e
+      this.taskRecorder.currentStepFailed(message, "timedOut", e)
+      throw TaskFailedHandled(e)
     } catch (e: ExecutionException) {
       throw when (val cause = e.cause!!) {
         is CancellationException -> {
           val message = this.revokeStrings.revokeBookCancelled
-          this.steps.currentStepFailed(message, "cancelled", cause)
-          cause
+          this.taskRecorder.currentStepFailed(message, "cancelled", cause)
+          TaskFailedHandled(cause)
         }
         is AdobeDRMExtensions.AdobeDRMRevokeException -> {
           val message = this.revokeStrings.revokeBookACSConnectorFailed(cause.errorCode)
-          this.steps.currentStepFailed(message, "${this.adobeACS}: ${cause.errorCode}", cause)
-          cause
+          this.taskRecorder.currentStepFailed(message, "${this.adobeACS}: ${cause.errorCode}", cause)
+          TaskFailedHandled(cause)
         }
         else -> {
-          this.steps.currentStepFailed(this.revokeStrings.revokeBookACSFailed, "unexpectedException", cause)
-          cause
+          this.taskRecorder.currentStepFailed(this.revokeStrings.revokeBookACSFailed, "unexpectedException", cause)
+          TaskFailedHandled(cause)
         }
       }
     } catch (e: Throwable) {
-      this.steps.currentStepFailed(this.revokeStrings.revokeBookACSFailed, "unexpectedException", e)
-      throw e
+      this.taskRecorder.currentStepFailed(this.revokeStrings.revokeBookACSFailed, "unexpectedException", e)
+      throw TaskFailedHandled(e)
     }
 
-    this.steps.currentStepSucceeded(this.revokeStrings.revokeACSExecuteOK)
+    this.taskRecorder.currentStepSucceeded(this.revokeStrings.revokeACSExecuteOK)
   }
 
   /**
@@ -494,28 +486,28 @@ class BookRevokeTask(
    * has been activated.
    */
 
-  private fun revokeFormatHandleEPUBAdobeWithConnectorGetCredentials(): AccountAuthenticationAdobePostActivationCredentials {
+  private fun revokeFormatHandleEPUBAdobeWithConnectorGetCredentials(account: AccountType): AccountAuthenticationAdobePostActivationCredentials {
     this.debug("getting Adobe ACS credentials")
-    this.steps.beginNewStep(this.revokeStrings.revokeACSGettingDeviceCredentials)
+    this.taskRecorder.beginNewStep(this.revokeStrings.revokeACSGettingDeviceCredentials)
     this.publishRequestingRevokeStatus()
 
     val credentials =
-      this.getRequiredAccountCredentials().adobeCredentials?.postActivationCredentials
+      this.getRequiredAccountCredentials(account).adobeCredentials?.postActivationCredentials
 
     if (credentials == null) {
       val exception = BookRevokeExceptionDeviceNotActivated()
       val message = this.revokeStrings.revokeACSGettingDeviceCredentialsNotActivated
-      this.steps.currentStepFailed(message, "${this.adobeACS}: drmDeviceNotActive", exception)
-      throw exception
+      this.taskRecorder.currentStepFailed(message, "${this.adobeACS}: drmDeviceNotActive", exception)
+      throw TaskFailedHandled(exception)
     }
 
-    this.steps.currentStepSucceeded(this.revokeStrings.revokeACSGettingDeviceCredentialsOK)
+    this.taskRecorder.currentStepSucceeded(this.revokeStrings.revokeACSGettingDeviceCredentialsOK)
     return credentials
   }
 
   private fun deleteAdobeRights(handle: BookDatabaseEntryFormatHandleEPUB) {
     this.debug("deleting Adobe ACS loan")
-    this.steps.beginNewStep(this.revokeStrings.revokeACSDeleteRights)
+    this.taskRecorder.beginNewStep(this.revokeStrings.revokeACSDeleteRights)
     this.publishRequestingRevokeStatus()
 
     try {
@@ -528,47 +520,47 @@ class BookRevokeTask(
         }
       }
     } catch (e: Exception) {
-      this.steps.currentStepFailed(
+      this.taskRecorder.currentStepFailed(
         this.revokeStrings.revokeACSDeleteRightsFailed, "unexpectedException", e
       )
-      throw e
+      throw TaskFailedHandled(e)
     }
   }
 
   @Suppress("UNUSED_PARAMETER")
   private fun revokeFormatHandleAudioBook(handle: BookDatabaseEntryFormatHandleAudioBook) {
     this.debug("revoking via AudioBook format handle")
-    this.steps.beginNewStep(this.revokeStrings.revokeFormatSpecific("AudioBook"))
+    this.taskRecorder.beginNewStep(this.revokeStrings.revokeFormatSpecific("AudioBook"))
     this.publishRequestingRevokeStatus()
 
-    this.steps.currentStepSucceeded(this.revokeStrings.revokeFormatNothingToDo)
+    this.taskRecorder.currentStepSucceeded(this.revokeStrings.revokeFormatNothingToDo)
   }
 
   @Suppress("UNUSED_PARAMETER")
   private fun revokeFormatHandlePDF(handle: BookDatabaseEntryFormatHandlePDF) {
     this.debug("revoking via PDF format handle")
-    this.steps.beginNewStep(this.revokeStrings.revokeFormatSpecific("PDF"))
+    this.taskRecorder.beginNewStep(this.revokeStrings.revokeFormatSpecific("PDF"))
     this.publishRequestingRevokeStatus()
 
-    this.steps.currentStepSucceeded(this.revokeStrings.revokeFormatNothingToDo)
+    this.taskRecorder.currentStepSucceeded(this.revokeStrings.revokeFormatNothingToDo)
   }
 
-  private fun setupBookDatabaseEntry() {
-    this.steps.beginNewStep(this.revokeStrings.revokeBookDatabaseLookup)
+  private fun setupBookDatabaseEntry(account: AccountType) {
+    this.taskRecorder.beginNewStep(this.revokeStrings.revokeBookDatabaseLookup)
 
     try {
       this.debug("setting up book database entry")
-      val database = this.account.bookDatabase
+      val database = account.bookDatabase
       this.databaseEntry = database.entry(this.bookID)
       this.databaseEntryInitialized = true
       this.publishRequestingRevokeStatus()
-      this.steps.currentStepSucceeded(this.revokeStrings.revokeBookDatabaseLookupOK)
+      this.taskRecorder.currentStepSucceeded(this.revokeStrings.revokeBookDatabaseLookupOK)
     } catch (e: Exception) {
       this.error("failed to set up book database entry: ", e)
-      this.steps.currentStepFailed(
+      this.taskRecorder.currentStepFailed(
         this.revokeStrings.revokeBookDatabaseLookupFailed, "unexpectedException", e
       )
-      throw e
+      throw TaskFailedHandled(e)
     }
   }
 
@@ -577,9 +569,9 @@ class BookRevokeTask(
    * are provided, throw an exception.
    */
 
-  private fun createHttpAuthIfRequired(): LSHTTPAuthorizationType? {
-    return if (this.account.requiresCredentials) {
-      AccountAuthenticatedHTTP.createAuthorization(this.getRequiredAccountCredentials())
+  private fun createHttpAuthIfRequired(account: AccountType): LSHTTPAuthorizationType? {
+    return if (account.requiresCredentials) {
+      AccountAuthenticatedHTTP.createAuthorization(this.getRequiredAccountCredentials(account))
     } else {
       null
     }
@@ -590,8 +582,8 @@ class BookRevokeTask(
    * loudly.
    */
 
-  private fun getRequiredAccountCredentials(): AccountAuthenticationCredentials {
-    val loginState = this.account.loginState
+  private fun getRequiredAccountCredentials(account: AccountType): AccountAuthenticationCredentials {
+    val loginState = account.loginState
     val credentials = loginState.credentials
     if (credentials != null) {
       return credentials
@@ -599,8 +591,8 @@ class BookRevokeTask(
       this.error("revocation requires credentials, but none are available")
       val exception = BookRevokeExceptionNoCredentials()
       val message = this.revokeStrings.revokeCredentialsRequired
-      this.steps.currentStepFailed(message, "revokeCredentialsRequired", exception)
-      throw exception
+      this.taskRecorder.currentStepFailed(message, "revokeCredentialsRequired", exception)
+      throw TaskFailedHandled(exception)
     }
   }
 

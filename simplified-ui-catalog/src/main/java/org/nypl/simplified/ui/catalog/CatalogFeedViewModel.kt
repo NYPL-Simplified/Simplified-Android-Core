@@ -134,7 +134,7 @@ class CatalogFeedViewModel(
 
     val syncFuture =
       fluentFutureOfAll(
-        accountsToSync.values.map { account ->
+        accountsToSync.keys.map { account ->
           this.booksController.booksSync(account)
         }
       )

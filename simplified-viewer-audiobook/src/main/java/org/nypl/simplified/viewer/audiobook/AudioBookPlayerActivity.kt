@@ -605,10 +605,7 @@ class AudioBookPlayerActivity :
      */
 
     try {
-      val account =
-        this.profiles.profileCurrent()
-          .account(this.parameters.accountID)
-      this.books.bookRevoke(account, this.parameters.bookID)
+      this.books.bookRevoke(this.parameters.accountID, this.parameters.bookID)
     } catch (e: Exception) {
       this.log.error("could not execute revocation: ", e)
     }
