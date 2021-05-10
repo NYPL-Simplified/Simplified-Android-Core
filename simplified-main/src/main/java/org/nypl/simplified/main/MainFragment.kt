@@ -1,27 +1,25 @@
 package org.nypl.simplified.main
 
-import android.content.Context
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.MenuItem
 import android.view.View
-import androidx.activity.addCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import io.reactivex.disposables.CompositeDisposable
-import org.joda.time.DateTime
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accessibility.AccessibilityService
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventDeletion
 import org.nypl.simplified.android.ktx.supportActionBar
 import org.nypl.simplified.books.book_registry.BookRegistryType
-import org.nypl.simplified.navigation.api.NavigationControllerDirectoryType
-import org.nypl.simplified.navigation.api.NavigationControllerType
-import org.nypl.simplified.navigation.api.NavigationControllers
+import org.nypl.simplified.listeners.api.FragmentListenerType
+import org.nypl.simplified.listeners.api.ListenerRepository
+import org.nypl.simplified.listeners.api.fragmentListeners
+import org.nypl.simplified.listeners.api.listenerRepositories
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileUpdated
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_DISABLED
@@ -29,15 +27,9 @@ import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEna
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimeOutSoon
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimedOut
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
-import org.nypl.simplified.ui.accounts.AccountNavigationControllerType
 import org.nypl.simplified.ui.announcements.AnnouncementsController
-import org.nypl.simplified.ui.catalog.CatalogFeedArguments
-import org.nypl.simplified.ui.catalog.CatalogFeedOwnership
-import org.nypl.simplified.ui.catalog.CatalogNavigationControllerType
-import org.nypl.simplified.ui.navigation.tabs.TabbedNavigationController
+import org.nypl.simplified.ui.navigation.tabs.TabbedNavigator
 import org.nypl.simplified.ui.profiles.ProfileDialogs
-import org.nypl.simplified.ui.profiles.ProfilesNavigationControllerType
-import org.nypl.simplified.ui.settings.SettingsNavigationControllerType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.slf4j.LoggerFactory
 
@@ -51,32 +43,25 @@ import org.slf4j.LoggerFactory
 class MainFragment : Fragment(R.layout.main_tabbed_host) {
 
   private val logger = LoggerFactory.getLogger(MainFragment::class.java)
-
-  private lateinit var bottomNavigator: TabbedNavigationController
-  private lateinit var bottomView: BottomNavigationView
-  private lateinit var navigationControllerDirectory: NavigationControllerDirectoryType
-  private var timeOutDialog: AlertDialog? = null
-
-  private lateinit var activityViewModel: MainActivityViewModel
-  private lateinit var viewModel: MainFragmentViewModel
   private val subscriptions = CompositeDisposable()
 
-  private val handler: Handler = Handler(Looper.getMainLooper())
-  private val delayedRunnables: MutableList<Runnable> = mutableListOf()
+  private val activityViewModel: MainActivityViewModel by activityViewModels()
+  private val viewModel: MainFragmentViewModel by viewModels()
+
+  private val listener: FragmentListenerType<MainFragmentEvent> by fragmentListeners()
+  private val listenerRepo: ListenerRepository<MainFragmentListenedEvent, MainFragmentState> by listenerRepositories()
+
+  private val defaultViewModelFactory: ViewModelProvider.Factory by lazy {
+    MainFragmentDefaultViewModelFactory(super.getDefaultViewModelProviderFactory())
+  }
+
+  private lateinit var bottomView: BottomNavigationView
+  private lateinit var navigator: TabbedNavigator
+
+  private var timeOutDialog: AlertDialog? = null
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-
-    this.navigationControllerDirectory =
-      NavigationControllers.findDirectory(this.requireActivity())
-
-    this.activityViewModel =
-      ViewModelProvider(this.requireActivity())
-        .get(MainActivityViewModel::class.java)
-
-    this.viewModel =
-      ViewModelProvider(this)
-        .get(MainFragmentViewModel::class.java)
 
     /*
     * If named profiles are enabled, subscribe to profile timer events so that users are
@@ -121,19 +106,6 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
         uiThread = services.requireService(UIThreadServiceType::class.java)
       )
     )
-
-    requireActivity().onBackPressedDispatcher.addCallback(this) {
-      if (bottomNavigator.popBackStack()) {
-        return@addCallback
-      }
-
-      try {
-        isEnabled = false
-        requireActivity().onBackPressed()
-      } finally {
-        isEnabled = true
-      }
-    }
   }
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -160,36 +132,30 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
     val profilesItem = this.bottomView.menu.findItem(R.id.tabProfile)
     profilesItem.isVisible = profilesVisible
     profilesItem.isEnabled = profilesVisible
-  }
 
-  override fun onOptionsItemSelected(item: MenuItem): Boolean {
-    return when (item.itemId) {
-      android.R.id.home -> {
-        this.bottomNavigator.popToRoot()
-      }
-      else -> super.onOptionsItemSelected(item)
-    }
-  }
+    this.navigator =
+      TabbedNavigator.create(
+        fragment = this,
+        fragmentContainerId = R.id.tabbedFragmentHolder,
+        navigationView = this.bottomView,
+        accountProviders = viewModel.accountProviders,
+        profilesController = viewModel.profilesController,
+        settingsConfiguration = viewModel.buildConfig,
+      )
 
-  override fun onAttach(context: Context) {
-    super.onAttach(context)
+    lifecycle.addObserver(
+      MainFragmentListenerDelegate(
+        fragment = this,
+        listenerRepository = listenerRepo,
+        listener = listener,
+        profilesController = viewModel.profilesController,
+        settingsConfiguration = viewModel.buildConfig,
+        navigator = this.navigator
+      )
+    )
 
     /*
-     * This extremely unfortunate workaround (delaying the creation of the navigator by scheduling
-     * the creation on the UI thread) is necessary because the bottom navigator
-     * eagerly instantiates fragments and there's nothing we can do to stop it doing so.
-     * The actual issue this avoids is documented here:
-     *
-     * https://github.com/PandoraMedia/BottomNavigator/issues/13
-     *
-     * In other words, the current onStart method is currently executing in the middle of
-     * a fragment transaction, and the bottom navigator will _immediately_ try to start
-     * executing more transactions (leading to an exception). By deferring creation of
-     * the navigator here, we avoid this issue, but this does mean that code executing
-     * in the onStart() methods of fragments within the tabs will not have guaranteed
-     * access to a navigation controller.
-     *
-     * Additionally, because the BottomNavigator stores references to fragments and reuses
+     * Because the BottomNavigator stores references to fragments and reuses
      * them instead of instantiating them anew, it's necessary to aggressively clear the
      * "root fragments" in case any of them are holding references to stale data such as
      * profile and account identifiers. We use a view model to store a "clear history" flag
@@ -197,79 +163,37 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
      * foreground/background switches.
      */
 
-    this.runOnUIThread {
-      this.bottomNavigator =
-        TabbedNavigationController.create(
-          activity = this.requireActivity(),
-          accountProviders = viewModel.accountProviders,
-          profilesController = viewModel.profilesController,
-          settingsConfiguration = viewModel.buildConfig,
-          fragmentContainerId = R.id.tabbedFragmentHolder,
-          navigationView = this.bottomView,
-          listener = this::onFragmentTransactionCompleted
-        )
+    if (this.activityViewModel.clearHistory) {
+      this.navigator.clearHistory()
+      this.activityViewModel.clearHistory = false
+    }
+  }
 
-      if (this.activityViewModel.clearHistory) {
-        this.bottomNavigator.clearHistory()
-        this.activityViewModel.clearHistory = false
+  override fun onOptionsItemSelected(item: MenuItem): Boolean {
+    return when (item.itemId) {
+      android.R.id.home -> {
+        this.navigator.popToRoot()
       }
-
-      this.navigationControllerDirectory.updateNavigationController(
-        CatalogNavigationControllerType::class.java, this.bottomNavigator
-      )
-      this.navigationControllerDirectory.updateNavigationController(
-        AccountNavigationControllerType::class.java, this.bottomNavigator
-      )
-      this.navigationControllerDirectory.updateNavigationController(
-        SettingsNavigationControllerType::class.java, this.bottomNavigator
-      )
-      this.navigationControllerDirectory.updateNavigationController(
-        NavigationControllerType::class.java, this.bottomNavigator
-      )
+      else -> super.onOptionsItemSelected(item)
     }
   }
 
   override fun onStart() {
     super.onStart()
 
-    this.runOnUIThread {
-      viewModel.accountEvents
-        .subscribe(this::onAccountEvent)
-        .let { subscriptions.add(it) }
+    viewModel.accountEvents
+      .subscribe(this::onAccountEvent)
+      .let { subscriptions.add(it) }
 
-      viewModel.profileEvents
-        .subscribe(this::onProfileEvent)
-        .let { subscriptions.add(it) }
+    viewModel.profileEvents
+      .subscribe(this::onProfileEvent)
+      .let { subscriptions.add(it) }
 
-      /*
-       * Ensure the toolbar is properly configured after an orientation change.
-       */
+    /*
+     * Show the Toolbar
+     */
 
-      configureToolbar()
-
-      /*
-       * Show the Toolbar
-       */
-
-      this.supportActionBar?.show()
-    }
-  }
-
-  private fun onFragmentTransactionCompleted() {
-    val isRoot = (0 == bottomNavigator.backStackSize())
-    this.logger.debug(
-      "controller stack size changed [{}, isRoot={}]", bottomNavigator.backStackSize(), isRoot
-    )
-    configureToolbar()
-  }
-
-  private fun configureToolbar() {
-    val isRoot = (0 == bottomNavigator.backStackSize())
-    this.supportActionBar?.apply {
-      setHomeAsUpIndicator(null)
-      setHomeActionContentDescription(null)
-      setDisplayHomeAsUpEnabled(!isRoot)
-    }
+    this.supportActionBar?.show()
   }
 
   private fun onAccountEvent(event: AccountEvent) {
@@ -283,7 +207,7 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
 
       is AccountEventDeletion.AccountEventDeletionSucceeded -> {
         try {
-          this.bottomNavigator.clearHistory()
+          this.navigator.clearHistory()
         } catch (e: Throwable) {
           this.logger.error("could not clear history: ", e)
         }
@@ -308,40 +232,22 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
     this.logger.debug("oldAccountId={}, newAccountId={}", oldAccountId, newAccountId)
 
     // Reload the catalog feed, the patron's account preference has changed
-    // Or if the user's age has changed
 
-    if (oldAccountId != newAccountId ||
-      event.oldDescription.preferences.dateOfBirth != event.newDescription.preferences.dateOfBirth
-    ) {
-      newAccountId?.let { id ->
-        val profile = viewModel.profilesController.profileCurrent()
-        val account = profile.account(id)
-        val age = profile.preferences().dateOfBirth?.yearsOld(DateTime.now()) ?: 1
-        this.bottomNavigator.clearHistory()
-        this.bottomNavigator.popBackStack()
-        this.bottomNavigator.openFeed(
-          CatalogFeedArguments.CatalogFeedArgumentsRemote(
-            title = getString(R.string.tabCatalog),
-            ownership = CatalogFeedOwnership.OwnedByAccount(id),
-            feedURI = account.catalogURIForAge(age),
-            isSearchResults = false
-          )
-        )
-      }
+    if (oldAccountId != newAccountId) {
+      this.navigator.clearHistory()
     }
   }
 
   private fun onIdleTimedOut() {
     this.timeOutDialog?.dismiss()
-    NavigationControllers.find(this.requireActivity(), ProfilesNavigationControllerType::class.java)
-      .openProfileSelect()
+    this.listener.post(MainFragmentEvent.ProfileIdleTimedOut)
   }
 
   private fun showTimeOutSoonDialog() {
     val dialog = ProfileDialogs.createTimeOutDialog(this.requireContext())
     this.timeOutDialog = dialog
     dialog.setOnDismissListener {
-      viewModel.profilesController.profileIdleTimer().reset()
+      this.viewModel.profilesController.profileIdleTimer().reset()
       this.timeOutDialog = null
     }
     dialog.show()
@@ -350,24 +256,6 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
   override fun onStop() {
     super.onStop()
     this.subscriptions.clear()
-  }
-
-  override fun onDetach() {
-    super.onDetach()
-    clearDelayedRunnables()
-
-    this.navigationControllerDirectory.removeNavigationController(
-      CatalogNavigationControllerType::class.java
-    )
-    this.navigationControllerDirectory.removeNavigationController(
-      AccountNavigationControllerType::class.java
-    )
-    this.navigationControllerDirectory.removeNavigationController(
-      SettingsNavigationControllerType::class.java
-    )
-    this.navigationControllerDirectory.removeNavigationController(
-      NavigationControllerType::class.java
-    )
   }
 
   override fun onDestroy() {
@@ -382,18 +270,7 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
     }
   }
 
-  private fun runOnUIThread(f: () -> Unit) {
-    val runnable = Runnable {
-      f.invoke()
-    }
-    handler.post(runnable)
-    delayedRunnables.add(runnable)
-  }
-
-  private fun clearDelayedRunnables() {
-    while (delayedRunnables.isNotEmpty()) {
-      val r = delayedRunnables.removeFirst()
-      handler.removeCallbacks(r)
-    }
+  override fun getDefaultViewModelProviderFactory(): ViewModelProvider.Factory {
+    return this.defaultViewModelFactory
   }
 }

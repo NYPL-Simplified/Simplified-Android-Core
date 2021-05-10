@@ -17,12 +17,12 @@ import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
-import org.nypl.simplified.navigation.api.NavigationControllers
+import org.nypl.simplified.listeners.api.FragmentListenerType
+import org.nypl.simplified.listeners.api.fragmentListeners
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskStep
 import org.nypl.simplified.ui.accounts.saml20.AccountSAML20
-import org.nypl.simplified.ui.catalog.CatalogNavigationControllerType
 import org.nypl.simplified.ui.catalog.R
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
@@ -51,6 +51,8 @@ class CatalogSAML20Fragment : Fragment() {
       return fragment
     }
   }
+
+  private val listener: FragmentListenerType<CatalogSAML20Event> by fragmentListeners()
 
   private lateinit var profiles: ProfilesControllerType
   private lateinit var booksController: BooksControllerType
@@ -160,11 +162,11 @@ class CatalogSAML20Fragment : Fragment() {
     this.webView.loadUrl(url)
   }
 
-  private fun onSAMLEvent(event: CatalogSAML20Event) {
+  private fun onSAMLEvent(event: CatalogSAML20InternalEvent) {
     return when (event) {
-      is CatalogSAML20Event.WebViewClientReady ->
+      is CatalogSAML20InternalEvent.WebViewClientReady ->
         this.onWebViewClientReady()
-      is CatalogSAML20Event.Succeeded ->
+      is CatalogSAML20InternalEvent.Succeeded ->
         this.onSAMLEventSucceeded()
     }
   }
@@ -175,8 +177,7 @@ class CatalogSAML20Fragment : Fragment() {
 
   private fun onSAMLEventSucceeded() {
     this.uiThread.runOnUIThread {
-      this.findNavigationController().popBackStack()
-      Unit
+      this.listener.post(CatalogSAML20Event.LoginSucceeded)
     }
   }
 
@@ -202,7 +203,7 @@ class CatalogSAML20Fragment : Fragment() {
         taskSteps = taskSteps
       )
 
-    this.findNavigationController().openErrorPage(parameters)
+    this.listener.post(CatalogSAML20Event.OpenErrorPage(parameters))
   }
 
   private fun onSAMLEventException(exception: Throwable) {
@@ -213,13 +214,6 @@ class CatalogSAML20Fragment : Fragment() {
 
   private fun onSAMLEventFinished() {
     // Don't care
-  }
-
-  private fun findNavigationController(): CatalogNavigationControllerType {
-    return NavigationControllers.find(
-      activity = this.requireActivity(),
-      interfaceType = CatalogNavigationControllerType::class.java
-    )
   }
 
   override fun onStop() {

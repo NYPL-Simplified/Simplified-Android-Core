@@ -7,7 +7,7 @@ dependencies {
   implementation project(":simplified-profiles-controller-api")
   implementation project(":simplified-reader-bookmarks-api")
   implementation project(":simplified-services-api")
-  implementation project(":simplified-ui-navigation-api")
+  implementation project(':simplified-ui-listeners-api')
   implementation project(":simplified-ui-screen")
   implementation project(":simplified-ui-theme")
   implementation project(":simplified-ui-thread-api")

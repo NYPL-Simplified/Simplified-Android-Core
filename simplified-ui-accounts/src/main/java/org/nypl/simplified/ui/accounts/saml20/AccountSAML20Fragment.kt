@@ -10,10 +10,10 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import io.reactivex.disposables.CompositeDisposable
 import org.nypl.simplified.accounts.database.api.AccountType
-import org.nypl.simplified.navigation.api.NavigationControllers
+import org.nypl.simplified.listeners.api.FragmentListenerType
+import org.nypl.simplified.listeners.api.fragmentListeners
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskStep
-import org.nypl.simplified.ui.accounts.AccountNavigationControllerType
 import org.nypl.simplified.ui.accounts.R
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 
@@ -41,6 +41,8 @@ class AccountSAML20Fragment : Fragment(R.layout.account_saml20) {
 
   private val eventSubscriptions: CompositeDisposable =
     CompositeDisposable()
+
+  private val listener: FragmentListenerType<AccountSAML20Event> by fragmentListeners()
 
   private val parameters: AccountSAML20FragmentParameters by lazy {
     this.requireArguments()[PARAMETERS_ID] as AccountSAML20FragmentParameters
@@ -97,13 +99,13 @@ class AccountSAML20Fragment : Fragment(R.layout.account_saml20) {
     }
   }
 
-  private fun onSAMLEvent(event: AccountSAML20Event) {
+  private fun onSAMLEvent(event: AccountSAML20InternalEvent) {
     return when (event) {
-      is AccountSAML20Event.WebViewClientReady ->
+      is AccountSAML20InternalEvent.WebViewClientReady ->
         this.onWebViewClientReady()
-      is AccountSAML20Event.Failed ->
+      is AccountSAML20InternalEvent.Failed ->
         this.onSAMLEventFailed(event)
-      is AccountSAML20Event.AccessTokenObtained ->
+      is AccountSAML20InternalEvent.AccessTokenObtained ->
         this.onSAMLEventAccessTokenObtained()
     }
   }
@@ -113,10 +115,10 @@ class AccountSAML20Fragment : Fragment(R.layout.account_saml20) {
   }
 
   private fun onSAMLEventAccessTokenObtained() {
-    this.findNavigationController().popBackStack()
+    this.listener.post(AccountSAML20Event.AccessTokenObtained)
   }
 
-  private fun onSAMLEventFailed(event: AccountSAML20Event.Failed) {
+  private fun onSAMLEventFailed(event: AccountSAML20InternalEvent.Failed) {
     val newDialog =
       AlertDialog.Builder(this.requireActivity())
         .setTitle(R.string.accountCreationFailed)
@@ -147,7 +149,7 @@ class AccountSAML20Fragment : Fragment(R.layout.account_saml20) {
         taskSteps = taskSteps
       )
 
-    this.findNavigationController().openErrorPage(parameters)
+    this.listener.post(AccountSAML20Event.OpenErrorPage(parameters))
   }
 
   private fun onSAMLEventException(exception: Throwable) {
@@ -161,12 +163,5 @@ class AccountSAML20Fragment : Fragment(R.layout.account_saml20) {
   override fun onStop() {
     super.onStop()
     this.eventSubscriptions.clear()
-  }
-
-  private fun findNavigationController(): AccountNavigationControllerType {
-    return NavigationControllers.find(
-      activity = this.requireActivity(),
-      interfaceType = AccountNavigationControllerType::class.java
-    )
   }
 }

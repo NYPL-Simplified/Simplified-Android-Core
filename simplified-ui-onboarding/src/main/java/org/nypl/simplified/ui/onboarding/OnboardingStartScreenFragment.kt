@@ -6,7 +6,8 @@ import android.widget.Button
 import android.widget.ImageView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import org.nypl.simplified.navigation.api.NavigationControllers
+import org.nypl.simplified.listeners.api.FragmentListenerType
+import org.nypl.simplified.listeners.api.fragmentListeners
 
 class OnboardingStartScreenFragment : Fragment(R.layout.onboarding_start_screen) {
 
@@ -15,6 +16,7 @@ class OnboardingStartScreenFragment : Fragment(R.layout.onboarding_start_screen)
   private lateinit var selectionImageView: ImageView
 
   private val viewModel: OnboardingStartScreenViewModel by viewModels()
+  private val listener: FragmentListenerType<OnboardingStartScreenEvent> by fragmentListeners()
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
@@ -29,14 +31,12 @@ class OnboardingStartScreenFragment : Fragment(R.layout.onboarding_start_screen)
     super.onStart()
 
     this.selectionButton.setOnClickListener {
-      NavigationControllers
-        .find(requireActivity(), OnboardingNavigationController::class.java)
-        .openSettingsAccountRegistry()
+      this.listener.post(OnboardingStartScreenEvent.FindLibrary)
     }
 
     this.selectionAlternateButton.setOnClickListener {
       viewModel.setHasSeenOnboarding()
-      parentFragmentManager.setFragmentResult("", Bundle())
+      this.listener.post(OnboardingStartScreenEvent.AddLibraryLater)
     }
   }
 }

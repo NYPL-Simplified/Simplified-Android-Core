@@ -30,9 +30,9 @@ import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryCorrupt
 import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS
 import org.nypl.simplified.futures.FluentFutureExtensions.map
+import org.nypl.simplified.listeners.api.FragmentListenerType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskResult
-import org.nypl.simplified.ui.accounts.AccountFragmentParameters
 import org.nypl.simplified.ui.catalog.R.string
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
@@ -47,7 +47,7 @@ class CatalogPagedViewHolder(
   private val borrowViewModel: CatalogBorrowViewModel,
   private val buttonCreator: CatalogButtons,
   private val context: FragmentActivity,
-  private val navigation: () -> CatalogNavigationControllerType,
+  private val listener: FragmentListenerType<CatalogFeedEvent>,
   private val onBookSelected: (FeedEntryOPDS) -> Unit,
   private val parent: View,
   private val registrySubscriptions: CompositeDisposable,
@@ -502,14 +502,14 @@ class CatalogPagedViewHolder(
       is BookFormat.BookFormatEPUB -> {
         this.idleButtons.addView(
           this.buttonCreator.createReadButton {
-            this.navigation().openViewer(this.context, book, format)
+            this.listener.post(CatalogFeedEvent.OpenViewer(book, format))
           }
         )
       }
       is BookFormat.BookFormatAudioBook -> {
         this.idleButtons.addView(
           this.buttonCreator.createListenButton {
-            this.navigation().openViewer(this.context, book, format)
+            this.listener.post(CatalogFeedEvent.OpenViewer(book, format))
           }
         )
       }
@@ -570,9 +570,11 @@ class CatalogPagedViewHolder(
     if (!this.isDownloadLoginVisible) {
       this.isDownloadLoginVisible = true
 
-      this.navigation().openBookDownloadLogin(
-        bookID = status.id,
-        downloadURI = status.downloadURI
+      this.listener.post(
+        CatalogFeedEvent.DownloadWaitingForExternalAuthentication(
+          bookID = status.id,
+          downloadURI = status.downloadURI
+        )
       )
     }
   }
@@ -640,14 +642,7 @@ class CatalogPagedViewHolder(
     this.uiThread.checkIsUIThread()
 
     if (this.borrowViewModel.isLoginRequired(accountID)) {
-      this.navigation()
-        .openSettingsAccount(
-          AccountFragmentParameters(
-            accountId = accountID,
-            closeOnLoginSuccess = true,
-            showPleaseLogInTitle = true
-          )
-        )
+      this.listener.post(CatalogFeedEvent.LoginRequired(accountID))
     }
   }
 
@@ -664,6 +659,6 @@ class CatalogPagedViewHolder(
       attributes = result.attributes.toSortedMap(),
       taskSteps = result.steps
     )
-    this.navigation().openErrorPage(errorPageParameters)
+    this.listener.post(CatalogFeedEvent.OpenErrorPage(errorPageParameters))
   }
 }

@@ -181,6 +181,18 @@ interface AccountProviderType : Comparable<AccountProviderType> {
     }
   }
 
+  fun feedIsRoot(feedURI: URI): Boolean {
+    return when (val auth = this.authentication) {
+      is AccountProviderAuthenticationDescription.COPPAAgeGate ->
+        auth.greaterEqual13 == feedURI || auth.under13 == feedURI
+      is AccountProviderAuthenticationDescription.SAML2_0,
+      AccountProviderAuthenticationDescription.Anonymous,
+      is AccountProviderAuthenticationDescription.Basic,
+      is AccountProviderAuthenticationDescription.OAuthWithIntermediary ->
+        this.catalogURI == feedURI
+    }
+  }
+
   /**
    * @return The time that this account provider was most recently updated
    */

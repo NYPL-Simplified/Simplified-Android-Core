@@ -8,7 +8,8 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.android.ktx.supportActionBar
-import org.nypl.simplified.navigation.api.NavigationControllers
+import org.nypl.simplified.listeners.api.FragmentListenerType
+import org.nypl.simplified.listeners.api.fragmentListeners
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 
 /**
@@ -16,6 +17,8 @@ import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
  */
 
 class ProfileTabFragment : Fragment(R.layout.profile_tab) {
+
+  private val listener: FragmentListenerType<ProfileTabEvent> by fragmentListeners()
 
   private lateinit var loggedInAs: TextView
   private lateinit var logOut: Button
@@ -56,7 +59,7 @@ class ProfileTabFragment : Fragment(R.layout.profile_tab) {
     ProfileDialogs.createSwitchConfirmDialog(
       context = activity,
       onConfirm = {
-        this.findNavigationController().openProfileSelect()
+        this.listener.post(ProfileTabEvent.SwitchProfileSelected)
       }
     ).show()
   }
@@ -71,12 +74,5 @@ class ProfileTabFragment : Fragment(R.layout.profile_tab) {
       title = getString(R.string.profileTitle)
       subtitle = null
     }
-  }
-
-  private fun findNavigationController(): ProfilesNavigationControllerType {
-    return NavigationControllers.find(
-      activity = this.requireActivity(),
-      interfaceType = ProfilesNavigationControllerType::class.java
-    )
   }
 }

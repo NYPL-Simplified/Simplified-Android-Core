@@ -1,5 +1,4 @@
 dependencies {
-  implementation project(":simplified-accounts-api")
   implementation project(":simplified-android-ktx")
   implementation project(":simplified-buildconfig-api")
   implementation project(":simplified-cardcreator")
@@ -11,7 +10,7 @@ dependencies {
   implementation project(":simplified-threads")
   implementation project(":simplified-ui-errorpage")
   implementation project(":simplified-ui-images")
-  implementation project(":simplified-ui-navigation-api")
+  implementation project(':simplified-ui-listeners-api')
   implementation project(":simplified-ui-theme")
   implementation project(":simplified-webview")
 

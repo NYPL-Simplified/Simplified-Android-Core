@@ -47,7 +47,7 @@ class AccountSAML20ViewModel(
     this.application.getDir("webview", Context.MODE_PRIVATE)
 
   private val eventSubject =
-    PublishSubject.create<AccountSAML20Event>()
+    PublishSubject.create<AccountSAML20InternalEvent>()
 
   private val authInfo =
     AtomicReference<AuthInfo>()
@@ -80,7 +80,7 @@ class AccountSAML20ViewModel(
   private class AccountSAML20WebClient(
     private val logger: Logger,
     private val resources: Resources,
-    private val eventSubject: PublishSubject<AccountSAML20Event>,
+    private val eventSubject: PublishSubject<AccountSAML20InternalEvent>,
     private val authInfo: AtomicReference<AuthInfo>,
     private val profiles: ProfilesControllerType,
     private val account: AccountID,
@@ -101,7 +101,7 @@ class AccountSAML20ViewModel(
         isReady = true
 
         this.eventSubject.onNext(
-          AccountSAML20Event.WebViewClientReady()
+          AccountSAML20InternalEvent.WebViewClientReady()
         )
       }
     }
@@ -131,7 +131,7 @@ class AccountSAML20ViewModel(
         if (accessToken == null) {
           val message = this.resources.getString(R.string.accountSAML20NoAccessToken)
           this.logger.error("{}", message)
-          this.eventSubject.onNext(AccountSAML20Event.Failed(message))
+          this.eventSubject.onNext(AccountSAML20InternalEvent.Failed(message))
           return true
         }
 
@@ -139,7 +139,7 @@ class AccountSAML20ViewModel(
         if (patronInfo == null) {
           val message = this.resources.getString(R.string.accountSAML20NoPatronInfo)
           this.logger.error("{}", message)
-          this.eventSubject.onNext(AccountSAML20Event.Failed(message))
+          this.eventSubject.onNext(AccountSAML20InternalEvent.Failed(message))
           return true
         }
 
@@ -166,7 +166,7 @@ class AccountSAML20ViewModel(
           )
         )
         this.eventSubject.onNext(
-          AccountSAML20Event.AccessTokenObtained(
+          AccountSAML20InternalEvent.AccessTokenObtained(
             token = accessToken,
             patronInfo = patronInfo,
             cookies = cookies
@@ -209,7 +209,7 @@ class AccountSAML20ViewModel(
   val isWebViewClientReady: Boolean
     get() = (this.webViewClient as AccountSAML20WebClient).isReady
 
-  val events: UnicastWorkSubject<AccountSAML20Event> =
+  val events: UnicastWorkSubject<AccountSAML20InternalEvent> =
     UnicastWorkSubject.create()
 
   val supportEmailAddress: String =

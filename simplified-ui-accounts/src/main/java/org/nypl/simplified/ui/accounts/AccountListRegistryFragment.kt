@@ -31,7 +31,8 @@ import org.nypl.simplified.accounts.api.AccountProviderDescription
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryStatus
 import org.nypl.simplified.android.ktx.supportActionBar
-import org.nypl.simplified.navigation.api.NavigationControllers
+import org.nypl.simplified.listeners.api.FragmentListenerType
+import org.nypl.simplified.listeners.api.fragmentListeners
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.images.ImageLoaderType
 import org.slf4j.LoggerFactory
@@ -44,6 +45,8 @@ class AccountListRegistryFragment : Fragment(R.layout.account_list_registry) {
 
   private val logger = LoggerFactory.getLogger(AccountListRegistryFragment::class.java)
   private val subscriptions = CompositeDisposable()
+  private val listener: FragmentListenerType<AccountListRegistryEvent> by fragmentListeners()
+
   private val requestLocationPermission = registerForActivityResult(
     ActivityResultContracts.RequestPermission(),
     ::getLocation
@@ -139,7 +142,7 @@ class AccountListRegistryFragment : Fragment(R.layout.account_list_registry) {
       }
 
       is AccountEventCreation.AccountEventCreationSucceeded -> {
-        this.findNavigationController().popBackStack()
+        this.listener.post(AccountListRegistryEvent.AccountCreated)
       }
 
       is AccountEventCreation.AccountEventCreationFailed -> {
@@ -295,14 +298,7 @@ class AccountListRegistryFragment : Fragment(R.layout.account_list_registry) {
         taskSteps = accountEvent.taskResult.steps
       )
 
-    this.findNavigationController().openErrorPage(parameters)
-  }
-
-  private fun findNavigationController(): AccountNavigationControllerType {
-    return NavigationControllers.find(
-      activity = this.requireActivity(),
-      interfaceType = AccountNavigationControllerType::class.java
-    )
+    this.listener.post(AccountListRegistryEvent.OpenErrorPage(parameters))
   }
 
   @SuppressLint("MissingPermission")

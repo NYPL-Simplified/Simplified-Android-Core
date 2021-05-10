@@ -34,7 +34,8 @@ import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.books.covers.BookCoverProviderType
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS
-import org.nypl.simplified.navigation.api.NavigationControllers
+import org.nypl.simplified.listeners.api.FragmentListenerType
+import org.nypl.simplified.listeners.api.fragmentListeners
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSAvailabilityHeld
 import org.nypl.simplified.opds.core.OPDSAvailabilityHeldReady
@@ -46,7 +47,6 @@ import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess
 import org.nypl.simplified.opds.core.OPDSAvailabilityRevoked
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskResult
-import org.nypl.simplified.ui.accounts.AccountFragmentParameters
 import org.nypl.simplified.ui.catalog.R.string
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
@@ -79,6 +79,8 @@ class CatalogFragmentBookDetail : Fragment() {
       return fragment
     }
   }
+
+  private val listener: FragmentListenerType<CatalogBookDetailEvent> by fragmentListeners()
 
   private lateinit var authors: TextView
   private lateinit var bookRegistry: BookRegistryReadableType
@@ -384,7 +386,7 @@ class CatalogFragmentBookDetail : Fragment() {
         title = context.resources.getString(R.string.catalogRelatedBooks),
         uri = feedRelated
       )
-    this.findNavigationController().openFeed(targetFeed)
+    this.listener.post(CatalogBookDetailEvent.OpenFeed(targetFeed))
   }
 
   private fun createOrGetFeedModel(
@@ -685,14 +687,14 @@ class CatalogFragmentBookDetail : Fragment() {
           is BookFormat.BookFormatEPUB -> {
             this.buttons.addView(
               this.buttonCreator.createReadButton {
-                this.findNavigationController().openViewer(this.requireActivity(), book, format)
+                this.listener.post(CatalogBookDetailEvent.OpenViewer(book, format))
               }
             )
           }
           is BookFormat.BookFormatAudioBook -> {
             this.buttons.addView(
               this.buttonCreator.createListenButton {
-                this.findNavigationController().openViewer(this.requireActivity(), book, format)
+                this.listener.post(CatalogBookDetailEvent.OpenViewer(book, format))
               }
             )
           }
@@ -825,12 +827,14 @@ class CatalogFragmentBookDetail : Fragment() {
     this.statusInProgressText.visibility = View.GONE
     this.statusInProgressBar.isIndeterminate = true
 
-    this.uiThread.runOnUIThread({
-      this.findNavigationController().openBookDownloadLogin(
-        bookID = book.id,
-        downloadURI = status.downloadURI
+    this.uiThread.runOnUIThread {
+      this.listener.post(
+        CatalogBookDetailEvent.DownloadWaitingForExternalAuthentication(
+          bookID = book.id,
+          downloadURI = status.downloadURI
+        )
       )
-    })
+    }
   }
 
   @UiThread
@@ -953,14 +957,9 @@ class CatalogFragmentBookDetail : Fragment() {
     this.uiThread.checkIsUIThread()
 
     if (this.borrowViewModel.isLoginRequired(this.parameters.feedEntry.accountID)) {
-      this.findNavigationController()
-        .openSettingsAccount(
-          AccountFragmentParameters(
-            accountId = this.parameters.feedEntry.accountID,
-            closeOnLoginSuccess = true,
-            showPleaseLogInTitle = true
-          )
-        )
+      this.listener.post(
+        CatalogBookDetailEvent.LoginRequired(this.parameters.feedEntry.accountID)
+      )
     }
   }
 
@@ -990,12 +989,6 @@ class CatalogFragmentBookDetail : Fragment() {
       attributes = result.attributes.toSortedMap(),
       taskSteps = result.steps
     )
-    this.findNavigationController().openErrorPage(errorPageParameters)
+    this.listener.post(CatalogBookDetailEvent.OpenErrorPage(errorPageParameters))
   }
-
-  private fun findNavigationController(): CatalogNavigationControllerType =
-    NavigationControllers.find(
-      activity = this.requireActivity(),
-      interfaceType = CatalogNavigationControllerType::class.java
-    )
 }
