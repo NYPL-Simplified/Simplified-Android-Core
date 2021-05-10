@@ -1,35 +1,23 @@
 package org.nypl.simplified.ui.splash
 
 import android.os.Bundle
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentResultListener
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import org.librarysimplified.documents.DocumentStoreType
 import org.librarysimplified.services.api.Services
+import org.nypl.simplified.listeners.api.FragmentListenerType
+import org.nypl.simplified.listeners.api.fragmentListeners
 import org.slf4j.LoggerFactory
 
 class SplashFragment : Fragment(R.layout.splash_fragment), FragmentResultListener {
 
-  companion object {
-
-    private const val resultKeyKey = "org.nypl.simplified.splash.result.key"
-
-    fun newInstance(resultKey: String) = SplashFragment().apply {
-      arguments = bundleOf(resultKeyKey to resultKey)
-    }
-  }
-
-  private lateinit var resultKey: String
-
   private val logger = LoggerFactory.getLogger(SplashFragment::class.java)
+  private val listener: FragmentListenerType<SplashEvent> by fragmentListeners()
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-
-    resultKey =
-      requireNotNull(requireArguments().getString(resultKeyKey))
 
     childFragmentManager.setFragmentResultListener(
       "",
@@ -97,7 +85,7 @@ class SplashFragment : Fragment(R.layout.splash_fragment), FragmentResultListene
   }
 
   private fun onMigrationReportFinished() {
-    requireActivity().supportFragmentManager.setFragmentResult(resultKey, Bundle())
+    this.listener.post(SplashEvent.SplashCompleted)
   }
 
   private fun showEula() {

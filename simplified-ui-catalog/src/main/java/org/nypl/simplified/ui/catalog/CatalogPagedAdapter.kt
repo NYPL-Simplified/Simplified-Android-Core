@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import io.reactivex.disposables.CompositeDisposable
 import org.librarysimplified.services.api.ServiceDirectoryType
 import org.nypl.simplified.feeds.api.FeedEntry
+import org.nypl.simplified.listeners.api.FragmentListenerType
 import org.slf4j.LoggerFactory
 
 /**
@@ -19,7 +20,7 @@ class CatalogPagedAdapter(
   private val borrowViewModel: CatalogBorrowViewModel,
   private val buttonCreator: CatalogButtons,
   private val context: FragmentActivity,
-  private val navigation: () -> CatalogNavigationControllerType,
+  private val listener: FragmentListenerType<CatalogFeedEvent>,
   private val onBookSelected: (FeedEntry.FeedEntryOPDS) -> Unit,
   private val services: ServiceDirectoryType,
   private val ownership: CatalogFeedOwnership
@@ -44,7 +45,7 @@ class CatalogPagedAdapter(
       borrowViewModel = this.borrowViewModel,
       buttonCreator = this.buttonCreator,
       context = this.context,
-      navigation = this.navigation,
+      listener = this.listener,
       onBookSelected = this.onBookSelected,
       parent = LayoutInflater.from(parent.context).inflate(R.layout.book_cell, parent, false),
       registrySubscriptions = this.registrySubscriptions,

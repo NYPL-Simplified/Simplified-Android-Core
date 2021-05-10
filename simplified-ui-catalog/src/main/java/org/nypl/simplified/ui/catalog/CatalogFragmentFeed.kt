@@ -55,12 +55,12 @@ import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderFailure.FeedLoad
 import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderFailure.FeedLoaderFailedGeneral
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.feeds.api.FeedSearch
-import org.nypl.simplified.navigation.api.NavigationControllers
+import org.nypl.simplified.listeners.api.FragmentListenerType
+import org.nypl.simplified.listeners.api.fragmentListeners
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileUpdated
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
-import org.nypl.simplified.ui.accounts.AccountFragmentParameters
 import org.nypl.simplified.ui.accounts.AccountPickerDialogFragment
 import org.nypl.simplified.ui.catalog.CatalogFeedArguments.CatalogFeedArgumentsRemote
 import org.nypl.simplified.ui.catalog.CatalogFeedOwnership.CollectedFromAccounts
@@ -143,13 +143,7 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
 
   private val logger = LoggerFactory.getLogger(CatalogFragmentFeed::class.java)
   private val parametersId = PARAMETERS_ID
-
-  private val navigationController by lazy {
-    NavigationControllers.find(
-      this.requireActivity(),
-      interfaceType = CatalogNavigationControllerType::class.java
-    )
-  }
+  private val listener: FragmentListenerType<CatalogFeedEvent> by fragmentListeners()
 
   private var accountSubscription: Disposable? = null
   private var profileSubscription: Disposable? = null
@@ -335,9 +329,7 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
         true
       }
       android.R.id.home -> {
-        val isRoot =
-          (0 == this.navigationController.backStackSize())
-        if (isRoot) {
+        if (isAccountCatalogRoot()) {
           this.openAccountPickerDialog()
           true
         } else {
@@ -393,13 +385,15 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
   }
 
   private fun onBookSelected(opdsEntry: FeedEntry.FeedEntryOPDS) {
-    this.navigationController
-      .openBookDetail(this.parameters, opdsEntry)
+    this.listener.post(
+      CatalogFeedEvent.OpenBookDetail(this.parameters, opdsEntry)
+    )
   }
 
   private fun onFeedSelected(title: String, uri: URI) {
-    this.navigationController
-      .openFeed(this.feedModel.resolveFeed(title, uri, false))
+    this.listener.post(
+      CatalogFeedEvent.OpenFeed(this.feedModel.resolveFeed(title, uri, false))
+    )
   }
 
   @UiThread
@@ -560,7 +554,7 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
         borrowViewModel = this.borrowViewModel,
         buttonCreator = this.buttonCreator,
         context = requireActivity(),
-        navigation = this::navigationController,
+        listener = this.listener,
         onBookSelected = this::onBookSelected,
         services = Services.serviceDirectory(),
         ownership = feedState.arguments.ownership
@@ -631,14 +625,7 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
                * for the navigator library.
                */
 
-              this.navigationController
-                .openSettingsAccount(
-                  AccountFragmentParameters(
-                    accountId = ownership.accountId,
-                    closeOnLoginSuccess = true,
-                    showPleaseLogInTitle = true
-                  )
-                )
+              this.listener.post(CatalogFeedEvent.LoginRequired(ownership.accountId))
             }
           }
           CollectedFromAccounts -> {
@@ -665,8 +652,11 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
 
     this.feedErrorDetails.isEnabled = true
     this.feedErrorDetails.setOnClickListener {
-      this.navigationController
-        .openErrorPage(this.errorPageParameters(feedState.failure))
+      this.listener.post(
+        CatalogFeedEvent.OpenErrorPage(
+          this.errorPageParameters(feedState.failure)
+        )
+      )
     }
   }
 
@@ -693,13 +683,8 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
     }
 
     try {
-      val isRoot = (0 == this.navigationController.backStackSize())
-      if (isRoot) {
-        when (this.parameters.ownership) {
-          is OwnedByAccount -> showAccountPickerAction()
-          else -> {
-          } // do nothing
-        }
+      if (isAccountCatalogRoot()) {
+        showAccountPickerAction()
       }
     } catch (e: Exception) {
       // Nothing to do
@@ -741,13 +726,12 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
   private fun openAccountPickerDialog() {
     return when (val ownership = this.parameters.ownership) {
       is OwnedByAccount -> {
-        val fm = requireActivity().supportFragmentManager
         val dialog =
           AccountPickerDialogFragment.create(
             currentId = ownership.accountId,
             showAddAccount = this.configurationService.allowAccountsAccess
           )
-        dialog.show(fm, dialog.tag)
+        dialog.show(parentFragmentManager, dialog.tag)
       }
       CollectedFromAccounts -> {
         throw IllegalStateException("Can't switch account from collected feed!")
@@ -767,8 +751,10 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
     fun performSearch(searchView: TextView) {
       val query = searchView.text.toString().trim()
       this@CatalogFragmentFeed.logSearchToAnalytics(query)
-      this@CatalogFragmentFeed.navigationController.openFeed(
-        this@CatalogFragmentFeed.feedModel.resolveSearch(search, query)
+      this@CatalogFragmentFeed.listener.post(
+        CatalogFeedEvent.OpenFeed(
+          this@CatalogFragmentFeed.feedModel.resolveSearch(search, query)
+        )
       )
     }
 
@@ -993,7 +979,9 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
       button.setTextColor(this.colorStateListForFacetTabs())
       button.setOnClickListener {
         this.logger.debug("selected entry point facet: {}", facet.title)
-        this.navigationController.openFeed(this.feedModel.resolveFacet(facet))
+        this.listener.post(
+          CatalogFeedEvent.OpenFeed(this.feedModel.resolveFacet(facet))
+        )
       }
       facetTabs.addView(button)
     }
@@ -1049,7 +1037,9 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
     alertBuilder.setSingleChoiceItems(names, checkedItem) { dialog, checked ->
       val selected = choices[checked]
       this.logger.debug("selected facet: {}", selected)
-      this.navigationController.openFeed(this.feedModel.resolveFacet(selected))
+      this.listener.post(
+        CatalogFeedEvent.OpenFeed(this.feedModel.resolveFacet(selected))
+      )
       dialog.dismiss()
     }
     alertBuilder.create().show()
@@ -1071,6 +1061,25 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
       attributes = taskFailure.attributes.toSortedMap(),
       taskSteps = taskFailure.steps
     )
+  }
+
+  private fun isAccountCatalogRoot(): Boolean {
+    val parameters = this.parameters
+    if (parameters !is CatalogFeedArgumentsRemote) {
+      return false
+    }
+
+    val ownership = this.parameters.ownership
+    if (ownership !is OwnedByAccount) {
+      return false
+    }
+
+    val accountProvider =
+      this.profilesController.profileCurrent()
+        .account(ownership.accountId)
+        .provider
+
+    return accountProvider.feedIsRoot(parameters.feedURI)
   }
 
   override fun onBirthYearSelected(isOver13: Boolean) {

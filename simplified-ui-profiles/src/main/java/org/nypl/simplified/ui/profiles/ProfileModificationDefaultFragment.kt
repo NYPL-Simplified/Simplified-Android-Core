@@ -17,7 +17,8 @@ import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
 import io.reactivex.disposables.CompositeDisposable
 import org.nypl.simplified.android.ktx.supportActionBar
-import org.nypl.simplified.navigation.api.NavigationControllers
+import org.nypl.simplified.listeners.api.FragmentListenerType
+import org.nypl.simplified.listeners.api.fragmentListeners
 import org.nypl.simplified.profiles.api.ProfileCreationEvent
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileUpdated
@@ -42,6 +43,7 @@ class ProfileModificationDefaultFragment : Fragment(R.layout.profile_modificatio
 
   private val subscriptions = CompositeDisposable()
   private val viewModel: ProfileModificationDefaultViewModel by viewModels()
+  private val listener: FragmentListenerType<ProfileModificationEvent> by fragmentListeners()
 
   private val parameters: ProfileModificationFragmentParameters by lazy {
     this.requireArguments()[PARAMETERS_ID] as ProfileModificationFragmentParameters
@@ -61,7 +63,7 @@ class ProfileModificationDefaultFragment : Fragment(R.layout.profile_modificatio
       view.findViewById(R.id.profileButtonCreate)
 
     this.cancel.setOnClickListener {
-      this.findNavigationController().popBackStack()
+      this.listener.post(ProfileModificationEvent.Cancelled)
     }
 
     val nameFieldListener = OnTextChangeListener(this::onNameChanged)
@@ -138,7 +140,7 @@ class ProfileModificationDefaultFragment : Fragment(R.layout.profile_modificatio
       }
       is ProfileCreationEvent.ProfileCreationSucceeded,
       is ProfileUpdated.Succeeded -> {
-        this.findNavigationController().popBackStack()
+        this.listener.post(ProfileModificationEvent.Succeeded)
       }
       is ProfileUpdated.Failed -> {
         this.showProfileUpdateError(event)
@@ -194,12 +196,5 @@ class ProfileModificationDefaultFragment : Fragment(R.layout.profile_modificatio
     val manager =
       context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
     manager.hideSoftInputFromWindow(windowToken, 0)
-  }
-
-  private fun findNavigationController(): ProfilesNavigationControllerType {
-    return NavigationControllers.find(
-      activity = this.requireActivity(),
-      interfaceType = ProfilesNavigationControllerType::class.java
-    )
   }
 }
