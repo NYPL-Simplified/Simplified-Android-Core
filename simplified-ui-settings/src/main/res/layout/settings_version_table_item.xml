@@ -10,7 +10,7 @@
     android:layout_height="wrap_content"
     android:layout_marginRight="16dp"
     android:textSize="11sp"
-    android:text="@string/accountPlaceholder"/>
+    android:text="@string/settingsPlaceholder"/>
 
   <TextView
     android:id="@+id/value"
@@ -20,6 +20,6 @@
     android:gravity="left"
     android:textSize="11sp"
     android:fontFamily="monospace"
-    android:text="@string/accountPlaceholder"/>
+    android:text="@string/settingsPlaceholder"/>
 
 </TableRow>

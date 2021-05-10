@@ -7,7 +7,7 @@
     android:icon="@drawable/ic_settings_account"
     android:key="settingsAccounts"
     android:summary="@string/settingsAccountsSummary"
-    android:title="@string/accounts" />
+    android:title="@string/settingsAccounts" />
 
   <PreferenceCategory android:title="@string/settingsDocumentation" app:isPreferenceVisible="false">
     <Preference
