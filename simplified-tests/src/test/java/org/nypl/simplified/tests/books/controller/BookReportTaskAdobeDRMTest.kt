@@ -23,6 +23,7 @@ import org.nypl.simplified.books.controller.BookReportTask
 import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess
+import java.net.URI
 import java.util.concurrent.TimeUnit
 
 class BookReportTaskAdobeDRMTest {
@@ -148,7 +149,8 @@ class BookReportTaskAdobeDRMTest {
             userName = AccountUsername("abcd"),
             password = AccountPassword("1234"),
             adobeCredentials = null,
-            authenticationDescription = null
+            authenticationDescription = null,
+            annotationsURI = URI("https://www.example.com")
           )
         )
       )
@@ -201,7 +203,8 @@ class BookReportTaskAdobeDRMTest {
             userName = AccountUsername("abcd"),
             password = AccountPassword("1234"),
             adobeCredentials = null,
-            authenticationDescription = null
+            authenticationDescription = null,
+            annotationsURI = URI("https://www.example.com")
           )
         )
       )

@@ -46,6 +46,7 @@ import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceType
 import org.nypl.simplified.tests.EventAssertions
 import org.nypl.simplified.tests.EventLogging
 import org.slf4j.Logger
+import java.net.URI
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 
@@ -73,7 +74,8 @@ abstract class ReaderBookmarkServiceContract {
       userName = AccountUsername("abcd"),
       password = AccountPassword("1234"),
       adobeCredentials = null,
-      authenticationDescription = null
+      authenticationDescription = null,
+      annotationsURI = URI("https://www.example.com")
     )
 
   private fun addResponse(

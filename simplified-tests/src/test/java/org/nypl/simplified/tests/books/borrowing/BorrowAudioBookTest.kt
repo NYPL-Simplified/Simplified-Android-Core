@@ -127,7 +127,8 @@ class BorrowAudioBookTest {
             userName = AccountUsername("user"),
             password = AccountPassword("password"),
             adobeCredentials = null,
-            authenticationDescription = "Basic"
+            authenticationDescription = "Basic",
+            annotationsURI = URI("https://www.example.com")
           )
         )
       )

@@ -44,6 +44,7 @@ import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.tests.mocking.MockAccountLogoutStringResources
 import org.slf4j.Logger
 import java.io.InputStream
+import java.net.URI
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 
@@ -206,7 +207,8 @@ abstract class ProfileAccountLogoutTaskContract {
         userName = AccountUsername("abcd"),
         password = AccountPassword("1234"),
         adobeCredentials = null,
-        authenticationDescription = null
+        authenticationDescription = null,
+        annotationsURI = URI("https://www.example.com")
       )
 
     this.account.setLoginState(AccountLoggedIn(credentials))
@@ -290,6 +292,7 @@ abstract class ProfileAccountLogoutTaskContract {
             userID = AdobeUserID("someone")
           )
         ),
+        annotationsURI = URI("https://www.example.com"),
         authenticationDescription = null
       )
 
@@ -397,6 +400,7 @@ abstract class ProfileAccountLogoutTaskContract {
             userID = AdobeUserID("someone")
           )
         ),
+        annotationsURI = URI("https://www.example.com"),
         authenticationDescription = null
       )
 
@@ -521,6 +525,7 @@ abstract class ProfileAccountLogoutTaskContract {
             userID = AdobeUserID("someone")
           )
         ),
+        annotationsURI = URI("https://www.example.com"),
         authenticationDescription = null
       )
 

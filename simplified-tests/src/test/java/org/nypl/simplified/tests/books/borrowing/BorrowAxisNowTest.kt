@@ -61,6 +61,7 @@ import org.nypl.simplified.tests.mocking.MockBundledContentResolver
 import org.nypl.simplified.tests.mocking.MockContentResolver
 import org.nypl.simplified.tests.mocking.MockDRMInformationAxisHandle
 import org.slf4j.LoggerFactory
+import java.net.URI
 
 class BorrowAxisNowTest {
 
@@ -145,7 +146,8 @@ class BorrowAxisNowTest {
             userName = AccountUsername("user"),
             password = AccountPassword("password"),
             adobeCredentials = null,
-            authenticationDescription = "Basic"
+            authenticationDescription = "Basic",
+            annotationsURI = URI("https://www.example.com")
           )
         )
       )

@@ -394,7 +394,8 @@ abstract class AccountsDatabaseContract {
         userName = AccountUsername("abcd"),
         password = AccountPassword("1234"),
         adobeCredentials = null,
-        authenticationDescription = null
+        authenticationDescription = null,
+        annotationsURI = URI("https://www.example.com")
       )
 
     acc0.setLoginState(AccountLoginState.AccountLoggedIn(creds))

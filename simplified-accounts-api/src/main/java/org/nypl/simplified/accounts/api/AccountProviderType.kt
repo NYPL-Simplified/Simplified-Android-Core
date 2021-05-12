@@ -71,6 +71,7 @@ interface AccountProviderType : Comparable<AccountProviderType> {
    * @see .patronSettingsURI
    */
 
+  @Deprecated("This is now an account-private credential value")
   val supportsSimplyESynchronization: Boolean
 
   /**
@@ -155,6 +156,7 @@ interface AccountProviderType : Comparable<AccountProviderType> {
    * @see .supportsSimplyESynchronization
    */
 
+  @Deprecated("This is now an account-private credential value")
   val annotationsURI: URI?
 
   /**

@@ -297,7 +297,8 @@ class MigrationFrom3Master(
           userName = AccountUsername(accountData.username),
           password = AccountPassword(accountData.password),
           adobeCredentials = null,
-          authenticationDescription = null
+          authenticationDescription = null,
+          annotationsURI = null
         )
 
       when (val taskResult = this.services.loginAccount(createdAccount.account, credentials)) {
