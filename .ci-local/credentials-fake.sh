@@ -15,6 +15,8 @@ info()
   echo "credentials-fake.sh: info: $1" 1>&2
 }
 
+mkdir -p "${HOME}/.gradle" ||
+  fatal "could not create ${HOME}/.gradle"
 
 #------------------------------------------------------------------------
 # Generate a temporary keystore for APK signing.
