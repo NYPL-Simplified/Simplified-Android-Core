@@ -3,4 +3,5 @@ dependencies {
   implementation libraries.androidx_legacy_preference_v14
   implementation libraries.google_material
   implementation libraries.kotlin_stdlib
+  implementation libraries.kotlin_reflect
 }

@@ -11,6 +11,7 @@ dependencies {
   implementation libraries.androidx_lifecycle
   implementation libraries.androidx_lifecycle_viewmodel
   implementation libraries.kotlin_stdlib
+  implementation libraries.kotlin_reflect
   implementation libraries.nypl_readium2_api
   implementation libraries.nypl_readium2_vanilla
   implementation libraries.nypl_readium2_views

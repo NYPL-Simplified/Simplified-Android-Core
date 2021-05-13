@@ -10,6 +10,7 @@ dependencies {
   api libraries.nypl_audiobook_manifest_parser_api
 
   implementation libraries.kotlin_stdlib
+  implementation libraries.kotlin_reflect
   implementation libraries.nypl_audiobook_downloads
   implementation libraries.nypl_audiobook_feedbooks
   implementation libraries.nypl_audiobook_manifest_fulfill_basic

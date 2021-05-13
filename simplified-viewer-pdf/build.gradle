@@ -8,6 +8,7 @@ dependencies {
 
   implementation libraries.androidx_appcompat
   implementation libraries.kotlin_stdlib
+  implementation libraries.kotlin_reflect
   implementation libraries.nypl_pdf_api
   implementation libraries.nypl_pdf_viewer
   implementation libraries.androidx_activity

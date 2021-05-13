@@ -4,6 +4,7 @@ dependencies {
 
   implementation libraries.joda_time
   implementation libraries.kotlin_stdlib
+  implementation libraries.kotlin_reflect
   implementation libraries.r2_opds
   implementation libraries.r2_shared
 }

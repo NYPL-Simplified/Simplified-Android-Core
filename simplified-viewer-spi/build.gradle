@@ -2,4 +2,5 @@ dependencies {
   api project(":simplified-books-api")
 
   implementation libraries.kotlin_stdlib
+  implementation libraries.kotlin_reflect
 }

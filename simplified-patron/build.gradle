@@ -6,4 +6,5 @@ dependencies {
   implementation libraries.jackson_databind
   implementation libraries.joda_time
   implementation libraries.kotlin_stdlib
+  implementation libraries.kotlin_reflect
 }
