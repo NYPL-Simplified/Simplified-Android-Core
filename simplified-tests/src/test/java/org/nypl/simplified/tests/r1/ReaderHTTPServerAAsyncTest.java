@@ -1,4 +1,4 @@
-package org.nypl.simplified.viewer.epub.readium1;
+package org.nypl.simplified.tests.r1;
 
 import android.content.res.AssetManager;
 
@@ -8,6 +8,9 @@ import com.koushikdutta.async.http.server.AsyncHttpServerResponse;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.nypl.simplified.viewer.epub.readium1.ReaderHTTPMimeMapType;
+import org.nypl.simplified.viewer.epub.readium1.ReaderHTTPServerAAsync;
+import org.nypl.simplified.viewer.epub.readium1.ReaderHTTPServerStartListenerType;
 import org.readium.sdk.android.ManifestItem;
 import org.readium.sdk.android.Package;
 import org.readium.sdk.android.util.ResourceInputStream;

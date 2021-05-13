@@ -4,5 +4,6 @@ dependencies {
   api project(":simplified-ui-thread-api")
 
   implementation libraries.kotlin_stdlib
+  implementation libraries.kotlin_reflect
   implementation libraries.rxjava2
 }

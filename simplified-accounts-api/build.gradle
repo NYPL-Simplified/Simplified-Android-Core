@@ -15,6 +15,7 @@ dependencies {
   implementation project(':simplified-opds-core')
 
   implementation libraries.kotlin_stdlib
+  implementation libraries.kotlin_reflect
 
   compileOnly libraries.google_autovalue
   annotationProcessor libraries.google_autovalue_processor

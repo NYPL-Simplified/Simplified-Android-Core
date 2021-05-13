@@ -5,7 +5,7 @@ import java.time.ZoneOffset
 buildscript {
   // Load in our list of dependencies.
   //
-  apply from: file("$rootDir/libraries.gradle")
+  apply from: file("$rootDir/build_libraries.gradle")
 
   repositories {
     mavenCentral()
@@ -21,6 +21,7 @@ buildscript {
     classpath "com.nabilhachicha:android-native-dependencies:0.1.2"
     classpath 'com.google.gms:google-services:4.3.4'
     classpath 'com.google.firebase:firebase-crashlytics-gradle:2.4.1'
+    classpath "de.mannodermaus.gradle.plugins:android-junit5:1.7.1.1"
   }
 }
 
@@ -86,6 +87,24 @@ subprojects { project ->
         "Unrecognized packaging type ${POM_PACKAGING} for ${project}")
   }
 
+  /*
+   * Configure publishing for the various project types.
+   */
+
+  switch (POM_PACKAGING) {
+    case "jar":
+      apply from: file("$rootDir/build_publishing.gradle")
+      break
+    case "apk":
+      break
+    case "aar":
+      apply from: file("$rootDir/build_publishing.gradle")
+      break
+    default:
+      throw new IllegalStateException(
+        "Unrecognized packaging type ${POM_PACKAGING} for ${project}")
+  }
+
   repositories {
     mavenLocal()
     mavenCentral()
@@ -107,32 +126,6 @@ subprojects { project ->
     jcenter()
   }
 
-  // Configure publishing for java projects
-  //
-  pluginManager.withPlugin("java") {
-    logger.info("Configuring publishing for ${project} (${POM_PACKAGING})")
-    apply from: file("$rootDir/.publish/publishing.gradle")
-  }
-
-  // Configure publishing for android-library projects
-  //
-  pluginManager.withPlugin("com.android.library") {
-    logger.info("Configuring publishing for ${project} (${POM_PACKAGING})")
-    apply from: file("$rootDir/.publish/publishing.gradle")
-  }
-
-  configurations.all {
-    // We currently have transitive dependencies that specify dependencies on newer versions
-    // of SLF4J. These are subtly incompatible with Logback-Android, and it will be a while before
-    // new versions appear of both artifacts. Remove this when both are updated!
-    //
-    resolutionStrategy.force libraries.slf4j
-
-    // one.irradia.mime.api depends on an outdated version of kotlin-reflect
-    //
-    resolutionStrategy.force libraries.kotlin_reflect
-  }
-
   // Skip tasks for projects that require drm; unless drm is enabled
   //
   def nyplDrmRequired =
@@ -152,6 +145,7 @@ task verifySemanticVersioning {}
 /**
  * Displays properties starting with 'org.librarysimplified'.
  */
+
 task listProperties(group: 'NYPL') {
   description = "Displays properties starting with 'org.librarysimplified'."
   doLast {
@@ -164,10 +158,11 @@ task listProperties(group: 'NYPL') {
   }
 }
 
-// Add ktlint tasks to root project. This executes faster than
-// configuring the task for each individual subproject.
-//
-apply from: file("$rootDir/ktlint.gradle")
+/*
+ * Add ktlint tasks.
+ */
+
+apply from: file("$rootDir/build_ktlint.gradle")
 
 subprojects {
   assemble.dependsOn ktlint

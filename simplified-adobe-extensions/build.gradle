@@ -7,5 +7,6 @@ dependencies {
   implementation project(":simplified-json-core")
 
   implementation libraries.kotlin_stdlib
+  implementation libraries.kotlin_reflect
   implementation libraries.slf4j
 }

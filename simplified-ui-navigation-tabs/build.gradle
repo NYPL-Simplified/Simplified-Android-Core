@@ -13,4 +13,5 @@ dependencies {
 
   api libraries.pandora_bottom_navigator
   implementation libraries.kotlin_stdlib
+  implementation libraries.kotlin_reflect
 }

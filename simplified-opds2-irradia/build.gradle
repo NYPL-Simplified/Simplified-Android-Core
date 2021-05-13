@@ -8,4 +8,5 @@ dependencies {
   implementation libraries.irradia_opds2_parser_librarysimplified
   implementation libraries.joda_time
   implementation libraries.kotlin_stdlib
+  implementation libraries.kotlin_reflect
 }

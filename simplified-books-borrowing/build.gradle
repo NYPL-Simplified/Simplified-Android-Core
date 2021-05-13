@@ -13,6 +13,7 @@ dependencies {
   implementation project(":simplified-taskrecorder-api")
 
   implementation libraries.kotlin_stdlib
+  implementation libraries.kotlin_reflect
   implementation libraries.nypl_drm_core
   implementation libraries.nypl_http_api
   implementation libraries.nypl_http_downloads

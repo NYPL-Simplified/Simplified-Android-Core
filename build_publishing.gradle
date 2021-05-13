@@ -1,15 +1,11 @@
 apply plugin: "maven-publish"
 apply plugin: "signing"
 
-// Required for publishing to Maven Central
-//
 def mavenCentralUsername =
   project.findProperty('mavenCentralUsername') ?: ''
 def mavenCentralPassword =
   project.findProperty('mavenCentralPassword') ?: ''
 
-// Control the behavior of various publishing tasks
-//
 def publishDirectory =
   project.findProperty('org.librarysimplified.directory.publish') ?: ''
 def noSigning =
