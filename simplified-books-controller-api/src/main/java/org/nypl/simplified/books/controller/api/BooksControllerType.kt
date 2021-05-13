@@ -96,7 +96,7 @@ interface BooksControllerType {
 
   fun booksSync(
     account: AccountType
-  ): FluentFuture<Unit>
+  ): FluentFuture<TaskResult<Unit>>
 
   /**
    * Revoke the given book.

@@ -63,6 +63,7 @@ import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimerType
 import org.nypl.simplified.profiles.controller.api.ProfileAccountCreationStringResourcesType
 import org.nypl.simplified.profiles.controller.api.ProfileAccountDeletionStringResourcesType
+import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.tests.EventAssertions
 import org.nypl.simplified.tests.ExtraAssertions.assertInstanceOf
 import org.nypl.simplified.tests.MutableServiceDirectory
@@ -85,7 +86,6 @@ import java.net.URI
 import java.util.ArrayList
 import java.util.Collections
 import java.util.NoSuchElementException
-import java.util.concurrent.ExecutionException
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -298,14 +298,23 @@ abstract class BooksControllerContract {
 
     this.server.enqueue(
       MockResponse()
+        .setResponseCode(200)
+        .setBody(this.simpleUserProfile())
+    )
+
+    this.server.enqueue(
+      MockResponse()
         .setResponseCode(400)
         .setBody("")
     )
 
-    val ex = Assertions.assertThrows(ExecutionException::class.java) {
-      controller.booksSync(account).get()
-    }
-    Assertions.assertEquals(IOException::class.java, ex.cause!!.javaClass)
+    val result = controller.booksSync(account).get()
+    assertInstanceOf(result, TaskResult.Failure::class.java)
+
+    Assertions.assertEquals(
+      IOException::class.java,
+      (result as TaskResult.Failure).exception!!::class.java
+    )
   }
 
   /**
@@ -342,6 +351,12 @@ abstract class BooksControllerContract {
     this.profiles.setProfileCurrent(profile.id)
     val account = profile.accountsByProvider()[provider.id]!!
     account.setLoginState(AccountLoggedIn(correctCredentials()))
+
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody(this.simpleUserProfile())
+    )
 
     this.server.enqueue(
       MockResponse()
@@ -470,13 +485,21 @@ abstract class BooksControllerContract {
     this.server.enqueue(
       MockResponse()
         .setResponseCode(200)
+        .setBody(this.simpleUserProfile())
+    )
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
         .setBody("Unlikely!")
     )
 
-    val ex = Assertions.assertThrows(ExecutionException::class.java) {
-      controller.booksSync(account).get()
-    }
-    Assertions.assertEquals(OPDSParseException::class.java, ex.cause!!.javaClass)
+    val result = controller.booksSync(account).get()
+    assertInstanceOf(result, TaskResult.Failure::class.java)
+
+    Assertions.assertEquals(
+      OPDSParseException::class.java,
+      (result as TaskResult.Failure).exception!!::class.java
+    )
   }
 
   /**
@@ -513,6 +536,12 @@ abstract class BooksControllerContract {
     this.profiles.setProfileCurrent(profile.id)
     val account = profile.accountsByProvider()[provider.id]!!
     account.setLoginState(AccountLoggedIn(correctCredentials()))
+
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody(this.simpleUserProfile())
+    )
 
     this.server.enqueue(
       MockResponse()
@@ -588,6 +617,12 @@ abstract class BooksControllerContract {
     val account = profile.accountsByProvider()[provider.id]!!
     account.setLoginState(AccountLoggedIn(correctCredentials()))
 
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody(this.simpleUserProfile())
+    )
+
     /*
      * Populate the database by syncing against a feed that contains books.
      */
@@ -616,6 +651,11 @@ abstract class BooksControllerContract {
      * Now run the sync again but this time with a feed that removes books.
      */
 
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody(this.simpleUserProfile())
+    )
     this.server.enqueue(
       MockResponse()
         .setResponseCode(200)
@@ -692,6 +732,12 @@ abstract class BooksControllerContract {
     this.profiles.setProfileCurrent(profile.id)
     val account = profile.accountsByProvider()[provider.id]!!
     account.setLoginState(AccountLoggedIn(correctCredentials()))
+
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody(this.simpleUserProfile())
+    )
 
     this.server.enqueue(
       MockResponse()
@@ -781,6 +827,12 @@ abstract class BooksControllerContract {
     this.server.enqueue(
       MockResponse()
         .setResponseCode(200)
+        .setBody(this.simpleUserProfile())
+    )
+
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
         .setBody(Buffer().readFrom(resource("testBooksSyncNewEntries.xml")))
     )
 
@@ -801,22 +853,6 @@ abstract class BooksControllerContract {
     return BooksControllerContract::class.java.getResourceAsStream(file)!!
   }
 
-  @Throws(IOException::class)
-  private fun resourceSize(file: String): Long {
-    var total = 0L
-    val buffer = ByteArray(8192)
-    resource(file).use { stream ->
-      while (true) {
-        val r = stream.read(buffer)
-        if (r <= 0) {
-          break
-        }
-        total += r.toLong()
-      }
-    }
-    return total
-  }
-
   @Throws(ProfileDatabaseException::class)
   private fun profilesDatabaseWithoutAnonymous(
     accountEvents: PublishSubject<AccountEvent>,
@@ -834,10 +870,9 @@ abstract class BooksControllerContract {
     )
   }
 
-  private fun onAccountResolution(
-    id: URI,
-    message: String
-  ) {
-    this.logger.debug("resolution: {}: {}", id, message)
+  private fun simpleUserProfile(): String {
+    return resource("/org/nypl/simplified/tests/patron/example-with-device.json")
+      .readBytes()
+      .decodeToString()
   }
 }

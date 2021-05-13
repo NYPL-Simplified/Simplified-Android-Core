@@ -650,7 +650,7 @@ class Controller private constructor(
 
   override fun booksSync(
     account: AccountType
-  ): FluentFuture<Unit> {
+  ): FluentFuture<TaskResult<Unit>> {
     return this.submitTask(
       BookSyncTask(
         account = account,
@@ -658,6 +658,7 @@ class Controller private constructor(
         bookRegistry = this.bookRegistry,
         booksController = this,
         feedParser = this.feedParser,
+        patronParsers = this.patronUserProfileParsers,
         http = this.lsHttp
       )
     )
