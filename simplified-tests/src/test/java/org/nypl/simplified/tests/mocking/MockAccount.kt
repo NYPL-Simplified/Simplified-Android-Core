@@ -39,7 +39,6 @@ class MockAccount(override val id: AccountID) : AccountType {
       AccountProvider(
         addAutomatically = false,
         announcements = emptyList(),
-        annotationsURI = null,
         authentication = authentication,
         authenticationAlternatives = listOf(),
         authenticationDocumentURI = null,

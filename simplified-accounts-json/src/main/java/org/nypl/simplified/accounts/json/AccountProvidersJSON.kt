@@ -67,7 +67,6 @@ object AccountProvidersJSON {
     node.put("supportsReservations", provider.supportsReservations)
     node.put("updated", provider.updated.toString())
 
-    this.putConditionally(node, "annotationsURI", provider.annotationsURI)
     this.putConditionally(node, "authenticationDocumentURI", provider.authenticationDocumentURI)
     this.putConditionally(node, "cardCreatorURI", provider.cardCreatorURI)
     this.putConditionally(node, "catalogURI", provider.catalogURI)
@@ -256,7 +255,6 @@ object AccountProvidersJSON {
 
       return AccountProvider(
         addAutomatically = addAutomatically,
-        annotationsURI = annotationsURI,
         announcements = announcements,
         authentication = authentication,
         authenticationAlternatives = authenticationAlternatives,

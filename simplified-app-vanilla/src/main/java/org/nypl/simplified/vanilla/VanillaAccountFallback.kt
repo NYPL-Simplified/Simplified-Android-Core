@@ -16,7 +16,6 @@ class VanillaAccountFallback : AccountProviderFallbackType {
   override fun get(): AccountProviderType {
     return AccountProvider(
       addAutomatically = false,
-      annotationsURI = null,
       authenticationDocumentURI = URI.create("https://circulation.librarysimplified.org/CLASSICS/authentication_document"),
       authentication = AccountProviderAuthenticationDescription.COPPAAgeGate(
         greaterEqual13 = URI.create("https://circulation.librarysimplified.org/CLASSICS/groups/1831"),
