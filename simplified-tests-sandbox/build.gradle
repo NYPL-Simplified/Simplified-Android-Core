@@ -48,6 +48,7 @@ dependencies {
   implementation libraries.io7m_jfunctional
   implementation libraries.io7m_junreachable
   implementation libraries.kotlin_stdlib
+  implementation libraries.kotlin_reflect
   implementation libraries.leak_canary
   implementation libraries.logback_android
   implementation libraries.mockito_android

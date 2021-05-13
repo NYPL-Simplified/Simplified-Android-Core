@@ -14,6 +14,7 @@ dependencies {
   implementation libraries.io7m_jfunctional
   implementation libraries.io7m_junreachable
   implementation libraries.kotlin_stdlib
+  implementation libraries.kotlin_reflect
   implementation libraries.rxjava2
   implementation libraries.rxjava2extensions
   implementation libraries.slf4j

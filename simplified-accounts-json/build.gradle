@@ -9,5 +9,6 @@ dependencies {
 
   implementation libraries.jackson_databind
   implementation libraries.kotlin_stdlib
+  implementation libraries.kotlin_reflect
   implementation libraries.slf4j
 }

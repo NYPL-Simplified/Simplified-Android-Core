@@ -5,4 +5,5 @@ dependencies {
   implementation project(":simplified-services-api")
   implementation project(":simplified-viewer-spi")
   implementation libraries.kotlin_stdlib
+  implementation libraries.kotlin_reflect
 }

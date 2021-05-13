@@ -21,12 +21,9 @@ dependencies {
   implementation libraries.androidx_recyclerview
   implementation libraries.google_material
   implementation libraries.kotlin_stdlib
+  implementation libraries.kotlin_reflect
   implementation libraries.rxjava2
   implementation libraries.rxjava2extensions
   implementation libraries.rxandroid2
   implementation libraries.slf4j
-
-  testImplementation libraries.junit
-  testImplementation libraries.mockito
-  testImplementation libraries.mockito_kotlin
 }

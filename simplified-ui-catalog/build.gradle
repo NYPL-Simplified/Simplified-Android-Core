@@ -29,6 +29,7 @@ dependencies {
   implementation libraries.androidx_recyclerview
   implementation libraries.google_material
   implementation libraries.kotlin_stdlib
+  implementation libraries.kotlin_reflect
   implementation libraries.rxandroid2
   implementation libraries.slf4j
 }

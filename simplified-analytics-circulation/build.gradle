@@ -3,5 +3,6 @@ dependencies {
   implementation project(":simplified-threads")
 
   implementation libraries.kotlin_stdlib
+  implementation libraries.kotlin_reflect
   implementation libraries.slf4j
 }
