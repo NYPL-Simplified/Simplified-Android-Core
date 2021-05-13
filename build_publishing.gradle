@@ -1,0 +1,143 @@
+apply plugin: "maven-publish"
+apply plugin: "signing"
+
+def mavenCentralUsername =
+  project.findProperty('mavenCentralUsername') ?: ''
+def mavenCentralPassword =
+  project.findProperty('mavenCentralPassword') ?: ''
+
+def publishDirectory =
+  project.findProperty('org.librarysimplified.directory.publish') ?: ''
+def noSigning =
+  project.hasProperty('org.librarysimplified.no_signing')
+
+task javadocsJar(type: Jar) {
+  classifier = "javadoc"
+}
+
+task sourcesJar(type: Jar) {
+  classifier = "sources"
+  from "src/main/java", "src/main/resources"
+}
+
+afterEvaluate {
+  publishing {
+    publications {
+      binaryAndSources(MavenPublication) {
+        artifactId = POM_ARTIFACT_ID
+
+        switch (POM_PACKAGING) {
+          case "aar":
+            from components.release
+            break
+          case "apk":
+            from components.release_apk
+            break
+          case "jar":
+            from components.java
+            break
+        }
+        artifact sourcesJar
+        artifact javadocsJar
+
+        pom {
+          name = POM_NAME
+          packaging = POM_PACKAGING
+          description = POM_DESCRIPTION
+          url = POM_URL
+
+          scm {
+            connection = POM_SCM_CONNECTION
+            developerConnection = POM_SCM_DEV_CONNECTION
+            url = POM_SCM_URL
+          }
+
+          licenses {
+            license {
+              name = POM_LICENCE_NAME
+              url = POM_LICENCE_URL
+            }
+          }
+
+          developers {
+            developer {
+              id = "io7m"
+              name = "Mark Raynsford"
+              email = "code@io7m.com"
+              url = "https://www.io7m.com"
+            }
+            developer {
+              id = "winniequinn"
+              name = "Winnie Quinn"
+              url = "https://www.winniequinn.com/"
+            }
+            developer {
+              id = "gioneill"
+              name = "Greg O'Neill"
+              url = "https://github.com/gioneill"
+            }
+            developer {
+              id = "mattniehoff"
+              name = "Matt Niehoff"
+              url = "https://github.com/mattniehoff"
+            }
+            developer {
+              id = "MalcolmMcFly"
+              name = "Malcolm Woods"
+              url = "https://github.com/MalcolmMcFly"
+            }
+            developer {
+              id = "twaddington"
+              name = "Tristan Waddington"
+              url = "https://github.com/twaddington"
+            }
+          }
+        }
+      }
+    }
+
+    repositories {
+      maven {
+        name = "directory"
+        url = "file://${publishDirectory}"
+      }
+      maven {
+        name = "centralSnapshots"
+        url = "https://oss.sonatype.org/content/repositories/snapshots/"
+        credentials(PasswordCredentials) {
+          username mavenCentralUsername
+          password mavenCentralPassword
+        }
+      }
+    }
+  }
+
+  if (!noSigning) {
+    apply plugin: "signing"
+    signing {
+      useGpgCmd()
+      sign publishing.publications.binaryAndSources
+    }
+  }
+
+  // This block controls what repositories will be pushed to
+  // when the base 'publish' task is executed.
+  //
+  tasks.withType(PublishToMavenRepository) {
+    def isSnapshot = version.endsWith('-SNAPSHOT')
+    def isRelease = !isSnapshot
+
+    onlyIf {
+      if (publishDirectory) {
+        repository == publishing.repositories.directory
+      } else {
+        switch (repository) {
+          case publishing.repositories.centralSnapshots:
+            isSnapshot && (mavenCentralUsername && mavenCentralPassword)
+            break
+          default: false
+        }
+      }
+    }
+  }
+}
