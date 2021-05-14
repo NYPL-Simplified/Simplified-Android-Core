@@ -1,7 +1,10 @@
 package org.nypl.simplified.cardcreator
 
+import android.graphics.Color
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.graphics.drawable.DrawableCompat
+import androidx.navigation.findNavController
 import org.nypl.simplified.cardcreator.databinding.ActivityCardCreatorBinding
 import org.nypl.simplified.cardcreator.utils.Cache
 
@@ -19,7 +22,17 @@ class CardCreatorActivity : AppCompatActivity() {
     setContentView(binding.root)
     if (intent.getBooleanExtra("isLoggedIn", false)) {
       Cache(this).isJuvenileCard = true
-      binding.toolbarTitleTv.setText(R.string.create_child_card)
+      binding.toolbar.setTitle(R.string.create_child_card)
+    }
+    window.statusBarColor = Color.BLACK
+    binding.toolbar.apply {
+      navigationIcon = navigationIcon?.also { DrawableCompat.setTint(it, Color.WHITE) }
+      setTitleTextColor(Color.WHITE)
+      setNavigationOnClickListener {
+        if (!findNavController(binding.cardCreatorNavHostFragment.id).popBackStack()) {
+          onBackPressed()
+        }
+      }
     }
   }
 

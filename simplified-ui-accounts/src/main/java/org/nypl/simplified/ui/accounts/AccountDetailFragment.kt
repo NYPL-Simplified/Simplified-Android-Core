@@ -308,7 +308,6 @@ class AccountDetailFragment : Fragment(R.layout.account) {
     /*
      * If there's any card creator URI, the button should be enabled...
      */
-
     return if (cardCreatorURI != null) {
       /*
        * Unless the URI refers to the NYPL Card Creator and we don't have that enabled
@@ -788,8 +787,9 @@ class AccountDetailFragment : Fragment(R.layout.account) {
       }
       is AsLogoutButtonEnabled -> {
         this.signUpLabel.setText(R.string.accountWantChildCard)
-        this.signUpLabel.isEnabled = isNypl()
-        this.signUpButton.isEnabled = isNypl()
+        val enableSignup = shouldSignUpBeEnabled()
+        this.signUpLabel.isEnabled = isNypl() && enableSignup
+        this.signUpButton.isEnabled = isNypl() && enableSignup
         if (isNypl()) {
           this.signUpLabel.setText(R.string.accountWantChildCard)
         } else {
@@ -887,8 +887,10 @@ class AccountDetailFragment : Fragment(R.layout.account) {
     val loginSatisfied = this.determineLoginIsSatisfied()
     this.setLoginButtonStatus(loginSatisfied)
     this.authenticationAlternativesShow()
-    this.signUpButton.isEnabled = true
-    this.signUpLabel.isEnabled = true
+    if (shouldSignUpBeEnabled()) {
+      this.signUpButton.isEnabled = true
+      this.signUpLabel.isEnabled = true
+    }
   }
 
   private fun authenticationAlternativesMake() {
