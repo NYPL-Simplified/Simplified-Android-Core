@@ -188,7 +188,7 @@ class SettingsDebugViewModel(application: Application) : AndroidViewModel(applic
     try {
       this.profilesController.profileCurrent()
         .accounts()
-        .values
+        .keys
         .forEach { account ->
           this.booksController.booksSync(account)
         }

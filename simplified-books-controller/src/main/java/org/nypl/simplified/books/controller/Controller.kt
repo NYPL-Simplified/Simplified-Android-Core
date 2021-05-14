@@ -27,7 +27,6 @@ import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.books.api.BookID
-import org.nypl.simplified.books.api.BookIDs
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookWithStatus
@@ -71,7 +70,6 @@ import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.slf4j.LoggerFactory
 import java.io.File
-import java.io.IOException
 import java.net.URI
 import java.util.SortedMap
 import java.util.concurrent.Callable
@@ -204,7 +202,7 @@ class Controller private constructor(
       this.logger.debug("triggering syncing of all accounts in profile")
       this.profiles.currentProfileUnsafe()
         .accounts()
-        .values
+        .keys
         .forEach { this.booksSync(it) }
     } catch (e: Exception) {
       this.logger.error("failed to trigger book syncing: ", e)
@@ -379,9 +377,7 @@ class Controller private constructor(
     return when (result) {
       is TaskResult.Success -> {
         this.logger.debug("logging in succeeded: syncing account")
-        val profile = this.profileCurrent()
-        val account = profile.account(accountID)
-        this.booksSync(account).map { result }
+        this.booksSync(accountID).map { result }
       }
       is TaskResult.Failure -> {
         this.logger.debug("logging in didn't succeed: not syncing account")
@@ -546,38 +542,16 @@ class Controller private constructor(
     return this.profileIdleTimer
   }
 
-  private fun accountForActual(
-    accountID: AccountID
-  ): AccountType {
-    this.logger.debug("account for: {}", accountID.uuid)
-    return try {
-      val profileCurrent = this.profileCurrent()
-      profileCurrent.account(accountID)
-    } catch (e: Throwable) {
-      this.logger.error("failed to fetch account: ", e)
-      throw IOException(e)
-    }
-  }
-
-  private fun accountFor(
-    accountID: AccountID
-  ): FluentFuture<AccountType> {
-    return this.submitTask {
-      return@submitTask this.accountForActual(accountID)
-    }
-  }
-
   override fun bookBorrow(
     accountID: AccountID,
     entry: OPDSAcquisitionFeedEntry
   ): FluentFuture<TaskResult<*>> {
-    this.publishRequestingDownload(BookIDs.newFromOPDSEntry(entry))
     return this.submitTask(
       Callable<TaskResult<*>> {
         val request =
           BorrowRequest.Start(
             accountId = accountID,
-            profile = this.profileCurrent().id,
+            profileId = this.profileCurrent().id,
             opdsAcquisitionFeedEntry = entry
           )
         BorrowTask.createBorrowTask(this.borrowRequirements, request)
@@ -586,44 +560,19 @@ class Controller private constructor(
     )
   }
 
-  private fun publishRequestingDownload(bookID: BookID) {
-    this.bookRegistry.bookOrNull(bookID)?.let { bookWithStatus ->
-      this.bookRegistry.update(
-        BookWithStatus(
-          book = bookWithStatus.book,
-          status = BookStatus.RequestingDownload(bookID)
-        )
-      )
-    }
-  }
-
-  override fun bookBorrowFailedDismiss(
-    account: AccountType,
-    bookID: BookID
-  ) {
-    this.submitTask(
-      BookBorrowFailedDismissTask(
-        bookDatabase = account.bookDatabase,
-        bookRegistry = this.bookRegistry,
-        id = bookID
-      )
-    )
-  }
-
   override fun bookBorrowFailedDismiss(
     accountID: AccountID,
     bookID: BookID
   ) {
-    this.accountFor(accountID).map { account ->
-      this.bookBorrowFailedDismiss(account, bookID)
-    }
-  }
-
-  override fun bookDownloadCancel(
-    account: AccountType,
-    bookID: BookID
-  ) {
-    this.borrows[bookID]?.cancel()
+    this.submitTask(
+      BookBorrowFailedDismissTask(
+        accountID = accountID,
+        profileID = this.profileCurrent().id,
+        profiles = this.profiles,
+        bookID = bookID,
+        bookRegistry = this.bookRegistry,
+      )
+    )
   }
 
   override fun bookDownloadCancel(
@@ -634,26 +583,21 @@ class Controller private constructor(
   }
 
   override fun bookReport(
-    account: AccountType,
+    accountID: AccountID,
     feedEntry: FeedEntry.FeedEntryOPDS,
     reportType: String
-  ): FluentFuture<Unit> {
-    return this.submitTask(
-      BookReportTask(
-        http = this.lsHttp,
-        account = account,
-        feedEntry = feedEntry,
-        reportType = reportType
-      )
-    )
+  ): FluentFuture<TaskResult<Unit>> {
+    throw NotImplementedError()
   }
 
   override fun booksSync(
-    account: AccountType
-  ): FluentFuture<Unit> {
+    accountID: AccountID
+  ): FluentFuture<TaskResult<Unit>> {
     return this.submitTask(
       BookSyncTask(
-        account = account,
+        accountID = accountID,
+        profileID = this.profileCurrent().id,
+        profiles = this.profiles,
         accountRegistry = this.accountProviders,
         bookRegistry = this.bookRegistry,
         booksController = this,
@@ -664,13 +608,15 @@ class Controller private constructor(
   }
 
   override fun bookRevoke(
-    account: AccountType,
+    accountID: AccountID,
     bookId: BookID
   ): FluentFuture<TaskResult<Unit>> {
     this.publishRequestingDelete(bookId)
     return this.submitTask(
       BookRevokeTask(
-        account = account,
+        accountID = accountID,
+        profileID = this.profileCurrent().id,
+        profiles = this.profiles,
         adobeDRM = this.adobeDrm,
         bookID = bookId,
         bookRegistry = this.bookRegistry,
@@ -680,42 +626,18 @@ class Controller private constructor(
     )
   }
 
-  override fun bookRevoke(
+  override fun bookDelete(
     accountID: AccountID,
     bookId: BookID
   ): FluentFuture<TaskResult<Unit>> {
     this.publishRequestingDelete(bookId)
-    return this.accountFor(accountID).flatMap { account ->
-      this.bookRevoke(account, bookId)
-    }
-  }
-
-  override fun bookDelete(
-    account: AccountID,
-    bookId: BookID
-  ): FluentFuture<Unit> {
-    this.publishRequestingDelete(bookId)
     return this.submitTask(
       BookDeleteTask(
-        accountId = account,
+        accountID = accountID,
+        profileID = this.profileCurrent().id,
+        profiles = this.profiles,
+        bookID = bookId,
         bookRegistry = this.bookRegistry,
-        bookId = bookId,
-        profiles = this.profiles
-      )
-    )
-  }
-
-  override fun bookDelete(
-    account: AccountType,
-    bookId: BookID
-  ): FluentFuture<Unit> {
-    this.publishRequestingDelete(bookId)
-    return this.submitTask(
-      BookDeleteTask(
-        accountId = account.id,
-        bookRegistry = this.bookRegistry,
-        bookId = bookId,
-        profiles = this.profiles
       )
     )
   }
@@ -734,21 +656,14 @@ class Controller private constructor(
   override fun bookRevokeFailedDismiss(
     accountID: AccountID,
     bookID: BookID
-  ): FluentFuture<Unit> {
-    return this.accountFor(accountID).flatMap { account ->
-      this.bookRevokeFailedDismiss(account, bookID)
-    }
-  }
-
-  override fun bookRevokeFailedDismiss(
-    account: AccountType,
-    bookID: BookID
-  ): FluentFuture<Unit> {
+  ): FluentFuture<TaskResult<Unit>> {
     return this.submitTask(
       BookRevokeFailedDismissTask(
-        bookDatabase = account.bookDatabase,
+        accountID = accountID,
+        profileID = this.profileCurrent().id,
+        profiles = this.profiles,
+        bookID = bookID,
         bookRegistry = this.bookRegistry,
-        bookId = bookID
       )
     )
   }
