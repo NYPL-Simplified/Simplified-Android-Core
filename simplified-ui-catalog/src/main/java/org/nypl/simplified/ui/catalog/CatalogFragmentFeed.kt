@@ -20,108 +20,106 @@ import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.Space
 import android.widget.TextView
-import androidx.annotation.UiThread
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.AppCompatButton
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
+import androidx.core.os.bundleOf
+import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
-import org.joda.time.DateTime
-import org.joda.time.LocalDateTime
 import org.librarysimplified.services.api.Services
-import org.nypl.simplified.accounts.api.AccountEvent
-import org.nypl.simplified.accounts.api.AccountEventCreation
-import org.nypl.simplified.accounts.api.AccountEventDeletion
-import org.nypl.simplified.accounts.api.AccountReadableType
-import org.nypl.simplified.analytics.api.AnalyticsEvent
-import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.android.ktx.supportActionBar
-import org.nypl.simplified.books.book_registry.BookRegistryReadableType
 import org.nypl.simplified.books.covers.BookCoverProviderType
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
-import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.feeds.api.FeedFacet
 import org.nypl.simplified.feeds.api.FeedFacets
 import org.nypl.simplified.feeds.api.FeedGroup
-import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderFailure
-import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderFailure.FeedLoaderFailedAuthentication
-import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderFailure.FeedLoaderFailedGeneral
-import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.feeds.api.FeedSearch
 import org.nypl.simplified.listeners.api.FragmentListenerType
 import org.nypl.simplified.listeners.api.fragmentListeners
-import org.nypl.simplified.profiles.api.ProfileEvent
-import org.nypl.simplified.profiles.api.ProfileUpdated
-import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
-import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.ui.accounts.AccountPickerDialogFragment
-import org.nypl.simplified.ui.catalog.CatalogFeedArguments.CatalogFeedArgumentsRemote
 import org.nypl.simplified.ui.catalog.CatalogFeedOwnership.CollectedFromAccounts
 import org.nypl.simplified.ui.catalog.CatalogFeedOwnership.OwnedByAccount
-import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedAgeGate
-import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoadFailed
-import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedEmpty
-import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedNavigation
-import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithGroups
-import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithoutGroups
-import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoading
-import org.nypl.simplified.ui.errorpage.ErrorPageParameters
-import org.nypl.simplified.ui.images.ImageLoaderType
+import org.nypl.simplified.ui.catalog.CatalogFeedState.*
+import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.*
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
 import org.nypl.simplified.ui.theme.ThemeControl
 import org.slf4j.LoggerFactory
-import java.net.URI
 
 /**
- * The base type of feed fragments. This class is abstract purely because the AndroidX
- * ViewModel API requires that we fetch view models by class, and we need to store separate view
- * models for each of the different app sections that want to display feeds.
+ * A fragment displaying an OPDS feed.
  */
 
-class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener {
+class CatalogFragmentFeed : Fragment(R.layout.feed), AgeGateDialog.BirthYearSelectedListener {
 
   companion object {
 
     private const val PARAMETERS_ID =
       "org.nypl.simplified.ui.catalog.CatalogFragmentFeed.parameters"
 
+    private val AGE_GATE_DIALOG_TAG =
+      AgeGateDialog::class.java.simpleName
+
     /**
-     * Create a login fragment for the given parameters.
+     * Create a catalog feed fragment for the given parameters.
      */
 
     fun create(parameters: CatalogFeedArguments): CatalogFragmentFeed {
-      val arguments = Bundle()
-      arguments.putSerializable(this.PARAMETERS_ID, parameters)
       val fragment = CatalogFragmentFeed()
-      fragment.arguments = arguments
+      fragment.arguments = bundleOf(PARAMETERS_ID to parameters)
       return fragment
     }
   }
 
-  private lateinit var analytics: AnalyticsType
-  private lateinit var bookCovers: BookCoverProviderType
-  private lateinit var bookRegistry: BookRegistryReadableType
-  private lateinit var borrowViewModel: CatalogBorrowViewModel
+  private val logger = LoggerFactory.getLogger(CatalogFragmentFeed::class.java)
+
+  private val parameters: CatalogFeedArguments by lazy {
+    this.requireArguments()[PARAMETERS_ID] as CatalogFeedArguments
+  }
+
+  private val services =
+    Services.serviceDirectory()
+
+  private val listener: FragmentListenerType<CatalogFeedEvent> by fragmentListeners()
+
+  private val borrowViewModel: CatalogBorrowViewModel by viewModels(
+    factoryProducer = {
+      CatalogBorrowViewModelFactory(services)
+    }
+  )
+
+  private val viewModel: CatalogFeedViewModel by viewModels(
+    factoryProducer = {
+      CatalogFeedViewModelFactory(
+        application = this.requireActivity().application,
+        services = Services.serviceDirectory(),
+        borrowViewModel = borrowViewModel,
+        feedArguments = this.parameters,
+        listener = this.listener
+      )
+    }
+  )
+
+  private val bookCovers =
+    services.requireService(BookCoverProviderType::class.java)
+  private val screenInformation =
+    services.requireService(ScreenSizeInformationType::class.java)
+  private val configurationService =
+    services.requireService(BuildConfigurationServiceType::class.java)
+
   private lateinit var buttonCreator: CatalogButtons
-  private lateinit var configurationService: BuildConfigurationServiceType
   private lateinit var feedEmpty: ViewGroup
   private lateinit var feedError: ViewGroup
   private lateinit var feedErrorDetails: Button
   private lateinit var feedErrorRetry: Button
-  private lateinit var feedLoader: FeedLoaderType
   private lateinit var feedLoading: ViewGroup
-  private lateinit var feedModel: CatalogFeedViewModelType
   private lateinit var feedNavigation: ViewGroup
   private lateinit var feedWithGroups: ViewGroup
   private lateinit var feedWithGroupsAdapter: CatalogFeedWithGroupsAdapter
-  private lateinit var feedWithGroupsData: MutableList<FeedGroup>
   private lateinit var feedWithGroupsFacets: LinearLayout
   private lateinit var feedWithGroupsFacetsScroll: ViewGroup
   private lateinit var feedWithGroupsHeader: ViewGroup
@@ -135,76 +133,40 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
   private lateinit var feedWithoutGroupsList: RecyclerView
   private lateinit var feedWithoutGroupsScrollListener: RecyclerView.OnScrollListener
   private lateinit var feedWithoutGroupsTabs: RadioGroup
-  private lateinit var imageLoader: ImageLoaderType
-  private lateinit var parameters: CatalogFeedArguments
-  private lateinit var profilesController: ProfilesControllerType
-  private lateinit var screenInformation: ScreenSizeInformationType
-  private lateinit var ageGateDialog: AgeGateDialog
 
-  private val logger = LoggerFactory.getLogger(CatalogFragmentFeed::class.java)
-  private val parametersId = PARAMETERS_ID
-  private val listener: FragmentListenerType<CatalogFeedEvent> by fragmentListeners()
-
-  private var accountSubscription: Disposable? = null
-  private var profileSubscription: Disposable? = null
-  private var feedStatusSubscription: Disposable? = null
+  private var ageGateDialog: DialogFragment? = null
+  private val feedWithGroupsData: MutableList<FeedGroup> = mutableListOf()
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setHasOptionsMenu(true)
 
-    ageGateDialog =
-      (childFragmentManager.findFragmentByTag(AgeGateDialog::class.java.simpleName) as? AgeGateDialog)
-      ?: AgeGateDialog.create()
-    this.parameters = this.requireArguments()[this.parametersId] as CatalogFeedArguments
-    this.feedWithGroupsData = mutableListOf()
-
-    val services = Services.serviceDirectory()
-
-    this.analytics =
-      services.requireService(AnalyticsType::class.java)
-    this.bookCovers =
-      services.requireService(BookCoverProviderType::class.java)
-    this.bookRegistry =
-      services.requireService(BookRegistryReadableType::class.java)
-    this.screenInformation =
-      services.requireService(ScreenSizeInformationType::class.java)
-    this.profilesController =
-      services.requireService(ProfilesControllerType::class.java)
-    this.configurationService =
-      services.requireService(BuildConfigurationServiceType::class.java)
-    this.feedLoader =
-      services.requireService(FeedLoaderType::class.java)
-    this.imageLoader =
-      services.requireService(ImageLoaderType::class.java)
+    this.ageGateDialog = childFragmentManager.findFragmentByTag(AGE_GATE_DIALOG_TAG) as? DialogFragment
   }
 
-  override fun onCreateView(
-    inflater: LayoutInflater,
-    container: ViewGroup?,
-    savedInstanceState: Bundle?
-  ): View {
+  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    super.onViewCreated(view, savedInstanceState)
+
+    this.viewModel.stateLive.observe(this.viewLifecycleOwner, this::reconfigureUI)
+
     this.buttonCreator =
       CatalogButtons(this.requireContext(), this.screenInformation)
 
-    val layout =
-      inflater.inflate(R.layout.feed, container, false)
-
     this.feedEmpty =
-      layout.findViewById(R.id.feedEmpty)
+      view.findViewById(R.id.feedEmpty)
     this.feedError =
-      layout.findViewById(R.id.feedError)
+      view.findViewById(R.id.feedError)
     this.feedLoading =
-      layout.findViewById(R.id.feedLoading)
+      view.findViewById(R.id.feedLoading)
     this.feedNavigation =
-      layout.findViewById(R.id.feedNavigation)
+      view.findViewById(R.id.feedNavigation)
     this.feedWithGroups =
-      layout.findViewById(R.id.feedWithGroups)
+      view.findViewById(R.id.feedWithGroups)
     this.feedWithoutGroups =
-      layout.findViewById(R.id.feedWithoutGroups)
+      view.findViewById(R.id.feedWithoutGroups)
 
     this.feedWithGroupsHeader =
-      layout.findViewById(R.id.feedWithGroupsHeader)
+      view.findViewById(R.id.feedWithGroupsHeader)
     this.feedWithGroupsFacetsScroll =
       this.feedWithGroupsHeader.findViewById(R.id.feedHeaderFacetsScroll)
     this.feedWithGroupsFacets =
@@ -221,8 +183,17 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
       CatalogFeedWithGroupsDecorator(this.screenInformation.dpToPixels(16).toInt())
     )
 
+    this.feedWithGroupsAdapter =
+      CatalogFeedWithGroupsAdapter(
+        groups = this.feedWithGroupsData,
+        coverLoader = this.bookCovers,
+        onFeedSelected = this.viewModel::openFeed,
+        onBookSelected = this.viewModel::openBookDetail
+      )
+    this.feedWithGroupsList.adapter = this.feedWithGroupsAdapter
+
     this.feedWithoutGroupsHeader =
-      layout.findViewById(R.id.feedWithoutGroupsHeader)
+      view.findViewById(R.id.feedWithoutGroupsHeader)
     this.feedWithoutGroupsFacetsScroll =
       this.feedWithoutGroupsHeader.findViewById(R.id.feedHeaderFacetsScroll)
     this.feedWithoutGroupsFacets =
@@ -246,63 +217,13 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
     this.feedNavigation.visibility = View.INVISIBLE
     this.feedWithGroups.visibility = View.INVISIBLE
     this.feedWithoutGroups.visibility = View.INVISIBLE
-
-    return layout
   }
 
   override fun onStart() {
     super.onStart()
 
-    this.feedModel =
-      this.createOrGetFeedModel()
-    this.borrowViewModel =
-      CatalogBorrowViewModelFactory.get(this)
-
-    /*
-     * Configure the lanes based on the viewmodel.
-     */
-
-    this.feedWithGroupsAdapter =
-      CatalogFeedWithGroupsAdapter(
-        groups = this.feedWithGroupsData,
-        coverLoader = this.bookCovers,
-        onFeedSelected = this::onFeedSelected,
-        onBookSelected = this::onBookSelected
-      )
-    this.feedWithGroupsList.adapter = this.feedWithGroupsAdapter
-
-    this.feedStatusSubscription = this.feedModel.feedStatus
-      .map { this.feedModel.feedState() }
-      .observeOn(AndroidSchedulers.mainThread())
-      .subscribe(this::reconfigureUI)
-
-    this.feedWithGroupsList.layoutManager!!.onRestoreInstanceState(
-      this.feedModel.restoreFeedWithGroupsViewState()
-    )
-    this.feedWithoutGroupsList.layoutManager!!.onRestoreInstanceState(
-      this.feedModel.restoreFeedWithoutGroupsViewState()
-    )
-
     this.feedWithoutGroupsScrollListener = CatalogScrollListener(this.bookCovers)
     this.feedWithoutGroupsList.addOnScrollListener(this.feedWithoutGroupsScrollListener)
-    this.reconfigureUI(this.feedModel.feedState())
-
-    this.accountSubscription =
-      this.profilesController.accountEvents()
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(this::onAccountEvent)
-    this.profileSubscription =
-      this.profilesController.profileEvents()
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(this::onProfileEvent)
-
-    /*
-     * Refresh the feed if it is locally generated.
-     */
-
-    if (this.parameters.isLocallyGenerated) {
-      this.feedModel.reloadFeed(this.parameters)
-    }
   }
 
   override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -319,17 +240,17 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
   override fun onOptionsItemSelected(item: MenuItem): Boolean {
     return when (item.itemId) {
       R.id.catalogMenuActionSearch -> {
-        this.feedModel.feedState().search?.let { search ->
+        this.viewModel.stateLive.value?.search?.let { search ->
           this.openSearchDialog(requireContext(), search)
         }
         true
       }
       R.id.catalogMenuActionReload -> {
-        this.feedModel.reloadFeed(this.feedModel.feedState().arguments)
+        this.viewModel.reloadFeed()
         true
       }
       android.R.id.home -> {
-        if (isAccountCatalogRoot()) {
+        if (this.viewModel.isAccountCatalogRoot()) {
           this.openAccountPickerDialog()
           true
         } else {
@@ -340,81 +261,18 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
     }
   }
 
-  private fun onAccountEvent(event: AccountEvent) {
-    return when (event) {
-      is AccountEventCreation.AccountEventCreationSucceeded,
-      is AccountEventDeletion.AccountEventDeletionSucceeded -> {
-        if (this.parameters.isLocallyGenerated) {
-          this.feedModel.reloadFeed(this.parameters)
-        } else {
-          // No reload necessary
-        }
-      }
-      else -> {
-      }
-    }
-  }
-
-  private fun onProfileEvent(event: ProfileEvent) {
-    when (event) {
-      is ProfileUpdated.Succeeded -> {
-        val feedState = this.feedModel.feedState()
-        when (val ownership = feedState.arguments.ownership) {
-          is OwnedByAccount -> {
-            val ageChanged =
-              event.newDescription.preferences.dateOfBirth != event.oldDescription.preferences.dateOfBirth
-            if (ageChanged) {
-              val account = this.profilesController.profileCurrent().account(ownership.accountId)
-              onAgeUpdateSuccess(account, ownership, event)
-            }
-          }
-        }
-      }
-    }
-  }
-
-  private fun createOrGetFeedModel(): CatalogFeedViewModel {
-    return ViewModelProvider(
-      this,
-      CatalogFeedViewModelFactory(
-        context = this.requireContext(),
-        services = Services.serviceDirectory(),
-        feedArguments = this.parameters
-      )
-    ).get(CatalogFeedViewModel::class.java)
-  }
-
-  private fun onBookSelected(opdsEntry: FeedEntry.FeedEntryOPDS) {
-    this.listener.post(
-      CatalogFeedEvent.OpenBookDetail(this.parameters, opdsEntry)
-    )
-  }
-
-  private fun onFeedSelected(title: String, uri: URI) {
-    this.listener.post(
-      CatalogFeedEvent.OpenFeed(this.feedModel.resolveFeed(title, uri, false))
-    )
-  }
-
-  @UiThread
   private fun reconfigureUI(feedState: CatalogFeedState) {
-    val activity = this.activity
-    if (activity == null) {
-      this.logger.warn("fragment is not attached")
-      return
-    }
-
     return when (feedState) {
       is CatalogFeedAgeGate ->
-        this.onCatalogFeedAgeGateUI(feedState)
+        this.onCatalogFeedAgeGate(feedState)
       is CatalogFeedLoading ->
-        this.onCatalogFeedLoadingUI(feedState)
+        this.onCatalogFeedLoading(feedState)
       is CatalogFeedWithGroups ->
-        this.onCatalogFeedWithGroupsUI(feedState)
+        this.onCatalogFeedWithGroups(feedState)
       is CatalogFeedWithoutGroups ->
-        this.onCatalogFeedWithoutGroupsUI(feedState)
+        this.onCatalogFeedWithoutGroups(feedState)
       is CatalogFeedNavigation ->
-        this.onCatalogFeedNavigationUI(feedState)
+        this.onCatalogFeedNavigation(feedState)
       is CatalogFeedLoadFailed ->
         this.onCatalogFeedLoadFailed(feedState)
       is CatalogFeedEmpty ->
@@ -425,33 +283,24 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
   override fun onStop() {
     super.onStop()
 
-    this.feedModel.saveFeedWithGroupsViewState(
-      this.feedWithGroupsList.layoutManager!!.onSaveInstanceState()
-    )
-    this.feedModel.saveFeedWithoutGroupsViewState(
-      this.feedWithoutGroupsList.layoutManager!!.onSaveInstanceState()
-    )
-
     /*
      * We aggressively unset adapters here in order to try to encourage prompt unsubscription
      * of views from the book registry.
      */
 
     this.feedWithoutGroupsList.removeOnScrollListener(this.feedWithoutGroupsScrollListener)
-    this.feedWithoutGroupsList.adapter = null
-    this.feedWithGroupsList.adapter = null
-    this.feedStatusSubscription?.dispose()
-    this.accountSubscription?.dispose()
-    this.profileSubscription?.dispose()
   }
 
-  @UiThread
-  private fun onCatalogFeedAgeGateUI(
+  override fun onDestroyView() {
+    super.onDestroyView()
+    this.feedWithoutGroupsList.adapter = null
+    this.feedWithGroupsList.adapter = null
+  }
+
+  private fun onCatalogFeedAgeGate(
     @Suppress("UNUSED_PARAMETER") feedState: CatalogFeedAgeGate
   ) {
-    if (!ageGateDialog.isAdded) {
-      ageGateDialog.show(childFragmentManager, AgeGateDialog::class.simpleName)
-    }
+    this.openAgeGateDialog()
     this.feedEmpty.visibility = View.INVISIBLE
     this.feedError.visibility = View.INVISIBLE
     this.feedLoading.visibility = View.INVISIBLE
@@ -462,34 +311,10 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
     this.configureToolbar()
   }
 
-  private fun onAgeUpdateSuccess(
-    account: AccountReadableType,
-    ownership: OwnedByAccount,
-    result: ProfileUpdated.Succeeded
-  ) {
-    val now = DateTime.now()
-    val oldAge = result.oldDescription.preferences.dateOfBirth?.yearsOld(now)
-    val newAge = result.newDescription.preferences.dateOfBirth?.yearsOld(now)
-    this.logger.debug("age updated from {} to {}", oldAge, newAge)
-
-    newAge?.let { age ->
-      val newParameters = CatalogFeedArgumentsRemote(
-        title = this.parameters.title,
-        ownership = ownership,
-        feedURI = account.catalogURIForAge(age),
-        isSearchResults = false
-      )
-      this.feedModel.reloadFeed(newParameters)
-      if (ageGateDialog.isVisible) {
-        ageGateDialog.dismissAllowingStateLoss()
-      }
-    }
-  }
-
-  @UiThread
   private fun onCatalogFeedEmpty(
     @Suppress("UNUSED_PARAMETER") feedState: CatalogFeedEmpty
   ) {
+    this.dismissAgeGateDialog()
     this.feedEmpty.visibility = View.VISIBLE
     this.feedError.visibility = View.INVISIBLE
     this.feedLoading.visibility = View.INVISIBLE
@@ -500,24 +325,25 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
     this.configureToolbar()
   }
 
-  @UiThread
-  private fun onCatalogFeedLoadingUI(
+  private fun onCatalogFeedLoading(
     @Suppress("UNUSED_PARAMETER") feedState: CatalogFeedLoading
   ) {
+    this.dismissAgeGateDialog()
     this.feedEmpty.visibility = View.INVISIBLE
     this.feedError.visibility = View.INVISIBLE
     this.feedLoading.visibility = View.VISIBLE
     this.feedNavigation.visibility = View.INVISIBLE
     this.feedWithGroups.visibility = View.INVISIBLE
     this.feedWithoutGroups.visibility = View.INVISIBLE
+    this.feedWithoutGroups.visibility = View.INVISIBLE
 
     this.configureToolbar()
   }
 
-  @UiThread
-  private fun onCatalogFeedNavigationUI(
+  private fun onCatalogFeedNavigation(
     @Suppress("UNUSED_PARAMETER") feedState: CatalogFeedNavigation
   ) {
+    this.dismissAgeGateDialog()
     this.feedEmpty.visibility = View.INVISIBLE
     this.feedError.visibility = View.INVISIBLE
     this.feedLoading.visibility = View.INVISIBLE
@@ -528,10 +354,10 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
     this.configureToolbar()
   }
 
-  @UiThread
-  private fun onCatalogFeedWithoutGroupsUI(
+  private fun onCatalogFeedWithoutGroups(
     feedState: CatalogFeedWithoutGroups
   ) {
+    this.dismissAgeGateDialog()
     this.feedEmpty.visibility = View.INVISIBLE
     this.feedError.visibility = View.INVISIBLE
     this.feedLoading.visibility = View.INVISIBLE
@@ -551,29 +377,23 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
 
     this.feedWithoutGroupsAdapter =
       CatalogPagedAdapter(
-        borrowViewModel = this.borrowViewModel,
-        buttonCreator = this.buttonCreator,
         context = requireActivity(),
-        listener = this.listener,
-        onBookSelected = this::onBookSelected,
-        services = Services.serviceDirectory(),
-        ownership = feedState.arguments.ownership
+        listener = this.viewModel,
+        buttonCreator = this.buttonCreator,
+        bookCovers = this.bookCovers,
       )
 
     this.feedWithoutGroupsList.adapter = this.feedWithoutGroupsAdapter
-    feedState.entries.observe(
-      this,
-      Observer { newPagedList ->
+    feedState.entries.observe(this) { newPagedList ->
         this.logger.debug("received paged list ({} elements)", newPagedList.size)
         this.feedWithoutGroupsAdapter.submitList(newPagedList)
       }
-    )
   }
 
-  @UiThread
-  private fun onCatalogFeedWithGroupsUI(
+  private fun onCatalogFeedWithGroups(
     feedState: CatalogFeedWithGroups
   ) {
+    this.dismissAgeGateDialog()
     this.feedEmpty.visibility = View.INVISIBLE
     this.feedError.visibility = View.INVISIBLE
     this.feedLoading.visibility = View.INVISIBLE
@@ -596,45 +416,10 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
     this.feedWithGroupsAdapter.notifyDataSetChanged()
   }
 
-  @UiThread
   private fun onCatalogFeedLoadFailed(
     feedState: CatalogFeedLoadFailed
   ) {
-    /*
-     * If the feed can't be loaded due to an authentication failure, then open
-     * the account screen (if possible).
-     */
-
-    when (feedState.failure) {
-      is FeedLoaderFailedGeneral -> {
-        // Display the error.
-      }
-      is FeedLoaderFailedAuthentication -> {
-        when (val ownership = this.parameters.ownership) {
-          is OwnedByAccount -> {
-            val shouldAuthenticate =
-              this.profilesController.profileCurrent()
-                .account(ownership.accountId)
-                .requiresCredentials
-
-            if (shouldAuthenticate) {
-              /*
-               * Explicitly deferring the opening of the fragment is required due to the
-               * tabbed navigation controller eagerly instantiating fragments and causing
-               * fragment transaction exceptions. This will go away when we have a replacement
-               * for the navigator library.
-               */
-
-              this.listener.post(CatalogFeedEvent.LoginRequired(ownership.accountId))
-            }
-          }
-          CollectedFromAccounts -> {
-            // Nothing we can do here! We don't know which account owns the feed.
-          }
-        }
-      }
-    }
-
+    this.dismissAgeGateDialog()
     this.feedEmpty.visibility = View.INVISIBLE
     this.feedError.visibility = View.VISIBLE
     this.feedLoading.visibility = View.INVISIBLE
@@ -647,26 +432,20 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
     this.feedErrorRetry.isEnabled = true
     this.feedErrorRetry.setOnClickListener { button ->
       button.isEnabled = false
-      this.feedModel.reloadFeed(this.feedModel.feedState().arguments)
+      this.viewModel.reloadFeed()
     }
 
     this.feedErrorDetails.isEnabled = true
     this.feedErrorDetails.setOnClickListener {
-      this.listener.post(
-        CatalogFeedEvent.OpenErrorPage(
-          this.errorPageParameters(feedState.failure)
-        )
-      )
+      this.viewModel.showFeedErrorDetails(feedState.failure)
     }
   }
 
-  @UiThread
   private fun configureToolbar() {
     this.configureToolbarNavigation()
     this.configureToolbarTitles()
   }
 
-  @UiThread
   private fun configureToolbarNavigation() {
     fun showAccountPickerAction() {
       // Configure the 'Home Action' in the Toolbar to show the account picker when tapped.
@@ -683,7 +462,7 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
     }
 
     try {
-      if (isAccountCatalogRoot()) {
+      if (this.viewModel.isAccountCatalogRoot()) {
         showAccountPickerAction()
       }
     } catch (e: Exception) {
@@ -691,38 +470,13 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
     }
   }
 
-  @UiThread
   private fun configureToolbarTitles() {
-    try {
-      when (val ownership = this.parameters.ownership) {
-        is OwnedByAccount -> {
-          val accountProvider =
-            this.profilesController.profileCurrent()
-              .account(ownership.accountId)
-              .provider
-
-          this.supportActionBar?.apply {
-            title = this@CatalogFragmentFeed.parameters.title
-            subtitle = accountProvider.displayName
-          }
-        }
-
-        is CollectedFromAccounts -> {
-          this.supportActionBar?.apply {
-            title = this@CatalogFragmentFeed.parameters.title
-            subtitle = null
-          }
-        }
-      }
-    } catch (e: Exception) {
-      this.supportActionBar?.apply {
-        title = this@CatalogFragmentFeed.parameters.title
-        subtitle = null
-      }
+    this.supportActionBar?.let {
+      it.title = this.parameters.title
+      it.subtitle = this.viewModel.accountProvider?.displayName
     }
   }
 
-  @UiThread
   private fun openAccountPickerDialog() {
     return when (val ownership = this.parameters.ownership) {
       is OwnedByAccount -> {
@@ -740,7 +494,6 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
   }
 
   @SuppressLint("InflateParams")
-  @UiThread
   private fun openSearchDialog(
     context: Context,
     search: FeedSearch
@@ -748,19 +501,10 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
     val view = LayoutInflater.from(context).inflate(R.layout.search_dialog, null)
     val searchView = view.findViewById<TextView>(R.id.searchDialogText)!!
 
-    fun performSearch(searchView: TextView) {
-      val query = searchView.text.toString().trim()
-      this@CatalogFragmentFeed.logSearchToAnalytics(query)
-      this@CatalogFragmentFeed.listener.post(
-        CatalogFeedEvent.OpenFeed(
-          this@CatalogFragmentFeed.feedModel.resolveSearch(search, query)
-        )
-      )
-    }
-
     val builder = AlertDialog.Builder(context).apply {
       setPositiveButton(R.string.catalogSearch) { dialog, _ ->
-        performSearch(searchView)
+        val query = searchView.text.toString().trim()
+        this@CatalogFragmentFeed.viewModel.performSearch(search, query)
         dialog.dismiss()
       }
       setNegativeButton(R.string.cancel) { dialog, _ ->
@@ -773,7 +517,8 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
     searchView.setOnEditorActionListener { _, actionId, _ ->
       return@setOnEditorActionListener when (actionId) {
         EditorInfo.IME_ACTION_SEARCH -> {
-          performSearch(searchView)
+          val query = searchView.text.toString().trim()
+          this@CatalogFragmentFeed.viewModel.performSearch(search, query)
           dialog.dismiss()
           true
         }
@@ -783,34 +528,6 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
     dialog.show()
   }
 
-  private fun logSearchToAnalytics(query: String) {
-    try {
-      val profile = this.profilesController.profileCurrent()
-      val accountId =
-        when (val ownership = this.parameters.ownership) {
-          is OwnedByAccount -> ownership.accountId
-          is CollectedFromAccounts -> null
-        }
-
-      if (accountId != null) {
-        val account = profile.account(accountId)
-        this.analytics.publishEvent(
-          AnalyticsEvent.CatalogSearched(
-            timestamp = LocalDateTime.now(),
-            credentials = account.loginState.credentials,
-            profileUUID = profile.id.uuid,
-            accountProvider = account.provider.id,
-            accountUUID = account.id.uuid,
-            searchQuery = query
-          )
-        )
-      }
-    } catch (e: Exception) {
-      this.logger.error("could not log to analytics: ", e)
-    }
-  }
-
-  @UiThread
   private fun configureFacets(
     facetHeader: ViewGroup,
     facetTabs: RadioGroup,
@@ -979,9 +696,7 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
       button.setTextColor(this.colorStateListForFacetTabs())
       button.setOnClickListener {
         this.logger.debug("selected entry point facet: {}", facet.title)
-        this.listener.post(
-          CatalogFeedEvent.OpenFeed(this.feedModel.resolveFacet(facet))
-        )
+        this.viewModel.openFacet(facet)
       }
       facetTabs.addView(button)
     }
@@ -1022,7 +737,6 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
     return ColorStateList(states, colors)
   }
 
-  @UiThread
   private fun showFacetSelectDialog(
     groupName: String,
     group: List<FeedFacet>
@@ -1037,51 +751,28 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
     alertBuilder.setSingleChoiceItems(names, checkedItem) { dialog, checked ->
       val selected = choices[checked]
       this.logger.debug("selected facet: {}", selected)
-      this.listener.post(
-        CatalogFeedEvent.OpenFeed(this.feedModel.resolveFacet(selected))
-      )
+      this.viewModel.openFacet(selected)
       dialog.dismiss()
     }
     alertBuilder.create().show()
   }
 
-  private fun errorPageParameters(
-    failure: FeedLoaderFailure
-  ): ErrorPageParameters {
-    val taskRecorder = TaskRecorder.create()
-    taskRecorder.beginNewStep(this.resources.getString(R.string.catalogFeedLoading))
-    taskRecorder.addAttributes(failure.attributes)
-    taskRecorder.currentStepFailed(failure.message, "feedLoadingFailed", failure.exception)
-    val taskFailure = taskRecorder.finishFailure<Unit>()
-
-    return ErrorPageParameters(
-      emailAddress = this.configurationService.supportErrorReportEmailAddress,
-      body = "",
-      subject = this.configurationService.supportErrorReportSubject,
-      attributes = taskFailure.attributes.toSortedMap(),
-      taskSteps = taskFailure.steps
-    )
-  }
-
-  private fun isAccountCatalogRoot(): Boolean {
-    val parameters = this.parameters
-    if (parameters !is CatalogFeedArgumentsRemote) {
-      return false
-    }
-
-    val ownership = this.parameters.ownership
-    if (ownership !is OwnedByAccount) {
-      return false
-    }
-
-    val account =
-      this.profilesController.profileCurrent()
-        .account(ownership.accountId)
-
-    return account.feedIsRoot(parameters.feedURI)
-  }
-
   override fun onBirthYearSelected(isOver13: Boolean) {
-    feedModel.updateBirthYear(isOver13)
+    this.viewModel.updateBirthYear(isOver13)
+  }
+
+  private fun openAgeGateDialog() {
+    if (this.ageGateDialog != null) {
+      return
+    }
+
+    val ageGate = AgeGateDialog.create()
+    ageGate.show(childFragmentManager, AGE_GATE_DIALOG_TAG)
+    this.ageGateDialog = ageGate
+  }
+
+  private fun dismissAgeGateDialog() {
+    this.ageGateDialog?.dismiss()
+    this.ageGateDialog = null
   }
 }

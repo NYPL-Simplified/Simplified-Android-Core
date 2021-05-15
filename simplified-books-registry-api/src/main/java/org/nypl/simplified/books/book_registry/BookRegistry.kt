@@ -6,8 +6,6 @@ import com.io7m.jfunctional.OptionType
 import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
 import org.nypl.simplified.books.api.BookID
-import org.nypl.simplified.books.book_registry.BookStatusEvent.BookStatusEventChanged
-import org.nypl.simplified.books.book_registry.BookStatusEvent.BookStatusEventRemoved
 import org.slf4j.LoggerFactory
 import java.util.Collections
 import java.util.SortedMap
@@ -43,13 +41,22 @@ class BookRegistry private constructor(
   override fun update(status: BookWithStatus) {
     val oldStatus = this.books[status.book.id]
     this.books[status.book.id] = status
-    this.observable.onNext(
-      BookStatusEventChanged(
-        bookId = status.book.id,
-        statusPrevious = oldStatus?.status,
-        statusNow = status.status
-      )
-    )
+
+    val event =
+      if (oldStatus == null) {
+        BookStatusEvent.BookStatusEventAdded(
+          bookId = status.book.id,
+          statusNow = status.status
+        )
+    } else {
+        BookStatusEvent.BookStatusEventChanged(
+          bookId = status.book.id,
+          statusPrevious = oldStatus.status,
+          statusNow = status.status
+        )
+      }
+
+    this.observable.onNext(event)
   }
 
   override fun updateIfStatusIsMoreImportant(status: BookWithStatus) {
@@ -73,7 +80,7 @@ class BookRegistry private constructor(
   override fun clear() {
     val entries = this.books.toMap()
     for (entry in entries) {
-      this.observable.onNext(BookStatusEventRemoved(entry.key, entry.value.status))
+      this.observable.onNext(BookStatusEvent.BookStatusEventRemoved(entry.key, entry.value.status))
     }
     this.books.clear()
   }
@@ -81,7 +88,7 @@ class BookRegistry private constructor(
   override fun clearFor(id: BookID) {
     val oldStatus = this.books.remove(id)
     if (oldStatus != null) {
-      this.observable.onNext(BookStatusEventRemoved(id, oldStatus.status))
+      this.observable.onNext(BookStatusEvent.BookStatusEventRemoved(id, oldStatus.status))
     }
   }
 

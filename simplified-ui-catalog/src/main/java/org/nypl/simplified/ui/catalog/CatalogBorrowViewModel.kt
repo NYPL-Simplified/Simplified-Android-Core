@@ -2,7 +2,6 @@ package org.nypl.simplified.ui.catalog
 
 import androidx.lifecycle.ViewModel
 import io.reactivex.disposables.Disposable
-import org.librarysimplified.services.api.ServiceDirectoryType
 import org.nypl.simplified.accounts.api.AccountEventLoginStateChanged
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggedIn
@@ -28,18 +27,14 @@ import java.util.concurrent.ConcurrentHashMap
  */
 
 class CatalogBorrowViewModel(
-  private val services: ServiceDirectoryType
+  private val profilesController: ProfilesControllerType,
+  private val booksController: BooksControllerType,
+  private val bookRegistry: BookRegistryType
+
 ) : ViewModel() {
 
   private val logger =
     LoggerFactory.getLogger(CatalogBorrowViewModel::class.java)
-
-  private val booksController: BooksControllerType =
-    this.services.requireService(BooksControllerType::class.java)
-  private val profilesController: ProfilesControllerType =
-    this.services.requireService(ProfilesControllerType::class.java)
-  private val bookRegistry: BookRegistryType =
-    this.services.requireService(BookRegistryType::class.java)
 
   private val bookBorrowAttempts: ConcurrentHashMap<BookTarget, Disposable> =
     ConcurrentHashMap()

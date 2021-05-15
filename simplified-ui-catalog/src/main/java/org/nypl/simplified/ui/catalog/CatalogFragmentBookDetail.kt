@@ -1,9 +1,7 @@
 package org.nypl.simplified.ui.catalog
 
-import android.content.Context
 import android.os.Bundle
 import android.text.Html
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
@@ -11,56 +9,34 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TableLayout
 import android.widget.TextView
-import androidx.annotation.UiThread
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProviders
+import androidx.fragment.app.viewModels
 import com.google.common.base.Preconditions
+import com.google.common.util.concurrent.FluentFuture
 import com.io7m.jfunctional.Some
-import io.reactivex.disposables.Disposable
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormatterBuilder
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.android.ktx.supportActionBar
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookFormat
-import org.nypl.simplified.books.book_database.api.BookFormats.BookFormatDefinition.BOOK_FORMAT_AUDIO
-import org.nypl.simplified.books.book_database.api.BookFormats.BookFormatDefinition.BOOK_FORMAT_EPUB
-import org.nypl.simplified.books.book_database.api.BookFormats.BookFormatDefinition.BOOK_FORMAT_PDF
-import org.nypl.simplified.books.book_registry.BookRegistryReadableType
+import org.nypl.simplified.books.book_database.api.BookFormats.BookFormatDefinition.*
 import org.nypl.simplified.books.book_registry.BookStatus
-import org.nypl.simplified.books.book_registry.BookStatusEvent
 import org.nypl.simplified.books.book_registry.BookWithStatus
-import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.books.covers.BookCoverProviderType
-import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS
 import org.nypl.simplified.listeners.api.FragmentListenerType
 import org.nypl.simplified.listeners.api.fragmentListeners
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
-import org.nypl.simplified.opds.core.OPDSAvailabilityHeld
-import org.nypl.simplified.opds.core.OPDSAvailabilityHeldReady
-import org.nypl.simplified.opds.core.OPDSAvailabilityHoldable
-import org.nypl.simplified.opds.core.OPDSAvailabilityLoanable
-import org.nypl.simplified.opds.core.OPDSAvailabilityLoaned
-import org.nypl.simplified.opds.core.OPDSAvailabilityMatcherType
-import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess
-import org.nypl.simplified.opds.core.OPDSAvailabilityRevoked
-import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
-import org.nypl.simplified.taskrecorder.api.TaskResult
-import org.nypl.simplified.ui.catalog.R.string
-import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
-import org.nypl.simplified.ui.thread.api.UIThreadServiceType
-import org.slf4j.LoggerFactory
 import java.net.URI
 
 /**
  * A book detail page.
  */
 
-class CatalogFragmentBookDetail : Fragment() {
-
-  private val logger = LoggerFactory.getLogger(CatalogFragmentBookDetail::class.java)
+class CatalogFragmentBookDetail : Fragment(R.layout.book_detail) {
 
   companion object {
 
@@ -72,30 +48,49 @@ class CatalogFragmentBookDetail : Fragment() {
      */
 
     fun create(parameters: CatalogFragmentBookDetailParameters): CatalogFragmentBookDetail {
-      val arguments = Bundle()
-      arguments.putSerializable(this.PARAMETERS_ID, parameters)
       val fragment = CatalogFragmentBookDetail()
-      fragment.arguments = arguments
+      fragment.arguments = bundleOf(this.PARAMETERS_ID to parameters)
       return fragment
     }
   }
 
+  private val services =
+    Services.serviceDirectory()
+
+  private val parameters: CatalogFragmentBookDetailParameters by lazy {
+      this.requireArguments()[PARAMETERS_ID] as CatalogFragmentBookDetailParameters
+  }
+
   private val listener: FragmentListenerType<CatalogBookDetailEvent> by fragmentListeners()
 
+  private val borrowViewModel: CatalogBorrowViewModel by viewModels(
+    factoryProducer = {
+      CatalogBorrowViewModelFactory(services)
+    }
+  )
+
+  private val viewModel: CatalogBookDetailViewModel by viewModels(
+    factoryProducer = {
+      CatalogBookDetailViewModelFactory(
+        requireActivity().application,
+        this.services,
+        this.borrowViewModel,
+        this.listener,
+        this.parameters
+      )
+    }
+  )
+
+  private var thumbnailLoading: FluentFuture<Unit>? = null
+
   private lateinit var authors: TextView
-  private lateinit var bookRegistry: BookRegistryReadableType
-  private lateinit var booksController: BooksControllerType
-  private lateinit var borrowViewModel: CatalogBorrowViewModel
   private lateinit var buttonCreator: CatalogButtons
   private lateinit var buttons: LinearLayout
-  private lateinit var configurationService: BuildConfigurationServiceType
   private lateinit var cover: ImageView
   private lateinit var covers: BookCoverProviderType
   private lateinit var debugStatus: TextView
   private lateinit var format: TextView
   private lateinit var metadata: TableLayout
-  private lateinit var parameters: CatalogFragmentBookDetailParameters
-  private lateinit var profilesController: ProfilesControllerType
   private lateinit var related: TextView
   private lateinit var report: TextView
   private lateinit var screenSize: ScreenSizeInformationType
@@ -109,10 +104,7 @@ class CatalogFragmentBookDetail : Fragment() {
   private lateinit var statusInProgressText: TextView
   private lateinit var summary: TextView
   private lateinit var title: TextView
-  private lateinit var uiThread: UIThreadServiceType
-  private val parametersId = PARAMETERS_ID
-  private var bookRegistrySubscription: Disposable? = null
-
+ 
   private val dateFormatter =
     DateTimeFormatterBuilder()
       .appendYear(4, 5)
@@ -139,61 +131,43 @@ class CatalogFragmentBookDetail : Fragment() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    this.parameters =
-      this.requireArguments()[this.parametersId] as CatalogFragmentBookDetailParameters
-
-    val services = Services.serviceDirectory()
-
-    this.configurationService =
-      services.requireService(BuildConfigurationServiceType::class.java)
-    this.bookRegistry =
-      services.requireService(BookRegistryReadableType::class.java)
-    this.uiThread =
-      services.requireService(UIThreadServiceType::class.java)
+    
     this.screenSize =
       services.requireService(ScreenSizeInformationType::class.java)
-    this.profilesController =
-      services.requireService(ProfilesControllerType::class.java)
-    this.booksController =
-      services.requireService(BooksControllerType::class.java)
     this.covers =
       services.requireService(BookCoverProviderType::class.java)
-  }
-
-  override fun onCreateView(
-    inflater: LayoutInflater,
-    container: ViewGroup?,
-    savedInstanceState: Bundle?
-  ): View {
     this.buttonCreator =
       CatalogButtons(this.requireContext(), this.screenSize)
+  }
 
-    val layout =
-      inflater.inflate(R.layout.book_detail, container, false)
+  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    super.onViewCreated(view, savedInstanceState)
+
+    this.viewModel.bookWithStatusLive.observe(this.viewLifecycleOwner, this::reconfigureUI)
 
     this.cover =
-      layout.findViewById(R.id.bookDetailCoverImage)
+      view.findViewById(R.id.bookDetailCoverImage)
     this.title =
-      layout.findViewById(R.id.bookDetailTitle)
+      view.findViewById(R.id.bookDetailTitle)
     this.format =
-      layout.findViewById(R.id.bookDetailFormat)
+      view.findViewById(R.id.bookDetailFormat)
     this.authors =
-      layout.findViewById(R.id.bookDetailAuthors)
+      view.findViewById(R.id.bookDetailAuthors)
     this.status =
-      layout.findViewById(R.id.bookDetailStatus)
+      view.findViewById(R.id.bookDetailStatus)
     this.summary =
-      layout.findViewById(R.id.bookDetailDescriptionText)
+      view.findViewById(R.id.bookDetailDescriptionText)
     this.metadata =
-      layout.findViewById(R.id.bookDetailMetadataTable)
+      view.findViewById(R.id.bookDetailMetadataTable)
     this.buttons =
-      layout.findViewById(R.id.bookDetailButtons)
+      view.findViewById(R.id.bookDetailButtons)
     this.related =
-      layout.findViewById(R.id.bookDetailRelated)
+      view.findViewById(R.id.bookDetailRelated)
     this.report =
-      layout.findViewById(R.id.bookDetailReport)
+      view.findViewById(R.id.bookDetailReport)
 
     this.debugStatus =
-      layout.findViewById(R.id.bookDetailDebugStatus)
+      view.findViewById(R.id.bookDetailDebugStatus)
 
     this.statusIdle =
       this.status.findViewById(R.id.bookDetailStatusIdle)
@@ -219,20 +193,11 @@ class CatalogFragmentBookDetail : Fragment() {
     this.statusFailed.visibility = View.INVISIBLE
 
     this.debugStatus.visibility =
-      if (this.configurationService.showDebugBookDetailStatus) {
+      if (this.viewModel.showDebugBookDetailStatus) {
         View.VISIBLE
       } else {
         View.INVISIBLE
       }
-
-    return layout
-  }
-
-  override fun onStart() {
-    super.onStart()
-
-    this.borrowViewModel =
-      CatalogBorrowViewModelFactory.get(this)
 
     val targetHeight =
       this.resources.getDimensionPixelSize(R.dimen.cover_detail_height)
@@ -240,95 +205,30 @@ class CatalogFragmentBookDetail : Fragment() {
       this.parameters.feedEntry, this.cover, 0, targetHeight
     )
 
-    /*
-     * Retrieve the current status of the book, or synthesize a status value based on the
-     * OPDS feed entry if the book is not in the registry. The book will only be in the
-     * registry if the user has ever tried to borrow it (as per the registry spec).
-     */
-
-    val status =
-      this.bookRegistry.bookOrNull(this.parameters.bookID)
-        ?: this.synthesizeBookWithStatus(this.parameters.feedEntry)
-
-    this.onBookChangedUI(status)
-    this.onOPDSFeedEntryUI(this.parameters.feedEntry)
-    this.configureToolbar()
-
-    this.bookRegistrySubscription =
-      this.bookRegistry.bookEvents()
-        .subscribe(this::onBookChanged)
+    this.configureOPDSEntry(this.parameters.feedEntry)
   }
 
-  private fun synthesizeBookWithStatus(
-    item: FeedEntryOPDS
-  ): BookWithStatus {
-    val book = Book(
-      id = item.bookID,
-      account = item.accountID,
-      cover = null,
-      thumbnail = null,
-      entry = item.feedEntry,
-      formats = listOf()
-    )
-    val status = BookStatus.fromBook(book)
-    this.logger.debug("Synthesizing {} with status {}", book.id, status)
-    return BookWithStatus(book, status)
+  override fun onDestroyView() {
+    super.onDestroyView()
+    this.thumbnailLoading?.cancel(true)
+    this.thumbnailLoading = null
+  }
+
+  override fun onResume() {
+    super.onResume()
+    this.configureToolbar()
   }
 
   private fun configureToolbar() {
-    val accountProvider = try {
-      this.profilesController.profileCurrent()
-        .account(this.parameters.feedEntry.accountID)
-        .provider
-    } catch (e: Exception) {
-      this.logger.debug("Couldn't load account provider from profile", e)
-      null
-    }
-
     val feedTitle = this.parameters.feedArguments.title
     this.supportActionBar?.apply {
       title = feedTitle
-      subtitle = accountProvider?.displayName
+      subtitle = this@CatalogFragmentBookDetail.viewModel.accountProvider?.displayName
     }
   }
 
-  private fun onBookChanged(event: BookStatusEvent) {
-    val bookWithStatus =
-      this.bookRegistry.bookOrNull(event.bookId)
-        ?: synthesizeBookWithStatus(this.parameters.feedEntry)
-
-    // Update the cached parameters with the feed entry. We'll need this later if the availability
-    // has changed but it's been removed from the registry (e.g. when revoking a hold).
-    this.parameters = this.parameters.copy(
-      feedEntry = FeedEntryOPDS(
-        accountID = this.parameters.feedEntry.accountID,
-        feedEntry = bookWithStatus.book.entry
-      )
-    )
-
-    this.uiThread.runOnUIThread { this.onBookChangedUI(bookWithStatus) }
-    this.onOPDSFeedEntry(
-      FeedEntryOPDS(
-        bookWithStatus.book.account,
-        bookWithStatus.book.entry
-      )
-    )
-  }
-
-  private fun onOPDSFeedEntry(entry: FeedEntryOPDS) {
-    this.uiThread.runOnUIThread {
-      this.parameters = this.parameters.copy(feedEntry = entry)
-      this.onOPDSFeedEntryUI(entry)
-    }
-  }
-
-  @UiThread
-  private fun onOPDSFeedEntryUI(feedEntry: FeedEntryOPDS) {
-    this.uiThread.checkIsUIThread()
-
-    // Sanity check; ensure we're attached to a valid context. We've seen some lifecycle related
-    // crashes related to being detached when this method executes.
-    val context = this.context ?: return
+  private fun configureOPDSEntry(feedEntry: FeedEntryOPDS) {
+    val context = this.requireContext()
 
     val opds = feedEntry.feedEntry
     this.title.text = opds.title
@@ -336,11 +236,11 @@ class CatalogFragmentBookDetail : Fragment() {
 
     this.format.text = when (feedEntry.probableFormat) {
       BOOK_FORMAT_EPUB ->
-        context.getString(string.catalogBookFormatEPUB)
+        context.getString(R.string.catalogBookFormatEPUB)
       BOOK_FORMAT_AUDIO ->
-        context.getString(string.catalogBookFormatAudioBook)
+        context.getString(R.string.catalogBookFormatAudioBook)
       BOOK_FORMAT_PDF ->
-        context.getString(string.catalogBookFormatPDF)
+        context.getString(R.string.catalogBookFormatPDF)
       null -> ""
     }
 
@@ -365,11 +265,11 @@ class CatalogFragmentBookDetail : Fragment() {
      * on demand.
      */
 
-    val feedRelatedOpt = this.parameters.feedEntry.feedEntry.related
+    val feedRelatedOpt = feedEntry.feedEntry.related
     if (feedRelatedOpt is Some<URI>) {
       val feedRelated = feedRelatedOpt.get()
       this.related.setOnClickListener {
-        this.openRelatedFeed(feedRelated)
+        this.viewModel.openRelatedFeed(feedRelated)
       }
       this.related.isEnabled = true
     } else {
@@ -377,35 +277,9 @@ class CatalogFragmentBookDetail : Fragment() {
     }
   }
 
-  private fun openRelatedFeed(feedRelated: URI) {
-    val context = this.requireContext()
-    val feedModel = this.createOrGetFeedModel(context)
-    val targetFeed =
-      feedModel.resolveFeedFromBook(
-        accountID = this.parameters.feedEntry.accountID,
-        title = context.resources.getString(R.string.catalogRelatedBooks),
-        uri = feedRelated
-      )
-    this.listener.post(CatalogBookDetailEvent.OpenFeed(targetFeed))
-  }
-
-  private fun createOrGetFeedModel(
-    context: Context
-  ): CatalogFeedViewModel {
-    return ViewModelProviders.of(
-      this,
-      CatalogFeedViewModelFactory(
-        context = context,
-        services = Services.serviceDirectory(),
-        feedArguments = this.parameters.feedArguments
-      )
-    ).get(CatalogFeedViewModel::class.java)
-  }
-
   private val genreUriScheme =
     "http://librarysimplified.org/terms/genres/Simplified/"
 
-  @UiThread
   private fun configureMetadataTable(entry: OPDSAcquisitionFeedEntry) {
     this.metadata.removeAllViews()
 
@@ -456,67 +330,60 @@ class CatalogFragmentBookDetail : Fragment() {
     return Triple(row, rowKey, rowVal)
   }
 
-  @UiThread
-  private fun onBookChangedUI(book: BookWithStatus) {
-    this.uiThread.checkIsUIThread()
+  private fun reconfigureUI(book: BookWithStatus) {
     this.debugStatus.text = book.javaClass.simpleName
 
     return when (val status = book.status) {
       is BookStatus.Held ->
-        this.onBookStatusHeldUI(status, book.book)
+        this.onBookStatusHeld(status, book.book)
       is BookStatus.Loaned ->
-        this.onBookStatusLoanedUI(status, book.book)
+        this.onBookStatusLoaned(status, book.book)
       is BookStatus.Holdable ->
-        this.onBookStatusHoldableUI(status, book.book)
+        this.onBookStatusHoldable(status)
       is BookStatus.Loanable ->
-        this.onBookStatusLoanableUI(status, book.book)
+        this.onBookStatusLoanable(status)
       is BookStatus.RequestingLoan ->
-        this.onBookStatusRequestingLoanUI()
+        this.onBookStatusRequestingLoan()
       is BookStatus.Revoked ->
-        this.onBookStatusRevokedUI(status)
+        this.onBookStatusRevoked(status)
       is BookStatus.FailedLoan ->
-        this.onBookStatusFailedLoanUI(status, book.book)
+        this.onBookStatusFailedLoan(status)
       is BookStatus.FailedRevoke ->
-        this.onBookStatusFailedRevokeUI(status, book.book)
+        this.onBookStatusFailedRevoke(status)
       is BookStatus.FailedDownload ->
-        this.onBookStatusFailedDownloadUI(status, book.book)
+        this.onBookStatusFailedDownload(status)
       is BookStatus.RequestingRevoke ->
-        this.onBookStatusRequestingRevokeUI()
+        this.onBookStatusRequestingRevoke()
       is BookStatus.RequestingDownload ->
-        this.onBookStatusRequestingDownloadUI()
+        this.onBookStatusRequestingDownload()
       is BookStatus.Downloading ->
-        this.onBookStatusDownloadingUI(status, book.book)
+        this.onBookStatusDownloading(status)
       is BookStatus.DownloadWaitingForExternalAuthentication ->
-        this.onBookStatusDownloadWaitingForExternalAuthenticationUI(status, book.book)
+        this.onBookStatusDownloadWaitingForExternalAuthentication()
       is BookStatus.DownloadExternalAuthenticationInProgress ->
-        this.onBookStatusDownloadExternalAuthenticationInProgressUI(book.book)
+        this.onBookStatusDownloadExternalAuthenticationInProgress()
     }
   }
 
-  @UiThread
-  private fun onBookStatusFailedLoanUI(
+  private fun onBookStatusFailedLoan(
     bookStatus: BookStatus.FailedLoan,
-    book: Book
   ) {
-    this.uiThread.checkIsUIThread()
-
     this.buttons.removeAllViews()
     this.buttons.addView(
       this.buttonCreator.createDismissButton {
-        this.borrowViewModel.tryDismissBorrowError(this.parameters.feedEntry.accountID, book.id)
+        this.viewModel.dismissBorrowError()
       }
     )
     this.buttons.addView(this.buttonCreator.createButtonSpace())
     this.buttons.addView(
       this.buttonCreator.createDetailsButton {
-        this.tryShowError(book, bookStatus.result)
+        this.viewModel.showError(bookStatus.result)
       }
     )
     this.buttons.addView(this.buttonCreator.createButtonSpace())
     this.buttons.addView(
       this.buttonCreator.createRetryButton {
-        this.openLoginDialogIfNecessary()
-        this.borrowViewModel.tryBorrowMaybeAuthenticated(book)
+        this.viewModel.borrowMaybeAuthenticated()
       }
     )
     this.checkButtonViewCount()
@@ -527,12 +394,9 @@ class CatalogFragmentBookDetail : Fragment() {
     this.statusFailedText.text = this.resources.getText(R.string.catalogOperationFailed)
   }
 
-  @UiThread
-  private fun onBookStatusRevokedUI(
+  private fun onBookStatusRevoked(
     bookStatus: BookStatus.Revoked
   ) {
-    this.uiThread.checkIsUIThread()
-
     this.buttons.removeAllViews()
     this.buttons.addView(this.buttonCreator.createCenteredTextForButtons(R.string.catalogRequesting))
     this.checkButtonViewCount()
@@ -545,10 +409,7 @@ class CatalogFragmentBookDetail : Fragment() {
       CatalogBookAvailabilityStrings.statusString(this.resources, bookStatus)
   }
 
-  @UiThread
-  private fun onBookStatusRequestingLoanUI() {
-    this.uiThread.checkIsUIThread()
-
+  private fun onBookStatusRequestingLoan() {
     this.buttons.removeAllViews()
     this.buttons.addView(this.buttonCreator.createCenteredTextForButtons(R.string.catalogRequesting))
     this.checkButtonViewCount()
@@ -561,19 +422,14 @@ class CatalogFragmentBookDetail : Fragment() {
     this.statusInProgressBar.isIndeterminate = true
   }
 
-  @UiThread
-  private fun onBookStatusLoanableUI(
+  private fun onBookStatusLoanable(
     bookStatus: BookStatus.Loanable,
-    book: Book
   ) {
-    this.uiThread.checkIsUIThread()
-
     this.buttons.removeAllViews()
     this.buttons.addView(this.buttonCreator.createButtonSizedSpace())
     this.buttons.addView(
       this.buttonCreator.createGetButton {
-        this.openLoginDialogIfNecessary()
-        this.borrowViewModel.tryBorrowMaybeAuthenticated(book)
+        this.viewModel.borrowMaybeAuthenticated()
       }
     )
     this.buttons.addView(this.buttonCreator.createButtonSizedSpace())
@@ -587,19 +443,14 @@ class CatalogFragmentBookDetail : Fragment() {
       CatalogBookAvailabilityStrings.statusString(this.resources, bookStatus)
   }
 
-  @UiThread
-  private fun onBookStatusHoldableUI(
+  private fun onBookStatusHoldable(
     bookStatus: BookStatus.Holdable,
-    book: Book
   ) {
-    this.uiThread.checkIsUIThread()
-
     this.buttons.removeAllViews()
     this.buttons.addView(this.buttonCreator.createButtonSizedSpace())
     this.buttons.addView(
       this.buttonCreator.createReserveButton {
-        this.openLoginDialogIfNecessary()
-        this.borrowViewModel.tryReserveMaybeAuthenticated(book)
+        this.viewModel.reserveMaybeAuthenticated()
       }
     )
     this.buttons.addView(this.buttonCreator.createButtonSizedSpace())
@@ -613,13 +464,10 @@ class CatalogFragmentBookDetail : Fragment() {
       CatalogBookAvailabilityStrings.statusString(this.resources, bookStatus)
   }
 
-  @UiThread
-  private fun onBookStatusHeldUI(
+  private fun onBookStatusHeld(
     bookStatus: BookStatus.Held,
     book: Book
   ) {
-    this.uiThread.checkIsUIThread()
-
     this.buttons.removeAllViews()
     when (bookStatus) {
       is BookStatus.Held.HeldInQueue ->
@@ -627,8 +475,7 @@ class CatalogFragmentBookDetail : Fragment() {
           this.buttons.addView(this.buttonCreator.createButtonSizedSpace())
           this.buttons.addView(
             this.buttonCreator.createRevokeHoldButton {
-              this.openLoginDialogIfNecessary()
-              this.borrowViewModel.tryRevokeMaybeAuthenticated(book)
+              this.viewModel.revokeMaybeAuthenticated()
             }
           )
           this.buttons.addView(this.buttonCreator.createButtonSizedSpace())
@@ -642,15 +489,13 @@ class CatalogFragmentBookDetail : Fragment() {
         if (bookStatus.isRevocable) {
           this.buttons.addView(
             this.buttonCreator.createRevokeHoldButton {
-              this.openLoginDialogIfNecessary()
-              this.borrowViewModel.tryRevokeMaybeAuthenticated(book)
+              this.viewModel.revokeMaybeAuthenticated()
             }
           )
         }
         this.buttons.addView(
           this.buttonCreator.createGetButton {
-            this.openLoginDialogIfNecessary()
-            this.borrowViewModel.tryBorrowMaybeAuthenticated(book)
+            this.viewModel.borrowMaybeAuthenticated()
           }
         )
       }
@@ -664,20 +509,16 @@ class CatalogFragmentBookDetail : Fragment() {
       CatalogBookAvailabilityStrings.statusString(this.resources, bookStatus)
   }
 
-  @UiThread
-  private fun onBookStatusLoanedUI(
+  private fun onBookStatusLoaned(
     bookStatus: BookStatus.Loaned,
     book: Book
   ) {
-    this.uiThread.checkIsUIThread()
-
     this.buttons.removeAllViews()
     when (bookStatus) {
       is BookStatus.Loaned.LoanedNotDownloaded ->
         this.buttons.addView(
           this.buttonCreator.createDownloadButton {
-            this.openLoginDialogIfNecessary()
-            this.borrowViewModel.tryBorrowMaybeAuthenticated(book)
+            this.viewModel.borrowMaybeAuthenticated()
           }
         )
 
@@ -687,14 +528,14 @@ class CatalogFragmentBookDetail : Fragment() {
           is BookFormat.BookFormatEPUB -> {
             this.buttons.addView(
               this.buttonCreator.createReadButton {
-                this.listener.post(CatalogBookDetailEvent.OpenViewer(book, format))
+                this.viewModel.openViewer(format)
               }
             )
           }
           is BookFormat.BookFormatAudioBook -> {
             this.buttons.addView(
               this.buttonCreator.createListenButton {
-                this.listener.post(CatalogBookDetailEvent.OpenViewer(book, format))
+                this.viewModel.openViewer(format)
               }
             )
           }
@@ -705,17 +546,16 @@ class CatalogFragmentBookDetail : Fragment() {
       this.buttons.addView(this.buttonCreator.createButtonSpace())
       this.buttons.addView(
         this.buttonCreator.createRevokeLoanButton {
-          this.openLoginDialogIfNecessary()
-          this.borrowViewModel.tryRevokeMaybeAuthenticated(book)
+          this.viewModel.revokeMaybeAuthenticated()
         }
       )
     }
 
-    if (this.shouldShowDeleteButton(book)) {
+    if (this.viewModel.bookCanBeDeleted) {
       this.buttons.addView(this.buttonCreator.createButtonSpace())
       this.buttons.addView(
         this.buttonCreator.createDeleteButton {
-          this.borrowViewModel.tryDelete(book.account, book.id)
+          this.viewModel.delete()
         }
       )
     }
@@ -729,60 +569,9 @@ class CatalogFragmentBookDetail : Fragment() {
       CatalogBookAvailabilityStrings.statusString(this.resources, bookStatus)
   }
 
-  /**
-   * Determine whether or not a book can be "deleted".
-   *
-   * A book can be deleted if:
-   *
-   * * It is loaned, downloaded, and not revocable (because otherwise, a revocation is needed).
-   * * It is loanable, but there is a book database entry for it
-   * * It is open access but there is a book database entry for it
-   */
-
-  private fun shouldShowDeleteButton(book: Book): Boolean {
-    return try {
-      val profile = this.profilesController.profileCurrent()
-      val account = profile.account(this.parameters.feedEntry.accountID)
-      return if (account.bookDatabase.books().contains(book.id)) {
-        book.entry.availability.matchAvailability(
-          object : OPDSAvailabilityMatcherType<Boolean, Exception> {
-            override fun onHeldReady(availability: OPDSAvailabilityHeldReady): Boolean =
-              false
-
-            override fun onHeld(availability: OPDSAvailabilityHeld): Boolean =
-              false
-
-            override fun onHoldable(availability: OPDSAvailabilityHoldable): Boolean =
-              false
-
-            override fun onLoaned(availability: OPDSAvailabilityLoaned): Boolean =
-              availability.revoke.isNone && book.isDownloaded
-
-            override fun onLoanable(availability: OPDSAvailabilityLoanable): Boolean =
-              true
-
-            override fun onOpenAccess(availability: OPDSAvailabilityOpenAccess): Boolean =
-              true
-
-            override fun onRevoked(availability: OPDSAvailabilityRevoked): Boolean =
-              false
-          })
-      } else {
-        false
-      }
-    } catch (e: Exception) {
-      this.logger.error("could not configure delete button: ", e)
-      false
-    }
-  }
-
-  @UiThread
-  private fun onBookStatusDownloadingUI(
+  private fun onBookStatusDownloading(
     bookStatus: BookStatus.Downloading,
-    book: Book
   ) {
-    this.uiThread.checkIsUIThread()
-
     /*
      * XXX: https://jira.nypl.org/browse/SIMPLY-3444
      *
@@ -810,39 +599,7 @@ class CatalogFragmentBookDetail : Fragment() {
     }
   }
 
-  @UiThread
-  private fun onBookStatusDownloadWaitingForExternalAuthenticationUI(
-    status: BookStatus.DownloadWaitingForExternalAuthentication,
-    book: Book
-  ) {
-    this.uiThread.checkIsUIThread()
-
-    this.buttons.removeAllViews()
-    this.buttons.addView(this.buttonCreator.createCenteredTextForButtons(R.string.catalogLoginRequired))
-    this.checkButtonViewCount()
-
-    this.statusInProgress.visibility = View.VISIBLE
-    this.statusIdle.visibility = View.INVISIBLE
-    this.statusFailed.visibility = View.INVISIBLE
-    this.statusInProgressText.visibility = View.GONE
-    this.statusInProgressBar.isIndeterminate = true
-
-    this.uiThread.runOnUIThread {
-      this.listener.post(
-        CatalogBookDetailEvent.DownloadWaitingForExternalAuthentication(
-          bookID = book.id,
-          downloadURI = status.downloadURI
-        )
-      )
-    }
-  }
-
-  @UiThread
-  private fun onBookStatusDownloadExternalAuthenticationInProgressUI(
-    book: Book
-  ) {
-    this.uiThread.checkIsUIThread()
-
+  private fun onBookStatusDownloadWaitingForExternalAuthentication() {
     this.buttons.removeAllViews()
     this.buttons.addView(this.buttonCreator.createCenteredTextForButtons(R.string.catalogLoginRequired))
     this.checkButtonViewCount()
@@ -854,10 +611,19 @@ class CatalogFragmentBookDetail : Fragment() {
     this.statusInProgressBar.isIndeterminate = true
   }
 
-  @UiThread
-  private fun onBookStatusRequestingDownloadUI() {
-    this.uiThread.checkIsUIThread()
+  private fun onBookStatusDownloadExternalAuthenticationInProgress() {
+    this.buttons.removeAllViews()
+    this.buttons.addView(this.buttonCreator.createCenteredTextForButtons(R.string.catalogLoginRequired))
+    this.checkButtonViewCount()
 
+    this.statusInProgress.visibility = View.VISIBLE
+    this.statusIdle.visibility = View.INVISIBLE
+    this.statusFailed.visibility = View.INVISIBLE
+    this.statusInProgressText.visibility = View.GONE
+    this.statusInProgressBar.isIndeterminate = true
+  }
+
+  private fun onBookStatusRequestingDownload() {
     this.buttons.removeAllViews()
     this.buttons.addView(this.buttonCreator.createCenteredTextForButtons(R.string.catalogRequesting))
     this.checkButtonViewCount()
@@ -869,10 +635,7 @@ class CatalogFragmentBookDetail : Fragment() {
     this.statusInProgressBar.isIndeterminate = true
   }
 
-  @UiThread
-  private fun onBookStatusRequestingRevokeUI() {
-    this.uiThread.checkIsUIThread()
-
+  private fun onBookStatusRequestingRevoke() {
     this.buttons.removeAllViews()
     this.buttons.addView(this.buttonCreator.createCenteredTextForButtons(R.string.catalogRequesting))
     this.checkButtonViewCount()
@@ -884,30 +647,25 @@ class CatalogFragmentBookDetail : Fragment() {
     this.statusInProgressBar.isIndeterminate = true
   }
 
-  @UiThread
-  private fun onBookStatusFailedDownloadUI(
+  private fun onBookStatusFailedDownload(
     bookStatus: BookStatus.FailedDownload,
-    book: Book
   ) {
-    this.uiThread.checkIsUIThread()
-
     this.buttons.removeAllViews()
     this.buttons.addView(
       this.buttonCreator.createDismissButton {
-        this.borrowViewModel.tryDismissBorrowError(book.account, book.id)
+        this.viewModel.dismissBorrowError()
       }
     )
     this.buttons.addView(this.buttonCreator.createButtonSpace())
     this.buttons.addView(
       this.buttonCreator.createDetailsButton {
-        this.tryShowError(book, bookStatus.result)
+        this.viewModel.showError(bookStatus.result)
       }
     )
     this.buttons.addView(this.buttonCreator.createButtonSpace())
     this.buttons.addView(
       this.buttonCreator.createRetryButton {
-        this.openLoginDialogIfNecessary()
-        this.borrowViewModel.tryBorrowMaybeAuthenticated(book)
+        this.viewModel.borrowMaybeAuthenticated()
       }
     )
     this.checkButtonViewCount()
@@ -918,30 +676,25 @@ class CatalogFragmentBookDetail : Fragment() {
     this.statusFailedText.text = this.getString(R.string.catalogOperationFailed)
   }
 
-  @UiThread
-  private fun onBookStatusFailedRevokeUI(
+  private fun onBookStatusFailedRevoke(
     bookStatus: BookStatus.FailedRevoke,
-    book: Book
   ) {
-    this.uiThread.checkIsUIThread()
-
     this.buttons.removeAllViews()
     this.buttons.addView(
       this.buttonCreator.createDismissButton {
-        this.borrowViewModel.tryDismissRevokeError(book.account, book.id)
+        this.viewModel.dismissRevokeError()
       }
     )
     this.buttons.addView(this.buttonCreator.createButtonSpace())
     this.buttons.addView(
       this.buttonCreator.createDetailsButton {
-        this.tryShowError(book, bookStatus.result)
+        this.viewModel.showError(bookStatus.result)
       }
     )
     this.buttons.addView(this.buttonCreator.createButtonSpace())
     this.buttons.addView(
       this.buttonCreator.createRetryButton {
-        this.openLoginDialogIfNecessary()
-        this.borrowViewModel.tryRevokeMaybeAuthenticated(book)
+        this.viewModel.revokeMaybeAuthenticated()
       }
     )
     this.checkButtonViewCount()
@@ -952,43 +705,10 @@ class CatalogFragmentBookDetail : Fragment() {
     this.statusFailedText.text = this.resources.getText(R.string.catalogOperationFailed)
   }
 
-  @UiThread
-  private fun openLoginDialogIfNecessary() {
-    this.uiThread.checkIsUIThread()
-
-    if (this.borrowViewModel.isLoginRequired(this.parameters.feedEntry.accountID)) {
-      this.listener.post(
-        CatalogBookDetailEvent.LoginRequired(this.parameters.feedEntry.accountID)
-      )
-    }
-  }
-
-  @UiThread
   private fun checkButtonViewCount() {
     Preconditions.checkState(
       this.buttons.childCount > 0,
       "At least one button must be present (existing ${this.buttons.childCount})"
     )
-  }
-
-  override fun onStop() {
-    super.onStop()
-    this.bookRegistrySubscription?.dispose()
-  }
-
-  private fun tryShowError(
-    book: Book,
-    result: TaskResult.Failure<*>
-  ) {
-    this.logger.debug("showing error: {}", book.id)
-
-    val errorPageParameters = ErrorPageParameters(
-      emailAddress = this.configurationService.supportErrorReportEmailAddress,
-      body = "",
-      subject = this.configurationService.supportErrorReportSubject,
-      attributes = result.attributes.toSortedMap(),
-      taskSteps = result.steps
-    )
-    this.listener.post(CatalogBookDetailEvent.OpenErrorPage(errorPageParameters))
   }
 }
