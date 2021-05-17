@@ -1074,12 +1074,11 @@ class CatalogFragmentFeed : Fragment(), AgeGateDialog.BirthYearSelectedListener 
       return false
     }
 
-    val accountProvider =
+    val account =
       this.profilesController.profileCurrent()
         .account(ownership.accountId)
-        .provider
 
-    return accountProvider.feedIsRoot(parameters.feedURI)
+    return account.feedIsRoot(parameters.feedURI)
   }
 
   override fun onBirthYearSelected(isOver13: Boolean) {
