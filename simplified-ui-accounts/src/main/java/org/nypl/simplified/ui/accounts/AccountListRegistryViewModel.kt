@@ -62,13 +62,6 @@ class AccountListRegistryViewModel(private val locationManager: LocationManager)
       /**
        * Here we are hiding Library Finder functionality
        */
-      queries.map {
-        createQuery(it)
-      }.switchMapCompletable {
-        executeQuery(it)
-      }.subscribeOn(Schedulers.io())
-        .onErrorComplete()
-        .subscribe()
 //      Observable.combineLatest(queries, locationUpdates) { query, _ -> createQuery(query) }
 //        .switchMapCompletable(this::executeQuery)
 //        .subscribeOn(Schedulers.io())
