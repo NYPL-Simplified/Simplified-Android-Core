@@ -308,19 +308,13 @@ abstract class BooksControllerContract {
         .setBody("")
     )
 
-    val result = controller.booksSync(account).get()
-    assertInstanceOf(result, TaskResult.Failure::class.java)
-
-    Assertions.assertEquals(
-      IOException::class.java,
-      (result as TaskResult.Failure).exception!!::class.java
-    )
+    val result = controller.booksSync(account.id).get()
+    Assertions.assertTrue(result is TaskResult.Failure)
+    Assertions.assertEquals(IOException::class.java, (result as TaskResult.Failure).exception!!.javaClass)
   }
 
   /**
    * If the remote side returns a 401 error code, the current credentials should be thrown away.
-   *
-   * @throws Exception On errors
    */
 
   @Test
@@ -364,7 +358,7 @@ abstract class BooksControllerContract {
         .setBody("")
     )
 
-    controller.booksSync(account).get()
+    controller.booksSync(account.id).get()
     Assertions.assertEquals(AccountNotLoggedIn, account.loginState)
   }
 
@@ -404,7 +398,7 @@ abstract class BooksControllerContract {
     account.setLoginState(AccountLoggedIn(correctCredentials()))
 
     Assertions.assertEquals(AccountLoggedIn(correctCredentials()), account.loginState)
-    controller.booksSync(account).get()
+    controller.booksSync(account.id).get()
     Assertions.assertEquals(AccountLoggedIn(correctCredentials()), account.loginState)
   }
 
@@ -443,19 +437,16 @@ abstract class BooksControllerContract {
     val account = profile.accountsByProvider()[provider.id]!!
 
     Assertions.assertEquals(AccountNotLoggedIn, account.loginState)
-    controller.booksSync(account).get()
+    controller.booksSync(account.id).get()
     Assertions.assertEquals(AccountNotLoggedIn, account.loginState)
   }
 
   /**
    * If the remote side returns garbage for a feed, an error is raised.
-   *
-   * @throws Exception On errors
    */
 
   @Test
   @Timeout(value = 3L, unit = TimeUnit.SECONDS)
-  @Throws(Exception::class)
   fun testBooksSyncBadFeed() {
     val controller =
       createController(
@@ -493,13 +484,9 @@ abstract class BooksControllerContract {
         .setBody("Unlikely!")
     )
 
-    val result = controller.booksSync(account).get()
-    assertInstanceOf(result, TaskResult.Failure::class.java)
-
-    Assertions.assertEquals(
-      OPDSParseException::class.java,
-      (result as TaskResult.Failure).exception!!::class.java
-    )
+    val result = controller.booksSync(account.id).get()
+    Assertions.assertTrue(result is TaskResult.Failure)
+    Assertions.assertEquals(OPDSParseException::class.java, (result as TaskResult.Failure).exception!!.javaClass)
   }
 
   /**
@@ -552,7 +539,7 @@ abstract class BooksControllerContract {
     this.bookRegistry.bookEvents().subscribe({ this.bookEvents.add(it) })
 
     Assertions.assertEquals(0L, this.bookRegistry.books().size.toLong())
-    controller.booksSync(account).get()
+    controller.booksSync(account.id).get()
     Assertions.assertEquals(3L, this.bookRegistry.books().size.toLong())
 
     this.bookRegistry.bookOrException(
@@ -633,7 +620,7 @@ abstract class BooksControllerContract {
         .setBody(Buffer().readFrom(resource("testBooksSyncNewEntries.xml")))
     )
 
-    controller.booksSync(account).get()
+    controller.booksSync(account.id).get()
 
     this.bookRegistry.bookOrException(
       BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f")
@@ -662,7 +649,7 @@ abstract class BooksControllerContract {
         .setBody(Buffer().readFrom(resource("testBooksSyncRemoveEntries.xml")))
     )
 
-    controller.booksSync(account).get()
+    controller.booksSync(account.id).get()
     Assertions.assertEquals(1L, this.bookRegistry.books().size.toLong())
 
     EventAssertions.isType(
@@ -730,7 +717,7 @@ abstract class BooksControllerContract {
 
     val profile = this.profiles.createProfile(provider, "Kermit")
     this.profiles.setProfileCurrent(profile.id)
-    val account = profile.accountsByProvider()[provider.id]!!
+    val account = profile.accounts().values.first()
     account.setLoginState(AccountLoggedIn(correctCredentials()))
 
     this.server.enqueue(
@@ -745,7 +732,7 @@ abstract class BooksControllerContract {
         .setBody(Buffer().readFrom(resource("testBooksDelete.xml")))
     )
 
-    controller.booksSync(account).get()
+    controller.booksSync(account.id).get()
 
     val bookId = BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f")
 
@@ -779,7 +766,7 @@ abstract class BooksControllerContract {
     //    Assert.assertTrue("EPUB must exist", file.isFile());
 
     this.bookRegistry.bookEvents().subscribe({ this.bookEvents.add(it) })
-    controller.bookDelete(account, bookId).get()
+    controller.bookDelete(account.id, bookId).get()
 
     Assertions.assertTrue(
       this.bookRegistry.book(bookId).isNone,
@@ -821,7 +808,7 @@ abstract class BooksControllerContract {
 
     val profile = this.profiles.createProfile(provider, "Kermit")
     this.profiles.setProfileCurrent(profile.id)
-    val account = profile.accountsByProvider()[provider.id]!!
+    val account = profile.accounts().values.first()
     account.setLoginState(AccountLoggedIn(correctCredentials()))
 
     this.server.enqueue(
@@ -836,14 +823,14 @@ abstract class BooksControllerContract {
         .setBody(Buffer().readFrom(resource("testBooksSyncNewEntries.xml")))
     )
 
-    controller.booksSync(account).get()
+    controller.booksSync(account.id).get()
 
     val bookId = BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f")
 
     val statusBefore = this.bookRegistry.bookOrException(bookId).status
     assertInstanceOf(statusBefore, BookStatus.Loaned.LoanedNotDownloaded::class.java)
 
-    controller.bookRevokeFailedDismiss(account, bookId).get()
+    controller.bookRevokeFailedDismiss(account.id, bookId).get()
 
     val statusAfter = this.bookRegistry.bookOrException(bookId).status
     Assertions.assertEquals(statusBefore, statusAfter)

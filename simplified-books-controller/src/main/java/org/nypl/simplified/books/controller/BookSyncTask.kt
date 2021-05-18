@@ -4,6 +4,7 @@ import org.librarysimplified.http.api.LSHTTPClientType
 import org.librarysimplified.http.api.LSHTTPResponseStatus
 import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
+import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.api.AccountProviderType
@@ -20,6 +21,8 @@ import org.nypl.simplified.opds.core.OPDSAvailabilityRevoked
 import org.nypl.simplified.opds.core.OPDSFeedParserType
 import org.nypl.simplified.opds.core.OPDSParseException
 import org.nypl.simplified.patron.api.PatronUserProfileParsersType
+import org.nypl.simplified.profiles.api.ProfileID
+import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.slf4j.LoggerFactory
@@ -27,61 +30,51 @@ import java.io.ByteArrayInputStream
 import java.io.IOException
 import java.io.InputStream
 import java.util.HashSet
-import java.util.concurrent.Callable
 
 class BookSyncTask(
+  accountID: AccountID,
+  profileID: ProfileID,
+  profiles: ProfilesDatabaseType,
   private val booksController: BooksControllerType,
-  private val account: AccountType,
   private val accountRegistry: AccountProviderRegistryType,
   private val bookRegistry: BookRegistryType,
   private val patronParsers: PatronUserProfileParsersType,
   private val http: LSHTTPClientType,
   private val feedParser: OPDSFeedParserType
-) : Callable<TaskResult<Unit>> {
+) : AbstractBookTask(accountID, profileID, profiles) {
 
-  private val logger =
+  override val logger =
     LoggerFactory.getLogger(BookSyncTask::class.java)
-  private val taskRecorder =
+
+  override val taskRecorder =
     TaskRecorder.create()
 
-  @Throws(Exception::class)
-  override fun call(): TaskResult<Unit> {
-    return try {
-      this.logger.debug("syncing account {}", this.account.id)
-      this.execute()
-      this.taskRecorder.finishSuccess(Unit)
-    } catch (e: Exception) {
-      this.taskRecorder.currentStepFailed(e.message ?: e.javaClass.name, "unexpectedException", e)
-      this.taskRecorder.finishFailure()
-    } finally {
-      this.logger.debug("finished syncing account {}", this.account.id)
-    }
-  }
+  override fun execute(account: AccountType): TaskResult.Success<Unit> {
+    this.logger.debug("syncing account {}", account.id)
+    this.taskRecorder.beginNewStep("Syncing...")
 
-  @Throws(Exception::class)
-  private fun execute() {
-    this.taskRecorder.beginNewStep("Updating account provider…")
-    val provider = this.updateAccountProvider()
-
-    this.taskRecorder.beginNewStep("Syncing account…")
+    val provider = this.updateAccountProvider(account)
     val providerAuth = provider.authentication
     if (providerAuth == AccountProviderAuthenticationDescription.Anonymous) {
-      this.taskRecorder.currentStepSucceeded("Account does not support syncing.")
-      return
+      this.logger.debug("account does not support syncing")
+      return this.taskRecorder.finishSuccess(Unit)
     }
 
-    val credentials = this.account.loginState.credentials
+    val credentials = account.loginState.credentials
     if (credentials == null) {
-      this.taskRecorder.currentStepSucceeded("No credentials, aborting!")
-      return
+      this.logger.debug("no credentials, aborting!")
+      return this.taskRecorder.finishSuccess(Unit)
     }
 
-    this.fetchPatronUserProfile(credentials)
+    this.fetchPatronUserProfile(
+      account = account,
+      credentials = credentials
+    )
 
     val loansURI = provider.loansURI
     if (loansURI == null) {
-      this.taskRecorder.currentStepSucceeded("No loans URI, aborting!")
-      return
+      this.logger.debug("no loans URI, aborting!")
+      return this.taskRecorder.finishSuccess(Unit)
     }
 
     val request =
@@ -91,16 +84,33 @@ class BookSyncTask(
 
     val response = request.execute()
     return when (val status = response.status) {
-      is LSHTTPResponseStatus.Responded.OK ->
-        this.onHTTPOK(status.bodyStream ?: ByteArrayInputStream(ByteArray(0)), provider)
-      is LSHTTPResponseStatus.Responded.Error ->
-        this.onHTTPError(status, provider)
+      is LSHTTPResponseStatus.Responded.OK -> {
+        this.onHTTPOK(status.bodyStream ?: ByteArrayInputStream(ByteArray(0)), provider, account)
+        this.taskRecorder.finishSuccess(Unit)
+      }
+      is LSHTTPResponseStatus.Responded.Error -> {
+        val recovered = this.onHTTPError(status, account)
+
+        if (recovered) {
+          this.taskRecorder.finishSuccess(Unit)
+        } else {
+          val message = String.format("%s: %d: %s", provider.loansURI, status.properties.status, status.properties.message)
+          val exception = IOException(message)
+          this.taskRecorder.currentStepFailed(
+            message = message,
+            errorCode = "syncFailed",
+            exception = exception
+          )
+          throw TaskFailedHandled(exception)
+        }
+      }
       is LSHTTPResponseStatus.Failed ->
         throw IOException(status.exception)
     }
   }
 
   private fun fetchPatronUserProfile(
+    account: AccountType,
     credentials: AccountAuthenticationCredentials
   ): Any {
     return try {
@@ -110,10 +120,10 @@ class BookSyncTask(
           patronParsers = this.patronParsers,
           credentials = credentials,
           http = this.http,
-          account = this.account
+          account = account
         )
 
-      when (val currentCredentials = this.account.loginState.credentials) {
+      when (val currentCredentials = account.loginState.credentials) {
         is AccountAuthenticationCredentials.Basic ->
           currentCredentials.copy(annotationsURI = profile.annotationsURI)
         is AccountAuthenticationCredentials.OAuthWithIntermediary ->
@@ -128,10 +138,14 @@ class BookSyncTask(
     }
   }
 
-  private fun updateAccountProvider(): AccountProviderType {
+  override fun onFailure(result: TaskResult.Failure<Unit>) {
+    // Nothing to do
+  }
+
+  private fun updateAccountProvider(account: AccountType): AccountProviderType {
     this.logger.debug("resolving the existing account provider")
 
-    val oldProvider = this.account.provider
+    val oldProvider = account.provider
     var newDescription =
       this.accountRegistry.findAccountProviderDescription(oldProvider.id)
     if (newDescription == null) {
@@ -152,7 +166,7 @@ class BookSyncTask(
     return when (newProviderResult) {
       is TaskResult.Success -> {
         this.logger.debug("successfully resolved the account provider")
-        this.account.setAccountProvider(newProviderResult.result)
+        account.setAccountProvider(newProviderResult.result)
         newProviderResult.result
       }
       is TaskResult.Failure -> {
@@ -165,17 +179,19 @@ class BookSyncTask(
   @Throws(IOException::class)
   private fun onHTTPOK(
     stream: InputStream,
-    provider: AccountProviderType
+    provider: AccountProviderType,
+    account: AccountType
   ) {
     return stream.use { ok ->
-      this.parseFeed(ok, provider)
+      this.parseFeed(ok, provider, account)
     }
   }
 
   @Throws(OPDSParseException::class)
   private fun parseFeed(
     stream: InputStream,
-    provider: AccountProviderType
+    provider: AccountProviderType,
+    account: AccountType
   ) {
     val feed = this.feedParser.parse(provider.loansURI, stream)
 
@@ -185,7 +201,7 @@ class BookSyncTask(
      * expired and should be deleted.
      */
 
-    val bookDatabase = this.account.bookDatabase
+    val bookDatabase = account.bookDatabase
     val existing = bookDatabase.books()
 
     /*
@@ -243,21 +259,23 @@ class BookSyncTask(
 
     for (revoke_id in revoking) {
       this.logger.debug("[{}] revoking", revoke_id.brief())
-      this.booksController.bookRevoke(this.account, revoke_id)
+      this.booksController.bookRevoke(account.id, revoke_id)
     }
   }
 
-  @Throws(Exception::class)
+  /**
+   * Returns whether we recovered from the error.
+   */
+
   private fun onHTTPError(
     result: LSHTTPResponseStatus.Responded.Error,
-    provider: AccountProviderType
-  ) {
+    account: AccountType
+  ): Boolean {
     if (result.properties.status == 401) {
       this.logger.debug("removing credentials due to 401 server response")
-      this.account.setLoginState(AccountLoginState.AccountNotLoggedIn)
-      return
+      account.setLoginState(AccountLoginState.AccountNotLoggedIn)
+      return true
     }
-
-    throw IOException(String.format("%s: %d: %s", provider.loansURI, result.properties.status, result.properties.message))
+    return false
   }
 }

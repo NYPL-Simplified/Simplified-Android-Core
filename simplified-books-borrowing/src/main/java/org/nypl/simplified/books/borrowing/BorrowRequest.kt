@@ -26,7 +26,7 @@ sealed class BorrowRequest {
    * The profile to which the account belongs.
    */
 
-  abstract val profile: ProfileID
+  abstract val profileId: ProfileID
 
   /**
    * Start borrowing a book.
@@ -34,7 +34,7 @@ sealed class BorrowRequest {
 
   data class Start(
     override val accountId: AccountID,
-    override val profile: ProfileID,
+    override val profileId: ProfileID,
     override val opdsAcquisitionFeedEntry: OPDSAcquisitionFeedEntry
   ) : BorrowRequest()
 }
