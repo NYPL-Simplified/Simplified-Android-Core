@@ -1,5 +1,6 @@
 package org.nypl.simplified.accounts.database.api
 
+import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.accounts.api.AccountPreferences
 import org.nypl.simplified.accounts.api.AccountProviderType
@@ -55,4 +56,32 @@ interface AccountType : AccountReadableType {
 
   @Throws(AccountsDatabaseException::class)
   fun setAccountProvider(accountProvider: AccountProviderType)
+
+  /**
+   * Update the account credentials using the given function, if the account is in a
+   * state where credentials are available. This is typically used to update parts of
+   * the credentials that are not under user control, such as the annotations URI that
+   * is included for some accounts.
+   *
+   * @throws AccountsDatabaseException On database errors
+   */
+
+  @Throws(AccountsDatabaseException::class)
+  fun updateCredentialsIfAvailable(
+    update: (AccountAuthenticationCredentials) -> AccountAuthenticationCredentials
+  ) {
+    return when (val state = this.loginState) {
+      is AccountLoginState.AccountLoggedIn ->
+        this.setLoginState(state.copy(update.invoke(state.credentials)))
+      is AccountLoginState.AccountLoggingOut ->
+        this.setLoginState(state.copy(update.invoke(state.credentials)))
+
+      is AccountLoginState.AccountLoggingIn,
+      is AccountLoginState.AccountLoggingInWaitingForExternalAuthentication,
+      is AccountLoginState.AccountLoginFailed,
+      is AccountLoginState.AccountLogoutFailed,
+      AccountLoginState.AccountNotLoggedIn ->
+        Unit
+    }
+  }
 }

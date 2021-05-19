@@ -20,6 +20,7 @@ import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.opds.core.OPDSAvailabilityRevoked
 import org.nypl.simplified.opds.core.OPDSFeedParserType
 import org.nypl.simplified.opds.core.OPDSParseException
+import org.nypl.simplified.patron.api.PatronUserProfile
 import org.nypl.simplified.patron.api.PatronUserProfileParsersType
 import org.nypl.simplified.profiles.api.ProfileID
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
@@ -123,18 +124,25 @@ class BookSyncTask(
           account = account
         )
 
-      when (val currentCredentials = account.loginState.credentials) {
-        is AccountAuthenticationCredentials.Basic ->
-          currentCredentials.copy(annotationsURI = profile.annotationsURI)
-        is AccountAuthenticationCredentials.OAuthWithIntermediary ->
-          currentCredentials.copy(annotationsURI = profile.annotationsURI)
-        is AccountAuthenticationCredentials.SAML2_0 ->
-          currentCredentials.copy(annotationsURI = profile.annotationsURI)
-        null ->
-          Unit
+      account.updateCredentialsIfAvailable {
+        this.withNewAnnotationsURI(it, profile)
       }
     } catch (e: Exception) {
       this.logger.error("patron user profile: ", e)
+    }
+  }
+
+  private fun withNewAnnotationsURI(
+    currentCredentials: AccountAuthenticationCredentials,
+    profile: PatronUserProfile
+  ): AccountAuthenticationCredentials {
+    return when (currentCredentials) {
+      is AccountAuthenticationCredentials.Basic ->
+        currentCredentials.copy(annotationsURI = profile.annotationsURI)
+      is AccountAuthenticationCredentials.OAuthWithIntermediary ->
+        currentCredentials.copy(annotationsURI = profile.annotationsURI)
+      is AccountAuthenticationCredentials.SAML2_0 ->
+        currentCredentials.copy(annotationsURI = profile.annotationsURI)
     }
   }
 

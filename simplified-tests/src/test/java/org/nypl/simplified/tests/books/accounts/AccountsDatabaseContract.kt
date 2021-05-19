@@ -400,6 +400,21 @@ abstract class AccountsDatabaseContract {
 
     acc0.setLoginState(AccountLoginState.AccountLoggedIn(creds))
     Assertions.assertEquals(AccountLoginState.AccountLoggedIn(creds), acc0.loginState)
+
+    acc0.updateCredentialsIfAvailable {
+      when (it) {
+        is AccountAuthenticationCredentials.Basic ->
+          creds.copy(annotationsURI = URI.create("https://www.example.com/annotations"))
+        is AccountAuthenticationCredentials.OAuthWithIntermediary ->
+          creds.copy(annotationsURI = URI.create("https://www.example.com/annotations"))
+        is AccountAuthenticationCredentials.SAML2_0 ->
+          creds.copy(annotationsURI = URI.create("https://www.example.com/annotations"))
+      }
+    }
+
+    Assertions.assertEquals(
+      URI.create("https://www.example.com/annotations"),
+      acc0.loginState.credentials?.annotationsURI)
   }
 
   @Test
