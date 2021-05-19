@@ -15,6 +15,14 @@ interface BookRegistryType : BookRegistryReadableType {
   fun update(status: BookWithStatus)
 
   /**
+   * Atomically update the status of the given book if the current value == the expected value.
+   *
+   * @return true if successful. False return indicates that the actual value was not equal to the expected value.
+   */
+
+  fun compareAndUpdate(expect: BookWithStatus, update: BookWithStatus): Boolean
+
+  /**
    * Conditionally update the status of the given book; the status is only updated if the
    * status is more important according to the priority ordering.
    *

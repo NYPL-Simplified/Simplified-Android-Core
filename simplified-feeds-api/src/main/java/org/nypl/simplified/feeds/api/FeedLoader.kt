@@ -5,7 +5,9 @@ import com.google.common.util.concurrent.ListeningExecutorService
 import com.io7m.jfunctional.Some
 import org.librarysimplified.http.api.LSHTTPAuthorizationType
 import org.nypl.simplified.accounts.api.AccountID
-import org.nypl.simplified.books.book_registry.BookRegistryReadableType
+import org.nypl.simplified.books.book_registry.BookRegistryType
+import org.nypl.simplified.books.book_registry.BookStatus
+import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.bundled.api.BundledURIs
 import org.nypl.simplified.books.formats.api.BookFormatSupportType
@@ -39,14 +41,11 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * The default implementation of the [FeedLoaderType] interface.
- *
- * This implementation caches feeds. A feed is ejected from the cache if it has
- * not been accessed for five minutes.
  */
 
 class FeedLoader private constructor(
   private val bookFormatSupport: BookFormatSupportType,
-  private val bookRegistry: BookRegistryReadableType,
+  private val bookRegistry: BookRegistryType,
   private val bundledContent: BundledContentResolverType,
   private val contentResolver: ContentResolverType,
   private val exec: ListeningExecutorService,
@@ -56,28 +55,6 @@ class FeedLoader private constructor(
 ) : FeedLoaderType {
 
   private val log = LoggerFactory.getLogger(FeedLoader::class.java)
-
-  private fun fetchURICore(
-    accountId: AccountID,
-    uri: URI,
-    auth: LSHTTPAuthorizationType?,
-    updateFromRegistry: Boolean,
-    method: String
-  ): FluentFuture<FeedLoaderResult> {
-    return FluentFuture.from(
-      this.exec.submit(
-        Callable {
-          this.fetchSynchronously(
-            accountId = accountId,
-            uri = uri,
-            auth = auth,
-            method = method,
-            updateFromRegistry = updateFromRegistry
-          )
-        }
-      )
-    )
-  }
 
   private val filterFlag =
     AtomicBoolean(true)
@@ -94,65 +71,25 @@ class FeedLoader private constructor(
     auth: LSHTTPAuthorizationType?,
     method: String,
   ): FluentFuture<FeedLoaderResult> {
-    return this.fetchURICore(
-      accountId = account,
-      uri = uri,
-      auth = auth,
-      updateFromRegistry = false,
-      method = method
+    return FluentFuture.from(
+      this.exec.submit(
+        Callable {
+          this.fetchSynchronously(
+            accountId = account,
+            uri = uri,
+            auth = auth,
+            method = method
+          )
+        }
+      )
     )
   }
-
-  override fun fetchURIWithBookRegistryEntries(
-    account: AccountID,
-    uri: URI,
-    auth: LSHTTPAuthorizationType?,
-    method: String
-  ): FluentFuture<FeedLoaderResult> {
-    return this.fetchURICore(
-      accountId = account,
-      uri = uri,
-      auth = auth,
-      updateFromRegistry = true,
-      method = method
-    )
-  }
-
-  private fun isEntrySupported(
-    entry: OPDSAcquisitionFeedEntry
-  ): Boolean {
-    if (!this.showOnlySupportedBooks) {
-      return true
-    }
-
-    val linearizedPaths = OPDSAcquisitionPaths.linearize(entry)
-    for (path in linearizedPaths) {
-      if (this.isRelationSupported(path.source.relation) && this.isTypePathSupported(path)) {
-        return true
-      }
-    }
-    return false
-  }
-
-  private fun isRelationSupported(relation: OPDSAcquisition.Relation): Boolean =
-    when (relation) {
-      ACQUISITION_BORROW -> true
-      ACQUISITION_BUY -> false
-      ACQUISITION_GENERIC -> true
-      ACQUISITION_OPEN_ACCESS -> true
-      ACQUISITION_SAMPLE -> false
-      ACQUISITION_SUBSCRIBE -> false
-    }
-
-  private fun isTypePathSupported(path: OPDSAcquisitionPath) =
-    this.bookFormatSupport.isSupportedPath(path.asMIMETypes())
 
   private fun fetchSynchronously(
     accountId: AccountID,
     uri: URI,
     auth: LSHTTPAuthorizationType?,
-    method: String,
-    updateFromRegistry: Boolean
+    method: String
   ): FeedLoaderResult {
     try {
       /*
@@ -190,12 +127,10 @@ class FeedLoader private constructor(
         )
 
       /*
-       * Replace entries in the feed with those from the book registry, if requested.
+       * Update the book registry with fresh data.
        */
 
-      if (updateFromRegistry) {
-        this.updateFeedFromBookRegistry(feed)
-      }
+      this.updateBookRegistryFromFeed(feed)
 
       return FeedLoaderSuccess(feed)
     } catch (e: FeedHTTPTransportException) {
@@ -226,6 +161,36 @@ class FeedLoader private constructor(
       )
     }
   }
+
+  private fun isEntrySupported(
+    entry: OPDSAcquisitionFeedEntry
+  ): Boolean {
+    if (!this.showOnlySupportedBooks) {
+      return true
+    }
+
+    val linearizedPaths = OPDSAcquisitionPaths.linearize(entry)
+    for (path in linearizedPaths) {
+      if (this.isRelationSupported(path.source.relation) && this.isTypePathSupported(path)) {
+        return true
+      }
+    }
+    return false
+  }
+
+  private fun isRelationSupported(relation: OPDSAcquisition.Relation): Boolean =
+    when (relation) {
+      ACQUISITION_BORROW -> true
+      ACQUISITION_BUY -> false
+      ACQUISITION_GENERIC -> true
+      ACQUISITION_OPEN_ACCESS -> true
+      ACQUISITION_SAMPLE -> false
+      ACQUISITION_SUBSCRIBE -> false
+    }
+
+  private fun isTypePathSupported(path: OPDSAcquisitionPath) =
+    this.bookFormatSupport.isSupportedPath(path.asMIMETypes())
+
 
   private fun parseFromContentResolver(
     accountId: AccountID,
@@ -297,45 +262,48 @@ class FeedLoader private constructor(
     }
   }
 
-  private fun updateFeedFromBookRegistry(feed: Feed) {
+  private fun updateBookRegistryFromFeed(feed: Feed) {
     when (feed) {
       is FeedWithoutGroups -> {
-        this.log.debug("updating {} entries (without groups) from book registry", feed.size)
+        this.log.debug("updating {} book registry from entries (without groups)", feed.size)
         for (index in 0 until feed.size) {
-          val e = feed.entriesInOrder.get(index)
-          val id = e.bookID
-          val bookWithStatus = this.bookRegistry.books().get(id)
-          if (bookWithStatus != null) {
-            this.log.trace("updating entry {} from book registry", id)
-            val en = FeedEntry.FeedEntryOPDS(
-              accountID = bookWithStatus.book.account,
-              feedEntry = bookWithStatus.book.entry
-            )
-            feed.entriesInOrder.set(index, en)
+          val e = feed.entriesInOrder[index]
+          if (e is FeedEntry.FeedEntryOPDS) {
+            this.updateBookRegistryFromEntry(e)
           }
         }
       }
       is FeedWithGroups -> {
-        this.log.debug("updating {} entries (with groups) from book registry", feed.size)
+        this.log.debug("updating {} book registry from entries (with groups)", feed.size)
         for (index in 0 until feed.size) {
-          val group = feed.feedGroupsInOrder.get(index)
-          val entries = group.getGroupEntries()
+          val group = feed.feedGroupsInOrder[index]
+          val entries = group.groupEntries
           for (gi in entries.indices) {
             val e = entries.get(gi)
-            val id = e.bookID
-            val bookWithStatus = this.bookRegistry.books().get(id)
-            if (bookWithStatus != null) {
-              this.log.trace("updating entry {} from book registry", id)
-              entries.set(
-                gi,
-                FeedEntry.FeedEntryOPDS(
-                  accountID = bookWithStatus.book.account,
-                  feedEntry = bookWithStatus.book.entry
-                )
-              )
+            if (e is FeedEntry.FeedEntryOPDS) {
+              this.updateBookRegistryFromEntry(e)
             }
           }
         }
+      }
+    }
+  }
+
+  private fun updateBookRegistryFromEntry(entry: FeedEntry.FeedEntryOPDS) {
+    val id = entry.bookID
+    val bookWithStatus = this.bookRegistry.bookOrNull(id)
+
+    // If the book is in the registry, though not in the database
+    if (bookWithStatus != null &&
+      (bookWithStatus.status is BookStatus.Loanable ||
+        bookWithStatus.status is BookStatus.Holdable ||
+        bookWithStatus.status is BookStatus.Held)
+    ) {
+      this.log.trace("updating book registry from entry {}", id)
+      val newBook = bookWithStatus.book.copy(entry = entry.feedEntry)
+      val newStatus = BookStatus.fromBook(newBook)
+      if (newStatus != bookWithStatus.status) {
+        this.bookRegistry.compareAndUpdate(bookWithStatus, BookWithStatus(newBook, newStatus))
       }
     }
   }
@@ -353,7 +321,7 @@ class FeedLoader private constructor(
       parser: OPDSFeedParserType,
       searchParser: OPDSSearchParserType,
       transport: OPDSFeedTransportType<LSHTTPAuthorizationType?>,
-      bookRegistry: BookRegistryReadableType,
+      bookRegistry: BookRegistryType,
       bundledContent: BundledContentResolverType
     ): FeedLoaderType {
       return FeedLoader(

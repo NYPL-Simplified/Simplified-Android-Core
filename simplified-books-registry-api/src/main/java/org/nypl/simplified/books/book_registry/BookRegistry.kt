@@ -41,18 +41,34 @@ class BookRegistry private constructor(
   override fun update(status: BookWithStatus) {
     val oldStatus = this.books[status.book.id]
     this.books[status.book.id] = status
+    this.publishUpdateEvent(oldStatus, status)
+  }
+
+  override fun compareAndUpdate(expect: BookWithStatus, update: BookWithStatus): Boolean {
+    return if (this.books.replace(expect.book.id, expect, update)) {
+      this.publishUpdateEvent(expect, update)
+      true
+    } else {
+      false
+    }
+  }
+
+  private fun publishUpdateEvent(oldStatus: BookWithStatus?, newStatus: BookWithStatus) {
+    if (newStatus.status == oldStatus?.status) {
+      return
+    }
 
     val event =
       if (oldStatus == null) {
         BookStatusEvent.BookStatusEventAdded(
-          bookId = status.book.id,
-          statusNow = status.status
+          bookId = newStatus.book.id,
+          statusNow = newStatus.status
         )
-    } else {
+      } else {
         BookStatusEvent.BookStatusEventChanged(
-          bookId = status.book.id,
+          bookId = oldStatus.book.id,
           statusPrevious = oldStatus.status,
-          statusNow = status.status
+          statusNow = newStatus.status
         )
       }
 

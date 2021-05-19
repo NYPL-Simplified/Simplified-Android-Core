@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Timeout
+import org.junit.jupiter.api.assertThrows
 import org.librarysimplified.http.api.LSHTTPClientConfiguration
 import org.librarysimplified.http.api.LSHTTPClientType
 import org.librarysimplified.http.vanilla.LSHTTPClients
@@ -35,6 +36,7 @@ import org.nypl.simplified.books.audio.AudioBookManifestStrategiesType
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatus
+import org.nypl.simplified.books.book_registry.BookStatusEvent.BookStatusEventAdded
 import org.nypl.simplified.books.book_registry.BookStatusEvent.BookStatusEventChanged
 import org.nypl.simplified.books.book_registry.BookStatusEvent.BookStatusEventRemoved
 import org.nypl.simplified.books.borrowing.BorrowSubtasks
@@ -529,17 +531,17 @@ abstract class BooksControllerContract {
     )
 
     EventAssertions.isType(
-      BookStatusEventChanged::class.java,
+      BookStatusEventAdded::class.java,
       this.bookEvents,
       0
     )
     EventAssertions.isType(
-      BookStatusEventChanged::class.java,
+      BookStatusEventAdded::class.java,
       this.bookEvents,
       1
     )
     EventAssertions.isType(
-      BookStatusEventChanged::class.java,
+      BookStatusEventAdded::class.java,
       this.bookEvents,
       2
     )
@@ -702,37 +704,13 @@ abstract class BooksControllerContract {
       "Book must not have a saved EPUB file"
     )
 
-    /*
-     * Manually reach into the database and create a book in order to have something to delete.
-     */
+    val result = controller.bookDelete(account.id, bookId).get()
+    result as TaskResult.Success
 
-    run {
-      val databaseEntry = account.bookDatabase.entry(bookId)
+    val newStatus = this.bookRegistry.bookOrException(bookId).status
+    newStatus as BookStatus.Loaned.LoanedNotDownloaded
 
-      //      databaseEntry.writeEPUB(File.createTempFile("book", ".epub"));
-      //      this.bookRegistry.update(
-      //          BookWithStatus.create(
-      //              databaseEntry.book(), BookStatus.fromBook(databaseEntry.book())));
-    }
-
-    //    final OptionType<File> createdFile =
-    //        this.bookRegistry.bookOrException(bookId).book().file();
-    //    Assert.assertTrue(
-    //        "Book must have a saved EPUB file",
-    //        createdFile.isSome());
-    //
-    //    final File file = ((Some<File>) createdFile).get();
-    //    Assert.assertTrue("EPUB must exist", file.isFile());
-
-    this.bookRegistry.bookEvents().subscribe({ this.bookEvents.add(it) })
-    controller.bookDelete(account.id, bookId).get()
-
-    Assertions.assertTrue(
-      this.bookRegistry.book(bookId).isNone,
-      "Book must not have a saved EPUB file"
-    )
-
-    // Assert.assertFalse("EPUB must not exist", file.exists());
+    assertThrows<Exception> { account.bookDatabase.entry(bookId) }
   }
 
   /**

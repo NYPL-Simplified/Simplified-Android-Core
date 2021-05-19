@@ -213,18 +213,9 @@ class CatalogFeedViewModel(
   }
 
   private fun onBookStatusEvent(event: BookStatusEvent) {
-    when (event) {
-      is BookStatusEvent.BookStatusEventAdded, is BookStatusEvent.BookStatusEventRemoved -> {
-        if (this.state.arguments.isLocallyGenerated) {
-         this.reloadFeed()
-        }
-      }
-      is BookStatusEvent.BookStatusEventChanged -> {
-        this.bookModels[event.bookId]?.let { model ->
-          model.onBookChanged.forEach { callback ->
-            this.notifyBookStatus(model.feedEntry, callback)
-          }
-        }
+    this.bookModels[event.bookId]?.let { model ->
+      model.onBookChanged.forEach { callback ->
+        this.notifyBookStatus(model.feedEntry, callback)
       }
     }
 
@@ -236,6 +227,11 @@ class CatalogFeedViewModel(
             downloadURI = statusNow.downloadURI
           )
         )
+      }
+      is BookStatus.Held, is BookStatus.Loaned, is BookStatus.Revoked -> {
+        if (this.state.arguments.isLocallyGenerated) {
+          this.reloadFeed()
+        }
       }
     }
   }
@@ -373,7 +369,7 @@ class CatalogFeedViewModel(
       AccountAuthenticatedHTTP.createAuthorizationIfPresent(loginState.credentials)
 
     val future =
-      this.feedLoader.fetchURIWithBookRegistryEntries(
+      this.feedLoader.fetchURI(
         account = account.id,
         uri = arguments.feedURI,
         auth = authentication,
