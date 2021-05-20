@@ -3,7 +3,7 @@ package org.nypl.simplified.ui.onboarding
 import androidx.lifecycle.ViewModelProvider
 import org.nypl.simplified.listeners.api.ListenerRepositoryFactory
 import org.nypl.simplified.listeners.api.ListenerRepository
-import org.nypl.simplified.ui.accounts.AccountListRegistryEvent
+import org.nypl.simplified.ui.accounts.AccountListEvent
 
 class OnboardingDefaultViewModelFactory(fallbackFactory: ViewModelProvider.Factory) :
   ListenerRepositoryFactory<OnboardingListenedEvent, Unit>(fallbackFactory) {
@@ -11,7 +11,7 @@ class OnboardingDefaultViewModelFactory(fallbackFactory: ViewModelProvider.Facto
   override val initialState: Unit = Unit
 
   override fun onListenerRepositoryCreated(repository: ListenerRepository<OnboardingListenedEvent, Unit>) {
-    repository.registerListener(AccountListRegistryEvent::class, OnboardingListenedEvent::AccountListRegistryEvent)
+    repository.registerListener(AccountListEvent::class, OnboardingListenedEvent::AccountListRegistryEvent)
     repository.registerListener(OnboardingStartScreenEvent::class, OnboardingListenedEvent::OnboardingStartScreenEvent)
   }
 }

@@ -5,10 +5,11 @@ import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 
 sealed class AccountListEvent {
 
+  object AccountCreated : AccountListEvent()
+
   /**
    * An existing account has been selected.
    */
-
   data class AccountSelected(
     val account: AccountID
   ) : AccountListEvent()
@@ -16,10 +17,4 @@ sealed class AccountListEvent {
   data class OpenErrorPage(
     val parameters: ErrorPageParameters
   ) : AccountListEvent()
-
-  /**
-   * The patron wants to add a new account.
-   */
-
-  object AddAccount : AccountListEvent()
 }

@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.RecyclerView
 import org.nypl.simplified.accounts.api.AccountProviderDescription
 import org.nypl.simplified.ui.images.ImageAccountIcons
 import org.nypl.simplified.ui.images.ImageLoaderType
-import org.slf4j.LoggerFactory
 
 /**
  * Adapter for showing a list of `AccountProviderDescription` items.
@@ -23,15 +22,9 @@ class FilterableAccountListAdapter(
   private val imageLoader: ImageLoaderType,
   private val onItemClicked: (AccountProviderDescription) -> Unit
 ) : ListAdapter<AccountProviderDescription, AccountItemViewHolder>(DIFF_CALLBACK) {
-
-  private val logger =
-    LoggerFactory.getLogger(FilterableAccountListAdapter::class.java)
-  private var listCopy =
-    mutableListOf<AccountProviderDescription>()
-
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AccountItemViewHolder {
     val inflater = LayoutInflater.from(parent.context)
-    val item = inflater.inflate(R.layout.account_list_item, parent, false)
+    val item = inflater.inflate(R.layout.account_list_item_card, parent, false)
 
     return AccountItemViewHolder(
       item,
@@ -42,49 +35,6 @@ class FilterableAccountListAdapter(
 
   override fun onBindViewHolder(holder: AccountItemViewHolder, position: Int) {
     holder.bind(getItem(position))
-  }
-
-  override fun submitList(list: List<AccountProviderDescription>?) {
-    this.listCopy.clear()
-    super.submitList(list)
-  }
-
-  override fun submitList(
-    list: List<AccountProviderDescription>?,
-    commitCallback: Runnable?
-  ) {
-    this.listCopy.clear()
-    super.submitList(list, commitCallback)
-  }
-
-  /** Returns true if the adapter is currently filtered. */
-
-  fun isFiltered(): Boolean {
-    return listCopy.isNotEmpty()
-  }
-
-  /**
-   * Filter the original list of items. Each time this method is called the
-   * original 'unfiltered' list is used as the base.
-   */
-
-  fun filterList(filter: (AccountProviderDescription) -> Boolean) {
-    if (this.listCopy.isEmpty()) {
-      this.listCopy.addAll(this.currentList)
-    }
-
-    super.submitList(this.listCopy.filter(filter)) {
-      this.logger.debug("{} matching items", this.currentList.size)
-    }
-  }
-
-  /** Reset the filter and show the original list of items. */
-
-  fun resetFilter() {
-    if (!isFiltered()) return
-    super.submitList(this.listCopy.toList()) {
-      this.listCopy.clear()
-    }
   }
 }
 
@@ -107,7 +57,7 @@ class AccountItemViewHolder(
   private var accountItem: AccountProviderDescription? = null
 
   init {
-    this.itemView.setOnClickListener {
+    this.itemView.findViewById<View>(R.id.account).setOnClickListener {
       this.accountItem?.let { account ->
         this.onItemClicked.invoke(account)
       }

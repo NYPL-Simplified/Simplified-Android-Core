@@ -26,10 +26,6 @@ sealed class MainFragmentListenedEvent {
     val event: org.nypl.simplified.ui.accounts.AccountListEvent
   ) : MainFragmentListenedEvent()
 
-  data class AccountListRegistryEvent(
-    val event: org.nypl.simplified.ui.accounts.AccountListRegistryEvent
-  ) : MainFragmentListenedEvent()
-
   data class AccountPickerEvent(
     val event: org.nypl.simplified.ui.accounts.AccountPickerEvent
   ) : MainFragmentListenedEvent()

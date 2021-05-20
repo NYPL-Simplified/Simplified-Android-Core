@@ -17,27 +17,25 @@ import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.listeners.api.FragmentListenerType
 import org.nypl.simplified.listeners.api.ListenerRepository
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
+import org.nypl.simplified.ui.accounts.AccountDetailEvent
 import org.nypl.simplified.ui.accounts.AccountDetailFragment
 import org.nypl.simplified.ui.accounts.AccountFragmentParameters
+import org.nypl.simplified.ui.accounts.AccountListEvent
 import org.nypl.simplified.ui.accounts.AccountListFragment
 import org.nypl.simplified.ui.accounts.AccountListFragmentParameters
-import org.nypl.simplified.ui.accounts.AccountListRegistryFragment
-import org.nypl.simplified.ui.accounts.AccountListRegistryEvent
-import org.nypl.simplified.ui.accounts.AccountListEvent
 import org.nypl.simplified.ui.accounts.AccountPickerEvent
-import org.nypl.simplified.ui.accounts.AccountDetailEvent
+import org.nypl.simplified.ui.accounts.saml20.AccountSAML20Event
 import org.nypl.simplified.ui.accounts.saml20.AccountSAML20Fragment
 import org.nypl.simplified.ui.accounts.saml20.AccountSAML20FragmentParameters
-import org.nypl.simplified.ui.accounts.saml20.AccountSAML20Event
 import org.nypl.simplified.ui.catalog.CatalogBookDetailEvent
 import org.nypl.simplified.ui.catalog.CatalogFeedArguments
 import org.nypl.simplified.ui.catalog.CatalogFeedEvent
 import org.nypl.simplified.ui.catalog.CatalogFragmentBookDetail
 import org.nypl.simplified.ui.catalog.CatalogFragmentBookDetailParameters
 import org.nypl.simplified.ui.catalog.CatalogFragmentFeed
+import org.nypl.simplified.ui.catalog.saml20.CatalogSAML20Event
 import org.nypl.simplified.ui.catalog.saml20.CatalogSAML20Fragment
 import org.nypl.simplified.ui.catalog.saml20.CatalogSAML20FragmentParameters
-import org.nypl.simplified.ui.catalog.saml20.CatalogSAML20Event
 import org.nypl.simplified.ui.errorpage.ErrorPageFragment
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.navigation.tabs.R
@@ -137,8 +135,6 @@ internal class MainFragmentListenerDelegate(
         this.handleSettingsMainEvent(event.event, state)
       is MainFragmentListenedEvent.SettingsDebugEvent ->
         this.handleSettingsDebugEvent(event.event, state)
-      is MainFragmentListenedEvent.AccountListRegistryEvent ->
-        this.handleAccountListRegistryEvent(event.event, state)
       is MainFragmentListenedEvent.AccountListEvent ->
         this.handleAccountListEvent(event.event, state)
       is MainFragmentListenedEvent.AccountDetailEvent ->
@@ -228,22 +224,6 @@ internal class MainFragmentListenerDelegate(
     }
   }
 
-  private fun handleAccountListRegistryEvent(
-    event: AccountListRegistryEvent,
-    state: MainFragmentState
-  ): MainFragmentState {
-    return when (event) {
-      AccountListRegistryEvent.AccountCreated -> {
-        this.popBackStack()
-        state
-      }
-      is AccountListRegistryEvent.OpenErrorPage -> {
-        this.openErrorPage(event.parameters)
-        state
-      }
-    }
-  }
-
   private fun handleAccountListEvent(
     event: AccountListEvent,
     state: MainFragmentState
@@ -253,8 +233,8 @@ internal class MainFragmentListenerDelegate(
         this.openSettingsAccount(event.account, showPleaseLogInTitle = false)
         state
       }
-      AccountListEvent.AddAccount -> {
-        this.openSettingsAccountRegistry()
+      AccountListEvent.AccountCreated -> {
+        this.popBackStack()
         state
       }
       is AccountListEvent.OpenErrorPage -> {
@@ -395,7 +375,7 @@ internal class MainFragmentListenerDelegate(
     this.navigator.addFragment(
       fragment = AccountListFragment.create(
         AccountListFragmentParameters(
-          shouldShowLibraryRegistryMenu = this.settingsConfiguration.allowAccountsRegistryAccess
+          addMultipleAccounts = true
         )
       ),
       tab = R.id.tabSettings
@@ -506,7 +486,7 @@ internal class MainFragmentListenerDelegate(
 
   private fun openSettingsAccountRegistry() {
     this.navigator.addFragment(
-      fragment = AccountListRegistryFragment(),
+      fragment = AccountListFragment.create(AccountListFragmentParameters(false)),
       tab = R.id.tabSettings
     )
   }

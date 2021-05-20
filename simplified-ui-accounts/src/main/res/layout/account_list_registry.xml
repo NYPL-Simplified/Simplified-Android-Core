@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -7,43 +8,120 @@
     android:orientation="vertical"
     android:showDividers="middle">
 
-    <TextView
-        android:id="@+id/accountRegistryTitle"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:padding="16dp"
-        android:text="@string/accountRegistrySelect"
-        android:textStyle="bold" />
+        android:orientation="vertical"
+        android:paddingVertical="8dp">
 
-    <!-- TODO -->
-    <TextView
-        android:id="@+id/accountRegistryNoLocation"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:padding="16dp"
-        android:text="@string/accountRegistryNoLocation"
-        android:textStyle="bold"
-        android:visibility="gone"
-        tools:visibility="visible" />
-
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/accountRegistryList"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/accountMyLibraries"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            tools:listitem="@layout/account_list_item" />
-
-        <androidx.core.widget.ContentLoadingProgressBar
-            android:id="@+id/accountRegistryProgress"
-            style="?android:attr/progressBarStyleLarge"
-            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:visibility="gone" />
-    </FrameLayout>
-</LinearLayout>
+            android:layout_marginHorizontal="16dp"
+            android:background="@drawable/bg_account_list_item"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/accountMyLibrariesHeader"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:background="?selectableItemBackground"
+                android:fontFamily="sans-serif-medium"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="8dp"
+                android:paddingEnd="48dp"
+                android:text="My Libraries"
+                android:textAlignment="textStart"
+                android:textColor="@android:color/black"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/accountMyLibrariesExpandIcon"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:padding="8dp"
+                android:src="@drawable/ic_expand"
+                app:layout_constraintBottom_toBottomOf="@id/accountMyLibrariesHeader"
+                app:layout_constraintDimensionRatio="h,1:1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/accountMyLibrariesHeader"
+                app:tint="@android:color/black"
+                tools:tint="@android:color/black" />
+
+            <View
+                android:id="@+id/accountMyLibrariesExpandDivider"
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_marginHorizontal="16dp"
+                android:background="@color/accountDivider"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/accountMyLibrariesHeader"
+                tools:visibility="visible" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/accountMyLibrariesList"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/accountMyLibrariesExpandDivider"
+                tools:itemCount="3"
+                tools:listitem="@layout/account_list_item"
+                tools:visibility="visible" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="4dp"
+            android:fontFamily="sans-serif-medium"
+            android:paddingHorizontal="8dp"
+            android:text="Add New Library"
+            android:textColor="@android:color/black"
+            android:textSize="16sp" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/accountRegistryList"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:visibility="gone"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/account_list_item_card"
+                tools:visibility="visible" />
+
+            <TextView
+                android:id="@+id/accountsNoLocation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:padding="16dp"
+                android:text="@string/accountRegistryNoLocation"
+                android:textSize="16sp"
+                android:visibility="gone" />
+
+            <androidx.core.widget.ContentLoadingProgressBar
+                android:id="@+id/accountRegistryProgress"
+                style="?android:attr/progressBarStyleLarge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="gone" />
+        </FrameLayout>
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

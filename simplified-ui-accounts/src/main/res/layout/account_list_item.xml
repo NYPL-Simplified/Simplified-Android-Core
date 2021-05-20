@@ -1,18 +1,15 @@
-<?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="16dp"
-    android:background="@drawable/bg_account_list_item"
+    android:id="@+id/account"
     android:clickable="true"
     android:focusable="true"
+    android:background="?android:selectableItemBackground"
     android:minHeight="?android:listPreferredItemHeight"
     android:orientation="horizontal"
-    android:padding="16dp"
-    tools:ignore="UseCompoundDrawables"
-    tools:layout_marginVertical="16dp">
+    android:padding="16dp">
 
     <TextView
         android:id="@+id/accountTitle"

@@ -7,8 +7,8 @@ import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 
 class SpaceItemDecoration(
-  @RecyclerView.Orientation private val direction: Int,
   context: Context,
+  @RecyclerView.Orientation private val direction: Int,
   margin: Float = 8f,
   private val marginOnInitialItem: Boolean = true
 ) : RecyclerView.ItemDecoration() {

@@ -7,6 +7,6 @@ sealed class OnboardingListenedEvent {
   ) : OnboardingListenedEvent()
 
   data class AccountListRegistryEvent(
-    val event: org.nypl.simplified.ui.accounts.AccountListRegistryEvent
+    val event: org.nypl.simplified.ui.accounts.AccountListEvent
   ) : OnboardingListenedEvent()
 }
