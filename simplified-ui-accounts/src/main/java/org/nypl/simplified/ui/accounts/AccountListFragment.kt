@@ -73,10 +73,10 @@ class AccountListFragment : Fragment(R.layout.account_list_registry) {
   private val logger by lazy { LoggerFactory.getLogger(AccountListFragment::class.java) }
   private val imageLoader: ImageLoaderType by lazy { services.requireService(ImageLoaderType::class.java) }
   private val listener: FragmentListenerType<AccountListEvent> by fragmentListeners()
-  private val viewModel: AccountListRegistryViewModel by assistedViewModels {
+  private val viewModel: AccountListViewModel by assistedViewModels {
     val locationManager =
       requireContext().getSystemService(Context.LOCATION_SERVICE) as LocationManager
-    AccountListRegistryViewModel(locationManager)
+    AccountListViewModel(locationManager)
   }
   private val requestLocationPermission = registerForActivityResult(
     ActivityResultContracts.RequestPermission(),
@@ -181,7 +181,7 @@ class AccountListFragment : Fragment(R.layout.account_list_registry) {
     this.configureToolbar()
 
     this.viewModel.registeredAccounts
-      .subscribe(registeredAccountListAdapter::submitList)
+      .subscribe(this::updateRegisteredAccounts)
       .let(subscriptions::add)
     this.viewModel.accountCreationEvents
       .subscribe(this::onAccountEvent)
@@ -330,6 +330,14 @@ class AccountListFragment : Fragment(R.layout.account_list_registry) {
     return AnimatorSet().apply {
       playTogether(sizeAnimator, visibilityAnimator)
     }
+  }
+
+  private fun updateRegisteredAccounts(accounts: List<AccountType>) {
+    registeredAccountListAdapter.submitList(accounts)
+    if (registeredAccountsList.isVisible)
+      runningAnimations += registeredAccountsList.verticalExpand().apply {
+        start()
+      }
   }
 
   private fun onAccountEvent(event: AccountEvent) {

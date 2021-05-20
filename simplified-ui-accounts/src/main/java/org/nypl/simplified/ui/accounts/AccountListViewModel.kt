@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory
 import java.net.URI
 import java.util.concurrent.TimeUnit
 
-class AccountListRegistryViewModel(private val locationManager: LocationManager) : ViewModel() {
+class AccountListViewModel(private val locationManager: LocationManager) : ViewModel() {
 
   private val services =
     Services.serviceDirectory()
@@ -47,7 +47,7 @@ class AccountListRegistryViewModel(private val locationManager: LocationManager)
     services.requireService(BuildConfigurationServiceType::class.java)
 
   private val logger =
-    LoggerFactory.getLogger(AccountListRegistryViewModel::class.java)
+    LoggerFactory.getLogger(AccountListViewModel::class.java)
 
   private val queries = BehaviorSubject.create<String>()
 
