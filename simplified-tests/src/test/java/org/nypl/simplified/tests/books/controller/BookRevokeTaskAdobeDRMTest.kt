@@ -527,7 +527,8 @@ class BookRevokeTaskAdobeDRMTest {
                 AdobeUserID("2bb42d71-42aa-4eb7-b8af-366171adcae8")
               )
             ),
-            authenticationDescription = null
+            authenticationDescription = null,
+            annotationsURI = URI("https://www.example.com")
           )
         )
       )
@@ -683,7 +684,8 @@ class BookRevokeTaskAdobeDRMTest {
                 AdobeUserID("2bb42d71-42aa-4eb7-b8af-366171adcae8")
               )
             ),
-            authenticationDescription = null
+            authenticationDescription = null,
+            annotationsURI = URI("https://www.example.com")
           )
         )
       )
@@ -830,7 +832,8 @@ class BookRevokeTaskAdobeDRMTest {
                 AdobeUserID("2bb42d71-42aa-4eb7-b8af-366171adcae8")
               )
             ),
-            authenticationDescription = null
+            authenticationDescription = null,
+            annotationsURI = URI("https://www.example.com")
           )
         )
       )
@@ -978,7 +981,8 @@ class BookRevokeTaskAdobeDRMTest {
                 AdobeUserID("2bb42d71-42aa-4eb7-b8af-366171adcae8")
               )
             ),
-            authenticationDescription = null
+            authenticationDescription = null,
+            annotationsURI = URI("https://www.example.com")
           )
         )
       )
@@ -1130,7 +1134,8 @@ class BookRevokeTaskAdobeDRMTest {
               deviceManagerURI = null,
               postActivationCredentials = null
             ),
-            authenticationDescription = null
+            authenticationDescription = null,
+            annotationsURI = URI("https://www.example.com")
           )
         )
       )
@@ -1379,7 +1384,8 @@ class BookRevokeTaskAdobeDRMTest {
                 AdobeUserID("2bb42d71-42aa-4eb7-b8af-366171adcae8")
               )
             ),
-            authenticationDescription = null
+            authenticationDescription = null,
+            annotationsURI = URI("https://www.example.com")
           )
         )
       )

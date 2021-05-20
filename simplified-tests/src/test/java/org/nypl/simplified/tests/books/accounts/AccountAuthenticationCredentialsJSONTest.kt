@@ -31,7 +31,8 @@ class AccountAuthenticationCredentialsJSONTest {
         userName = AccountUsername("1234"),
         password = AccountPassword("5678"),
         adobeCredentials = null,
-        authenticationDescription = null
+        authenticationDescription = null,
+        annotationsURI = URI("https://www.example.com")
       )
 
     val creds1 = deserializeFromJSON(serializeToJSON(creds0))
@@ -45,7 +46,8 @@ class AccountAuthenticationCredentialsJSONTest {
       AccountAuthenticationCredentials.OAuthWithIntermediary(
         accessToken = "bm90IGFuIGFjY2VzcyB0b2tlbgo=",
         authenticationDescription = null,
-        adobeCredentials = null
+        adobeCredentials = null,
+        annotationsURI = URI("https://www.example.com")
       )
 
     val creds1 = deserializeFromJSON(serializeToJSON(creds0))
@@ -68,7 +70,8 @@ class AccountAuthenticationCredentialsJSONTest {
         userName = AccountUsername("1234"),
         password = AccountPassword("5678"),
         adobeCredentials = adobe,
-        authenticationDescription = null
+        authenticationDescription = null,
+        annotationsURI = URI("https://www.example.com")
       )
 
     val creds1 = deserializeFromJSON(serializeToJSON(creds0))
@@ -96,7 +99,8 @@ class AccountAuthenticationCredentialsJSONTest {
         userName = AccountUsername("1234"),
         password = AccountPassword("5678"),
         adobeCredentials = adobe,
-        authenticationDescription = "fake"
+        authenticationDescription = "fake",
+        annotationsURI = URI("https://www.example.com")
       )
 
     val creds1 = deserializeFromJSON(serializeToJSON(creds0))
@@ -124,6 +128,7 @@ class AccountAuthenticationCredentialsJSONTest {
         accessToken = "76885cd7-f2e9-4930-a9a1-1ea8f1093ed9",
         adobeCredentials = adobe,
         authenticationDescription = "fake",
+        annotationsURI = URI("https://www.example.com"),
         patronInfo = "{}",
         cookies = listOf(
           AccountCookie("https://example", "cookie0=23"),

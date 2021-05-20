@@ -173,7 +173,8 @@ class ProfileAccountLoginTask(
             adobeCredentials = null,
             authenticationDescription = this.findCurrentDescription().description,
             patronInfo = request.patronInfo,
-            cookies = request.cookies
+            cookies = request.cookies,
+            annotationsURI = null
           )
 
         this.handlePatronUserProfile()
@@ -242,7 +243,8 @@ class ProfileAccountLoginTask(
           AccountAuthenticationCredentials.OAuthWithIntermediary(
             accessToken = request.token,
             adobeCredentials = null,
-            authenticationDescription = this.findCurrentDescription().description
+            authenticationDescription = this.findCurrentDescription().description,
+            annotationsURI = null
           )
 
         this.handlePatronUserProfile()
@@ -284,7 +286,8 @@ class ProfileAccountLoginTask(
         userName = request.username,
         password = request.password,
         authenticationDescription = request.description.description,
-        adobeCredentials = null
+        adobeCredentials = null,
+        annotationsURI = null
       )
 
     this.handlePatronUserProfile()
@@ -303,6 +306,19 @@ class ProfileAccountLoginTask(
         account = this.account
       )
     patronProfile.drm.map(this::onPatronProfileRequestHandleDRM)
+
+    /*
+     * Copy the annotations link out of the patron profile.
+     */
+
+    this.credentials = when (val currentCredentials = this.credentials) {
+      is AccountAuthenticationCredentials.Basic ->
+        currentCredentials.copy(annotationsURI = patronProfile.annotationsURI)
+      is AccountAuthenticationCredentials.OAuthWithIntermediary ->
+        currentCredentials.copy(annotationsURI = patronProfile.annotationsURI)
+      is AccountAuthenticationCredentials.SAML2_0 ->
+        currentCredentials.copy(annotationsURI = patronProfile.annotationsURI)
+    }
   }
 
   private fun validateRequest(): Boolean {

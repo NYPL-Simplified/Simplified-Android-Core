@@ -602,6 +602,7 @@ class Controller private constructor(
         bookRegistry = this.bookRegistry,
         booksController = this,
         feedParser = this.feedParser,
+        patronParsers = this.patronUserProfileParsers,
         http = this.lsHttp
       )
     )

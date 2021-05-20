@@ -60,6 +60,7 @@ import org.nypl.simplified.tests.mocking.MockBorrowContext
 import org.nypl.simplified.tests.mocking.MockBundledContentResolver
 import org.nypl.simplified.tests.mocking.MockContentResolver
 import org.slf4j.LoggerFactory
+import java.net.URI
 import java.util.concurrent.TimeUnit
 
 class BorrowLoanCreateTest {
@@ -127,7 +128,8 @@ class BorrowLoanCreateTest {
             userName = AccountUsername("someone"),
             password = AccountPassword("not a password"),
             adobeCredentials = null,
-            authenticationDescription = "Basic"
+            authenticationDescription = "Basic",
+            annotationsURI = URI("https://www.example.com")
           )
         )
       )

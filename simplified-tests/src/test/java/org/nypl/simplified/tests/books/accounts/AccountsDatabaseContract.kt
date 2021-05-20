@@ -394,11 +394,27 @@ abstract class AccountsDatabaseContract {
         userName = AccountUsername("abcd"),
         password = AccountPassword("1234"),
         adobeCredentials = null,
-        authenticationDescription = null
+        authenticationDescription = null,
+        annotationsURI = URI("https://www.example.com")
       )
 
     acc0.setLoginState(AccountLoginState.AccountLoggedIn(creds))
     Assertions.assertEquals(AccountLoginState.AccountLoggedIn(creds), acc0.loginState)
+
+    acc0.updateCredentialsIfAvailable {
+      when (it) {
+        is AccountAuthenticationCredentials.Basic ->
+          creds.copy(annotationsURI = URI.create("https://www.example.com/annotations"))
+        is AccountAuthenticationCredentials.OAuthWithIntermediary ->
+          creds.copy(annotationsURI = URI.create("https://www.example.com/annotations"))
+        is AccountAuthenticationCredentials.SAML2_0 ->
+          creds.copy(annotationsURI = URI.create("https://www.example.com/annotations"))
+      }
+    }
+
+    Assertions.assertEquals(
+      URI.create("https://www.example.com/annotations"),
+      acc0.loginState.credentials?.annotationsURI)
   }
 
   @Test

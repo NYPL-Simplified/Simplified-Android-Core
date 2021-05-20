@@ -112,7 +112,14 @@ abstract class ProfileAccountLoginTaskContract {
   "simplified:authorization_expires": "2019-08-02T00:00:00Z",
   "settings": {
     "simplified:synchronize_annotations": true
-  }
+  },
+  "links": [
+    {
+       "href" : "https://www.example.com",
+       "rel" : "http://www.w3.org/ns/oa#annotationService",
+       "type" : "application/ld+json; profile=\"http://www.w3.org/ns/anno.jsonld\""
+    }
+  ]
 }
 """
 
@@ -130,6 +137,13 @@ abstract class ProfileAccountLoginTaskContract {
           "href": "http://${this.server.hostName}:${this.server.port}/devices"
         }
       ]
+    }
+  ],
+  "links": [
+    {
+       "href" : "https://www.example.com",
+       "rel" : "http://www.w3.org/ns/oa#annotationService",
+       "type" : "application/ld+json; profile=\"http://www.w3.org/ns/anno.jsonld\""
     }
   ],
   "simplified:authorization_expires": "2019-08-02T00:00:00Z",
@@ -678,7 +692,8 @@ abstract class ProfileAccountLoginTaskContract {
         userName = request.username,
         password = request.password,
         adobeCredentials = null,
-        authenticationDescription = "Description"
+        authenticationDescription = "Description",
+        annotationsURI = URI("https://www.example.com")
       ),
       state.credentials
     )
@@ -806,7 +821,8 @@ abstract class ProfileAccountLoginTaskContract {
         userName = request.username,
         password = request.password,
         adobeCredentials = null,
-        authenticationDescription = "Library Login"
+        authenticationDescription = "Library Login",
+        annotationsURI = URI("https://www.example.com")
       )
 
     val newCredentials =
@@ -912,7 +928,8 @@ abstract class ProfileAccountLoginTaskContract {
         userName = request.username,
         password = request.password,
         adobeCredentials = null,
-        authenticationDescription = "Description"
+        authenticationDescription = "Description",
+        annotationsURI = URI("https://www.example.com")
       )
 
     val newCredentials =
@@ -1174,7 +1191,8 @@ abstract class ProfileAccountLoginTaskContract {
         userName = request.username,
         password = request.password,
         adobeCredentials = null,
-        authenticationDescription = "Library Login"
+        authenticationDescription = "Library Login",
+        annotationsURI = URI("https://www.example.com")
       )
 
     val newCredentials =
@@ -1541,7 +1559,8 @@ abstract class ProfileAccountLoginTaskContract {
       AccountAuthenticationCredentials.OAuthWithIntermediary(
         adobeCredentials = null,
         authenticationDescription = "Description",
-        accessToken = "A TOKEN!"
+        accessToken = "A TOKEN!",
+        annotationsURI = URI("https://www.example.com")
       ),
       state.credentials
     )
@@ -1887,6 +1906,7 @@ abstract class ProfileAccountLoginTaskContract {
         authenticationDescription = "Description",
         accessToken = "A TOKEN!",
         patronInfo = "{}",
+        annotationsURI = URI("https://www.example.com"),
         cookies = listOf(
           AccountCookie("https://example", "cookie0=23"),
           AccountCookie("https://fake", "cookie1=24; Path=/; Secure"),

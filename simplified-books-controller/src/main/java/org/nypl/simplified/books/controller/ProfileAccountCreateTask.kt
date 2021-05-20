@@ -38,7 +38,7 @@ class ProfileAccountCreateTask(
       this.logger.debug("creating account for provider {}", this.accountProviderID)
       val accountProvider = this.resolveAccountProvider()
       val account = this.createAccount(accountProvider)
-      metrics?.logMetric(MetricEvent.LibraryAdded(accountProvider.toString()))
+      metrics?.logMetric(MetricEvent.LibraryAdded(accountProvider.id.toString()))
       this.publishSuccessEvent(account)
       this.taskRecorder.finishSuccess(account)
     } catch (e: Throwable) {

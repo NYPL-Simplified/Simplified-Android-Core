@@ -390,7 +390,6 @@ class AccountProviderSourceNYPLRegistryDescriptionTest {
     val provider = AccountProvider(
       addAutomatically = false,
       announcements = emptyList(),
-      annotationsURI = null,
       authentication = AccountProviderAuthenticationDescription.Basic(
         description = "Basic Auth",
         barcodeFormat = "CODABAR",
@@ -550,7 +549,6 @@ class AccountProviderSourceNYPLRegistryDescriptionTest {
     val provider = AccountProvider(
       addAutomatically = false,
       announcements = emptyList(),
-      annotationsURI = null,
       authentication = AccountProviderAuthenticationDescription.COPPAAgeGate(
         greaterEqual13 = URI("http://www.example.com/feed-13.xml"),
         under13 = URI("http://www.example.com/feed-under-13.xml")
@@ -685,7 +683,6 @@ class AccountProviderSourceNYPLRegistryDescriptionTest {
     val provider = AccountProvider(
       addAutomatically = false,
       announcements = emptyList(),
-      annotationsURI = null,
       authentication = AccountProviderAuthenticationDescription.Anonymous,
       authenticationAlternatives = listOf(),
       authenticationDocumentURI = this.server.url("auth").toUri(),

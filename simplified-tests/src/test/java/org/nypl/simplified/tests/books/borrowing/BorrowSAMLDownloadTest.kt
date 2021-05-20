@@ -54,6 +54,7 @@ import org.nypl.simplified.tests.mocking.MockBorrowContext
 import org.nypl.simplified.tests.mocking.MockBundledContentResolver
 import org.nypl.simplified.tests.mocking.MockContentResolver
 import org.slf4j.LoggerFactory
+import java.net.URI
 import java.util.concurrent.TimeUnit
 
 class BorrowSAMLDownloadTest {
@@ -123,7 +124,8 @@ class BorrowSAMLDownloadTest {
               AccountCookie("http://somehost.org", "another=value")
             ),
             adobeCredentials = null,
-            authenticationDescription = "SAML"
+            authenticationDescription = "SAML",
+            annotationsURI = URI("https://www.example.com")
           )
         )
       )

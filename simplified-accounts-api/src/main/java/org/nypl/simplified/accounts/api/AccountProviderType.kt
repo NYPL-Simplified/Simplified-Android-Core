@@ -66,14 +66,6 @@ interface AccountProviderType : Comparable<AccountProviderType> {
   val authenticationAlternatives: List<AccountProviderAuthenticationDescription>
 
   /**
-   * @return `true` iff the SimplyE synchronization is supported
-   * @see .annotationsURI
-   * @see .patronSettingsURI
-   */
-
-  val supportsSimplyESynchronization: Boolean
-
-  /**
    * @return `true` iff reservations are supported
    */
 
@@ -146,16 +138,6 @@ interface AccountProviderType : Comparable<AccountProviderType> {
    */
 
   val patronSettingsURI: URI?
-
-  /**
-   * The annotations URI. This is the URI used to get and set annotations for bookmark
-   * syncing.
-   *
-   * @return The annotations URI
-   * @see .supportsSimplyESynchronization
-   */
-
-  val annotationsURI: URI?
 
   /**
    * Determine the correct catalog URI to use for readers of a given age.
@@ -233,9 +215,6 @@ interface AccountProviderType : Comparable<AccountProviderType> {
     val links = mutableListOf<Link>()
     addLink(links, this.catalogURI, "http://opds-spec.org/catalog")
 
-    this.annotationsURI?.let { uri ->
-      addLink(links, uri, "http://www.w3.org/ns/oa#annotationService")
-    }
     this.authenticationDocumentURI?.let { uri ->
       addLink(links, uri, AUTHENTICATION_DOCUMENT_RELATION_URI_TEXT)
     }
