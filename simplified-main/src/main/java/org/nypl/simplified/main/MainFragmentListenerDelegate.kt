@@ -293,7 +293,7 @@ internal class MainFragmentListenerDelegate(
         state
       }
       AccountPickerEvent.AddAccount -> {
-        this.openSettingsAccountRegistry()
+        this.openSettingsAccounts()
         state
       }
     }
@@ -481,13 +481,6 @@ internal class MainFragmentListenerDelegate(
     this.navigator.addFragment(
       fragment = CatalogFragmentFeed.create(feedArguments),
       tab = this.navigator.currentTab()
-    )
-  }
-
-  private fun openSettingsAccountRegistry() {
-    this.navigator.addFragment(
-      fragment = AccountListFragment.create(AccountListFragmentParameters(false)),
-      tab = R.id.tabSettings
     )
   }
 

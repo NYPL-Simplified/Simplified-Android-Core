@@ -35,6 +35,7 @@ import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventCreation
 import org.nypl.simplified.accounts.api.AccountProviderDescription
+import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.android.ktx.supportActionBar
 import org.nypl.simplified.listeners.api.FragmentListenerType
 import org.nypl.simplified.listeners.api.fragmentListeners
@@ -85,7 +86,9 @@ class AccountListFragment : Fragment(R.layout.account_list_registry) {
   private val subscriptions = CompositeDisposable()
   private val runningAnimations = mutableListOf<Animator>()
 
-  private val registeredAccountListAdapter = AccountListAdapter(imageLoader, { }, { })
+  private val registeredAccountListAdapter =
+    AccountListAdapter(imageLoader, ::onRegisteredAccountClicked, ::onRegisteredAccountDeleted)
+
   private val accountListAdapter = FilterableAccountListAdapter(imageLoader, ::onAccountClicked)
 
   private lateinit var binding: AccountListRegistryBinding
@@ -214,6 +217,31 @@ class AccountListFragment : Fragment(R.layout.account_list_registry) {
     accountList.isVisible = showList
   }
 
+  private fun onRegisteredAccountClicked(account: AccountType) {
+    this.listener.post(AccountListEvent.AccountSelected(account.id))
+  }
+
+  private fun onRegisteredAccountDeleted(account: AccountType) {
+    val context = this.requireContext()
+    AlertDialog.Builder(context)
+      .setTitle(R.string.accountsDeleteConfirmTitle)
+      .setMessage(
+        context.getString(
+          R.string.accountsDeleteConfirm,
+          account.provider.displayName
+        )
+      )
+      .setNegativeButton(R.string.cancel) { dialog, _ ->
+        dialog.dismiss()
+      }
+      .setPositiveButton(R.string.accountsDelete) { dialog, _ ->
+        this.viewModel.deleteAccountByProvider(account.provider.id)
+        dialog.dismiss()
+      }
+      .create()
+      .show()
+  }
+
   private fun onAccountClicked(account: AccountProviderDescription) {
     this.logger.debug("selected account: {} ({})", account.id, account.title)
     this.viewModel.createAccount(account.id)
@@ -307,7 +335,8 @@ class AccountListFragment : Fragment(R.layout.account_list_registry) {
   private fun onAccountEvent(event: AccountEvent) {
     when (event) {
       is AccountEventCreation.AccountEventCreationSucceeded -> {
-        this.listener.post(AccountListEvent.AccountCreated)
+        if (!parameters.addMultipleAccounts)
+          this.listener.post(AccountListEvent.AccountCreated)
       }
       is AccountEventCreation.AccountEventCreationFailed -> {
         this.showAccountCreationFailedDialog(event)
@@ -342,7 +371,6 @@ class AccountListFragment : Fragment(R.layout.account_list_registry) {
         attributes = accountEvent.attributes.toSortedMap(),
         taskSteps = accountEvent.taskResult.steps
       )
-
     this.listener.post(AccountListEvent.OpenErrorPage(parameters))
   }
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
 <resources>
-  <string name="accountAdd">Add account</string>
+  <string name="accountAdd">Find a Library</string>
   <string name="accountCancel">Cancel</string>
   <string name="accountCardCreatorLabel">Don\'t have a library card?</string>
   <string name="accountCardCreatorSignUp">Create Card</string>
