@@ -101,7 +101,10 @@ class AccountListRegistryFragment : Fragment(R.layout.account_list_registry) {
       adapter = this@AccountListRegistryFragment.accountListAdapter
       addItemDecoration(SpaceItemDecoration(RecyclerView.VERTICAL, requireContext()))
     }
-    requestLocationPermission.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
+    /**
+     * Disabling until we roll out Library Finder
+     */
+    //requestLocationPermission.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
   }
 
   private fun onAccountClicked(account: AccountProviderDescription) {
@@ -246,7 +249,6 @@ class AccountListRegistryFragment : Fragment(R.layout.account_list_registry) {
 
         val availableDescriptions =
           this.viewModel.determineAvailableAccountProviderDescriptions()
-
         if (availableDescriptions.isEmpty()) {
           this.title.setText(R.string.accountRegistryEmpty)
         } else {
