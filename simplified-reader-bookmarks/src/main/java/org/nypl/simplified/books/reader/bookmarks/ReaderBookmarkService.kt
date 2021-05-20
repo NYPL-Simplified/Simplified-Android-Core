@@ -230,7 +230,7 @@ class ReaderBookmarkService private constructor(
           account
         } else {
           this.logger.debug(
-            "[{}]: account {} has does not have syncing enabled",
+            "[{}]: account {} does not have syncing enabled",
             profile.id.uuid,
             account.account.id
           )

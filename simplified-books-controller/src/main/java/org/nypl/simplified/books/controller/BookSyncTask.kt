@@ -113,8 +113,8 @@ class BookSyncTask(
   private fun fetchPatronUserProfile(
     account: AccountType,
     credentials: AccountAuthenticationCredentials
-  ): Any {
-    return try {
+  ) {
+    try {
       val profile =
         PatronUserProfiles.runPatronProfileRequest(
           taskRecorder = this.taskRecorder,

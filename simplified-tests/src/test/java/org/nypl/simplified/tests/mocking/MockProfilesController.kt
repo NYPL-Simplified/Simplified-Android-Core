@@ -86,7 +86,7 @@ class MockProfilesController(
     return this.profileEventSource
   }
 
-  override fun profileSelect(id: ProfileID): FluentFuture<Unit> {
+  override fun profileSelect(profileID: ProfileID): FluentFuture<Unit> {
     return FluentFuture.from(SettableFuture.create())
   }
 
@@ -135,8 +135,8 @@ class MockProfilesController(
 
   val profileAccountLogouts = mutableListOf<AccountID>()
 
-  override fun profileAccountLogout(account: AccountID): FluentFuture<TaskResult<Unit>> {
-    this.profileAccountLogouts.add(account)
+  override fun profileAccountLogout(accountID: AccountID): FluentFuture<TaskResult<Unit>> {
+    this.profileAccountLogouts.add(accountID)
     return FluentFuture.from(SettableFuture.create())
   }
 
@@ -144,7 +144,7 @@ class MockProfilesController(
     return FluentFuture.from(SettableFuture.create())
   }
 
-  override fun profileAccountForBook(id: BookID): AccountType {
+  override fun profileAccountForBook(bookID: BookID): AccountType {
     return TODO()
   }
 
