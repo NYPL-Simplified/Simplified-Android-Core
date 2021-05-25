@@ -22,7 +22,6 @@ import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.listeners.api.FragmentListenerType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
-import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.taskrecorder.api.TaskStep
 import org.nypl.simplified.ui.accounts.saml20.AccountSAML20
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
@@ -254,37 +253,16 @@ class CatalogSAML20ViewModel(
         if (bookWithStatus != null) {
           val book = bookWithStatus.book
 
-          try {
-            this.booksController.bookBorrow(
-              accountID = book.account,
-              entry = book.entry,
-            )
-            Unit
-          } catch (e: Throwable) {
-            this.logger.error("failed to start borrow task: ", e)
-            this.bookRegistry.updateIfStatusIsMoreImportant(
-              BookWithStatus(book, BookStatus.FailedLoan(book.id, this.failMinimal(e)))
-            )
-          }
+          this.booksController.bookBorrow(
+            accountID = book.account,
+            entry = book.entry,
+          )
         }
 
         this.eventSubject.onNext(
           WebClientEvent.Succeeded
         )
       }
-    }
-
-    private fun failMinimal(
-      exception: Throwable
-    ): TaskResult.Failure<Unit> {
-      val recorder = TaskRecorder.create()
-      recorder.beginNewStep("Logging in...")
-      recorder.currentStepFailed(
-        message = exception.message ?: exception.javaClass.canonicalName ?: "unknown",
-        errorCode = "borrowLoginFailed",
-        exception = exception
-      )
-      return recorder.finishFailure()
     }
   }
 

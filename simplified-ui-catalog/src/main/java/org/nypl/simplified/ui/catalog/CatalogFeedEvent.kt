@@ -31,9 +31,4 @@ sealed class CatalogFeedEvent {
     val book: Book,
     val format: BookFormat
   ) : CatalogFeedEvent()
-
-  data class DownloadWaitingForExternalAuthentication(
-    val bookID: BookID,
-    val downloadURI: URI
-  ) : CatalogFeedEvent()
 }

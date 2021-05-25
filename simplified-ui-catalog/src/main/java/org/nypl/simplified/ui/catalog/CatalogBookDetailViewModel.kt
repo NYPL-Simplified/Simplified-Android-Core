@@ -60,17 +60,6 @@ class CatalogBookDetailViewModel(
   private fun onBookStatusEvent(event: BookStatusEvent) {
     val bookWithStatus = this.createBookWithStatus()
     this.bookWithStatusMutable.value = bookWithStatus
-
-    when (val status = event.statusNow) {
-      is BookStatus.DownloadWaitingForExternalAuthentication -> {
-        this.listener.post(
-          CatalogBookDetailEvent.DownloadWaitingForExternalAuthentication(
-            bookID = status.id,
-            downloadURI = status.downloadURI
-          )
-        )
-      }
-    }
   }
 
   /*

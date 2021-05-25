@@ -219,15 +219,7 @@ class CatalogFeedViewModel(
       }
     }
 
-    when (val statusNow = event.statusNow) {
-      is BookStatus.DownloadWaitingForExternalAuthentication -> {
-        this.listener.post(
-          CatalogFeedEvent.DownloadWaitingForExternalAuthentication(
-            bookID = event.bookId,
-            downloadURI = statusNow.downloadURI
-          )
-        )
-      }
+    when (event.statusNow) {
       is BookStatus.Held, is BookStatus.Loaned, is BookStatus.Revoked -> {
         if (this.state.arguments.isLocallyGenerated) {
           this.reloadFeed()
