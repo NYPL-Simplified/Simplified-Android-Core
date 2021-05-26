@@ -2,6 +2,7 @@ dependencies {
   api project(":simplified-patron-api")
 
   implementation project(":simplified-json-core")
+  implementation project(":simplified-links-json")
 
   implementation libraries.jackson_databind
   implementation libraries.joda_time

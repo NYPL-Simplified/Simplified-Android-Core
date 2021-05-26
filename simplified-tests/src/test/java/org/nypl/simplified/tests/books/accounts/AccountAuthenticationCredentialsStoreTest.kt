@@ -16,6 +16,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileOutputStream
+import java.net.URI
 import java.util.UUID
 
 class AccountAuthenticationCredentialsStoreTest {
@@ -56,7 +57,8 @@ class AccountAuthenticationCredentialsStoreTest {
         userName = AccountUsername("abcd"),
         password = AccountPassword("1234"),
         adobeCredentials = null,
-        authenticationDescription = null
+        authenticationDescription = null,
+        annotationsURI = URI("https://www.example.com")
       )
 
     store0.put(accountID, credentials)
@@ -128,7 +130,8 @@ class AccountAuthenticationCredentialsStoreTest {
           userName = AccountUsername("abcd"),
           password = AccountPassword("1234"),
           adobeCredentials = null,
-          authenticationDescription = null
+          authenticationDescription = null,
+          annotationsURI = URI("https://www.example.com")
         )
       )
     cred1.remove("username")
@@ -144,7 +147,8 @@ class AccountAuthenticationCredentialsStoreTest {
           userName = AccountUsername("abcd"),
           password = AccountPassword("1234"),
           adobeCredentials = null,
-          authenticationDescription = null
+          authenticationDescription = null,
+          annotationsURI = URI("https://www.example.com")
         )
       )
     creds.set<ObjectNode>("not a uuid", cred2)
@@ -159,7 +163,8 @@ class AccountAuthenticationCredentialsStoreTest {
           userName = AccountUsername("abcd"),
           password = AccountPassword("1234"),
           adobeCredentials = null,
-          authenticationDescription = null
+          authenticationDescription = null,
+          annotationsURI = URI("https://www.example.com")
         )
       )
     creds.set<ObjectNode>("37452e48-2235-4098-ad67-e72bce45ccb6", cred3)
@@ -188,7 +193,8 @@ class AccountAuthenticationCredentialsStoreTest {
         userName = AccountUsername("abcd"),
         password = AccountPassword("1234"),
         adobeCredentials = null,
-        authenticationDescription = null
+        authenticationDescription = null,
+        annotationsURI = URI("https://www.example.com")
       )
 
     store.put(accountID, credentials)

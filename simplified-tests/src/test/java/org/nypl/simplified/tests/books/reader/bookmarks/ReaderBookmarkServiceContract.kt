@@ -46,6 +46,7 @@ import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceType
 import org.nypl.simplified.tests.EventAssertions
 import org.nypl.simplified.tests.EventLogging
 import org.slf4j.Logger
+import java.net.URI
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 
@@ -67,13 +68,16 @@ abstract class ReaderBookmarkServiceContract {
   private var readerBookmarkService: ReaderBookmarkServiceType? = null
   private lateinit var server: MockWebServer
   private lateinit var http: LSHTTPClientType
+  private lateinit var annotationsURI: URI
+  private lateinit var patronURI: URI
 
   private val accountCredentials =
     AccountAuthenticationCredentials.Basic(
       userName = AccountUsername("abcd"),
       password = AccountPassword("1234"),
       adobeCredentials = null,
-      authenticationDescription = null
+      authenticationDescription = null,
+      annotationsURI = null
     )
 
   private fun addResponse(
@@ -103,6 +107,10 @@ abstract class ReaderBookmarkServiceContract {
 
     this.server = MockWebServer()
     this.server.start()
+    this.annotationsURI =
+      this.server.url("annotations").toUri()
+    this.patronURI =
+      this.server.url("patron").toUri()
   }
 
   @AfterEach
@@ -119,41 +127,41 @@ abstract class ReaderBookmarkServiceContract {
   @Test
   @Timeout(value = 10L, unit = TimeUnit.SECONDS)
   fun testInitializeEmpty() {
-    addResponse(
+    this.addResponse(
       "http://www.example.com/patron",
       """
-  {
-    "settings": {
-      "simplified:synchronize_annotations": true
+    {
+      "settings": {
+        "simplified:synchronize_annotations": true
+      }
     }
-  }
-  """
+    """
     )
 
-    addResponse(
+    this.addResponse(
       "http://www.example.com/annotations",
       """
-  {
-     "id" : "http://www.example.com/annotations/",
-     "type" : [
-        "BasicContainer",
-        "AnnotationCollection"
-     ],
-     "@context" : [
-        "http://www.w3.org/ns/anno.jsonld",
-        "http://www.w3.org/ns/ldp.jsonld"
-     ],
-     "total" : 0,
-     "first" : {
-        "items" : [],
-        "type" : "AnnotationPage",
-        "id" : "http://www.example.com/annotations/"
-     }
-  }
-  """
+    {
+       "id" : "http://www.example.com/annotations/",
+       "type" : [
+          "BasicContainer",
+          "AnnotationCollection"
+       ],
+       "@context" : [
+          "http://www.w3.org/ns/anno.jsonld",
+          "http://www.w3.org/ns/ldp.jsonld"
+       ],
+       "total" : 0,
+       "first" : {
+          "items" : [],
+          "type" : "AnnotationPage",
+          "id" : "http://www.example.com/annotations/"
+       }
+    }
+    """
     )
 
-    val httpCalls = ReaderBookmarkHTTPCalls(this.objectMapper, http)
+    val httpCalls = ReaderBookmarkHTTPCalls(this.objectMapper, this.http)
 
     val profileEvents =
       EventLogging.create<ProfileEvent>(this.logger, 1)
@@ -171,12 +179,8 @@ abstract class ReaderBookmarkServiceContract {
     val accountProvider =
       Mockito.mock(AccountProviderType::class.java)
 
-    Mockito.`when`(accountProvider.supportsSimplyESynchronization)
-      .thenReturn(true)
-    Mockito.`when`(accountProvider.annotationsURI)
-      .thenReturn(this.server.url("annotations").toUri())
     Mockito.`when`(accountProvider.patronSettingsURI)
-      .thenReturn(this.server.url("patron").toUri())
+      .thenReturn(this.patronURI)
 
     val accountPreferences =
       AccountPreferences(
@@ -189,9 +193,13 @@ abstract class ReaderBookmarkServiceContract {
       Mockito.mock(AccountType::class.java)
 
     Mockito.`when`(account.loginState)
-      .thenReturn(AccountLoginState.AccountLoggedIn(this.accountCredentials))
+      .thenReturn(
+        AccountLoginState.AccountLoggedIn(
+          this.accountCredentials.copy(annotationsURI = this.annotationsURI)
+        )
+      )
     Mockito.`when`(account.id)
-      .thenReturn(fakeAccountID)
+      .thenReturn(this.fakeAccountID)
     Mockito.`when`(account.provider)
       .thenReturn(accountProvider)
     Mockito.`when`(account.bookDatabase)
@@ -202,10 +210,10 @@ abstract class ReaderBookmarkServiceContract {
     val profile =
       Mockito.mock(ProfileType::class.java)
 
-    Mockito.`when`(profile.account(fakeAccountID))
+    Mockito.`when`(profile.account(this.fakeAccountID))
       .thenReturn(account)
     Mockito.`when`(profile.accounts())
-      .thenReturn(sortedMapOf(Pair(fakeAccountID, account)))
+      .thenReturn(sortedMapOf(Pair(this.fakeAccountID, account)))
     Mockito.`when`(profile.id)
       .thenReturn(ProfileID.generate())
 
@@ -228,15 +236,25 @@ abstract class ReaderBookmarkServiceContract {
       ReaderBookmarkEvent.ReaderBookmarkSyncStarted::class.java,
       bookmarkEvents.eventLog,
       0,
-      { event -> Assertions.assertEquals(fakeAccountID, event.accountID) }
+      { event -> Assertions.assertEquals(this.fakeAccountID, event.accountID) }
     )
 
     EventAssertions.isTypeAndMatches(
       ReaderBookmarkEvent.ReaderBookmarkSyncFinished::class.java,
       bookmarkEvents.eventLog,
       1,
-      { event -> Assertions.assertEquals(fakeAccountID, event.accountID) }
+      { event -> Assertions.assertEquals(this.fakeAccountID, event.accountID) }
     )
+
+    Assertions.assertEquals(2, this.server.requestCount)
+    this.run {
+      val request = this.server.takeRequest()
+      Assertions.assertEquals(this.patronURI, request.requestUrl?.toUri())
+    }
+    this.run {
+      val request = this.server.takeRequest()
+      Assertions.assertEquals(this.annotationsURI, request.requestUrl?.toUri())
+    }
   }
 
   /**
@@ -247,58 +265,58 @@ abstract class ReaderBookmarkServiceContract {
   @Test
   @Timeout(value = 5L, unit = TimeUnit.SECONDS)
   fun testInitializeReceive() {
-    addResponse(
+    this.addResponse(
       "http://www.example.com/patron",
       """
-  {
-    "settings": {
-      "simplified:synchronize_annotations": true
+    {
+      "settings": {
+        "simplified:synchronize_annotations": true
+      }
     }
-  }
-  """
+    """
     )
 
-    addResponse(
+    this.addResponse(
       "http://www.example.com/annotations",
       """
-  {
-     "id" : "http://www.example.com/annotations/",
-     "type" : [
-        "BasicContainer",
-        "AnnotationCollection"
-     ],
-     "@context" : [
-        "http://www.w3.org/ns/anno.jsonld",
-        "http://www.w3.org/ns/ldp.jsonld"
-     ],
-     "total" : 0,
-     "first" : {
-        "items" : [
-           {
-              "body" : {
-                 "http://librarysimplified.org/terms/device" : "urn:uuid:253c7cbc-4fdf-430e-81b9-18bea90b6026",
-                 "http://librarysimplified.org/terms/time" : "2018-12-03T16:29:03"
-              },
-              "id" : "http://www.example.com/annotations/100000",
-              "type" : "Annotation",
-              "motivation" : "http://www.w3.org/ns/oa#bookmarking",
-              "target" : {
-                 "selector" : {
-                    "value" : "{\"idref\":\"n-1\",\"contentCFI\":\"/4/14,/1:0,/1:1\"}",
-                    "type" : "FragmentSelector"
-                 },
-                 "source" : "urn:example.com/terms/id/c083c0a6-54c6-4cc5-9d3a-425317da662a"
-              }
-           }
-        ],
-        "type" : "AnnotationPage",
-        "id" : "http://www.example.com/annotations/"
-     }
-  }
-  """
+    {
+       "id" : "http://www.example.com/annotations/",
+       "type" : [
+          "BasicContainer",
+          "AnnotationCollection"
+       ],
+       "@context" : [
+          "http://www.w3.org/ns/anno.jsonld",
+          "http://www.w3.org/ns/ldp.jsonld"
+       ],
+       "total" : 0,
+       "first" : {
+          "items" : [
+             {
+                "body" : {
+                   "http://librarysimplified.org/terms/device" : "urn:uuid:253c7cbc-4fdf-430e-81b9-18bea90b6026",
+                   "http://librarysimplified.org/terms/time" : "2018-12-03T16:29:03"
+                },
+                "id" : "http://www.example.com/annotations/100000",
+                "type" : "Annotation",
+                "motivation" : "http://www.w3.org/ns/oa#bookmarking",
+                "target" : {
+                   "selector" : {
+                      "value" : "{\"idref\":\"n-1\",\"contentCFI\":\"/4/14,/1:0,/1:1\"}",
+                      "type" : "FragmentSelector"
+                   },
+                   "source" : "urn:example.com/terms/id/c083c0a6-54c6-4cc5-9d3a-425317da662a"
+                }
+             }
+          ],
+          "type" : "AnnotationPage",
+          "id" : "http://www.example.com/annotations/"
+       }
+    }
+    """
     )
 
-    val httpCalls = ReaderBookmarkHTTPCalls(this.objectMapper, http)
+    val httpCalls = ReaderBookmarkHTTPCalls(this.objectMapper, this.http)
 
     val profileEvents =
       EventLogging.create<ProfileEvent>(this.logger, 1)
@@ -352,12 +370,8 @@ abstract class ReaderBookmarkServiceContract {
     val accountProvider =
       Mockito.mock(AccountProviderType::class.java)
 
-    Mockito.`when`(accountProvider.supportsSimplyESynchronization)
-      .thenReturn(true)
-    Mockito.`when`(accountProvider.annotationsURI)
-      .thenReturn(this.server.url("annotations").toUri())
     Mockito.`when`(accountProvider.patronSettingsURI)
-      .thenReturn(this.server.url("patron").toUri())
+      .thenReturn(this.patronURI)
 
     val accountPreferences =
       AccountPreferences(
@@ -370,9 +384,13 @@ abstract class ReaderBookmarkServiceContract {
       Mockito.mock(AccountType::class.java)
 
     Mockito.`when`(account.loginState)
-      .thenReturn(AccountLoginState.AccountLoggedIn(this.accountCredentials))
+      .thenReturn(
+        AccountLoginState.AccountLoggedIn(
+          this.accountCredentials.copy(annotationsURI = this.annotationsURI)
+        )
+      )
     Mockito.`when`(account.id)
-      .thenReturn(fakeAccountID)
+      .thenReturn(this.fakeAccountID)
     Mockito.`when`(account.provider)
       .thenReturn(accountProvider)
     Mockito.`when`(account.bookDatabase)
@@ -384,10 +402,10 @@ abstract class ReaderBookmarkServiceContract {
       Mockito.mock(ProfileType::class.java)
 
     Mockito.`when`(profile.accounts())
-      .thenReturn(sortedMapOf(Pair(fakeAccountID, account)))
+      .thenReturn(sortedMapOf(Pair(this.fakeAccountID, account)))
     Mockito.`when`(profile.id)
       .thenReturn(ProfileID.generate())
-    Mockito.`when`(profile.account(fakeAccountID))
+    Mockito.`when`(profile.account(this.fakeAccountID))
       .thenReturn(account)
 
     val profiles =
@@ -409,25 +427,35 @@ abstract class ReaderBookmarkServiceContract {
       ReaderBookmarkEvent.ReaderBookmarkSyncStarted::class.java,
       bookmarkEvents.eventLog,
       0,
-      { event -> Assertions.assertEquals(fakeAccountID, event.accountID) }
+      { event -> Assertions.assertEquals(this.fakeAccountID, event.accountID) }
     )
 
     EventAssertions.isTypeAndMatches(
       ReaderBookmarkEvent.ReaderBookmarkSaved::class.java,
       bookmarkEvents.eventLog,
       1,
-      { event -> Assertions.assertEquals(fakeAccountID, event.accountID) }
+      { event -> Assertions.assertEquals(this.fakeAccountID, event.accountID) }
     )
 
     EventAssertions.isTypeAndMatches(
       ReaderBookmarkEvent.ReaderBookmarkSyncFinished::class.java,
       bookmarkEvents.eventLog,
       2,
-      { event -> Assertions.assertEquals(fakeAccountID, event.accountID) }
+      { event -> Assertions.assertEquals(this.fakeAccountID, event.accountID) }
     )
 
     Assertions.assertEquals(1, receivedBookmarks.size)
     Assertions.assertEquals("urn:example.com/terms/id/c083c0a6-54c6-4cc5-9d3a-425317da662a", receivedBookmarks[0].opdsId)
+
+    Assertions.assertEquals(2, this.server.requestCount)
+    this.run {
+      val request = this.server.takeRequest()
+      Assertions.assertEquals(this.patronURI, request.requestUrl?.toUri())
+    }
+    this.run {
+      val request = this.server.takeRequest()
+      Assertions.assertEquals(this.annotationsURI, request.requestUrl?.toUri())
+    }
   }
 
   /**
@@ -438,15 +466,15 @@ abstract class ReaderBookmarkServiceContract {
   @Test
   @Timeout(value = 5L, unit = TimeUnit.SECONDS)
   fun testInitializeSendBookmarks() {
-    addResponse(
+    this.addResponse(
       "http://www.example.com/patron",
       """
-  {
-    "settings": {
-      "simplified:synchronize_annotations": true
+    {
+      "settings": {
+        "simplified:synchronize_annotations": true
+      }
     }
-  }
-  """
+    """
     )
 
     val responseText = """
@@ -486,9 +514,9 @@ abstract class ReaderBookmarkServiceContract {
     }
     """
 
-    addResponse("http://www.example.com/annotations", responseText)
+    this.addResponse("http://www.example.com/annotations", responseText)
 
-    val httpCalls = ReaderBookmarkHTTPCalls(this.objectMapper, http)
+    val httpCalls = ReaderBookmarkHTTPCalls(this.objectMapper, this.http)
 
     val profileEvents =
       EventLogging.create<ProfileEvent>(this.logger, 1)
@@ -556,12 +584,8 @@ abstract class ReaderBookmarkServiceContract {
     val accountProvider =
       Mockito.mock(AccountProviderType::class.java)
 
-    Mockito.`when`(accountProvider.supportsSimplyESynchronization)
-      .thenReturn(true)
-    Mockito.`when`(accountProvider.annotationsURI)
-      .thenReturn(this.server.url("annotations").toUri())
     Mockito.`when`(accountProvider.patronSettingsURI)
-      .thenReturn(this.server.url("patron").toUri())
+      .thenReturn(this.patronURI)
 
     val accountPreferences =
       AccountPreferences(
@@ -574,9 +598,13 @@ abstract class ReaderBookmarkServiceContract {
       Mockito.mock(AccountType::class.java)
 
     Mockito.`when`(account.loginState)
-      .thenReturn(AccountLoginState.AccountLoggedIn(this.accountCredentials))
+      .thenReturn(
+        AccountLoginState.AccountLoggedIn(
+          this.accountCredentials.copy(annotationsURI = this.annotationsURI)
+        )
+      )
     Mockito.`when`(account.id)
-      .thenReturn(fakeAccountID)
+      .thenReturn(this.fakeAccountID)
     Mockito.`when`(account.provider)
       .thenReturn(accountProvider)
     Mockito.`when`(account.bookDatabase)
@@ -588,10 +616,10 @@ abstract class ReaderBookmarkServiceContract {
       Mockito.mock(ProfileType::class.java)
 
     Mockito.`when`(profile.accounts())
-      .thenReturn(sortedMapOf(Pair(fakeAccountID, account)))
+      .thenReturn(sortedMapOf(Pair(this.fakeAccountID, account)))
     Mockito.`when`(profile.id)
       .thenReturn(ProfileID.generate())
-    Mockito.`when`(profile.account(fakeAccountID))
+    Mockito.`when`(profile.account(this.fakeAccountID))
       .thenReturn(account)
 
     val profiles =
@@ -613,25 +641,35 @@ abstract class ReaderBookmarkServiceContract {
       ReaderBookmarkEvent.ReaderBookmarkSyncStarted::class.java,
       bookmarkEvents.eventLog,
       0,
-      { event -> Assertions.assertEquals(fakeAccountID, event.accountID) }
+      { event -> Assertions.assertEquals(this.fakeAccountID, event.accountID) }
     )
 
     EventAssertions.isTypeAndMatches(
       ReaderBookmarkEvent.ReaderBookmarkSaved::class.java,
       bookmarkEvents.eventLog,
       1,
-      { event -> Assertions.assertEquals(fakeAccountID, event.accountID) }
+      { event -> Assertions.assertEquals(this.fakeAccountID, event.accountID) }
     )
 
     EventAssertions.isTypeAndMatches(
       ReaderBookmarkEvent.ReaderBookmarkSyncFinished::class.java,
       bookmarkEvents.eventLog,
       2,
-      { event -> Assertions.assertEquals(fakeAccountID, event.accountID) }
+      { event -> Assertions.assertEquals(this.fakeAccountID, event.accountID) }
     )
 
     Assertions.assertEquals(2, receivedBookmarks.size)
     Assertions.assertEquals("urn:example.com/terms/id/c083c0a6-54c6-4cc5-9d3a-425317da662a", receivedBookmarks[0].opdsId)
     Assertions.assertEquals("urn:example.com/terms/id/c083c0a6-54c6-4cc5-9d3a-425317da662a", receivedBookmarks[1].opdsId)
+
+    Assertions.assertEquals(2, this.server.requestCount)
+    this.run {
+      val request = this.server.takeRequest()
+      Assertions.assertEquals(this.patronURI, request.requestUrl?.toUri())
+    }
+    this.run {
+      val request = this.server.takeRequest()
+      Assertions.assertEquals(this.annotationsURI, request.requestUrl?.toUri())
+    }
   }
 }

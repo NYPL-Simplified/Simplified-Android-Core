@@ -605,7 +605,7 @@ class AccountDetailFragment : Fragment(R.layout.account) {
 
   private fun reconfigureAccountUI() {
     val isPermitted = this.viewModel.account.preferences.bookmarkSyncingPermitted
-    val isSupported = this.viewModel.account.provider.supportsSimplyESynchronization
+    val isSupported = this.viewModel.account.loginState.credentials ?.annotationsURI != null
     this.bookmarkSyncCheck.isChecked = isPermitted
     this.bookmarkSyncCheck.isEnabled = isSupported
     this.bookmarkSyncLabel.isEnabled = isSupported
@@ -887,7 +887,7 @@ class AccountDetailFragment : Fragment(R.layout.account) {
     val loginSatisfied = this.determineLoginIsSatisfied()
     this.setLoginButtonStatus(loginSatisfied)
     this.authenticationAlternativesShow()
-    if(shouldSignUpBeEnabled()) {
+    if (shouldSignUpBeEnabled()) {
       this.signUpButton.isEnabled = true
       this.signUpLabel.isEnabled = true
     }

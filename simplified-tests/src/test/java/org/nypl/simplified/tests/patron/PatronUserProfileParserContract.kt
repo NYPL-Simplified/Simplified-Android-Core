@@ -99,6 +99,31 @@ abstract class PatronUserProfileParserContract {
   }
 
   @Test
+  fun testExampleWithDeviceManagement2() {
+    val parser =
+      this.parsers.createParser(URI.create("urn:x"), resource("example-with-device-20210512.json"))
+
+    val result = parser.parse()
+    this.dump(result)
+    ExtraAssertions.assertInstanceOf(result, Success::class.java)
+
+    val success = result as Success
+    val profile = success.result
+
+    Assertions.assertEquals("123123", profile.authorization?.identifier)
+    Assertions.assertEquals("2022-08-06T00:00:00.000Z", profile.authorization?.expires.toString())
+    Assertions.assertEquals(true, profile.settings.synchronizeAnnotations)
+
+    Assertions.assertEquals(1, profile.drm.size)
+
+    val drmAdobe = profile.drm.map { a -> a as PatronDRMAdobe }.first()
+    Assertions.assertEquals("NYPL", drmAdobe.vendor)
+    Assertions.assertEquals(URI("http://librarysimplified.org/terms/drm/scheme/ACS"), drmAdobe.scheme)
+    Assertions.assertEquals("NYNYPL|123|asds|asdasd", drmAdobe.clientToken)
+    Assertions.assertEquals("https://example.com/devices", drmAdobe.deviceManagerURI?.toString())
+  }
+
+  @Test
   fun testExampleUnknownDRM() {
     val parser =
       this.parsers.createParser(URI.create("urn:x"), resource("example-drm-unknown.json"))

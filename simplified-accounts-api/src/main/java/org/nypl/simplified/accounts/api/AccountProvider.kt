@@ -25,7 +25,6 @@ data class AccountProvider(
   override val mainColor: String,
   override val addAutomatically: Boolean,
   override val patronSettingsURI: URI?,
-  override val annotationsURI: URI?,
   override val updated: DateTime,
   override val announcements: List<Announcement> = listOf(),
   override val location: AccountLibraryLocation?
@@ -33,9 +32,6 @@ data class AccountProvider(
   override fun compareTo(other: AccountProviderType): Int {
     return this.id.compareTo(other.id)
   }
-
-  override val supportsSimplyESynchronization: Boolean =
-    this.annotationsURI != null
 
   companion object {
 
@@ -51,7 +47,6 @@ data class AccountProvider(
 
       return AccountProvider(
         addAutomatically = other.addAutomatically,
-        annotationsURI = other.annotationsURI,
         authentication = other.authentication,
         authenticationAlternatives = other.authenticationAlternatives,
         authenticationDocumentURI = other.authenticationDocumentURI,

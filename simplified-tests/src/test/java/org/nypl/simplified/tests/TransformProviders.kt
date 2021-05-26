@@ -58,7 +58,6 @@ class TransformProviders {
           AccountProvider(
             addAutomatically = false,
             announcements = emptyList(),
-            annotationsURI = null,
             authenticationDocumentURI = null,
             authentication = authentication,
             authenticationAlternatives = listOf(),

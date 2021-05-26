@@ -1,14 +1,11 @@
 package org.nypl.simplified.books.controller
 
-import com.google.common.base.Preconditions
-import com.io7m.jfunctional.Some
-import org.joda.time.DateTime
 import org.librarysimplified.http.api.LSHTTPClientType
 import org.librarysimplified.http.api.LSHTTPResponseStatus
 import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
+import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.api.AccountLoginState
-import org.nypl.simplified.accounts.api.AccountProvider
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.database.api.AccountType
@@ -20,10 +17,11 @@ import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.controller.api.BooksControllerType
-import org.nypl.simplified.opds.core.OPDSAcquisitionFeed
 import org.nypl.simplified.opds.core.OPDSAvailabilityRevoked
 import org.nypl.simplified.opds.core.OPDSFeedParserType
 import org.nypl.simplified.opds.core.OPDSParseException
+import org.nypl.simplified.patron.api.PatronUserProfile
+import org.nypl.simplified.patron.api.PatronUserProfileParsersType
 import org.nypl.simplified.profiles.api.ProfileID
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
@@ -32,7 +30,6 @@ import org.slf4j.LoggerFactory
 import java.io.ByteArrayInputStream
 import java.io.IOException
 import java.io.InputStream
-import java.net.URI
 import java.util.HashSet
 
 class BookSyncTask(
@@ -42,6 +39,7 @@ class BookSyncTask(
   private val booksController: BooksControllerType,
   private val accountRegistry: AccountProviderRegistryType,
   private val bookRegistry: BookRegistryType,
+  private val patronParsers: PatronUserProfileParsersType,
   private val http: LSHTTPClientType,
   private val feedParser: OPDSFeedParserType
 ) : AbstractBookTask(accountID, profileID, profiles) {
@@ -68,6 +66,11 @@ class BookSyncTask(
       this.logger.debug("no credentials, aborting!")
       return this.taskRecorder.finishSuccess(Unit)
     }
+
+    this.fetchPatronUserProfile(
+      account = account,
+      credentials = credentials
+    )
 
     val loansURI = provider.loansURI
     if (loansURI == null) {
@@ -104,6 +107,42 @@ class BookSyncTask(
       }
       is LSHTTPResponseStatus.Failed ->
         throw IOException(status.exception)
+    }
+  }
+
+  private fun fetchPatronUserProfile(
+    account: AccountType,
+    credentials: AccountAuthenticationCredentials
+  ) {
+    try {
+      val profile =
+        PatronUserProfiles.runPatronProfileRequest(
+          taskRecorder = this.taskRecorder,
+          patronParsers = this.patronParsers,
+          credentials = credentials,
+          http = this.http,
+          account = account
+        )
+
+      account.updateCredentialsIfAvailable {
+        this.withNewAnnotationsURI(it, profile)
+      }
+    } catch (e: Exception) {
+      this.logger.error("patron user profile: ", e)
+    }
+  }
+
+  private fun withNewAnnotationsURI(
+    currentCredentials: AccountAuthenticationCredentials,
+    profile: PatronUserProfile
+  ): AccountAuthenticationCredentials {
+    return when (currentCredentials) {
+      is AccountAuthenticationCredentials.Basic ->
+        currentCredentials.copy(annotationsURI = profile.annotationsURI)
+      is AccountAuthenticationCredentials.OAuthWithIntermediary ->
+        currentCredentials.copy(annotationsURI = profile.annotationsURI)
+      is AccountAuthenticationCredentials.SAML2_0 ->
+        currentCredentials.copy(annotationsURI = profile.annotationsURI)
     }
   }
 
@@ -163,7 +202,6 @@ class BookSyncTask(
     account: AccountType
   ) {
     val feed = this.feedParser.parse(provider.loansURI, stream)
-    this.updateAnnotations(feed, account)
 
     /*
      * Obtain the set of books that are on disk already. If any
@@ -214,7 +252,6 @@ class BookSyncTask(
 
           this.logger.debug("[{}] deleting", existingId.brief())
           dbEntry.delete()
-          this.bookRegistry.clearFor(existingId)
         } else {
           this.logger.debug("[{}] keeping", existingId.brief())
         }
@@ -230,44 +267,6 @@ class BookSyncTask(
     for (revoke_id in revoking) {
       this.logger.debug("[{}] revoking", revoke_id.brief())
       this.booksController.bookRevoke(account.id, revoke_id)
-    }
-  }
-
-  /**
-   * Check to see if the feed contains an annotations link. If it does, update the account
-   * provider to indicate that the provider does support bookmark syncing.
-   */
-
-  private fun updateAnnotations(feed: OPDSAcquisitionFeed, account: AccountType) {
-    this.logger.debug("checking feed for annotations link")
-
-    if (feed.annotations.isSome) {
-      this.logger.debug("feed contains annotations link: setting sync support to 'true'")
-
-      val newAccountProvider =
-        AccountProvider.copy(account.provider)
-          .copy(
-            annotationsURI = (feed.annotations as Some<URI>).get(),
-            updated = DateTime.now()
-          )
-      Preconditions.checkArgument(
-        newAccountProvider.supportsSimplyESynchronization,
-        "Support for syncing must now be enabled"
-      )
-
-      val newProvider = this.accountRegistry.updateProvider(newAccountProvider)
-      Preconditions.checkArgument(
-        newProvider.supportsSimplyESynchronization,
-        "Support for syncing must now be enabled"
-      )
-
-      account.setAccountProvider(newProvider)
-      Preconditions.checkArgument(
-        account.provider.supportsSimplyESynchronization,
-        "Support for syncing must now be enabled"
-      )
-    } else {
-      this.logger.debug("feed does not contain annotations link")
     }
   }
 

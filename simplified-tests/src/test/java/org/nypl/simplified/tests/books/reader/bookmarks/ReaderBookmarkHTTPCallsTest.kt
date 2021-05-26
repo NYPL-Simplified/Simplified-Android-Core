@@ -22,6 +22,7 @@ import org.nypl.simplified.reader.bookmarks.api.BookmarkAnnotationBodyNode
 import org.nypl.simplified.reader.bookmarks.api.BookmarkAnnotationSelectorNode
 import org.nypl.simplified.reader.bookmarks.api.BookmarkAnnotationTargetNode
 import java.io.IOException
+import java.net.URI
 import java.util.concurrent.TimeUnit
 
 class ReaderBookmarkHTTPCallsTest {
@@ -41,7 +42,8 @@ class ReaderBookmarkHTTPCallsTest {
         userName = AccountUsername("abcd"),
         password = AccountPassword("1234"),
         adobeCredentials = null,
-        authenticationDescription = null
+        authenticationDescription = null,
+        annotationsURI = URI("https://www.example.com")
       )
 
     val targetURI =
@@ -69,7 +71,8 @@ class ReaderBookmarkHTTPCallsTest {
         userName = AccountUsername("abcd"),
         password = AccountPassword("1234"),
         adobeCredentials = null,
-        authenticationDescription = null
+        authenticationDescription = null,
+        annotationsURI = URI("https://www.example.com")
       )
 
     val targetURI =
@@ -291,7 +294,8 @@ class ReaderBookmarkHTTPCallsTest {
         userName = AccountUsername("abcd"),
         password = AccountPassword("1234"),
         adobeCredentials = null,
-        authenticationDescription = null
+        authenticationDescription = null,
+        annotationsURI = URI("https://www.example.com")
       )
 
     val targetURI = this.server.url("me").toUri()
@@ -318,7 +322,8 @@ class ReaderBookmarkHTTPCallsTest {
         userName = AccountUsername("io7mtest"),
         password = AccountPassword("1234"),
         adobeCredentials = null,
-        authenticationDescription = null
+        authenticationDescription = null,
+        annotationsURI = URI("https://www.example.com")
       )
 
     val targetURI = this.server.url("annotations").toUri()
@@ -345,7 +350,8 @@ class ReaderBookmarkHTTPCallsTest {
         userName = AccountUsername("io7mtest"),
         password = AccountPassword("1234"),
         adobeCredentials = null,
-        authenticationDescription = null
+        authenticationDescription = null,
+        annotationsURI = URI("https://www.example.com")
       )
 
     val targetURI = this.server.url("annotations").toUri()
