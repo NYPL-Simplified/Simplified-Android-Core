@@ -123,6 +123,10 @@ class AccountListViewModel(private val locationManager: LocationManager) : ViewM
         clearQuery()
     }
 
+  /**
+   * calls AccountProviderRegistryType#refresh(). AccountListViewModel#accounts will be updated after
+   * AccountProviderRegistryType#events() emits AccountProviderRegistryEvent.StatusChanged.
+   * */
   fun refreshAccountRegistry() {
     Completable.fromAction {
       this.accountRegistry.refresh(
@@ -193,6 +197,10 @@ class AccountListViewModel(private val locationManager: LocationManager) : ViewM
     activeLocation == null
   }
 
+  /**
+   * @param query user provided search query for accountRegistry to use.
+   * @return an AccountSearchQuery with most recent location data and query
+   * */
   private fun createQuery(query: String) = AccountSearchQuery(
     location = activeLocation?.toAccountGeoLocation(),
     searchQuery = query,
@@ -202,6 +210,10 @@ class AccountListViewModel(private val locationManager: LocationManager) : ViewM
       .showTestingLibraries
   )
 
+  /**
+   * Calls AccountProviderRegistryType#execute(). AccountListViewModel#accounts will be updated after
+   * AccountProviderRegistryType#events() emits AccountProviderRegistryEvent.StatusChanged.
+   * */
   private fun executeQuery(query: AccountSearchQuery) = Completable.fromAction {
     isLoadingSubject.onNext(true)
     accountRegistry.query(query)
@@ -211,6 +223,10 @@ class AccountListViewModel(private val locationManager: LocationManager) : ViewM
     longitude, latitude
   )
 
+  /**
+   * Handles events from ProfileControllerType#accountEvents()
+   * Updates AccountListViewModel#registeredAccounts when AccountEvent.AccountEventUpdated is emitted.
+   * */
   private fun onRegisteredAccountEvent(event: AccountEvent) {
     when (event) {
       is AccountEventDeletion.AccountEventDeletionFailed -> {
