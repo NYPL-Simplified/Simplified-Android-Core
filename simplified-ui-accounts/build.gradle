@@ -3,16 +3,17 @@ dependencies {
   implementation project(":simplified-buildconfig-api")
   implementation project(":simplified-cardcreator")
   implementation project(":simplified-documents")
+  implementation project(":simplified-metrics-api")
   implementation project(":simplified-oauth")
   implementation project(":simplified-profiles-controller-api")
+  implementation project(":simplified-reader-bookmarks-api")
   implementation project(":simplified-services-api")
-  implementation project(":simplified-metrics-api")
   implementation project(":simplified-threads")
   implementation project(":simplified-ui-errorpage")
   implementation project(":simplified-ui-images")
-  implementation project(':simplified-ui-listeners-api')
   implementation project(":simplified-ui-theme")
   implementation project(":simplified-webview")
+  implementation project(':simplified-ui-listeners-api')
 
   implementation libraries.androidx_appcompat
   implementation libraries.androidx_constraintlayout

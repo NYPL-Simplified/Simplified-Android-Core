@@ -24,6 +24,7 @@ import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventLoginStateChanged
+import org.nypl.simplified.accounts.api.AccountEventUpdated
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggedIn
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingIn
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingInWaitingForExternalAuthentication
@@ -108,7 +109,6 @@ class AccountDetailFragment : Fragment(R.layout.account) {
   private lateinit var signUpLabel: TextView
 
   private val cardCreatorResultCode = 101
-  private val closing = AtomicBoolean(false)
   private val imageButtonLoadingTag = "IMAGE_BUTTON_LOADING"
   private val nyplCardCreatorScheme = "nypl.card-creator"
   private var cardCreatorService: CardCreatorServiceType? = null
@@ -380,7 +380,7 @@ class AccountDetailFragment : Fragment(R.layout.account) {
      */
 
     this.bookmarkSyncCheck.setOnCheckedChangeListener { _, isChecked ->
-      this.viewModel.bookmarkSyncingPermitted = isChecked
+      this.viewModel.enableBookmarkSyncing(isChecked)
     }
 
     /*
@@ -565,12 +565,6 @@ class AccountDetailFragment : Fragment(R.layout.account) {
     this.supportActionBar?.apply {
       title = getString(R.string.accounts)
       subtitle = providerName
-    }
-  }
-
-  private fun explicitlyClose() {
-    if (this.closing.compareAndSet(false, true)) {
-      this.logger.debug("explicitlyClose: popping backstack")
     }
   }
 
@@ -915,6 +909,13 @@ class AccountDetailFragment : Fragment(R.layout.account) {
 
   private fun onAccountEvent(accountEvent: AccountEvent) {
     return when (accountEvent) {
+      is AccountEventUpdated -> {
+        if (accountEvent.accountID == this.parameters.accountId) {
+          this.reconfigureAccountUI()
+        } else {
+          // Don't care about events for other accounts
+        }
+      }
       is AccountEventLoginStateChanged ->
         if (accountEvent.accountID == this.parameters.accountId) {
           this.reconfigureAccountUI()
