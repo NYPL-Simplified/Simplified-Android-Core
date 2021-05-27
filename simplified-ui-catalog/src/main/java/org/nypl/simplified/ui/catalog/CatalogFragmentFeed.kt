@@ -246,7 +246,7 @@ class CatalogFragmentFeed : Fragment(R.layout.feed), AgeGateDialog.BirthYearSele
         true
       }
       R.id.catalogMenuActionReload -> {
-        this.viewModel.reloadFeed()
+        this.viewModel.syncAccounts()
         true
       }
       android.R.id.home -> {

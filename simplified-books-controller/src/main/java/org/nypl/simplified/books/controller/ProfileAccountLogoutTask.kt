@@ -19,6 +19,8 @@ import org.nypl.simplified.accounts.api.AccountLogoutStringResourcesType
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions
 import org.nypl.simplified.books.book_registry.BookRegistryType
+import org.nypl.simplified.books.book_registry.BookStatus
+import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.patron.api.PatronDRMAdobe
 import org.nypl.simplified.patron.api.PatronUserProfileParsersType
 import org.nypl.simplified.profiles.api.ProfileReadableType
@@ -248,25 +250,18 @@ class ProfileAccountLogoutTask(
   }
 
   private fun runBookRegistryClear() {
-    this.debug("clearing book database and registry")
-
-    this.steps.beginNewStep(this.logoutStrings.logoutClearingBookRegistry)
-    this.updateLoggingOutState()
-    try {
-      for (book in this.account.bookDatabase.books()) {
-        this.bookRegistry.clearFor(book)
-      }
-    } catch (e: Throwable) {
-      this.error("could not clear book registry: ", e)
-      this.steps.currentStepFailed(
-        this.logoutStrings.logoutClearingBookRegistryFailed, "unexpectedException"
-      )
-    }
+    this.debug("clearing book database and updating registry")
 
     this.steps.beginNewStep(this.logoutStrings.logoutClearingBookDatabase)
     this.updateLoggingOutState()
     try {
-      this.account.bookDatabase.delete()
+      for (book in this.account.bookDatabase.books()) {
+        val entry = account.bookDatabase.entry(book)
+        val newBook = entry.book.copy(formats = emptyList())
+        entry.delete()
+        val status = BookStatus.fromBook(newBook)
+        this.bookRegistry.update(BookWithStatus(entry.book, status))
+      }
     } catch (e: Throwable) {
       this.error("could not clear book database: ", e)
       this.steps.currentStepFailed(

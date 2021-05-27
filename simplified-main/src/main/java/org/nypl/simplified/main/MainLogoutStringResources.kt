@@ -39,12 +39,6 @@ class MainLogoutStringResources(
   override val logoutDeactivatingDeviceAdobe: String
     get() = this.resources.getString(R.string.logoutDeactivatingDeviceAdobe)
 
-  override val logoutClearingBookRegistryFailed: String
-    get() = this.resources.getString(R.string.logoutClearingBookRegistryFailed)
-
-  override val logoutClearingBookRegistry: String
-    get() = this.resources.getString(R.string.logoutClearingBookRegistry)
-
   override val logoutClearingBookDatabase: String
     get() = this.resources.getString(R.string.logoutClearingBookDatabase)
 

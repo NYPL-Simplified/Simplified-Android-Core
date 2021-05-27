@@ -29,12 +29,6 @@ class MockAccountLogoutStringResources : AccountLogoutStringResourcesType {
   override val logoutDeactivatingDeviceAdobe: String
     get() = "logoutDeactivatingDeviceAdobe"
 
-  override val logoutClearingBookRegistryFailed: String
-    get() = "logoutClearingBookRegistryFailed"
-
-  override val logoutClearingBookRegistry: String
-    get() = "logoutClearingBookRegistry"
-
   override val logoutClearingBookDatabase: String
     get() = "logoutClearingBookDatabase"
 

@@ -3,8 +3,6 @@
 <resources>
   <string name="logoutClearingBookDatabase">Clearing the book database…</string>
   <string name="logoutClearingBookDatabaseFailed">Clearing the book database failed!</string>
-  <string name="logoutClearingBookRegistry">Clearing the book registry…</string>
-  <string name="logoutClearingBookRegistryFailed">Clearing the book registry failed!</string>
   <string name="logoutDeactivatingDeviceAdobe">Deactivating device…</string>
   <string name="logoutDeactivatingDeviceAdobeDeactivated">Deactivated device.</string>
   <string name="logoutDeactivatingDeviceAdobeFailed">Deactivating the device failed: %1$s (%2$s)</string>

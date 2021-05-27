@@ -1,5 +1,7 @@
 package org.nypl.simplified.books.controller
 
+import org.nypl.simplified.accounts.api.AccountID
+import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
 import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookWithStatus
@@ -219,13 +221,28 @@ internal class ProfileFeedTask(
   private fun collectAllBooks(bookRegistry: BookRegistryReadableType): ArrayList<BookWithStatus> {
     val accountID = this.request.filterByAccountID
     val values = bookRegistry.books().values
-    return ArrayList(
+    val allBooks =
       if (accountID != null) {
         values.filter { book -> book.book.account == accountID }
       } else {
         values
+      }.filter {
+        this.accountIsLoggedIn(it.book.account)
       }
-    )
+    return ArrayList(allBooks)
+  }
+
+  private fun accountIsLoggedIn(accountID: AccountID): Boolean {
+    return try {
+      val account = this.profiles.profileCurrent().account(accountID)
+      if (!account.provider.authentication.isLoginPossible) {
+        true
+      } else {
+        account.loginState is AccountLoginState.AccountLoggedIn
+      }
+    } catch (e: Exception) {
+      false
+    }
   }
 
   private fun usableForBooksFeed(status: BookStatus): Boolean {
@@ -252,8 +269,7 @@ internal class ProfileFeedTask(
 
   private fun usableForHoldsFeed(status: BookStatus): Boolean {
     return when (status) {
-      is BookStatus.Held,
-      is BookStatus.Holdable ->
+      is BookStatus.Held ->
         true
 
       is BookStatus.Downloading,
@@ -262,6 +278,7 @@ internal class ProfileFeedTask(
       is BookStatus.FailedDownload,
       is BookStatus.FailedLoan,
       is BookStatus.FailedRevoke,
+      is BookStatus.Holdable,
       is BookStatus.Loanable,
       is BookStatus.Loaned,
       is BookStatus.RequestingDownload,

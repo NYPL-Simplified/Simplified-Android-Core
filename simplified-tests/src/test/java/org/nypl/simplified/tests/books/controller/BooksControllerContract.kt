@@ -38,7 +38,6 @@ import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookStatusEvent.BookStatusEventAdded
 import org.nypl.simplified.books.book_registry.BookStatusEvent.BookStatusEventChanged
-import org.nypl.simplified.books.book_registry.BookStatusEvent.BookStatusEventRemoved
 import org.nypl.simplified.books.borrowing.BorrowSubtasks
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskDirectoryType
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
@@ -605,6 +604,7 @@ abstract class BooksControllerContract {
     this.profiles.setProfileCurrent(profile.id)
     val account = profile.accountsByProvider()[provider.id]!!
     account.setLoginState(AccountLoggedIn(correctCredentials()))
+    val bookDatabase = account.bookDatabase
 
     this.server.enqueue(
       MockResponse()
@@ -634,7 +634,7 @@ abstract class BooksControllerContract {
       BookID.create("251cc5f69cd2a329bb6074b47a26062e59f5bb01d09d14626f41073f63690113")
     )
 
-    this.bookRegistry.bookEvents().subscribe({ this.bookEvents.add(it) })
+    this.bookRegistry.bookEvents().subscribe { this.bookEvents.add(it) }
 
     /*
      * Now run the sync again but this time with a feed that removes books.
@@ -652,39 +652,24 @@ abstract class BooksControllerContract {
     )
 
     controller.booksSync(account.id).get()
-    Assertions.assertEquals(1L, this.bookRegistry.books().size.toLong())
 
-    EventAssertions.isType(
-      BookStatusEventChanged::class.java,
-      this.bookEvents,
-      0
-    )
-    EventAssertions.isType(
-      BookStatusEventRemoved::class.java,
-      this.bookEvents,
-      1
-    )
-    EventAssertions.isType(
-      BookStatusEventRemoved::class.java,
-      this.bookEvents,
-      2
+    Assertions.assertEquals(1, bookDatabase.books().size)
+
+    bookDatabase.entry(
+      BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f")
     )
 
     this.bookRegistry.bookOrException(
       BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f")
-    )
+    ).status as BookStatus.Loaned.LoanedNotDownloaded
 
-    checkBookIsNotInRegistry("f9a7536a61caa60f870b3fbe9d4304b2d59ea03c71cbaee82609e3779d1e6e0f")
-    checkBookIsNotInRegistry("251cc5f69cd2a329bb6074b47a26062e59f5bb01d09d14626f41073f63690113")
-  }
+    this.bookRegistry.bookOrException(
+      BookID.create("f9a7536a61caa60f870b3fbe9d4304b2d59ea03c71cbaee82609e3779d1e6e0f")
+    ).status as BookStatus.Loaned.LoanedNotDownloaded
 
-  private fun checkBookIsNotInRegistry(id: String) {
-    try {
-      this.bookRegistry.bookOrException(BookID.create(id))
-      Assertions.fail("Book should not exist!")
-    } catch (e: NoSuchElementException) {
-      // Correctly raised
-    }
+    this.bookRegistry.bookOrException(
+      BookID.create("251cc5f69cd2a329bb6074b47a26062e59f5bb01d09d14626f41073f63690113")
+    ).status as BookStatus.Loaned.LoanedNotDownloaded
   }
 
   /**

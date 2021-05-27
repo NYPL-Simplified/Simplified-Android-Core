@@ -43,8 +43,6 @@ import org.nypl.simplified.feeds.api.FeedFacetPseudoTitleProviderType
 import org.nypl.simplified.feeds.api.FeedLoaderResult
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.feeds.api.FeedSearch
-import org.nypl.simplified.futures.FluentFutureExtensions.flatMap
-import org.nypl.simplified.futures.FluentFutureExtensions.fluentFutureOfAll
 import org.nypl.simplified.futures.FluentFutureExtensions.map
 import org.nypl.simplified.futures.FluentFutureExtensions.onAnyError
 import org.nypl.simplified.listeners.api.FragmentListenerType
@@ -60,7 +58,9 @@ import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.ui.catalog.CatalogFeedArguments.CatalogFeedArgumentsLocalBooks
 import org.nypl.simplified.ui.catalog.CatalogFeedArguments.CatalogFeedArgumentsRemote
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded
-import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.*
+import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedEmpty
+import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithGroups
+import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithoutGroups
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.slf4j.LoggerFactory
 import java.net.URI
@@ -149,25 +149,29 @@ class CatalogFeedViewModel(
   private fun onLoginStateChanged(accountID: AccountID, accountState: AccountLoginState) {
     val feedState = state
 
-    if (accountState is AccountLoginState.AccountLoggedIn) {
-      when (val ownership = feedState.arguments.ownership) {
-        is CatalogFeedOwnership.OwnedByAccount -> {
-          /*
-           * If loading the feed failed due to bad credentials and an account login has occurred,
-           * try refreshing the feed.
-           */
+    when (val ownership = feedState.arguments.ownership) {
+      is CatalogFeedOwnership.OwnedByAccount -> {
+        /*
+         * If loading the feed failed due to bad credentials and an account login has occurred,
+         * try refreshing the feed.
+         */
 
-          if (
-            ownership.accountId == accountID &&
-            feedState is CatalogFeedState.CatalogFeedLoadFailed &&
-            feedState.failure is FeedLoaderResult.FeedLoaderFailure.FeedLoaderFailedAuthentication
-          ) {
-            this.logger.debug("reloading feed due to successful login")
-            this.reloadFeed()
-          }
-        }
-        CatalogFeedOwnership.CollectedFromAccounts -> {
+        if (
+          accountState is AccountLoginState.AccountLoggedIn &&
+          ownership.accountId == accountID &&
+          feedState is CatalogFeedState.CatalogFeedLoadFailed &&
+          feedState.failure is FeedLoaderResult.FeedLoaderFailure.FeedLoaderFailedAuthentication
+        ) {
           this.logger.debug("reloading feed due to successful login")
+          this.reloadFeed()
+        }
+      }
+      CatalogFeedOwnership.CollectedFromAccounts -> {
+        if (
+          accountState is AccountLoginState.AccountLoggedIn ||
+          accountState is AccountLoginState.AccountNotLoggedIn
+        ) {
+          this.logger.debug("reloading feed due to successful login or logout")
           this.reloadFeed()
         }
       }
@@ -264,6 +268,38 @@ class CatalogFeedViewModel(
   val stateLive: LiveData<CatalogFeedState>
     get() = stateMutable
 
+  fun syncAccounts() {
+    when (val arguments = state.arguments) {
+      is CatalogFeedArgumentsLocalBooks -> {
+        this.syncAccounts(arguments)
+      }
+      is CatalogFeedArgumentsRemote -> {
+
+      }
+    }
+  }
+
+  private fun syncAccounts(arguments: CatalogFeedArgumentsLocalBooks) {
+    val profile =
+      this.profilesController.profileCurrent()
+    val accountsToSync =
+      if (arguments.filterAccount == null) {
+        // Sync all accounts
+        this.logger.debug("[{}]: syncing all accounts", this.instanceId)
+        profile.accounts()
+      } else {
+        // Sync the account we're filtering on
+        this.logger.debug("[{}]: syncing account {}", this.instanceId, arguments.filterAccount)
+        profile.accounts().filterKeys { it == arguments.filterAccount }
+      }
+
+    for (account in accountsToSync.keys) {
+      this.booksController.booksSync(account)
+    }
+
+    // Feed will be automatically reloaded if necessary in response to BookStatus change.
+  }
+
   fun reloadFeed() {
     this.loadFeed(state.arguments)
   }
@@ -301,31 +337,13 @@ class CatalogFeedViewModel(
         uri = booksUri
       )
 
-    val profile =
-      this.profilesController.profileCurrent()
-    val accountsToSync =
-      if (request.filterByAccountID == null) {
-        // Sync all accounts
-        profile.accounts()
-      } else {
-        // Sync the account we're filtering on
-        profile.accounts().filterKeys { it == request.filterByAccountID }
-      }
-
-    val syncFuture =
-      fluentFutureOfAll(
-        accountsToSync.keys.map { account ->
-          this.booksController.booksSync(account)
-        }
-      )
-
     val future = this.profilesController.profileFeed(request)
       .map { f -> FeedLoaderResult.FeedLoaderSuccess(f) as FeedLoaderResult }
       .onAnyError { ex -> FeedLoaderResult.wrapException(booksUri, ex) }
 
     this.createNewStatus(
       arguments = arguments,
-      future = syncFuture.flatMap { future }
+      future = future
     )
   }
 
@@ -417,7 +435,62 @@ class CatalogFeedViewModel(
     arguments: CatalogFeedArguments
   ) {
     this.logger.debug("[{}]: feed status updated: {}", this.instanceId, result.javaClass)
+
+    /*
+     * Update the book registry with fresh data.
+    */
+
+    if (arguments is CatalogFeedArgumentsRemote && result is FeedLoaderResult.FeedLoaderSuccess) {
+      this.updateBookRegistryFromFeed(result.feed)
+    }
+
     this.stateMutable.value = this.feedLoaderResultToFeedState(arguments, result)
+  }
+
+  private fun updateBookRegistryFromFeed(feed: Feed) {
+    when (feed) {
+      is Feed.FeedWithoutGroups -> {
+        this.logger.debug("updating {} book registry from entries (without groups)", feed.size)
+        for (index in 0 until feed.size) {
+          val e = feed.entriesInOrder[index]
+          if (e is FeedEntry.FeedEntryOPDS) {
+            this.updateBookRegistryFromEntry(e)
+          }
+        }
+      }
+      is Feed.FeedWithGroups -> {
+        this.logger.debug("updating {} book registry from entries (with groups)", feed.size)
+        for (index in 0 until feed.size) {
+          val group = feed.feedGroupsInOrder[index]
+          val entries = group.groupEntries
+          for (gi in entries.indices) {
+            val e = entries.get(gi)
+            if (e is FeedEntry.FeedEntryOPDS) {
+              this.updateBookRegistryFromEntry(e)
+            }
+          }
+        }
+      }
+    }
+  }
+
+  private fun updateBookRegistryFromEntry(entry: FeedEntry.FeedEntryOPDS) {
+    val id = entry.bookID
+    val bookWithStatus = this.bookRegistry.bookOrNull(id)
+
+    // If the book is in the registry, though not in the database
+    if (bookWithStatus != null &&
+      (bookWithStatus.status is BookStatus.Loanable ||
+        bookWithStatus.status is BookStatus.Holdable ||
+        bookWithStatus.status is BookStatus.Held)
+    ) {
+      this.logger.trace("updating book registry from entry {}", id)
+      val newBook = bookWithStatus.book.copy(entry = entry.feedEntry)
+      val newStatus = BookStatus.fromBook(newBook)
+      if (newStatus != bookWithStatus.status) {
+        this.bookRegistry.compareAndUpdate(bookWithStatus, BookWithStatus(newBook, newStatus))
+      }
+    }
   }
 
   private fun feedLoaderResultToFeedState(

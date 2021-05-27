@@ -58,18 +58,6 @@ interface AccountLogoutStringResourcesType {
   val logoutDeactivatingDeviceAdobe: String
 
   /**
-   * Clearing the book registry failed.
-   */
-
-  val logoutClearingBookRegistryFailed: String
-
-  /**
-   * Clearing the book registry succeeded.
-   */
-
-  val logoutClearingBookRegistry: String
-
-  /**
    * Clearing the book database started.
    */
 

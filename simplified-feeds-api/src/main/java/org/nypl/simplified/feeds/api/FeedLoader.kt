@@ -6,14 +6,10 @@ import com.io7m.jfunctional.Some
 import org.librarysimplified.http.api.LSHTTPAuthorizationType
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.books.book_registry.BookRegistryType
-import org.nypl.simplified.books.book_registry.BookStatus
-import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.bundled.api.BundledURIs
 import org.nypl.simplified.books.formats.api.BookFormatSupportType
 import org.nypl.simplified.content.api.ContentResolverType
-import org.nypl.simplified.feeds.api.Feed.FeedWithGroups
-import org.nypl.simplified.feeds.api.Feed.FeedWithoutGroups
 import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderFailure
 import org.nypl.simplified.feeds.api.FeedLoaderResult.FeedLoaderSuccess
 import org.nypl.simplified.opds.core.OPDSAcquisition
@@ -125,12 +121,6 @@ class FeedLoader private constructor(
           filter = this::isEntrySupported,
           search = search
         )
-
-      /*
-       * Update the book registry with fresh data.
-       */
-
-      this.updateBookRegistryFromFeed(feed)
 
       return FeedLoaderSuccess(feed)
     } catch (e: FeedHTTPTransportException) {
@@ -259,52 +249,6 @@ class FeedLoader private constructor(
       }
     } else {
       null
-    }
-  }
-
-  private fun updateBookRegistryFromFeed(feed: Feed) {
-    when (feed) {
-      is FeedWithoutGroups -> {
-        this.log.debug("updating {} book registry from entries (without groups)", feed.size)
-        for (index in 0 until feed.size) {
-          val e = feed.entriesInOrder[index]
-          if (e is FeedEntry.FeedEntryOPDS) {
-            this.updateBookRegistryFromEntry(e)
-          }
-        }
-      }
-      is FeedWithGroups -> {
-        this.log.debug("updating {} book registry from entries (with groups)", feed.size)
-        for (index in 0 until feed.size) {
-          val group = feed.feedGroupsInOrder[index]
-          val entries = group.groupEntries
-          for (gi in entries.indices) {
-            val e = entries.get(gi)
-            if (e is FeedEntry.FeedEntryOPDS) {
-              this.updateBookRegistryFromEntry(e)
-            }
-          }
-        }
-      }
-    }
-  }
-
-  private fun updateBookRegistryFromEntry(entry: FeedEntry.FeedEntryOPDS) {
-    val id = entry.bookID
-    val bookWithStatus = this.bookRegistry.bookOrNull(id)
-
-    // If the book is in the registry, though not in the database
-    if (bookWithStatus != null &&
-      (bookWithStatus.status is BookStatus.Loanable ||
-        bookWithStatus.status is BookStatus.Holdable ||
-        bookWithStatus.status is BookStatus.Held)
-    ) {
-      this.log.trace("updating book registry from entry {}", id)
-      val newBook = bookWithStatus.book.copy(entry = entry.feedEntry)
-      val newStatus = BookStatus.fromBook(newBook)
-      if (newStatus != bookWithStatus.status) {
-        this.bookRegistry.compareAndUpdate(bookWithStatus, BookWithStatus(newBook, newStatus))
-      }
     }
   }
 
