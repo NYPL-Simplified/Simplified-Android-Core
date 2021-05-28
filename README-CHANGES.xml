@@ -9,6 +9,16 @@
             <c:ticket id="SIMPLY-3604"/>
           </c:tickets>
         </c:change>
+        <c:change date="2021-05-14T00:00:00+00:00" summary="Card Creator covers navigation">
+          <c:tickets>
+            <c:ticket id="SMA-123"/>
+          </c:tickets>
+        </c:change>
+        <c:change date="2021-05-14T00:00:00+00:00" summary="Newer Firebase builds crash on Galaxy Tab A">
+          <c:tickets>
+            <c:ticket id="SMA-176"/>
+          </c:tickets>
+        </c:change>
         <c:change date="2021-04-01T00:00:00+00:00" summary="Fix DPLA audio book downloads">
           <c:tickets>
             <c:ticket id="SIMPLY-3666"/>
