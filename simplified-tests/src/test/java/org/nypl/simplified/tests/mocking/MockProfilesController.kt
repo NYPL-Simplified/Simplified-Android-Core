@@ -49,14 +49,14 @@ class MockProfilesController(
     return FluentFuture.from(SettableFuture.create())
   }
 
-  private val profileList =
+  val profileList: List<MockProfile> =
     IntRange(1, profileCount)
       .toList()
       .map {
         MockProfile(ProfileID(UUID.randomUUID()), accountCount)
       }
 
-  private val profiles =
+  val profiles: SortedMap<ProfileID, MockProfile> =
     this.profileList.map { profile -> Pair(profile.id, profile) }
       .toMap()
       .toSortedMap()

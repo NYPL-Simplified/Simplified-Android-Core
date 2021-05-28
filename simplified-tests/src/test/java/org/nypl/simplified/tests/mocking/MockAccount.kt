@@ -15,14 +15,28 @@ import java.util.UUID
 
 class MockAccount(override val id: AccountID) : AccountType {
 
+  @Volatile
+  private var preferencesCurrent: AccountPreferences =
+    AccountPreferences(
+      bookmarkSyncingPermitted = true,
+      catalogURIOverride = null,
+      announcementsAcknowledged = listOf()
+    )
+
   private val providerId = UUID.randomUUID()
 
+  @Volatile
+  var bookDatabaseProperty: BookDatabaseType =
+    MockBookDatabase(owner = this.id)
+
   override val bookDatabase: BookDatabaseType
-    get() = TODO("not implemented") // To change initializer of created properties use File | Settings | File Templates.
+    get() = this.bookDatabaseProperty
 
   override fun setPreferences(preferences: AccountPreferences) {
+    this.preferencesCurrent = preferences
   }
 
+  @Volatile
   private var accountProviderCurrent: AccountProviderType =
     run {
       val authentication =
@@ -92,9 +106,5 @@ class MockAccount(override val id: AccountID) : AccountType {
     get() = this.loginStateMutable
 
   override val preferences: AccountPreferences
-    get() = AccountPreferences(
-      bookmarkSyncingPermitted = true,
-      catalogURIOverride = null,
-      announcementsAcknowledged = listOf()
-    )
+    get() = this.preferencesCurrent
 }

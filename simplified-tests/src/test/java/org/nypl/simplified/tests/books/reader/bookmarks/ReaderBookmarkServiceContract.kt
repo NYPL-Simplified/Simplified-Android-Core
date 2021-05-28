@@ -19,9 +19,10 @@ import org.mockito.Mockito
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountID
-import org.nypl.simplified.accounts.api.AccountLoginState
+import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggedIn
 import org.nypl.simplified.accounts.api.AccountPassword
 import org.nypl.simplified.accounts.api.AccountPreferences
+import org.nypl.simplified.accounts.api.AccountProvider
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.api.AccountUsername
 import org.nypl.simplified.accounts.database.api.AccountType
@@ -43,8 +44,12 @@ import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkEvent
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkHTTPCallsType
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceType
+import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceUsableType.SyncEnableResult.SYNC_DISABLED
+import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceUsableType.SyncEnableResult.SYNC_ENABLED
+import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceUsableType.SyncEnableResult.SYNC_ENABLE_NOT_SUPPORTED
 import org.nypl.simplified.tests.EventAssertions
 import org.nypl.simplified.tests.EventLogging
+import org.nypl.simplified.tests.mocking.MockProfilesController
 import org.slf4j.Logger
 import java.net.URI
 import java.util.UUID
@@ -70,6 +75,42 @@ abstract class ReaderBookmarkServiceContract {
   private lateinit var http: LSHTTPClientType
   private lateinit var annotationsURI: URI
   private lateinit var patronURI: URI
+
+  private val annotationsEmpty = """
+{
+   "id" : "http://www.example.com/annotations/",
+   "type" : [
+      "BasicContainer",
+      "AnnotationCollection"
+   ],
+   "@context" : [
+      "http://www.w3.org/ns/anno.jsonld",
+      "http://www.w3.org/ns/ldp.jsonld"
+   ],
+   "total" : 0,
+   "first" : {
+      "items" : [],
+      "type" : "AnnotationPage",
+      "id" : "http://www.example.com/annotations/"
+   }
+}
+"""
+
+  private val patronSettingsWithAnnotationsEnabled = """
+{
+  "settings": {
+    "simplified:synchronize_annotations": true
+  }
+}
+"""
+
+  private val patronSettingsWithAnnotationsDisabled = """
+{
+  "settings": {
+    "simplified:synchronize_annotations": false
+  }
+}
+"""
 
   private val accountCredentials =
     AccountAuthenticationCredentials.Basic(
@@ -127,39 +168,8 @@ abstract class ReaderBookmarkServiceContract {
   @Test
   @Timeout(value = 10L, unit = TimeUnit.SECONDS)
   fun testInitializeEmpty() {
-    this.addResponse(
-      "http://www.example.com/patron",
-      """
-    {
-      "settings": {
-        "simplified:synchronize_annotations": true
-      }
-    }
-    """
-    )
-
-    this.addResponse(
-      "http://www.example.com/annotations",
-      """
-    {
-       "id" : "http://www.example.com/annotations/",
-       "type" : [
-          "BasicContainer",
-          "AnnotationCollection"
-       ],
-       "@context" : [
-          "http://www.w3.org/ns/anno.jsonld",
-          "http://www.w3.org/ns/ldp.jsonld"
-       ],
-       "total" : 0,
-       "first" : {
-          "items" : [],
-          "type" : "AnnotationPage",
-          "id" : "http://www.example.com/annotations/"
-       }
-    }
-    """
-    )
+    this.addResponse("http://www.example.com/patron", this.patronSettingsWithAnnotationsEnabled)
+    this.addResponse("http://www.example.com/annotations", this.annotationsEmpty)
 
     val httpCalls = ReaderBookmarkHTTPCalls(this.objectMapper, this.http)
 
@@ -194,7 +204,7 @@ abstract class ReaderBookmarkServiceContract {
 
     Mockito.`when`(account.loginState)
       .thenReturn(
-        AccountLoginState.AccountLoggedIn(
+        AccountLoggedIn(
           this.accountCredentials.copy(annotationsURI = this.annotationsURI)
         )
       )
@@ -265,16 +275,7 @@ abstract class ReaderBookmarkServiceContract {
   @Test
   @Timeout(value = 5L, unit = TimeUnit.SECONDS)
   fun testInitializeReceive() {
-    this.addResponse(
-      "http://www.example.com/patron",
-      """
-    {
-      "settings": {
-        "simplified:synchronize_annotations": true
-      }
-    }
-    """
-    )
+    this.addResponse("http://www.example.com/patron", this.patronSettingsWithAnnotationsEnabled)
 
     this.addResponse(
       "http://www.example.com/annotations",
@@ -385,7 +386,7 @@ abstract class ReaderBookmarkServiceContract {
 
     Mockito.`when`(account.loginState)
       .thenReturn(
-        AccountLoginState.AccountLoggedIn(
+        AccountLoggedIn(
           this.accountCredentials.copy(annotationsURI = this.annotationsURI)
         )
       )
@@ -466,16 +467,7 @@ abstract class ReaderBookmarkServiceContract {
   @Test
   @Timeout(value = 5L, unit = TimeUnit.SECONDS)
   fun testInitializeSendBookmarks() {
-    this.addResponse(
-      "http://www.example.com/patron",
-      """
-    {
-      "settings": {
-        "simplified:synchronize_annotations": true
-      }
-    }
-    """
-    )
+    this.addResponse("http://www.example.com/patron", this.patronSettingsWithAnnotationsEnabled)
 
     val responseText = """
     {
@@ -599,7 +591,7 @@ abstract class ReaderBookmarkServiceContract {
 
     Mockito.`when`(account.loginState)
       .thenReturn(
-        AccountLoginState.AccountLoggedIn(
+        AccountLoggedIn(
           this.accountCredentials.copy(annotationsURI = this.annotationsURI)
         )
       )
@@ -671,5 +663,207 @@ abstract class ReaderBookmarkServiceContract {
       val request = this.server.takeRequest()
       Assertions.assertEquals(this.annotationsURI, request.requestUrl?.toUri())
     }
+  }
+
+  /**
+   * Trying to enable syncing on an account that doesn't support it, returns an appropriate status
+   * code.
+   */
+
+  @Test
+  @Timeout(value = 10L, unit = TimeUnit.SECONDS)
+  fun testEnableBookmarkSyncingNotSupported() {
+    val httpCalls =
+      ReaderBookmarkHTTPCalls(this.objectMapper, this.http)
+    val bookmarkEvents =
+      EventLogging.create<ReaderBookmarkEvent>(this.logger, 3)
+    val profiles =
+      MockProfilesController(1, 1)
+
+    this.readerBookmarkService =
+      this.bookmarkService(
+        threads = ::Thread,
+        events = bookmarkEvents.events,
+        httpCalls = httpCalls,
+        profilesController = profiles)
+
+    val service =
+      this.readerBookmarkService!!
+    val result =
+      service.bookmarkSyncEnable(profiles.profileList[0].accountList[0].id, true).get()
+
+    Assertions.assertEquals(SYNC_ENABLE_NOT_SUPPORTED, result)
+  }
+
+  /**
+   * Trying to enable syncing on an account that supports it, makes the appropriate HTTP calls, and
+   * returns an appropriate status code.
+   */
+
+  @Test
+  @Timeout(value = 10L, unit = TimeUnit.SECONDS)
+  fun testEnableBookmarkSyncingSupportedEnable() {
+    val httpCalls =
+      ReaderBookmarkHTTPCalls(this.objectMapper, this.http)
+    val bookmarkEvents =
+      EventLogging.create<ReaderBookmarkEvent>(this.logger, 3)
+    val profiles =
+      MockProfilesController(1, 1)
+
+    val account = profiles.profileList[0].accountList[0]
+    account.setAccountProvider(
+      (account.provider as AccountProvider).copy(patronSettingsURI = this.patronURI)
+    )
+    account.setPreferences(account.preferences.copy(bookmarkSyncingPermitted = false))
+    account.setLoginState(AccountLoggedIn(AccountAuthenticationCredentials.Basic(
+      userName = AccountUsername("durandal"),
+      password = AccountPassword("tycho"),
+      adobeCredentials = null,
+      authenticationDescription = null,
+      annotationsURI = this.annotationsURI
+    )))
+
+    /*
+     * The service checks to see if the patron has syncing enabled.
+     */
+
+    this.addResponse(
+      this.patronURI.toString(),
+      this.patronSettingsWithAnnotationsDisabled)
+
+    /*
+     * The service then sends a request to turn syncing on.
+     */
+
+    this.addResponse(
+      this.patronURI.toString(),
+      this.patronSettingsWithAnnotationsEnabled)
+
+    /*
+     * The service then checks again to see if the patron has syncing enabled.
+     */
+
+    this.addResponse(
+      this.patronURI.toString(),
+      this.patronSettingsWithAnnotationsEnabled)
+
+    this.readerBookmarkService =
+      this.bookmarkService(
+        threads = ::Thread,
+        events = bookmarkEvents.events,
+        httpCalls = httpCalls,
+        profilesController = profiles)
+
+    val service =
+      this.readerBookmarkService!!
+    val result =
+      service.bookmarkSyncEnable(
+        accountID = profiles.profileList[0].accountList[0].id,
+        enabled = true
+      ).get()
+
+    Assertions.assertEquals(3, this.server.requestCount)
+    this.run {
+      val request = this.server.takeRequest()
+      Assertions.assertEquals(this.patronURI, request.requestUrl?.toUri())
+    }
+    this.run {
+      val request = this.server.takeRequest()
+      Assertions.assertEquals(this.patronURI, request.requestUrl?.toUri())
+    }
+    this.run {
+      val request = this.server.takeRequest()
+      Assertions.assertEquals(this.patronURI, request.requestUrl?.toUri())
+    }
+    Assertions.assertEquals(SYNC_ENABLED, result)
+    Assertions.assertEquals(true, account.preferences.bookmarkSyncingPermitted)
+  }
+
+  /**
+   * Trying to disable syncing on an account that supports it, makes the appropriate HTTP calls, and
+   * returns an appropriate status code.
+   */
+
+  @Test
+  @Timeout(value = 10L, unit = TimeUnit.SECONDS)
+  fun testEnableBookmarkSyncingSupportedDisable() {
+    val httpCalls =
+      ReaderBookmarkHTTPCalls(this.objectMapper, this.http)
+    val bookmarkEvents =
+      EventLogging.create<ReaderBookmarkEvent>(this.logger, 3)
+    val profiles =
+      MockProfilesController(1, 1)
+
+    val account = profiles.profileList[0].accountList[0]
+    account.setAccountProvider(
+      (account.provider as AccountProvider).copy(patronSettingsURI = this.patronURI)
+    )
+    account.setPreferences(account.preferences.copy(bookmarkSyncingPermitted = true))
+    account.setLoginState(AccountLoggedIn(AccountAuthenticationCredentials.Basic(
+      userName = AccountUsername("durandal"),
+      password = AccountPassword("tycho"),
+      adobeCredentials = null,
+      authenticationDescription = null,
+      annotationsURI = this.annotationsURI
+    )))
+
+    /*
+     * The service checks to see if the patron has syncing enabled. As it is initially enabled,
+     * there'll be a request for bookmarks right after.
+     */
+
+    this.addResponse(
+      this.patronURI.toString(),
+      this.patronSettingsWithAnnotationsEnabled)
+    this.addResponse(
+      this.annotationsURI.toString(),
+      this.annotationsEmpty)
+
+    /*
+     * The service then sends a request to turn syncing off, then checks again to see if the patron
+     * has syncing disabled.
+     */
+
+    this.addResponse(
+      this.patronURI.toString(),
+      this.patronSettingsWithAnnotationsDisabled)
+    this.addResponse(
+      this.patronURI.toString(),
+      this.patronSettingsWithAnnotationsDisabled)
+
+    this.readerBookmarkService =
+      this.bookmarkService(
+        threads = ::Thread,
+        events = bookmarkEvents.events,
+        httpCalls = httpCalls,
+        profilesController = profiles)
+
+    val service =
+      this.readerBookmarkService!!
+    val result =
+      service.bookmarkSyncEnable(
+        accountID = profiles.profileList[0].accountList[0].id,
+        enabled = false
+      ).get()
+
+    Assertions.assertEquals(4, this.server.requestCount)
+    this.run {
+      val request = this.server.takeRequest()
+      Assertions.assertEquals(this.patronURI, request.requestUrl?.toUri())
+    }
+    this.run {
+      val request = this.server.takeRequest()
+      Assertions.assertEquals(this.annotationsURI, request.requestUrl?.toUri())
+    }
+    this.run {
+      val request = this.server.takeRequest()
+      Assertions.assertEquals(this.patronURI, request.requestUrl?.toUri())
+    }
+    this.run {
+      val request = this.server.takeRequest()
+      Assertions.assertEquals(this.patronURI, request.requestUrl?.toUri())
+    }
+    Assertions.assertEquals(SYNC_DISABLED, result)
+    Assertions.assertEquals(false, account.preferences.bookmarkSyncingPermitted)
   }
 }

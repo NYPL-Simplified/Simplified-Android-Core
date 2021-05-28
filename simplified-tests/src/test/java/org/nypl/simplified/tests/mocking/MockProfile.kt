@@ -43,13 +43,13 @@ class MockProfile(
   override fun delete() {
   }
 
-  private val accountList =
+  val accountList: MutableList<MockAccount> =
     IntRange(1, accountCount)
       .toList()
       .map { MockAccount(AccountID(UUID.randomUUID())) }
       .toMutableList()
 
-  private val accounts =
+  val accounts: SortedMap<AccountID, MockAccount> =
     this.accountList.map { account -> Pair(account.id, account) }
       .toMap()
       .toSortedMap()
