@@ -54,7 +54,7 @@ import org.slf4j.LoggerFactory
  * A fragment displaying an OPDS feed.
  */
 
-class CatalogFragmentFeed : Fragment(R.layout.feed), AgeGateDialog.BirthYearSelectedListener {
+class CatalogFeedFragment : Fragment(R.layout.feed), AgeGateDialog.BirthYearSelectedListener {
 
   companion object {
 
@@ -68,14 +68,14 @@ class CatalogFragmentFeed : Fragment(R.layout.feed), AgeGateDialog.BirthYearSele
      * Create a catalog feed fragment for the given parameters.
      */
 
-    fun create(parameters: CatalogFeedArguments): CatalogFragmentFeed {
-      val fragment = CatalogFragmentFeed()
+    fun create(parameters: CatalogFeedArguments): CatalogFeedFragment {
+      val fragment = CatalogFeedFragment()
       fragment.arguments = bundleOf(PARAMETERS_ID to parameters)
       return fragment
     }
   }
 
-  private val logger = LoggerFactory.getLogger(CatalogFragmentFeed::class.java)
+  private val logger = LoggerFactory.getLogger(CatalogFeedFragment::class.java)
 
   private val parameters: CatalogFeedArguments by lazy {
     this.requireArguments()[PARAMETERS_ID] as CatalogFeedArguments
@@ -504,7 +504,7 @@ class CatalogFragmentFeed : Fragment(R.layout.feed), AgeGateDialog.BirthYearSele
     val builder = AlertDialog.Builder(context).apply {
       setPositiveButton(R.string.catalogSearch) { dialog, _ ->
         val query = searchView.text.toString().trim()
-        this@CatalogFragmentFeed.viewModel.performSearch(search, query)
+        this@CatalogFeedFragment.viewModel.performSearch(search, query)
         dialog.dismiss()
       }
       setNegativeButton(R.string.cancel) { dialog, _ ->
@@ -518,7 +518,7 @@ class CatalogFragmentFeed : Fragment(R.layout.feed), AgeGateDialog.BirthYearSele
       return@setOnEditorActionListener when (actionId) {
         EditorInfo.IME_ACTION_SEARCH -> {
           val query = searchView.text.toString().trim()
-          this@CatalogFragmentFeed.viewModel.performSearch(search, query)
+          this@CatalogFeedFragment.viewModel.performSearch(search, query)
           dialog.dismiss()
           true
         }

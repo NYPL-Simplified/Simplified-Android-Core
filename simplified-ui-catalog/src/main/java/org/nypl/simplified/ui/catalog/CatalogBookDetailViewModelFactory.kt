@@ -15,7 +15,7 @@ class CatalogBookDetailViewModelFactory(
   private val services: ServiceDirectoryType,
   private val borrowViewModel: CatalogBorrowViewModel,
   private val listener: FragmentListenerType<CatalogBookDetailEvent>,
-  private val parameters: CatalogFragmentBookDetailParameters
+  private val parameters: CatalogBookDetailFragmentParameters
 ): ViewModelProvider.NewInstanceFactory() {
 
   private val logger =

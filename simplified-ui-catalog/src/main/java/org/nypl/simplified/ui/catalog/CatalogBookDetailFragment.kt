@@ -36,7 +36,7 @@ import java.net.URI
  * A book detail page.
  */
 
-class CatalogFragmentBookDetail : Fragment(R.layout.book_detail) {
+class CatalogBookDetailFragment : Fragment(R.layout.book_detail) {
 
   companion object {
 
@@ -47,8 +47,8 @@ class CatalogFragmentBookDetail : Fragment(R.layout.book_detail) {
      * Create a book detail fragment for the given parameters.
      */
 
-    fun create(parameters: CatalogFragmentBookDetailParameters): CatalogFragmentBookDetail {
-      val fragment = CatalogFragmentBookDetail()
+    fun create(parameters: CatalogBookDetailFragmentParameters): CatalogBookDetailFragment {
+      val fragment = CatalogBookDetailFragment()
       fragment.arguments = bundleOf(this.PARAMETERS_ID to parameters)
       return fragment
     }
@@ -57,8 +57,8 @@ class CatalogFragmentBookDetail : Fragment(R.layout.book_detail) {
   private val services =
     Services.serviceDirectory()
 
-  private val parameters: CatalogFragmentBookDetailParameters by lazy {
-      this.requireArguments()[PARAMETERS_ID] as CatalogFragmentBookDetailParameters
+  private val parameters: CatalogBookDetailFragmentParameters by lazy {
+      this.requireArguments()[PARAMETERS_ID] as CatalogBookDetailFragmentParameters
   }
 
   private val listener: FragmentListenerType<CatalogBookDetailEvent> by fragmentListeners()
@@ -223,7 +223,7 @@ class CatalogFragmentBookDetail : Fragment(R.layout.book_detail) {
     val feedTitle = this.parameters.feedArguments.title
     this.supportActionBar?.apply {
       title = feedTitle
-      subtitle = this@CatalogFragmentBookDetail.viewModel.accountProvider?.displayName
+      subtitle = this@CatalogBookDetailFragment.viewModel.accountProvider?.displayName
     }
   }
 

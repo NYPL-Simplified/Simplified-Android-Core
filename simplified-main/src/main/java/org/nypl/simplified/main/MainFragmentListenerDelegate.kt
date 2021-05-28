@@ -31,9 +31,9 @@ import org.nypl.simplified.ui.accounts.saml20.AccountSAML20FragmentParameters
 import org.nypl.simplified.ui.catalog.CatalogBookDetailEvent
 import org.nypl.simplified.ui.catalog.CatalogFeedArguments
 import org.nypl.simplified.ui.catalog.CatalogFeedEvent
-import org.nypl.simplified.ui.catalog.CatalogFragmentBookDetail
-import org.nypl.simplified.ui.catalog.CatalogFragmentBookDetailParameters
-import org.nypl.simplified.ui.catalog.CatalogFragmentFeed
+import org.nypl.simplified.ui.catalog.CatalogBookDetailFragment
+import org.nypl.simplified.ui.catalog.CatalogBookDetailFragmentParameters
+import org.nypl.simplified.ui.catalog.CatalogFeedFragment
 import org.nypl.simplified.ui.catalog.saml20.CatalogSAML20Event
 import org.nypl.simplified.ui.errorpage.ErrorPageFragment
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
@@ -460,8 +460,8 @@ internal class MainFragmentListenerDelegate(
     entry: FeedEntry.FeedEntryOPDS
   ) {
     this.navigator.addFragment(
-      fragment = CatalogFragmentBookDetail.create(
-        CatalogFragmentBookDetailParameters(
+      fragment = CatalogBookDetailFragment.create(
+        CatalogBookDetailFragmentParameters(
           feedEntry = entry,
           feedArguments = feedArguments
         )
@@ -472,7 +472,7 @@ internal class MainFragmentListenerDelegate(
 
   private fun openFeed(feedArguments: CatalogFeedArguments) {
     this.navigator.addFragment(
-      fragment = CatalogFragmentFeed.create(feedArguments),
+      fragment = CatalogFeedFragment.create(feedArguments),
       tab = this.navigator.currentTab()
     )
   }

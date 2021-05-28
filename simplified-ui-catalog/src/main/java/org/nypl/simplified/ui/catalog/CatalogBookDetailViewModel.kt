@@ -31,13 +31,13 @@ import org.slf4j.LoggerFactory
 import java.net.URI
 
 class CatalogBookDetailViewModel(
-  private val resources: Resources,
-  private val profilesController: ProfilesControllerType,
-  private val bookRegistry: BookRegistryType,
-  private val buildConfiguration: BuildConfigurationServiceType,
-  private val borrowViewModel: CatalogBorrowViewModel,
-  private val parameters: CatalogFragmentBookDetailParameters,
-  private val listener: FragmentListenerType<CatalogBookDetailEvent>
+    private val resources: Resources,
+    private val profilesController: ProfilesControllerType,
+    private val bookRegistry: BookRegistryType,
+    private val buildConfiguration: BuildConfigurationServiceType,
+    private val borrowViewModel: CatalogBorrowViewModel,
+    private val parameters: CatalogBookDetailFragmentParameters,
+    private val listener: FragmentListenerType<CatalogBookDetailEvent>
 ) : ViewModel() {
 
   private val logger =
