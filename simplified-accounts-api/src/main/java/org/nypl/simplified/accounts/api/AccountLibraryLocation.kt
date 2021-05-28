@@ -6,5 +6,6 @@ package org.nypl.simplified.accounts.api
 
 data class AccountLibraryLocation(
   val location: AccountGeoLocation,
+  val locationDescription: String,
   val distance: AccountDistance?
 )

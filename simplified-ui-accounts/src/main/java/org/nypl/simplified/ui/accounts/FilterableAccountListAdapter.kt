@@ -115,6 +115,26 @@ class AccountItemViewHolder(
   }
 
   fun bind(item: AccountProviderDescription) {
+    val location = item.location
+    val context = itemView.context
+    this.itemView.contentDescription = when {
+      location?.locationDescription != null && location.distance != null -> {
+        context.getString(
+          R.string.accountRegistryItemContentDescriptionDistance,
+          item.title,
+          location.locationDescription,
+          location.distance!!.toText()
+        )
+      }
+      location?.locationDescription != null -> {
+        context.getString(
+          R.string.accountRegistryItemContentDescription,
+          item.title,
+          location.locationDescription
+        )
+      }
+      else -> item.title
+    }
     this.accountTitleView.text = item.title
     this.accountCaptionView.text = ""
     this.accountCaptionView.visibility =
@@ -152,6 +172,6 @@ val DIFF_CALLBACK =
       oldItem: AccountProviderDescription,
       newItem: AccountProviderDescription
     ): Boolean {
-      return oldItem.title == newItem.title
+      return oldItem == newItem
     }
   }

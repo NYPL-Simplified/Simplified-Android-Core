@@ -139,7 +139,8 @@ class AccountProviderSourceNYPLRegistry(
                   longitude = 48.009720957177684,
                   latitude = -106.42124352031094
                 ),
-                distance = AccountDistance(entry.value.id.hashCode() * 0.00001, KILOMETERS)
+                distance = AccountDistance(entry.value.id.hashCode() * 0.00001, KILOMETERS),
+                locationDescription = "Yellowstone Rd, Fort Peck, MT 59223"
               )
             )
           }
