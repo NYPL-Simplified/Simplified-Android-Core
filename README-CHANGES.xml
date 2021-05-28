@@ -84,7 +84,7 @@
             <c:ticket id="SMA-166"/>
           </c:tickets>
         </c:change>
-        <c:change date="2021-05-28T11:28:15+00:00" summary="The bookmark syncing toggle now correct turns on/off server-side syncing">
+        <c:change date="2021-05-28T11:28:15+00:00" summary="The bookmark syncing toggle now correctly turns on/off server-side syncing">
           <c:tickets>
             <c:ticket id="SMA-177"/>
           </c:tickets>
