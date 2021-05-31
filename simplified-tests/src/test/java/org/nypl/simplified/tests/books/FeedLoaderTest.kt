@@ -50,7 +50,6 @@ class FeedLoaderTest : FeedLoaderContract() {
 
     return FeedLoader.create(
       bookFormatSupport = bookFormatSupport,
-      bookRegistry = bookRegistry,
       bundledContent = bundledContent,
       contentResolver = contentResolver,
       exec = exec,

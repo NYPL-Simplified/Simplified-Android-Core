@@ -177,7 +177,6 @@ class BookRevokeTaskTest {
     val feedLoader =
       FeedLoader.create(
         bookFormatSupport = this.bookFormatSupport,
-        bookRegistry = this.bookRegistry,
         bundledContent = this.bundledContent,
         contentResolver = this.contentResolver,
         exec = executorFeeds,

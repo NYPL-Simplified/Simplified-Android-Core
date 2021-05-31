@@ -143,7 +143,6 @@ abstract class ProfilesControllerContract {
     val feedLoader =
       FeedLoader.create(
         bookFormatSupport = this.bookFormatSupport,
-        bookRegistry = this.bookRegistry,
         bundledContent = bundledContent,
         contentResolver = this.contentResolver,
         exec = this.executorFeeds,

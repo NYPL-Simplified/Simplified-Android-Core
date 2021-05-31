@@ -210,7 +210,6 @@ class Simply3635Test {
         parser = this.opdsParser,
         searchParser = OPDSSearchParser.newParser(),
         transport = FeedHTTPTransport(this.http),
-        bookRegistry = this.bookRegistry,
         bundledContent = this.bundledContent
       )
 

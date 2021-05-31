@@ -168,7 +168,6 @@ abstract class BooksControllerContract {
     val feedLoader =
       FeedLoader.create(
         bookFormatSupport = this.bookFormatSupport,
-        bookRegistry = books,
         bundledContent = bundledContent,
         contentResolver = this.contentResolver,
         exec = feedExecutor,

@@ -43,6 +43,8 @@ import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.controller.ProfileAccountLogoutTask
+import org.nypl.simplified.feeds.api.FeedLoader
+import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.opds.core.OPDSAcquisition
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess
@@ -53,6 +55,7 @@ import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.tests.mocking.MockAccountLogoutStringResources
 import org.nypl.simplified.tests.mocking.MockBookDatabase
 import org.nypl.simplified.tests.mocking.MockBookDatabaseEntry
+import org.nypl.simplified.tests.mocking.MockCrashingFeedLoader
 import org.slf4j.Logger
 import java.io.InputStream
 import java.net.URI
@@ -67,6 +70,7 @@ abstract class ProfileAccountLogoutTaskContract {
   private lateinit var adeptExecutor: AdobeAdeptExecutorType
   private lateinit var bookDatabase: MockBookDatabase
   private lateinit var bookRegistry: BookRegistryType
+  private lateinit var feedLoader: FeedLoaderType
   private lateinit var http: LSHTTPClientType
   private lateinit var logoutStrings: AccountLogoutStringResourcesType
   private lateinit var patronParsers: PatronUserProfileParsersType
@@ -91,6 +95,8 @@ abstract class ProfileAccountLogoutTaskContract {
             timeout = Pair(5L, TimeUnit.SECONDS)
           )
         )
+    this.feedLoader =
+      MockCrashingFeedLoader()
 
     this.accountID =
       AccountID(UUID.randomUUID())
@@ -183,6 +189,7 @@ abstract class ProfileAccountLogoutTaskContract {
         account = this.account,
         adeptExecutor = null,
         bookRegistry = this.bookRegistry,
+        feedLoader = this.feedLoader,
         http = this.http,
         patronParsers = PatronUserProfileParsers(),
         profile = this.profile,
@@ -246,6 +253,7 @@ abstract class ProfileAccountLogoutTaskContract {
         account = this.account,
         adeptExecutor = null,
         bookRegistry = this.bookRegistry,
+        feedLoader = this.feedLoader,
         http = this.http,
         patronParsers = PatronUserProfileParsers(),
         profile = this.profile,
@@ -323,6 +331,7 @@ abstract class ProfileAccountLogoutTaskContract {
         account = this.account,
         adeptExecutor = null,
         bookRegistry = this.bookRegistry,
+        feedLoader = this.feedLoader,
         http = this.http,
         patronParsers = PatronUserProfileParsers(),
         profile = this.profile,
@@ -423,6 +432,7 @@ abstract class ProfileAccountLogoutTaskContract {
         account = this.account,
         adeptExecutor = this.adeptExecutor,
         bookRegistry = this.bookRegistry,
+        feedLoader = this.feedLoader,
         http = this.http,
         patronParsers = PatronUserProfileParsers(),
         profile = this.profile,
@@ -540,6 +550,7 @@ abstract class ProfileAccountLogoutTaskContract {
         adeptExecutor = this.adeptExecutor,
         bookRegistry = this.bookRegistry,
         http = this.http,
+        feedLoader = this.feedLoader,
         profile = this.profile,
         patronParsers = PatronUserProfileParsers(),
         logoutStrings = this.logoutStrings

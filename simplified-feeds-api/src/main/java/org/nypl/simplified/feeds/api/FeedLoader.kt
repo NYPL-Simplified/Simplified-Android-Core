@@ -5,7 +5,6 @@ import com.google.common.util.concurrent.ListeningExecutorService
 import com.io7m.jfunctional.Some
 import org.librarysimplified.http.api.LSHTTPAuthorizationType
 import org.nypl.simplified.accounts.api.AccountID
-import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.bundled.api.BundledURIs
 import org.nypl.simplified.books.formats.api.BookFormatSupportType
@@ -41,7 +40,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 class FeedLoader private constructor(
   private val bookFormatSupport: BookFormatSupportType,
-  private val bookRegistry: BookRegistryType,
   private val bundledContent: BundledContentResolverType,
   private val contentResolver: ContentResolverType,
   private val exec: ListeningExecutorService,
@@ -265,12 +263,10 @@ class FeedLoader private constructor(
       parser: OPDSFeedParserType,
       searchParser: OPDSSearchParserType,
       transport: OPDSFeedTransportType<LSHTTPAuthorizationType?>,
-      bookRegistry: BookRegistryType,
       bundledContent: BundledContentResolverType
     ): FeedLoaderType {
       return FeedLoader(
         bookFormatSupport = bookFormatSupport,
-        bookRegistry = bookRegistry,
         bundledContent = bundledContent,
         contentResolver = contentResolver,
         exec = exec,
