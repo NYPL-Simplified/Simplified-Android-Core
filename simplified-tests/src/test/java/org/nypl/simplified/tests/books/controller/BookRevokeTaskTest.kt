@@ -1305,7 +1305,7 @@ class BookRevokeTaskTest {
     result as TaskResult.Success
 
     val newStatus = this.bookRegistry.bookOrException(bookId).status
-    newStatus as BookStatus.Loanable
+    newStatus as BookStatus.Loaned.LoanedNotDownloaded
 
     assertTrue(bookDatabaseEntry.deleted)
     assertEquals(1, this.server.requestCount)
@@ -1537,7 +1537,7 @@ class BookRevokeTaskTest {
     result as TaskResult.Success
 
     val newStatus = this.bookRegistry.bookOrException(bookId).status
-    newStatus as BookStatus.Loanable
+    newStatus as BookStatus.Loaned.LoanedNotDownloaded
 
     assertTrue(bookDatabaseEntry.deleted)
     assertEquals(1, this.server.requestCount)
