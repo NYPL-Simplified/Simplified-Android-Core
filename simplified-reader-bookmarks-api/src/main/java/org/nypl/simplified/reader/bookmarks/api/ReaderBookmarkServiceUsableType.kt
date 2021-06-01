@@ -20,6 +20,26 @@ interface ReaderBookmarkServiceUsableType {
   val bookmarkEvents: Observable<ReaderBookmarkEvent>
 
   /**
+   * The result of attempting to enable/disable syncing (assuming that the attempt didn't
+   * outright fail with an exception).
+   */
+
+  enum class SyncEnableResult {
+    SYNC_ENABLE_NOT_SUPPORTED,
+    SYNC_ENABLED,
+    SYNC_DISABLED
+  }
+
+  /**
+   * Enable/disable bookmark syncing on the server.
+   */
+
+  fun bookmarkSyncEnable(
+    accountID: AccountID,
+    enabled: Boolean
+  ): FluentFuture<SyncEnableResult>
+
+  /**
    * The user wants their current bookmarks.
    */
 

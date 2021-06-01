@@ -15,6 +15,7 @@ import org.nypl.simplified.profiles.api.ProfileDateOfBirth
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
+import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceType
 import org.nypl.simplified.threads.NamedThreadPools
 
 /**
@@ -33,6 +34,9 @@ class AccountDetailViewModel(
 
   private val profilesController =
     services.requireService(ProfilesControllerType::class.java)
+
+  private val readerBookmarkService =
+    services.requireService(ReaderBookmarkServiceType::class.java)
 
   private val backgroundExecutor =
     NamedThreadPools.namedThreadPool(1, "simplified-accounts-io", 19)
@@ -85,16 +89,13 @@ class AccountDetailViewModel(
   @Volatile
   var loginExplicitlyRequested: Boolean = false
 
-  var bookmarkSyncingPermitted: Boolean
-    get() =
-      this.account.preferences.bookmarkSyncingPermitted
-    set(value) {
-      this.backgroundExecutor.execute {
-        this.account.setPreferences(
-          this.account.preferences.copy(bookmarkSyncingPermitted = value)
-        )
-      }
-    }
+  /**
+   * Enable/disable bookmark syncing.
+   */
+
+  fun enableBookmarkSyncing(enabled: Boolean) {
+    this.readerBookmarkService.bookmarkSyncEnable(this.accountId, enabled)
+  }
 
   var isOver13: Boolean
     get() {
