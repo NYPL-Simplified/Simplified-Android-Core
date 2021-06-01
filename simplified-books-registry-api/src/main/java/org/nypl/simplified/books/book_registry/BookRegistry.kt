@@ -44,15 +44,6 @@ class BookRegistry private constructor(
     this.publishUpdateEvent(oldStatus, status)
   }
 
-  override fun compareAndUpdate(expect: BookWithStatus, update: BookWithStatus): Boolean {
-    return if (this.books.replace(expect.book.id, expect, update)) {
-      this.publishUpdateEvent(expect, update)
-      true
-    } else {
-      false
-    }
-  }
-
   private fun publishUpdateEvent(oldStatus: BookWithStatus?, newStatus: BookWithStatus) {
     if (newStatus.status == oldStatus?.status) {
       return

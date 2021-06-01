@@ -436,61 +436,7 @@ class CatalogFeedViewModel(
   ) {
     this.logger.debug("[{}]: feed status updated: {}", this.instanceId, result.javaClass)
 
-    /*
-     * Update the book registry with fresh data.
-    */
-
-    if (arguments is CatalogFeedArgumentsRemote && result is FeedLoaderResult.FeedLoaderSuccess) {
-      this.updateBookRegistryFromFeed(result.feed)
-    }
-
     this.stateMutable.value = this.feedLoaderResultToFeedState(arguments, result)
-  }
-
-  private fun updateBookRegistryFromFeed(feed: Feed) {
-    when (feed) {
-      is Feed.FeedWithoutGroups -> {
-        this.logger.debug("updating {} book registry from entries (without groups)", feed.size)
-        for (index in 0 until feed.size) {
-          val e = feed.entriesInOrder[index]
-          if (e is FeedEntry.FeedEntryOPDS) {
-            this.updateBookRegistryFromEntry(e)
-          }
-        }
-      }
-      is Feed.FeedWithGroups -> {
-        this.logger.debug("updating {} book registry from entries (with groups)", feed.size)
-        for (index in 0 until feed.size) {
-          val group = feed.feedGroupsInOrder[index]
-          val entries = group.groupEntries
-          for (gi in entries.indices) {
-            val e = entries.get(gi)
-            if (e is FeedEntry.FeedEntryOPDS) {
-              this.updateBookRegistryFromEntry(e)
-            }
-          }
-        }
-      }
-    }
-  }
-
-  private fun updateBookRegistryFromEntry(entry: FeedEntry.FeedEntryOPDS) {
-    val id = entry.bookID
-    val bookWithStatus = this.bookRegistry.bookOrNull(id)
-
-    // If the book is in the registry, though not in the database
-    if (bookWithStatus != null &&
-      (bookWithStatus.status is BookStatus.Loanable ||
-        bookWithStatus.status is BookStatus.Holdable ||
-        bookWithStatus.status is BookStatus.Held)
-    ) {
-      this.logger.trace("updating book registry from entry {}", id)
-      val newBook = bookWithStatus.book.copy(entry = entry.feedEntry)
-      val newStatus = BookStatus.fromBook(newBook)
-      if (newStatus != bookWithStatus.status) {
-        this.bookRegistry.compareAndUpdate(bookWithStatus, BookWithStatus(newBook, newStatus))
-      }
-    }
   }
 
   private fun feedLoaderResultToFeedState(
