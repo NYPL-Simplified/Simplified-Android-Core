@@ -685,7 +685,8 @@ abstract class ReaderBookmarkServiceContract {
         threads = ::Thread,
         events = bookmarkEvents.events,
         httpCalls = httpCalls,
-        profilesController = profiles)
+        profilesController = profiles
+      )
 
     val service =
       this.readerBookmarkService!!
@@ -715,13 +716,17 @@ abstract class ReaderBookmarkServiceContract {
       (account.provider as AccountProvider).copy(patronSettingsURI = this.patronURI)
     )
     account.setPreferences(account.preferences.copy(bookmarkSyncingPermitted = false))
-    account.setLoginState(AccountLoggedIn(AccountAuthenticationCredentials.Basic(
-      userName = AccountUsername("durandal"),
-      password = AccountPassword("tycho"),
-      adobeCredentials = null,
-      authenticationDescription = null,
-      annotationsURI = this.annotationsURI
-    )))
+    account.setLoginState(
+      AccountLoggedIn(
+        AccountAuthenticationCredentials.Basic(
+          userName = AccountUsername("durandal"),
+          password = AccountPassword("tycho"),
+          adobeCredentials = null,
+          authenticationDescription = null,
+          annotationsURI = this.annotationsURI
+        )
+      )
+    )
 
     /*
      * The service checks to see if the patron has syncing enabled.
@@ -729,7 +734,8 @@ abstract class ReaderBookmarkServiceContract {
 
     this.addResponse(
       this.patronURI.toString(),
-      this.patronSettingsWithAnnotationsDisabled)
+      this.patronSettingsWithAnnotationsDisabled
+    )
 
     /*
      * The service then sends a request to turn syncing on.
@@ -737,7 +743,8 @@ abstract class ReaderBookmarkServiceContract {
 
     this.addResponse(
       this.patronURI.toString(),
-      this.patronSettingsWithAnnotationsEnabled)
+      this.patronSettingsWithAnnotationsEnabled
+    )
 
     /*
      * The service then checks again to see if the patron has syncing enabled.
@@ -745,14 +752,16 @@ abstract class ReaderBookmarkServiceContract {
 
     this.addResponse(
       this.patronURI.toString(),
-      this.patronSettingsWithAnnotationsEnabled)
+      this.patronSettingsWithAnnotationsEnabled
+    )
 
     this.readerBookmarkService =
       this.bookmarkService(
         threads = ::Thread,
         events = bookmarkEvents.events,
         httpCalls = httpCalls,
-        profilesController = profiles)
+        profilesController = profiles
+      )
 
     val service =
       this.readerBookmarkService!!
@@ -799,13 +808,17 @@ abstract class ReaderBookmarkServiceContract {
       (account.provider as AccountProvider).copy(patronSettingsURI = this.patronURI)
     )
     account.setPreferences(account.preferences.copy(bookmarkSyncingPermitted = true))
-    account.setLoginState(AccountLoggedIn(AccountAuthenticationCredentials.Basic(
-      userName = AccountUsername("durandal"),
-      password = AccountPassword("tycho"),
-      adobeCredentials = null,
-      authenticationDescription = null,
-      annotationsURI = this.annotationsURI
-    )))
+    account.setLoginState(
+      AccountLoggedIn(
+        AccountAuthenticationCredentials.Basic(
+          userName = AccountUsername("durandal"),
+          password = AccountPassword("tycho"),
+          adobeCredentials = null,
+          authenticationDescription = null,
+          annotationsURI = this.annotationsURI
+        )
+      )
+    )
 
     /*
      * The service checks to see if the patron has syncing enabled. As it is initially enabled,
@@ -814,10 +827,12 @@ abstract class ReaderBookmarkServiceContract {
 
     this.addResponse(
       this.patronURI.toString(),
-      this.patronSettingsWithAnnotationsEnabled)
+      this.patronSettingsWithAnnotationsEnabled
+    )
     this.addResponse(
       this.annotationsURI.toString(),
-      this.annotationsEmpty)
+      this.annotationsEmpty
+    )
 
     /*
      * The service then sends a request to turn syncing off, then checks again to see if the patron
@@ -826,17 +841,20 @@ abstract class ReaderBookmarkServiceContract {
 
     this.addResponse(
       this.patronURI.toString(),
-      this.patronSettingsWithAnnotationsDisabled)
+      this.patronSettingsWithAnnotationsDisabled
+    )
     this.addResponse(
       this.patronURI.toString(),
-      this.patronSettingsWithAnnotationsDisabled)
+      this.patronSettingsWithAnnotationsDisabled
+    )
 
     this.readerBookmarkService =
       this.bookmarkService(
         threads = ::Thread,
         events = bookmarkEvents.events,
         httpCalls = httpCalls,
-        profilesController = profiles)
+        profilesController = profiles
+      )
 
     val service =
       this.readerBookmarkService!!

@@ -32,7 +32,6 @@ class CatalogSAML20ViewModelFactory(
       val buildConfig =
         services.requireService(BuildConfigurationServiceType::class.java)
 
-
       return CatalogSAML20ViewModel(
         profilesController = profilesController,
         booksController = booksController,

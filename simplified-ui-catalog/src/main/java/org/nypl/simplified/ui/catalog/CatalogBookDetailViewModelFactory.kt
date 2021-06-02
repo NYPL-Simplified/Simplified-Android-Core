@@ -16,7 +16,7 @@ class CatalogBookDetailViewModelFactory(
   private val borrowViewModel: CatalogBorrowViewModel,
   private val listener: FragmentListenerType<CatalogBookDetailEvent>,
   private val parameters: CatalogBookDetailFragmentParameters
-): ViewModelProvider.NewInstanceFactory() {
+) : ViewModelProvider.NewInstanceFactory() {
 
   private val logger =
     LoggerFactory.getLogger(CatalogBookDetailViewModelFactory::class.java)

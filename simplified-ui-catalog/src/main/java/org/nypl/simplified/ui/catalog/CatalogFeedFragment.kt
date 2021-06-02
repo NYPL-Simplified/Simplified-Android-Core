@@ -44,8 +44,13 @@ import org.nypl.simplified.listeners.api.fragmentListeners
 import org.nypl.simplified.ui.accounts.AccountPickerDialogFragment
 import org.nypl.simplified.ui.catalog.CatalogFeedOwnership.CollectedFromAccounts
 import org.nypl.simplified.ui.catalog.CatalogFeedOwnership.OwnedByAccount
-import org.nypl.simplified.ui.catalog.CatalogFeedState.*
-import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.*
+import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedAgeGate
+import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoadFailed
+import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedEmpty
+import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedNavigation
+import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithGroups
+import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithoutGroups
+import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoading
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
 import org.nypl.simplified.ui.theme.ThemeControl
 import org.slf4j.LoggerFactory
@@ -385,9 +390,9 @@ class CatalogFeedFragment : Fragment(R.layout.feed), AgeGateDialog.BirthYearSele
 
     this.feedWithoutGroupsList.adapter = this.feedWithoutGroupsAdapter
     feedState.entries.observe(this) { newPagedList ->
-        this.logger.debug("received paged list ({} elements)", newPagedList.size)
-        this.feedWithoutGroupsAdapter.submitList(newPagedList)
-      }
+      this.logger.debug("received paged list ({} elements)", newPagedList.size)
+      this.feedWithoutGroupsAdapter.submitList(newPagedList)
+    }
   }
 
   private fun onCatalogFeedWithGroups(

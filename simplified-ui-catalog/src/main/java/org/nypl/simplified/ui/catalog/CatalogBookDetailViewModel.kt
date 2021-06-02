@@ -31,13 +31,13 @@ import org.slf4j.LoggerFactory
 import java.net.URI
 
 class CatalogBookDetailViewModel(
-    private val resources: Resources,
-    private val profilesController: ProfilesControllerType,
-    private val bookRegistry: BookRegistryType,
-    private val buildConfiguration: BuildConfigurationServiceType,
-    private val borrowViewModel: CatalogBorrowViewModel,
-    private val parameters: CatalogBookDetailFragmentParameters,
-    private val listener: FragmentListenerType<CatalogBookDetailEvent>
+  private val resources: Resources,
+  private val profilesController: ProfilesControllerType,
+  private val bookRegistry: BookRegistryType,
+  private val buildConfiguration: BuildConfigurationServiceType,
+  private val borrowViewModel: CatalogBorrowViewModel,
+  private val parameters: CatalogBookDetailFragmentParameters,
+  private val listener: FragmentListenerType<CatalogBookDetailEvent>
 ) : ViewModel() {
 
   private val logger =
@@ -262,17 +262,17 @@ class CatalogBookDetailViewModel(
   }
 
   fun showError(result: TaskResult.Failure<*>) {
-      this.logger.debug("showing error: {}", this.bookWithStatus.book.id)
+    this.logger.debug("showing error: {}", this.bookWithStatus.book.id)
 
-      val errorPageParameters = ErrorPageParameters(
-        emailAddress = this.buildConfiguration.supportErrorReportEmailAddress,
-        body = "",
-        subject = this.buildConfiguration.supportErrorReportSubject,
-        attributes = result.attributes.toSortedMap(),
-        taskSteps = result.steps
-      )
-      this.listener.post(
-        CatalogBookDetailEvent.OpenErrorPage(errorPageParameters)
-      )
+    val errorPageParameters = ErrorPageParameters(
+      emailAddress = this.buildConfiguration.supportErrorReportEmailAddress,
+      body = "",
+      subject = this.buildConfiguration.supportErrorReportSubject,
+      attributes = result.attributes.toSortedMap(),
+      taskSteps = result.steps
+    )
+    this.listener.post(
+      CatalogBookDetailEvent.OpenErrorPage(errorPageParameters)
+    )
   }
 }

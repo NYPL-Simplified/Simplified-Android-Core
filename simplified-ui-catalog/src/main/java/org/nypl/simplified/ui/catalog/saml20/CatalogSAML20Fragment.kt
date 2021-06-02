@@ -43,7 +43,7 @@ class CatalogSAML20Fragment : Fragment(R.layout.book_saml20) {
 
   private val services = Services.serviceDirectory()
 
-  private val viewModel: CatalogSAML20ViewModel  by viewModels(
+  private val viewModel: CatalogSAML20ViewModel by viewModels(
     factoryProducer = {
       CatalogSAML20ViewModelFactory(
         services = services,

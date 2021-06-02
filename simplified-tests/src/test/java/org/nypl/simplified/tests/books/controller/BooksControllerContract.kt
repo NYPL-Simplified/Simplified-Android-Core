@@ -37,7 +37,6 @@ import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookStatusEvent.BookStatusEventAdded
-import org.nypl.simplified.books.book_registry.BookStatusEvent.BookStatusEventChanged
 import org.nypl.simplified.books.borrowing.BorrowSubtasks
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskDirectoryType
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
@@ -86,7 +85,6 @@ import java.io.InputStream
 import java.net.URI
 import java.util.ArrayList
 import java.util.Collections
-import java.util.NoSuchElementException
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit

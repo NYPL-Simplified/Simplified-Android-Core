@@ -414,7 +414,8 @@ abstract class AccountsDatabaseContract {
 
     Assertions.assertEquals(
       URI.create("https://www.example.com/annotations"),
-      acc0.loginState.credentials?.annotationsURI)
+      acc0.loginState.credentials?.annotationsURI
+    )
   }
 
   @Test

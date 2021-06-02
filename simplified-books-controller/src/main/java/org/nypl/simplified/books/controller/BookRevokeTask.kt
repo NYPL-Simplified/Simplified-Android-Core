@@ -116,36 +116,36 @@ class BookRevokeTask(
   }
 
   private fun bookFromDatabaseOrFallback(): Book {
-      return if (this::databaseEntry.isInitialized) {
-        this.databaseEntry.book
-      } else {
-        this.warn("publishing book status with fake book!")
+    return if (this::databaseEntry.isInitialized) {
+      this.databaseEntry.book
+    } else {
+      this.warn("publishing book status with fake book!")
 
-        /**
-         * Note that this is a synthesized value because we need to be able to open the book
-         * database to get a real book value, and that database call might fail. If the call fails,
-         * we have no "book" that we can refer to in order to publish a "book revoke has failed"
-         * status for the book, so we use this fake book in that (rare) situation.
-         */
+      /**
+       * Note that this is a synthesized value because we need to be able to open the book
+       * database to get a real book value, and that database call might fail. If the call fails,
+       * we have no "book" that we can refer to in order to publish a "book revoke has failed"
+       * status for the book, so we use this fake book in that (rare) situation.
+       */
 
-        val entry =
-          OPDSAcquisitionFeedEntry.newBuilder(
-            this.bookID.value(),
-            "",
-            DateTime.now(),
-            OPDSAvailabilityLoanable.get()
-          )
-            .build()
-
-        Book(
-          this.bookID,
-          this.accountID,
-          null,
-          null,
-          entry,
-          listOf()
+      val entry =
+        OPDSAcquisitionFeedEntry.newBuilder(
+          this.bookID.value(),
+          "",
+          DateTime.now(),
+          OPDSAvailabilityLoanable.get()
         )
-      }
+          .build()
+
+      Book(
+        this.bookID,
+        this.accountID,
+        null,
+        null,
+        entry,
+        listOf()
+      )
+    }
   }
 
   private fun publishRequestingRevokeStatus() {
@@ -243,8 +243,8 @@ class BookRevokeTask(
   ): FeedEntryOPDS {
     val acquisitionFeedEntry =
       OPDSAcquisitionFeedEntry.newBuilderFrom(oldEntry)
-      .setAvailability(availability)
-      .build()
+        .setAvailability(availability)
+        .build()
 
     return FeedEntryOPDS(accountID, acquisitionFeedEntry)
   }
@@ -253,7 +253,7 @@ class BookRevokeTask(
     targetURI: URI,
     revokeType: RevokeType,
     account: AccountType
-  ): FeedEntryOPDS  {
+  ): FeedEntryOPDS {
     this.debug("notifying server of {} revocation via {}", revokeType, targetURI)
     this.taskRecorder.beginNewStep(this.revokeStrings.revokeServerNotifyURI(targetURI))
     this.publishRequestingRevokeStatus()

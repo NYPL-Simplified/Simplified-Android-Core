@@ -21,7 +21,7 @@ import org.librarysimplified.services.api.Services
 import org.nypl.simplified.android.ktx.supportActionBar
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookFormat
-import org.nypl.simplified.books.book_database.api.BookFormats.BookFormatDefinition.*
+import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.covers.BookCoverProviderType
@@ -58,7 +58,7 @@ class CatalogBookDetailFragment : Fragment(R.layout.book_detail) {
     Services.serviceDirectory()
 
   private val parameters: CatalogBookDetailFragmentParameters by lazy {
-      this.requireArguments()[PARAMETERS_ID] as CatalogBookDetailFragmentParameters
+    this.requireArguments()[PARAMETERS_ID] as CatalogBookDetailFragmentParameters
   }
 
   private val listener: FragmentListenerType<CatalogBookDetailEvent> by fragmentListeners()
@@ -104,7 +104,7 @@ class CatalogBookDetailFragment : Fragment(R.layout.book_detail) {
   private lateinit var statusInProgressText: TextView
   private lateinit var summary: TextView
   private lateinit var title: TextView
- 
+
   private val dateFormatter =
     DateTimeFormatterBuilder()
       .appendYear(4, 5)
@@ -131,7 +131,7 @@ class CatalogBookDetailFragment : Fragment(R.layout.book_detail) {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    
+
     this.screenSize =
       services.requireService(ScreenSizeInformationType::class.java)
     this.covers =
@@ -235,11 +235,11 @@ class CatalogBookDetailFragment : Fragment(R.layout.book_detail) {
     this.authors.text = opds.authorsCommaSeparated
 
     this.format.text = when (feedEntry.probableFormat) {
-      BOOK_FORMAT_EPUB ->
+      BookFormats.BookFormatDefinition.BOOK_FORMAT_EPUB ->
         context.getString(R.string.catalogBookFormatEPUB)
-      BOOK_FORMAT_AUDIO ->
+      BookFormats.BookFormatDefinition.BOOK_FORMAT_AUDIO ->
         context.getString(R.string.catalogBookFormatAudioBook)
-      BOOK_FORMAT_PDF ->
+      BookFormats.BookFormatDefinition.BOOK_FORMAT_PDF ->
         context.getString(R.string.catalogBookFormatPDF)
       null -> ""
     }

@@ -179,7 +179,6 @@ class FeedLoader private constructor(
   private fun isTypePathSupported(path: OPDSAcquisitionPath) =
     this.bookFormatSupport.isSupportedPath(path.asMIMETypes())
 
-
   private fun parseFromContentResolver(
     accountId: AccountID,
     uri: URI

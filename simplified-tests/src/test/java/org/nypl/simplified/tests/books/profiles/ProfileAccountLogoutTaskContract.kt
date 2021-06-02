@@ -36,14 +36,11 @@ import org.nypl.simplified.accounts.api.AccountPassword
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.api.AccountUsername
 import org.nypl.simplified.accounts.database.api.AccountType
-import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookID
-import org.nypl.simplified.books.book_database.api.BookDatabaseType
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.controller.ProfileAccountLogoutTask
-import org.nypl.simplified.feeds.api.FeedLoader
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.opds.core.OPDSAcquisition
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
@@ -107,7 +104,6 @@ abstract class ProfileAccountLogoutTaskContract {
       BookRegistry.create()
     this.bookDatabase =
       MockBookDatabase(this.accountID)
-
 
     val acquisition =
       OPDSAcquisition(
@@ -271,7 +267,7 @@ abstract class ProfileAccountLogoutTaskContract {
       this.bookDatabase.entries.values.all(MockBookDatabaseEntry::deleted)
     )
     Assertions.assertTrue(
-      this.bookRegistry.books().values.all { it.status is BookStatus.Loaned.LoanedNotDownloaded}
+      this.bookRegistry.books().values.all { it.status is BookStatus.Loaned.LoanedNotDownloaded }
     )
   }
 
@@ -349,7 +345,7 @@ abstract class ProfileAccountLogoutTaskContract {
       this.bookDatabase.entries.values.all(MockBookDatabaseEntry::deleted)
     )
     Assertions.assertTrue(
-      this.bookRegistry.books().values.all { it.status is BookStatus.Loaned.LoanedNotDownloaded}
+      this.bookRegistry.books().values.all { it.status is BookStatus.Loaned.LoanedNotDownloaded }
     )
   }
 
@@ -567,7 +563,7 @@ abstract class ProfileAccountLogoutTaskContract {
       this.bookDatabase.entries.values.all(MockBookDatabaseEntry::deleted)
     )
     Assertions.assertTrue(
-      this.bookRegistry.books().values.all { it.status is BookStatus.Loaned.LoanedNotDownloaded}
+      this.bookRegistry.books().values.all { it.status is BookStatus.Loaned.LoanedNotDownloaded }
     )
   }
 

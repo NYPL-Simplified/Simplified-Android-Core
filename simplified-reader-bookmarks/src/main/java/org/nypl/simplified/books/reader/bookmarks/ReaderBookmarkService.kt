@@ -208,7 +208,8 @@ class ReaderBookmarkService private constructor(
       this.syncableAccount.account.setPreferences(
         this.syncableAccount.account.preferences.copy(
           bookmarkSyncingPermitted = syncable != null
-        ))
+        )
+      )
 
       this.evaluatePolicyInput.invoke(
         SyncingEnabled(
@@ -528,7 +529,8 @@ class ReaderBookmarkService private constructor(
         "[{}]: {} syncing for account {}",
         this.profile.id.uuid,
         if (this.enable) "enabling" else "disabling",
-        this.syncableAccount.account.id.uuid)
+        this.syncableAccount.account.id.uuid
+      )
 
       this.httpCalls.syncingEnable(
         settingsURI = this.syncableAccount.settingsURI,
@@ -800,10 +802,13 @@ class ReaderBookmarkService private constructor(
         )
 
       FluentFuture.from(this.executor.submit(opEnable))
-        .transform({ result ->
-          opCheck.call()
-          result
-        }, this.executor)
+        .transform(
+          { result ->
+            opCheck.call()
+            result
+          },
+          this.executor
+        )
     } catch (e: ProfileNoneCurrentException) {
       this.logger.error("bookmarkSyncEnable: no profile is current: ", e)
       FluentFuture.from(Futures.immediateFailedFuture(e))

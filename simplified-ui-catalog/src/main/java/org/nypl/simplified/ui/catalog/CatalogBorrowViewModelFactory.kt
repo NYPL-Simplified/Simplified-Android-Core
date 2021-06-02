@@ -1,10 +1,8 @@
 package org.nypl.simplified.ui.catalog
 
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import org.librarysimplified.services.api.ServiceDirectoryType
-import org.librarysimplified.services.api.Services
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType

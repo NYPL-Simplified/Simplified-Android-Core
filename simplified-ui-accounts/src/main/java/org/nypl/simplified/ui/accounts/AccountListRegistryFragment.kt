@@ -1,6 +1,5 @@
 package org.nypl.simplified.ui.accounts
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
@@ -104,7 +103,7 @@ class AccountListRegistryFragment : Fragment(R.layout.account_list_registry) {
     /**
      * Disabling until we roll out Library Finder
      */
-    //requestLocationPermission.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
+    // requestLocationPermission.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
   }
 
   private fun onAccountClicked(account: AccountProviderDescription) {

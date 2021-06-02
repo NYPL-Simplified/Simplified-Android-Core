@@ -58,7 +58,6 @@ import org.nypl.simplified.ui.images.ImageAccountIcons
 import org.nypl.simplified.ui.images.ImageLoaderType
 import org.slf4j.LoggerFactory
 import java.net.URI
-import java.util.concurrent.atomic.AtomicBoolean
 
 /**
  * A fragment that shows settings for a single account.

@@ -119,18 +119,18 @@ class CatalogFeedViewModel(
 
   private val subscriptions =
     CompositeDisposable(
-        this.profilesController.accountEvents()
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe(this::onAccountEvent),
-        this.profilesController.profileEvents()
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe(this::onProfileEvent),
-        this.bookRegistry.bookEvents()
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe(this::onBookStatusEvent),
-        this.loaderResults
-          .observeOn(AndroidSchedulers.mainThread())
-          .subscribe(this::onFeedLoaderResult)
+      this.profilesController.accountEvents()
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(this::onAccountEvent),
+      this.profilesController.profileEvents()
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(this::onProfileEvent),
+      this.bookRegistry.bookEvents()
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(this::onBookStatusEvent),
+      this.loaderResults
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(this::onFeedLoaderResult)
     )
 
   private fun onAccountEvent(event: AccountEvent) {
@@ -274,7 +274,6 @@ class CatalogFeedViewModel(
         this.syncAccounts(arguments)
       }
       is CatalogFeedArgumentsRemote -> {
-
       }
     }
   }
@@ -585,9 +584,9 @@ class CatalogFeedViewModel(
       try {
         when (val ownership = this.feedArguments.ownership) {
           is CatalogFeedOwnership.OwnedByAccount ->
-              this.profilesController.profileCurrent()
-                .account(ownership.accountId)
-                .provider
+            this.profilesController.profileCurrent()
+              .account(ownership.accountId)
+              .provider
           is CatalogFeedOwnership.CollectedFromAccounts ->
             null
         }
@@ -665,7 +664,6 @@ class CatalogFeedViewModel(
       taskSteps = taskFailure.steps
     )
   }
-
 
   fun performSearch(search: FeedSearch, query: String) {
     this.logSearchToAnalytics(query)

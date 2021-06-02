@@ -11,13 +11,13 @@ task ktlint(type: JavaExec, group: "quality") {
     description = "Check Kotlin code style."
     classpath = configurations.ktlint
     main = "com.pinterest.ktlint.Main"
-    args "src/**/*.kt"
+    args "**/src/**/*.kt"
 }
 task ktlintFormat(type: JavaExec, group: "quality") {
     description = "Fix Kotlin code style deviations."
     classpath = configurations.ktlint
     main = "com.pinterest.ktlint.Main"
-    args "-F", "src/**/*.kt"
+    args "-F", "**/src/**/*.kt"
 }
 afterEvaluate {
     tasks.withType(Test) {
