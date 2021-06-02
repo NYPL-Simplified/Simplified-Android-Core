@@ -19,7 +19,7 @@ import org.nypl.simplified.feeds.api.FeedFacet
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.ui.catalog.CatalogFeedArguments
 import org.nypl.simplified.ui.catalog.CatalogFeedOwnership
-import org.nypl.simplified.ui.catalog.CatalogFragmentFeed
+import org.nypl.simplified.ui.catalog.CatalogFeedFragment
 import org.nypl.simplified.ui.profiles.ProfileTabFragment
 import org.nypl.simplified.ui.settings.SettingsMainFragment
 import org.nypl.simplified.ui.theme.ThemeControl
@@ -200,7 +200,7 @@ object BottomNavigators {
         pickDefaultAccount(profilesController, defaultProvider).id
       }
 
-    return CatalogFragmentFeed.create(
+    return CatalogFeedFragment.create(
       CatalogFeedArguments.CatalogFeedArgumentsLocalBooks(
         filterAccount = filterAccountId,
         ownership = CatalogFeedOwnership.CollectedFromAccounts,
@@ -232,7 +232,7 @@ object BottomNavigators {
         pickDefaultAccount(profilesController, defaultProvider).id
       }
 
-    return CatalogFragmentFeed.create(
+    return CatalogFeedFragment.create(
       CatalogFeedArguments.CatalogFeedArgumentsLocalBooks(
         filterAccount = filterAccountId,
         ownership = CatalogFeedOwnership.CollectedFromAccounts,
@@ -250,6 +250,6 @@ object BottomNavigators {
     feedArguments: CatalogFeedArguments.CatalogFeedArgumentsRemote
   ): Fragment {
     logger.debug("[{}]: creating catalog fragment", id)
-    return CatalogFragmentFeed.create(feedArguments)
+    return CatalogFeedFragment.create(feedArguments)
   }
 }

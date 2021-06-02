@@ -39,17 +39,33 @@ class MainLogoutStringResources(
   override val logoutDeactivatingDeviceAdobe: String
     get() = this.resources.getString(R.string.logoutDeactivatingDeviceAdobe)
 
-  override val logoutClearingBookRegistryFailed: String
-    get() = this.resources.getString(R.string.logoutClearingBookRegistryFailed)
-
-  override val logoutClearingBookRegistry: String
-    get() = this.resources.getString(R.string.logoutClearingBookRegistry)
-
   override val logoutClearingBookDatabase: String
     get() = this.resources.getString(R.string.logoutClearingBookDatabase)
 
   override val logoutClearingBookDatabaseFailed: String
     get() = this.resources.getString(R.string.logoutClearingBookDatabaseFailed)
+
+  override fun logoutUpdatingOPDSEntry(bookID: String): String {
+    return this.resources.getString(R.string.logoutUpdatingOpdsEntry, bookID)
+  }
+
+  override val logoutNoAlternateLinkInDatabase: String
+    get() = this.resources.getString(R.string.logoutNoAlternateLinkInDatabase)
+
+  override val logoutOPDSFeedTimedOut: String
+    get() = this.resources.getString(R.string.logoutOPDSFeedTimedOut)
+
+  override val logoutOPDSFeedFailed: String
+    get() = this.resources.getString(R.string.logoutOPDSFeedFailed)
+
+  override val logoutOPDSFeedCorrupt: String
+    get() = this.resources.getString(R.string.logoutOPDSFeedCorrupt)
+
+  override val logoutOPDSFeedEmpty: String
+    get() = this.resources.getString(R.string.logoutOPDSFeedEmpty)
+
+  override val logoutOPDSFeedWithGroups: String
+    get() = this.resources.getString(R.string.logoutOPDSFeedWithGroups)
 
   override val logoutNotLoggedIn: String
     get() = this.resources.getString(R.string.logoutNotLoggedIn)

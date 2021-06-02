@@ -3,6 +3,7 @@ package org.nypl.simplified.ui.catalog
 import android.view.View
 import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
+import com.google.common.util.concurrent.FluentFuture
 import org.nypl.simplified.books.covers.BookCoverProviderType
 import org.nypl.simplified.feeds.api.FeedEntry
 
@@ -17,6 +18,8 @@ class CatalogLaneItemViewHolder(
   private val onBookSelected: (FeedEntry.FeedEntryOPDS) -> Unit
 ) : RecyclerView.ViewHolder(view) {
 
+  private var thumbnailLoading: FluentFuture<Unit>? = null
+
   private val imageView = view.findViewById<ImageView>(R.id.coverImage)
   private val targetHeight =
     view.resources.getDimensionPixelSize(org.nypl.simplified.books.covers.R.dimen.cover_thumbnail_height)
@@ -29,8 +32,18 @@ class CatalogLaneItemViewHolder(
       onBookSelected.invoke(entry)
     }
 
-    coverLoader.loadThumbnailInto(
+    this.thumbnailLoading = coverLoader.loadThumbnailInto(
       entry, imageView, 0, targetHeight
     )
+  }
+
+  fun unbind() {
+    this.thumbnailLoading = this.thumbnailLoading?.let { loading ->
+      loading.cancel(true)
+      null
+    }
+
+    view.contentDescription = null
+    view.setOnClickListener(null)
   }
 }

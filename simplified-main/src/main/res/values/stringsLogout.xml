@@ -3,8 +3,13 @@
 <resources>
   <string name="logoutClearingBookDatabase">Clearing the book database…</string>
   <string name="logoutClearingBookDatabaseFailed">Clearing the book database failed!</string>
-  <string name="logoutClearingBookRegistry">Clearing the book registry…</string>
-  <string name="logoutClearingBookRegistryFailed">Clearing the book registry failed!</string>
+  <string name="logoutUpdatingOpdsEntry">Updating OPDS entry for book %1$s…</string>
+  <string name="logoutOPDSFeedTimedOut">Timed out waiting for server OPDS feed</string>
+  <string name="logoutNoAlternateLinkInDatabase">No alternate link available in database.</string>
+  <string name="logoutOPDSFeedFailed">Failed to fetch OPDS entry.</string>
+  <string name="logoutOPDSFeedCorrupt">Server returned a feed with a corrupted entry.</string>
+  <string name="logoutOPDSFeedEmpty">Server returned an empty revocation feed.</string>
+  <string name="logoutOPDSFeedWithGroups">Server returned a revocation feed with groups.</string>
   <string name="logoutDeactivatingDeviceAdobe">Deactivating device…</string>
   <string name="logoutDeactivatingDeviceAdobeDeactivated">Deactivated device.</string>
   <string name="logoutDeactivatingDeviceAdobeFailed">Deactivating the device failed: %1$s (%2$s)</string>

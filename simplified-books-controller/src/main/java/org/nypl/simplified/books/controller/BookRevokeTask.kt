@@ -44,6 +44,7 @@ import org.nypl.simplified.opds.core.OPDSAvailabilityLoanable
 import org.nypl.simplified.opds.core.OPDSAvailabilityLoaned
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess
 import org.nypl.simplified.opds.core.OPDSAvailabilityRevoked
+import org.nypl.simplified.opds.core.OPDSAvailabilityType
 import org.nypl.simplified.profiles.api.ProfileID
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
@@ -72,7 +73,6 @@ class BookRevokeTask(
 
   private lateinit var databaseEntry: BookDatabaseEntryType
   private val adobeACS = "Adobe ACS"
-  private var databaseEntryInitialized: Boolean = false
 
   override val logger: Logger =
     LoggerFactory.getLogger(BookRevokeTask::class.java)
@@ -88,7 +88,6 @@ class BookRevokeTask(
     this.revokeFormatHandle(account)
     this.revokeNotifyServer(account)
     this.revokeNotifyServerDeleteBook()
-    this.bookRegistry.clearFor(this.bookID)
     return this.taskRecorder.finishSuccess(Unit)
   }
 
@@ -106,8 +105,18 @@ class BookRevokeTask(
     this.logger.warn("[{}] $message", this.bookID.brief(), *arguments)
 
   private fun publishBookStatus(status: BookStatus) {
-    val book =
-      if (this.databaseEntryInitialized) {
+    val book = this.bookFromDatabaseOrFallback()
+    this.bookRegistry.update(BookWithStatus(book, status))
+  }
+
+  private fun publishStatusFromDatabase() {
+    val book = this.bookFromDatabaseOrFallback()
+    val status = BookStatus.fromBook(book)
+    this.bookRegistry.update(BookWithStatus(book, status))
+  }
+
+  private fun bookFromDatabaseOrFallback(): Book {
+      return if (this::databaseEntry.isInitialized) {
         this.databaseEntry.book
       } else {
         this.warn("publishing book status with fake book!")
@@ -137,8 +146,6 @@ class BookRevokeTask(
           listOf()
         )
       }
-
-    this.bookRegistry.update(BookWithStatus(book, status))
   }
 
   private fun publishRequestingRevokeStatus() {
@@ -154,10 +161,11 @@ class BookRevokeTask(
     this.taskRecorder.beginNewStep(this.revokeStrings.revokeServerNotify)
     this.publishRequestingRevokeStatus()
 
-    val availability = this.databaseEntry.book.entry.availability
+    val feedEntry = this.databaseEntry.book.entry
+    val availability = feedEntry.availability
     this.debug("availability is {}", availability)
 
-    return when (availability) {
+    val newEntry = when (availability) {
       is OPDSAvailabilityHeldReady -> {
         val uriOpt = availability.revoke
         if (uriOpt is Some<URI>) {
@@ -165,7 +173,7 @@ class BookRevokeTask(
         } else {
           this.debug("no revoke URI, nothing to do")
           this.taskRecorder.currentStepSucceeded(this.revokeStrings.revokeServerNotifyNoURI)
-          Unit
+          this.feedEntryWithAvailability(accountID, feedEntry, OPDSAvailabilityLoanable.get())
         }
       }
 
@@ -176,7 +184,7 @@ class BookRevokeTask(
         } else {
           this.debug("no revoke URI, nothing to do")
           this.taskRecorder.currentStepSucceeded(this.revokeStrings.revokeServerNotifyNoURI)
-          Unit
+          this.feedEntryWithAvailability(accountID, feedEntry, OPDSAvailabilityHoldable.get())
         }
       }
 
@@ -195,7 +203,7 @@ class BookRevokeTask(
         } else {
           this.debug("no revoke URI, nothing to do")
           this.taskRecorder.currentStepSucceeded(this.revokeStrings.revokeServerNotifyNoURI)
-          Unit
+          this.feedEntryWithAvailability(accountID, feedEntry, OPDSAvailabilityLoanable.get())
         }
       }
 
@@ -214,7 +222,7 @@ class BookRevokeTask(
         } else {
           this.debug("no revoke URI, nothing to do")
           this.taskRecorder.currentStepSucceeded(this.revokeStrings.revokeServerNotifyNoURI)
-          Unit
+          FeedEntryOPDS(accountID, feedEntry)
         }
       }
 
@@ -224,13 +232,28 @@ class BookRevokeTask(
       else ->
         throw UnreachableCodeException()
     }
+
+    this.revokeNotifyServerSaveNewEntry(newEntry)
+  }
+
+  private fun feedEntryWithAvailability(
+    accountID: AccountID,
+    oldEntry: OPDSAcquisitionFeedEntry,
+    availability: OPDSAvailabilityType
+  ): FeedEntryOPDS {
+    val acquisitionFeedEntry =
+      OPDSAcquisitionFeedEntry.newBuilderFrom(oldEntry)
+      .setAvailability(availability)
+      .build()
+
+    return FeedEntryOPDS(accountID, acquisitionFeedEntry)
   }
 
   private fun revokeNotifyServerURI(
     targetURI: URI,
     revokeType: RevokeType,
     account: AccountType
-  ) {
+  ): FeedEntryOPDS  {
     this.debug("notifying server of {} revocation via {}", revokeType, targetURI)
     this.taskRecorder.beginNewStep(this.revokeStrings.revokeServerNotifyURI(targetURI))
     this.publishRequestingRevokeStatus()
@@ -240,7 +263,7 @@ class BookRevokeTask(
     val entry =
       this.revokeNotifyServerURIProcessFeed(feed)
 
-    this.revokeNotifyServerSaveNewEntry(entry)
+    return entry
   }
 
   private fun revokeNotifyServerSaveNewEntry(entry: FeedEntryOPDS) {
@@ -262,6 +285,7 @@ class BookRevokeTask(
     this.debug("deleting book")
     this.taskRecorder.beginNewStep(this.revokeStrings.revokeDeleteBook)
     this.publishRevokedStatus()
+    this.publishStatusFromDatabase()
     this.databaseEntry.delete()
   }
 
@@ -552,7 +576,6 @@ class BookRevokeTask(
       this.debug("setting up book database entry")
       val database = account.bookDatabase
       this.databaseEntry = database.entry(this.bookID)
-      this.databaseEntryInitialized = true
       this.publishRequestingRevokeStatus()
       this.taskRecorder.currentStepSucceeded(this.revokeStrings.revokeBookDatabaseLookupOK)
     } catch (e: Exception) {

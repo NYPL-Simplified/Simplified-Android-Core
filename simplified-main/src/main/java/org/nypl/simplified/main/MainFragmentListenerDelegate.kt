@@ -11,32 +11,29 @@ import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookFormat
-import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.listeners.api.FragmentListenerType
 import org.nypl.simplified.listeners.api.ListenerRepository
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
+import org.nypl.simplified.ui.accounts.AccountDetailEvent
 import org.nypl.simplified.ui.accounts.AccountDetailFragment
 import org.nypl.simplified.ui.accounts.AccountFragmentParameters
+import org.nypl.simplified.ui.accounts.AccountListEvent
 import org.nypl.simplified.ui.accounts.AccountListFragment
 import org.nypl.simplified.ui.accounts.AccountListFragmentParameters
-import org.nypl.simplified.ui.accounts.AccountListRegistryFragment
 import org.nypl.simplified.ui.accounts.AccountListRegistryEvent
-import org.nypl.simplified.ui.accounts.AccountListEvent
+import org.nypl.simplified.ui.accounts.AccountListRegistryFragment
 import org.nypl.simplified.ui.accounts.AccountPickerEvent
-import org.nypl.simplified.ui.accounts.AccountDetailEvent
+import org.nypl.simplified.ui.accounts.saml20.AccountSAML20Event
 import org.nypl.simplified.ui.accounts.saml20.AccountSAML20Fragment
 import org.nypl.simplified.ui.accounts.saml20.AccountSAML20FragmentParameters
-import org.nypl.simplified.ui.accounts.saml20.AccountSAML20Event
 import org.nypl.simplified.ui.catalog.CatalogBookDetailEvent
 import org.nypl.simplified.ui.catalog.CatalogFeedArguments
 import org.nypl.simplified.ui.catalog.CatalogFeedEvent
-import org.nypl.simplified.ui.catalog.CatalogFragmentBookDetail
-import org.nypl.simplified.ui.catalog.CatalogFragmentBookDetailParameters
-import org.nypl.simplified.ui.catalog.CatalogFragmentFeed
-import org.nypl.simplified.ui.catalog.saml20.CatalogSAML20Fragment
-import org.nypl.simplified.ui.catalog.saml20.CatalogSAML20FragmentParameters
+import org.nypl.simplified.ui.catalog.CatalogBookDetailFragment
+import org.nypl.simplified.ui.catalog.CatalogBookDetailFragmentParameters
+import org.nypl.simplified.ui.catalog.CatalogFeedFragment
 import org.nypl.simplified.ui.catalog.saml20.CatalogSAML20Event
 import org.nypl.simplified.ui.errorpage.ErrorPageFragment
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
@@ -50,7 +47,6 @@ import org.nypl.simplified.ui.settings.SettingsMainEvent
 import org.nypl.simplified.viewer.api.Viewers
 import org.nypl.simplified.viewer.spi.ViewerPreferences
 import org.slf4j.LoggerFactory
-import java.net.URI
 
 internal class MainFragmentListenerDelegate(
   private val fragment: Fragment,
@@ -181,10 +177,6 @@ internal class MainFragmentListenerDelegate(
         this.openErrorPage(event.parameters)
         state
       }
-      is CatalogFeedEvent.DownloadWaitingForExternalAuthentication -> {
-        this.openBookDownloadLogin(event.bookID, event.downloadURI)
-        state
-      }
       is CatalogFeedEvent.OpenViewer -> {
         this.openViewer(event.book, event.format)
         state
@@ -211,10 +203,6 @@ internal class MainFragmentListenerDelegate(
       }
       is CatalogBookDetailEvent.OpenErrorPage -> {
         this.openErrorPage(event.parameters)
-        state
-      }
-      is CatalogBookDetailEvent.DownloadWaitingForExternalAuthentication -> {
-        this.openBookDownloadLogin(event.bookID, event.downloadURI)
         state
       }
       is CatalogBookDetailEvent.OpenViewer -> {
@@ -472,8 +460,8 @@ internal class MainFragmentListenerDelegate(
     entry: FeedEntry.FeedEntryOPDS
   ) {
     this.navigator.addFragment(
-      fragment = CatalogFragmentBookDetail.create(
-        CatalogFragmentBookDetailParameters(
+      fragment = CatalogBookDetailFragment.create(
+        CatalogBookDetailFragmentParameters(
           feedEntry = entry,
           feedArguments = feedArguments
         )
@@ -482,24 +470,9 @@ internal class MainFragmentListenerDelegate(
     )
   }
 
-  private fun openBookDownloadLogin(
-    bookID: BookID,
-    downloadURI: URI
-  ) {
-    this.navigator.addFragment(
-      fragment = CatalogSAML20Fragment.create(
-        CatalogSAML20FragmentParameters(
-          bookID = bookID,
-          downloadURI = downloadURI
-        )
-      ),
-      tab = this.navigator.currentTab()
-    )
-  }
-
   private fun openFeed(feedArguments: CatalogFeedArguments) {
     this.navigator.addFragment(
-      fragment = CatalogFragmentFeed.create(feedArguments),
+      fragment = CatalogFeedFragment.create(feedArguments),
       tab = this.navigator.currentTab()
     )
   }

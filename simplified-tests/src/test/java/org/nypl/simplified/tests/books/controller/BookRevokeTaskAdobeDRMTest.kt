@@ -69,6 +69,7 @@ import org.nypl.simplified.profiles.api.ProfileID
 import org.nypl.simplified.profiles.api.ProfileType
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.taskrecorder.api.TaskResult
+import org.nypl.simplified.tests.mocking.MockBookDatabaseEntry
 import org.nypl.simplified.tests.mocking.MockRevokeStringResources
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -199,7 +200,6 @@ class BookRevokeTaskAdobeDRMTest {
 
     return FeedLoader.create(
       bookFormatSupport = this.bookFormatSupport,
-      bookRegistry = this.bookRegistry,
       bundledContent = this.bundledContent,
       contentResolver = this.contentResolver,
       exec = executorFeeds,
@@ -320,9 +320,10 @@ class BookRevokeTaskAdobeDRMTest {
 
     val result = task.call()
     TaskDumps.dump(logger, result)
-
     result as TaskResult.Success
-    Assertions.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
+
+    val newStatus = this.bookRegistry.bookOrException(bookId).status
+    newStatus as BookStatus.Loaned.LoanedNotDownloaded
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
   }
@@ -435,9 +436,10 @@ class BookRevokeTaskAdobeDRMTest {
 
     val result = task.call()
     TaskDumps.dump(logger, result)
-
     result as TaskResult.Success
-    Assertions.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
+
+    val newStatus = this.bookRegistry.bookOrException(bookId).status
+    newStatus as BookStatus.Loaned.LoanedNotDownloaded
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
   }
@@ -594,9 +596,10 @@ class BookRevokeTaskAdobeDRMTest {
 
     val result = task.call()
     TaskDumps.dump(logger, result)
-
     result as TaskResult.Success
-    Assertions.assertEquals(Option.none<BookStatus>(), this.bookRegistry.book(bookId))
+
+    val newStatus = this.bookRegistry.bookOrException(bookId).status
+    newStatus as BookStatus.Loaned.LoanedNotDownloaded
 
     Mockito.verify(bookDatabaseEntry, Times(1)).delete()
     Mockito.verify(drmHandle, Times(1)).setAdobeRightsInformation(null)

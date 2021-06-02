@@ -7,7 +7,7 @@ import java.io.Serializable
  * Parameters for a book detail page.
  */
 
-data class CatalogFragmentBookDetailParameters(
+data class CatalogBookDetailFragmentParameters(
   val feedEntry: FeedEntry.FeedEntryOPDS,
   val feedArguments: CatalogFeedArguments
 ) : Serializable {

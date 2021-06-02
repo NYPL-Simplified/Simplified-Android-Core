@@ -15,7 +15,10 @@ import org.nypl.simplified.accessibility.AccessibilityService
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventDeletion
 import org.nypl.simplified.android.ktx.supportActionBar
+import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_registry.BookRegistryType
+import org.nypl.simplified.books.book_registry.BookStatus
+import org.nypl.simplified.books.book_registry.BookStatusEvent
 import org.nypl.simplified.listeners.api.FragmentListenerType
 import org.nypl.simplified.listeners.api.ListenerRepository
 import org.nypl.simplified.listeners.api.fragmentListeners
@@ -28,10 +31,13 @@ import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimeOutSoon
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimedOut
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.ui.announcements.AnnouncementsController
+import org.nypl.simplified.ui.catalog.saml20.CatalogSAML20Fragment
+import org.nypl.simplified.ui.catalog.saml20.CatalogSAML20FragmentParameters
 import org.nypl.simplified.ui.navigation.tabs.TabbedNavigator
 import org.nypl.simplified.ui.profiles.ProfileDialogs
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.slf4j.LoggerFactory
+import java.net.URI
 
 /**
  * The main application fragment.
@@ -189,6 +195,10 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
       .subscribe(this::onProfileEvent)
       .let { subscriptions.add(it) }
 
+    viewModel.registryEvents
+      .subscribe(this::onBookStatusEvent)
+      .let { subscriptions.add(it) }
+
     /*
      * Show the Toolbar
      */
@@ -251,6 +261,29 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
       this.timeOutDialog = null
     }
     dialog.show()
+  }
+
+  private fun onBookStatusEvent(event: BookStatusEvent) {
+    when (val status = event.statusNow) {
+      is BookStatus.DownloadWaitingForExternalAuthentication -> {
+        this.openBookDownloadLogin(status.id, status.downloadURI)
+      }
+    }
+  }
+
+  private fun openBookDownloadLogin(
+    bookID: BookID,
+    downloadURI: URI
+  ) {
+    this.navigator.addFragment(
+      fragment = CatalogSAML20Fragment.create(
+        CatalogSAML20FragmentParameters(
+          bookID = bookID,
+          downloadURI = downloadURI
+        )
+      ),
+      tab = this.navigator.currentTab()
+    )
   }
 
   override fun onStop() {

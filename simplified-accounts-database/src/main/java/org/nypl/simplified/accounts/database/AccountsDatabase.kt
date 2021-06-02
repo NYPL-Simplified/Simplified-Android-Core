@@ -294,17 +294,21 @@ class AccountsDatabase private constructor(
       }
 
     override fun setLoginState(state: AccountLoginState) {
+      val oldState = this.loginStateActual
+
       synchronized(this.descriptionLock) {
         this.loginStateActual = state
       }
 
-      this.accountEvents.onNext(
-        AccountEventLoginStateChanged(
-          message = "",
-          accountID = this.id,
-          state = state
+      if (state != oldState) {
+        this.accountEvents.onNext(
+          AccountEventLoginStateChanged(
+            message = "",
+            accountID = this.id,
+            state = state
+          )
         )
-      )
+      }
 
       val credentials = state.credentials
       if (credentials != null) {

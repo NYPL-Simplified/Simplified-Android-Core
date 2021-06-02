@@ -1,14 +1,12 @@
 package org.nypl.simplified.ui.catalog
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.fragment.app.FragmentActivity
 import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import io.reactivex.disposables.CompositeDisposable
-import org.librarysimplified.services.api.ServiceDirectoryType
+import org.nypl.simplified.books.covers.BookCoverProviderType
 import org.nypl.simplified.feeds.api.FeedEntry
-import org.nypl.simplified.listeners.api.FragmentListenerType
 import org.slf4j.LoggerFactory
 
 /**
@@ -17,22 +15,16 @@ import org.slf4j.LoggerFactory
  */
 
 class CatalogPagedAdapter(
-  private val borrowViewModel: CatalogBorrowViewModel,
+  private val context: Context,
+  private val listener: CatalogPagedViewListener,
   private val buttonCreator: CatalogButtons,
-  private val context: FragmentActivity,
-  private val listener: FragmentListenerType<CatalogFeedEvent>,
-  private val onBookSelected: (FeedEntry.FeedEntryOPDS) -> Unit,
-  private val services: ServiceDirectoryType,
-  private val ownership: CatalogFeedOwnership
+  private val bookCovers: BookCoverProviderType,
 ) : PagedListAdapter<FeedEntry, CatalogPagedViewHolder>(CatalogPagedAdapterDiffing.comparisonCallback) {
 
   private val logger =
     LoggerFactory.getLogger(CatalogPagedAdapter::class.java)
 
   private var viewHolders = 0
-
-  private val registrySubscriptions =
-    CompositeDisposable()
 
   override fun onCreateViewHolder(
     parent: ViewGroup,
@@ -42,27 +34,31 @@ class CatalogPagedAdapter(
     this.logger.trace("creating view holder ($viewHolders)")
 
     return CatalogPagedViewHolder(
-      borrowViewModel = this.borrowViewModel,
-      buttonCreator = this.buttonCreator,
       context = this.context,
       listener = this.listener,
-      onBookSelected = this.onBookSelected,
       parent = LayoutInflater.from(parent.context).inflate(R.layout.book_cell, parent, false),
-      registrySubscriptions = this.registrySubscriptions,
-      services = this.services,
-      ownership = this.ownership
+      buttonCreator = this.buttonCreator,
+      bookCovers = this.bookCovers,
     )
+  }
+
+  override fun onBindViewHolder(holder: CatalogPagedViewHolder, position: Int) {
+    holder.bindTo(this.getItem(position))
+  }
+
+  override fun onViewRecycled(holder: CatalogPagedViewHolder) {
+    super.onViewRecycled(holder)
+    holder.unbind()
   }
 
   override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
     this.logger.trace("detaching from recycler view")
 
     /*
-     * Because individual cells each maintain a subscription to the book registry, we want
+     * Because individual cells each maintain a subscription to a book status, we want
      * to aggressively unsubscribe the views when the adapter is detached from the recycler view.
      */
 
-    this.registrySubscriptions.dispose()
     val childCount = recyclerView.childCount
     for (childIndex in 0 until childCount) {
       val holder =
@@ -70,12 +66,5 @@ class CatalogPagedAdapter(
           as CatalogPagedViewHolder
       holder.unbind()
     }
-  }
-
-  override fun onBindViewHolder(
-    holder: CatalogPagedViewHolder,
-    position: Int
-  ) {
-    holder.bindTo(this.getItem(position))
   }
 }

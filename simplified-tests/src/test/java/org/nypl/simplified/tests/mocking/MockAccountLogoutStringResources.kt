@@ -29,17 +29,32 @@ class MockAccountLogoutStringResources : AccountLogoutStringResourcesType {
   override val logoutDeactivatingDeviceAdobe: String
     get() = "logoutDeactivatingDeviceAdobe"
 
-  override val logoutClearingBookRegistryFailed: String
-    get() = "logoutClearingBookRegistryFailed"
-
-  override val logoutClearingBookRegistry: String
-    get() = "logoutClearingBookRegistry"
-
   override val logoutClearingBookDatabase: String
     get() = "logoutClearingBookDatabase"
 
   override val logoutClearingBookDatabaseFailed: String
     get() = "logoutClearingBookDatabaseFailed"
+
+  override fun logoutUpdatingOPDSEntry(bookID: String): String =
+    "logoutUpdatingOPDSEntry"
+
+  override val logoutNoAlternateLinkInDatabase: String
+    get() = "logoutNoAlternateLinkInDatabase"
+
+  override val logoutOPDSFeedTimedOut: String
+    get() = "logoutOPDSFeedTimedOut"
+
+  override val logoutOPDSFeedFailed: String
+    get() = "logoutOPDSFeedFailed"
+
+  override val logoutOPDSFeedCorrupt: String
+    get() = "logoutOPDSFeedCorrupt"
+
+  override val logoutOPDSFeedEmpty: String
+    get() = "logoutOPDSFeedEmpty"
+
+  override val logoutOPDSFeedWithGroups: String
+    get() = "logoutOPDSFeedWithGroups"
 
   override val logoutNotLoggedIn: String
     get() = "logoutNotLoggedIn"

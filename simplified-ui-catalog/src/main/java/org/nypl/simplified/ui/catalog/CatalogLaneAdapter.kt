@@ -27,4 +27,9 @@ class CatalogLaneAdapter(
   override fun onBindViewHolder(holder: CatalogLaneItemViewHolder, position: Int) {
     holder.bindTo(items[position])
   }
+
+  override fun onViewRecycled(holder: CatalogLaneItemViewHolder) {
+    super.onViewRecycled(holder)
+    holder.unbind()
+  }
 }

@@ -734,7 +734,6 @@ class BorrowTaskTest {
     assertEquals(Downloading::class.java, this.bookStates.removeAt(0).javaClass)
     assertEquals(Downloading::class.java, this.bookStates.removeAt(0).javaClass)
     assertEquals(Downloading::class.java, this.bookStates.removeAt(0).javaClass)
-    assertEquals(Downloading::class.java, this.bookStates.removeAt(0).javaClass)
     assertEquals(LoanedDownloaded::class.java, this.bookStates.removeAt(0).javaClass)
     assertEquals(0, this.bookStates.size)
 

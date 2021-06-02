@@ -45,16 +45,9 @@ class CatalogFeedWithGroupsAdapter(
     )
   }
 
-  override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
-    this.logger.trace("detaching from recycler view")
-
-    val childCount = recyclerView.childCount
-    for (childIndex in 0 until childCount) {
-      val holder =
-        recyclerView.getChildViewHolder(recyclerView.getChildAt(childIndex))
-          as CatalogFeedWithGroupsLaneViewHolder
-      holder.unbind()
-    }
+  override fun onViewRecycled(holder: CatalogFeedWithGroupsLaneViewHolder) {
+    super.onViewRecycled(holder)
+    holder.unbind()
   }
 
   override fun getItemCount(): Int =

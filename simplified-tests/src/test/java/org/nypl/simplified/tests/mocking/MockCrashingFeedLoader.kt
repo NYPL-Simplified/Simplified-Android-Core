@@ -22,13 +22,4 @@ class MockCrashingFeedLoader : FeedLoaderType {
   ): FluentFuture<FeedLoaderResult> {
     return FluentFuture.from(Futures.immediateFailedFuture(IOException("Ouch!")))
   }
-
-  override fun fetchURIWithBookRegistryEntries(
-    account: AccountID,
-    uri: URI,
-    auth: LSHTTPAuthorizationType?,
-    method: String
-  ): FluentFuture<FeedLoaderResult> {
-    return FluentFuture.from(Futures.immediateFailedFuture(IOException("Ouch!")))
-  }
 }

@@ -53,6 +53,7 @@ class CatalogButtons(
     button.setOnClickListener {
       button.isEnabled = false
       onClick.invoke(button)
+      button.isEnabled = true
     }
     return button
   }

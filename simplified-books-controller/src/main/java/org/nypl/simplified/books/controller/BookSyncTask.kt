@@ -252,7 +252,6 @@ class BookSyncTask(
 
           this.logger.debug("[{}] deleting", existingId.brief())
           dbEntry.delete()
-          this.bookRegistry.clearFor(existingId)
         } else {
           this.logger.debug("[{}] keeping", existingId.brief())
         }

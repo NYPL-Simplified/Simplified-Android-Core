@@ -17,10 +17,11 @@ dependencies {
   implementation project(':simplified-ui-listeners-api')
   implementation project(":simplified-ui-screen")
   implementation project(":simplified-ui-theme")
-  implementation project(":simplified-ui-thread-api")
   implementation project(":simplified-ui-accounts")
   implementation project(":simplified-ui-errorpage")
 
+  implementation libraries.androidx_core
+  implementation libraries.androidx_fragment
   implementation libraries.androidx_appcompat
   implementation libraries.androidx_cardview
   implementation libraries.androidx_constraintlayout
@@ -30,6 +31,8 @@ dependencies {
   implementation libraries.google_material
   implementation libraries.kotlin_stdlib
   implementation libraries.kotlin_reflect
+  implementation libraries.rxjava2
+  implementation libraries.rxjava2extensions
   implementation libraries.rxandroid2
   implementation libraries.slf4j
 }

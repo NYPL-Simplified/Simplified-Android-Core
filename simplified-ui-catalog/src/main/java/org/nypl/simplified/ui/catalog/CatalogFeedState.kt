@@ -50,7 +50,6 @@ sealed class CatalogFeedState {
 
   data class CatalogFeedLoading(
     override val arguments: CatalogFeedArguments,
-    val future: FluentFuture<FeedLoaderResult>
   ) : CatalogFeedState() {
     override val title: String = ""
     override val search: FeedSearch? = null

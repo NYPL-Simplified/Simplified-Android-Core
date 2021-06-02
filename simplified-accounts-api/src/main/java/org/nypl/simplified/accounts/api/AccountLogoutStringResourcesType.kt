@@ -58,18 +58,6 @@ interface AccountLogoutStringResourcesType {
   val logoutDeactivatingDeviceAdobe: String
 
   /**
-   * Clearing the book registry failed.
-   */
-
-  val logoutClearingBookRegistryFailed: String
-
-  /**
-   * Clearing the book registry succeeded.
-   */
-
-  val logoutClearingBookRegistry: String
-
-  /**
    * Clearing the book database started.
    */
 
@@ -80,6 +68,48 @@ interface AccountLogoutStringResourcesType {
    */
 
   val logoutClearingBookDatabaseFailed: String
+
+  /**
+   * Fetching Opds entries without authentication for the database
+   */
+
+  fun logoutUpdatingOPDSEntry(bookID: String): String
+
+  /*
+   * No alternate link is available in the database for the OPDS entry.
+   */
+
+  val logoutNoAlternateLinkInDatabase: String
+
+  /**
+   * Timed out waiting for server OPDS feed.
+   */
+
+  val logoutOPDSFeedTimedOut: String
+
+  /**
+   * Failed to fetch or parse OPDS entry.
+   */
+
+  val logoutOPDSFeedFailed: String
+
+  /**
+   * Server returned a feed with a corrupted entry.
+   */
+
+  val logoutOPDSFeedCorrupt: String
+
+  /**
+   * Server returned an empty OPDS feed.
+   */
+
+  val logoutOPDSFeedEmpty: String
+
+  /**
+   * Server returned an OPDS feed with groups
+   */
+
+  val logoutOPDSFeedWithGroups: String
 
   /**
    * The account does not appear to be logged in.
