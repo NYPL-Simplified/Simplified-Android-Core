@@ -37,10 +37,6 @@ data class ProfilePreferences(
 
   val mostRecentAccount: AccountID?,
 
-  /** Use the experimental R2 reader for DRM-free books. */
-
-  val useExperimentalR2: Boolean = false,
-
   /** @return `true` if the debug settings should be visible. */
 
   val showDebugSettings: Boolean = false

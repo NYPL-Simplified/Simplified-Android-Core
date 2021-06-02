@@ -113,18 +113,6 @@ class SettingsDebugViewModel(application: Application) : AndroidViewModel(applic
       CardCreatorDebugging.fakeNewYorkLocation = value
     }
 
-  var useExperimentalR2: Boolean
-    get() =
-      this.profilesController
-        .profileCurrent()
-        .preferences()
-        .useExperimentalR2
-    set(value) {
-      this.profilesController.profileUpdate { description ->
-        description.copy(preferences = description.preferences.copy(useExperimentalR2 = value))
-      }
-    }
-
   var showOnlySupportedBooks: Boolean
     get() =
       this.feedLoader.showOnlySupportedBooks

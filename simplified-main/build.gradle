@@ -67,20 +67,18 @@ dependencies {
   api project(":simplified-ui-thread-api")
   api project(":simplified-viewer-api")
   api project(":simplified-viewer-audiobook")
-  api project(":simplified-viewer-epub-readium1")
   api project(":simplified-viewer-epub-readium2")
   api project(":simplified-viewer-pdf")
   api project(":simplified-viewer-spi")
 
-  api libraries.koush_async
   api libraries.androidx_appcompat
   api libraries.kotlin_stdlib
-  api libraries.rxjava2
-  api libraries.rxandroid2
-  api libraries.rxjava2extensions
   api libraries.nypl_http_api
   api libraries.nypl_http_bearer_token
   api libraries.nypl_http_vanilla
+  api libraries.rxandroid2
+  api libraries.rxjava2
+  api libraries.rxjava2extensions
   api libraries.slf4j
 
   api libraries.logback_android

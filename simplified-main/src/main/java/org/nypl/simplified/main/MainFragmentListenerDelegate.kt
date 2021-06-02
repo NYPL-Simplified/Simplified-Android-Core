@@ -492,17 +492,8 @@ internal class MainFragmentListenerDelegate(
     book: Book,
     format: BookFormat
   ) {
-    /*
-     * XXX: Enable or disable support for R2 based on the current profile's preferences. When R2
-     * moves from being experimental, this code can be removed.
-     */
-
-    val profile =
-      this.profilesController.profileCurrent()
     val viewerPreferences =
-      ViewerPreferences(
-        flags = mapOf(Pair("useExperimentalR2", profile.preferences().useExperimentalR2))
-      )
+      ViewerPreferences(flags = mapOf())
 
     Viewers.openViewer(
       activity = this.fragment.requireActivity(),

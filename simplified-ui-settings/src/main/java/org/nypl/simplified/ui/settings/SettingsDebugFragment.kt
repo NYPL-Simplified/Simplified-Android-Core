@@ -39,7 +39,6 @@ class SettingsDebugFragment : Fragment(R.layout.settings_debug) {
   private lateinit var crashlyticsId: TextView
   private lateinit var customOPDS: Button
   private lateinit var drmTable: TableLayout
-  private lateinit var enableR2: SwitchCompat
   private lateinit var failNextBoot: SwitchCompat
   private lateinit var forgetAnnouncementsButton: Button
   private lateinit var hasSeenLibrarySelection: SwitchCompat
@@ -79,8 +78,6 @@ class SettingsDebugFragment : Fragment(R.layout.settings_debug) {
       view.findViewById(R.id.settingsVersionDevSeenLibrarySelectionScreen)
     this.cardCreatorFakeLocation =
       view.findViewById(R.id.settingsVersionDevCardCreatorLocationSwitch)
-    this.enableR2 =
-      view.findViewById(R.id.settingsVersionDevEnableR2Switch)
     this.showOnlySupportedBooks =
       view.findViewById(R.id.settingsVersionDevShowOnlySupported)
     this.customOPDS =
@@ -109,8 +106,6 @@ class SettingsDebugFragment : Fragment(R.layout.settings_debug) {
       this.viewModel.hasSeenLibrarySelection
     this.cardCreatorFakeLocation.isChecked =
       this.viewModel.cardCreatorFakeLocation
-    this.enableR2.isChecked =
-      this.viewModel.useExperimentalR2
     this.showOnlySupportedBooks.isChecked =
       this.viewModel.showOnlySupportedBooks
     this.crashlyticsId.text =
@@ -195,14 +190,6 @@ class SettingsDebugFragment : Fragment(R.layout.settings_debug) {
 
     this.cardCreatorFakeLocation.setOnCheckedChangeListener { _, checked ->
       this.viewModel.cardCreatorFakeLocation = checked
-    }
-
-    /*
-    * Update the current profile's preferences whenever the R2 switch is changed.
-    */
-
-    this.enableR2.setOnCheckedChangeListener { _, changed ->
-      this.viewModel.useExperimentalR2 = changed
     }
 
     /*
