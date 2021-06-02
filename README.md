@@ -408,7 +408,6 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.ui.thread.api](simplified-ui-thread-api)|UI thread service|
 |[org.librarysimplified.viewer.api](simplified-viewer-api)|Viewer API|
 |[org.librarysimplified.viewer.audiobook](simplified-viewer-audiobook)|AudioBook viewer|
-|[org.librarysimplified.viewer.epub.readium1](simplified-viewer-epub-readium1)|Readium 1 EPUB reader|
 |[org.librarysimplified.viewer.epub.readium2](simplified-viewer-epub-readium2)|Readium 2 EPUB reader|
 |[org.librarysimplified.viewer.pdf](simplified-viewer-pdf)|PDF reader|
 |[org.librarysimplified.viewer.spi](simplified-viewer-spi)|Viewer SPI|
