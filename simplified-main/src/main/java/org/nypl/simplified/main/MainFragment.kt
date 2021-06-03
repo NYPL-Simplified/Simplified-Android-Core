@@ -5,7 +5,6 @@ import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -51,7 +50,6 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
   private val logger = LoggerFactory.getLogger(MainFragment::class.java)
   private val subscriptions = CompositeDisposable()
 
-  private val activityViewModel: MainActivityViewModel by activityViewModels()
   private val viewModel: MainFragmentViewModel by viewModels()
 
   private val listener: FragmentListenerType<MainFragmentEvent> by fragmentListeners()
@@ -159,20 +157,6 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
         navigator = this.navigator
       )
     )
-
-    /*
-     * Because the BottomNavigator stores references to fragments and reuses
-     * them instead of instantiating them anew, it's necessary to aggressively clear the
-     * "root fragments" in case any of them are holding references to stale data such as
-     * profile and account identifiers. We use a view model to store a "clear history" flag
-     * so that we can avoid clearing the history due to device orientation changes and app
-     * foreground/background switches.
-     */
-
-    if (this.activityViewModel.clearHistory) {
-      this.navigator.clearHistory()
-      this.activityViewModel.clearHistory = false
-    }
   }
 
   override fun onOptionsItemSelected(item: MenuItem): Boolean {
