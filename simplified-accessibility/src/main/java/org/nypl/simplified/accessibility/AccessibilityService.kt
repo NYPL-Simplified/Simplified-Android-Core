@@ -1,15 +1,10 @@
 package org.nypl.simplified.accessibility
 
 import android.content.Context
-import androidx.annotation.UiThread
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.OnLifecycleEvent
 import io.reactivex.disposables.CompositeDisposable
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
 import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookStatusEvent
-import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.slf4j.LoggerFactory
 
 /**
@@ -20,61 +15,35 @@ class AccessibilityService private constructor(
   private val bookRegistry: BookRegistryReadableType,
   private val strings: AccessibilityStringsType,
   private val events: AccessibilityEventsType,
-  private val uiThread: UIThreadServiceType,
 ) : AccessibilityServiceType {
-
-  private val logger =
-    LoggerFactory.getLogger(AccessibilityService::class.java)
 
   companion object {
     fun create(
       context: Context,
       bookRegistry: BookRegistryReadableType,
-      uiThread: UIThreadServiceType,
       strings: AccessibilityStringsType = AccessibilityStrings(context.resources),
       events: AccessibilityEventsType = AccessibilityEvents(context)
     ): AccessibilityServiceType {
       return AccessibilityService(
         bookRegistry = bookRegistry,
         strings = strings,
-        events = events,
-        uiThread = uiThread
+        events = events
       )
     }
   }
 
+  private val logger =
+    LoggerFactory.getLogger(AccessibilityService::class.java)
+
+  private val subscriptions =
+    CompositeDisposable(
+      bookRegistry.bookEvents().subscribe(this::onBookEvent)
+    )
+
   override val spokenFeedbackEnabled: Boolean
     get() = this.events.spokenFeedbackEnabled
 
-  @Volatile
-  private var lifecycleOwner: LifecycleOwner? = null
-  private val subscriptions = CompositeDisposable()
-
-  @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
-  override fun onViewAvailable(owner: LifecycleOwner) {
-    this.lifecycleOwner = owner
-    this.logger.debug("subscribing to book registry")
-    this.subscriptions.add(this.bookRegistry.bookEvents().subscribe(this::onBookEvent))
-  }
-
-  @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-  override fun onViewUnavailable(owner: LifecycleOwner) {
-    this.lifecycleOwner = owner
-    this.logger.debug("unsubscribing from book registry")
-    this.subscriptions.clear()
-  }
-
   private fun speak(message: String) {
-    this.uiThread.runOnUIThread {
-      val owner = this.lifecycleOwner ?: return@runOnUIThread
-      if (owner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
-        this.speakUI(message)
-      }
-    }
-  }
-
-  @UiThread
-  private fun speakUI(message: String) {
     this.events.show(message)
   }
 

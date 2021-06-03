@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory
 
 /**
  * The default implementation of the [AccessibilityEventsType] interface that publishes
- * events and optionally displays toasts.
+ * events.
  */
 
 class AccessibilityEvents(context: Context) : AccessibilityEventsType {

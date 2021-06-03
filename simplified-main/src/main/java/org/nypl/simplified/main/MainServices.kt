@@ -22,6 +22,8 @@ import org.librarysimplified.services.api.Services
 import org.nypl.drm.core.AdobeAdeptExecutorType
 import org.nypl.drm.core.AxisNowServiceFactoryType
 import org.nypl.drm.core.AxisNowServiceType
+import org.nypl.simplified.accessibility.AccessibilityService
+import org.nypl.simplified.accessibility.AccessibilityServiceType
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentialsStoreType
 import org.nypl.simplified.accounts.api.AccountBundledCredentialsType
 import org.nypl.simplified.accounts.api.AccountEvent
@@ -725,6 +727,12 @@ internal object MainServices {
       message = strings.bootingGeneral("book registry"),
       interfaceType = BookRegistryReadableType::class.java,
       serviceConstructor = { bookRegistry }
+    )
+
+    addService(
+      message = strings.bootingGeneral("accessibility service"),
+      interfaceType = AccessibilityServiceType::class.java,
+      serviceConstructor = { AccessibilityService.create(context, bookRegistry) }
     )
 
     val tenPrint =
