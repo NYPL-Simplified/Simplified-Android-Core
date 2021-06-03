@@ -65,7 +65,6 @@ dependencies {
   api project(":simplified-ui-errorpage")
   api project(":simplified-ui-splash")
   api project(":simplified-ui-theme")
-  api project(":simplified-viewer-epub-readium1")
   api project(":simplified-webview")
 
   api libraries.nypl_audiobook_api
@@ -97,7 +96,6 @@ dependencies {
   implementation libraries.slf4j
   implementation libraries.nypl_readium
   implementation libraries.nypl_readium_js
-  implementation libraries.koush_async
 
   testImplementation libraries.logback_classic
   testImplementation libraries.junit

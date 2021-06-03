@@ -192,15 +192,6 @@
       android:text="Card Creator: Pretend the user is in New York" />
 
     <androidx.appcompat.widget.SwitchCompat
-      android:id="@+id/settingsVersionDevEnableR2Switch"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:layout_marginBottom="16dp"
-      android:checked="false"
-      android:enabled="true"
-      android:text="Enable experimental R2 module for EPUBs" />
-
-    <androidx.appcompat.widget.SwitchCompat
       android:id="@+id/settingsVersionDevShowOnlySupported"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"

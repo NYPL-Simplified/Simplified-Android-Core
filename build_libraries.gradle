@@ -40,7 +40,6 @@ ext.versions = [
   joda_time                     : '2.9.9',
   junit                         : '4.12',
   junit_jupiter                 : '5.7.1',
-  koush_async                   : '2.2.1',
   leak_canary                   : '2.1',
   logback_android               : '2.0.0',
   logback_classic               : '1.2.3',

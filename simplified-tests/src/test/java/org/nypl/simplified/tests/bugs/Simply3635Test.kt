@@ -277,8 +277,7 @@ class Simply3635Test {
         showTestingLibraries = false,
         hasSeenLibrarySelectionScreen = false,
         readerPreferences = ReaderPreferences.builder().build(),
-        mostRecentAccount = null,
-        useExperimentalR2 = false
+        mostRecentAccount = null
       )
 
     val profileDescription0 =
