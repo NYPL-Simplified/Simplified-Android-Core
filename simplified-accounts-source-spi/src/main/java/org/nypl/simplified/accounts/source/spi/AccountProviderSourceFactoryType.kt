@@ -2,6 +2,7 @@ package org.nypl.simplified.accounts.source.spi
 
 import android.content.Context
 import org.librarysimplified.http.api.LSHTTPClientType
+import org.nypl.simplified.buildconfig.api.BuildConfigurationAccountsType
 
 /**
  * A factory for creating account sources.
@@ -15,6 +16,7 @@ interface AccountProviderSourceFactoryType {
 
   fun create(
     context: Context,
-    http: LSHTTPClientType
+    http: LSHTTPClientType,
+    buildConfig: BuildConfigurationAccountsType
   ): AccountProviderSourceType
 }
