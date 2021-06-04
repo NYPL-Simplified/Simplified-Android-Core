@@ -58,7 +58,7 @@ class MainApplication : Application() {
     return try {
       val info = this.packageManager.getPackageInfo(this.packageName, 0)
       info.versionCode.toString()
-    } catch (e : Exception) {
+    } catch (e: Exception) {
       this.logger.error("version info unavailable: ", e)
       "UNKNOWN"
     }
