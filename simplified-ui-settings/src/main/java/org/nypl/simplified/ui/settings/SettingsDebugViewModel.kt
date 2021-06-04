@@ -167,7 +167,7 @@ class SettingsDebugViewModel(application: Application) : AndroidViewModel(applic
     Reports.sendReportsDefault(
       context = this.getApplication(),
       address = this.supportEmailAddress,
-      subject = "[simplye-error-report] ${this.appVersion}",
+      subject = "[error-report]",
       body = ""
     )
   }
