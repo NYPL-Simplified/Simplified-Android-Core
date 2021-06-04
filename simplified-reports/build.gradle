@@ -1,3 +1,18 @@
+def getGitHash = { ->
+  def stdout = new ByteArrayOutputStream()
+  exec {
+    commandLine "git", "rev-parse", "--short", "HEAD"
+    standardOutput = stdout
+  }
+  return stdout.toString().trim()
+}
+
+android {
+  defaultConfig {
+    buildConfigField "String", "SIMPLIFIED_GIT_COMMIT", "\"${getGitHash()}\""
+  }
+}
+
 dependencies {
   api libraries.androidx_legacy_support_v4
   api libraries.kotlin_stdlib

@@ -2,6 +2,7 @@ package org.nypl.simplified.main
 
 import android.app.Application
 import android.net.http.HttpResponseCache
+import android.os.Process
 import android.os.StrictMode
 import android.os.StrictMode.ThreadPolicy
 import android.os.StrictMode.VmPolicy
@@ -41,9 +42,26 @@ class MainApplication : Application() {
     MainLogging.configure(cacheDir)
     this.configureHttpCache()
     this.configureStrictMode()
-    this.logger.debug("starting app: pid {}", android.os.Process.myPid())
+    this.logStartup()
     this.boot.start(this)
     INSTANCE = this
+  }
+
+  private fun logStartup() {
+    this.logger.debug("starting app: pid {}", Process.myPid())
+    this.logger.debug("app version: {}", BuildConfig.SIMPLIFIED_VERSION)
+    this.logger.debug("app build:   {}", versionCode())
+    this.logger.debug("app commit:  {}", BuildConfig.GIT_COMMIT)
+  }
+
+  private fun versionCode(): String {
+    return try {
+      val info = this.packageManager.getPackageInfo(this.packageName, 0)
+      info.versionCode.toString()
+    } catch (e: Exception) {
+      this.logger.error("version info unavailable: ", e)
+      "UNKNOWN"
+    }
   }
 
   /**
