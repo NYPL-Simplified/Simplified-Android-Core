@@ -5,12 +5,24 @@ import com.google.common.util.concurrent.AsyncFunction
 import com.google.common.util.concurrent.FluentFuture
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.MoreExecutors
+import java.util.concurrent.Executor
 
 /**
  * Extension functions to get around the lack of SAM conversion in Kotlin.
  */
 
 object FluentFutureExtensions {
+
+  /**
+   * Apply a function `f` to the value of the current future.
+   *
+   * This is the same as `FluentFuture.transform` excepted that the compiler knows
+   * that the result is not null.
+   */
+
+  fun <A, B> FluentFuture<A>.map(f: (A) -> B, executor: Executor): FluentFuture<B> {
+    return this.transform(Function<A, B> { x -> f.invoke(x!!) }, executor)
+  }
 
   /**
    * Apply a function `f` to the value of the current future.
