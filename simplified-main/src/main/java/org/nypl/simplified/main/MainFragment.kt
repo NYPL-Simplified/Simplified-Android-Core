@@ -11,12 +11,10 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import io.reactivex.disposables.CompositeDisposable
 import org.librarysimplified.services.api.Services
-import org.nypl.simplified.accessibility.AccessibilityService
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventDeletion
 import org.nypl.simplified.android.ktx.supportActionBar
 import org.nypl.simplified.books.api.BookID
-import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookStatusEvent
 import org.nypl.simplified.listeners.api.FragmentListenerType
@@ -98,18 +96,6 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
         context = requireContext(),
         uiThread = services.requireService(UIThreadServiceType::class.java),
         profileController = services.requireService(ProfilesControllerType::class.java)
-      )
-    )
-
-    /*
-     * Register an accessibility controller.
-     */
-
-    this.lifecycle.addObserver(
-      AccessibilityService.create(
-        context = requireContext(),
-        bookRegistry = services.requireService(BookRegistryType::class.java),
-        uiThread = services.requireService(UIThreadServiceType::class.java)
       )
     )
   }
