@@ -48,7 +48,6 @@ import org.nypl.simplified.futures.FluentFutureExtensions.onAnyError
 import org.nypl.simplified.listeners.api.FragmentListenerType
 import org.nypl.simplified.profiles.api.ProfileDateOfBirth
 import org.nypl.simplified.profiles.api.ProfileDescription
-import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfilePreferences
 import org.nypl.simplified.profiles.api.ProfileUpdated
 import org.nypl.simplified.profiles.controller.api.ProfileFeedRequest
@@ -62,6 +61,7 @@ import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.Catalog
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithGroups
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithoutGroups
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
+import org.nypl.simplified.ui.thread.api.UIExecutor
 import org.slf4j.LoggerFactory
 import java.net.URI
 import java.util.UUID
@@ -89,6 +89,9 @@ class CatalogFeedViewModel(
 
   private val logger =
     LoggerFactory.getLogger(this.javaClass)
+
+  private val uiExecutor =
+    UIExecutor()
 
   private val stateMutable: MutableLiveData<CatalogFeedState> =
     MutableLiveData(CatalogFeedState.CatalogFeedLoading(this.feedArguments))
@@ -122,9 +125,6 @@ class CatalogFeedViewModel(
       this.profilesController.accountEvents()
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(this::onAccountEvent),
-      this.profilesController.profileEvents()
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(this::onProfileEvent),
       this.bookRegistry.bookEvents()
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(this::onBookStatusEvent),
@@ -178,16 +178,16 @@ class CatalogFeedViewModel(
     }
   }
 
-  private fun onProfileEvent(event: ProfileEvent) {
-    when (event) {
+  private fun onAgeUpdateCompleted(result: ProfileUpdated) {
+    when (result) {
       is ProfileUpdated.Succeeded -> {
         when (val ownership = this.state.arguments.ownership) {
           is CatalogFeedOwnership.OwnedByAccount -> {
             val ageChanged =
-              event.newDescription.preferences.dateOfBirth != event.oldDescription.preferences.dateOfBirth
+              result.newDescription.preferences.dateOfBirth != result.oldDescription.preferences.dateOfBirth
             if (ageChanged) {
               val account = this.profilesController.profileCurrent().account(ownership.accountId)
-              onAgeUpdateSuccess(account, ownership, event)
+              onAgeUpdateSuccess(account, ownership, result)
             }
           }
         }
@@ -263,6 +263,7 @@ class CatalogFeedViewModel(
     super.onCleared()
     this.logger.debug("[{}]: deleting viewmodel", this.instanceId)
     this.subscriptions.clear()
+    this.uiExecutor.dispose()
   }
 
   val stateLive: LiveData<CatalogFeedState>
@@ -620,7 +621,7 @@ class CatalogFeedViewModel(
     profilesController.profileUpdate { description ->
       val years = if (over13) 14 else 0
       this.synthesizeDateOfBirthDescription(description, years)
-    }
+    }.map(this::onAgeUpdateCompleted, this.uiExecutor)
   }
 
   private fun synthesizeDateOfBirthDescription(
