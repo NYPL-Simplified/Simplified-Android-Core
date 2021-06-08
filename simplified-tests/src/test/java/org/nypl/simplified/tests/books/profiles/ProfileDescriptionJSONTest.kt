@@ -8,6 +8,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.nypl.simplified.accounts.api.AccountID
 
 import org.nypl.simplified.profiles.ProfileDescriptionJSON
 import org.nypl.simplified.profiles.api.ProfileAttributes
@@ -51,7 +52,7 @@ class ProfileDescriptionJSONTest {
           showTestingLibraries = false,
           hasSeenLibrarySelectionScreen = false,
           readerPreferences = ReaderPreferences.builder().build(),
-          mostRecentAccount = null
+          mostRecentAccount = AccountID.generate()
         ),
         attributes = ProfileAttributes(
           sortedMapOf(
@@ -65,7 +66,7 @@ class ProfileDescriptionJSONTest {
     val node =
       ProfileDescriptionJSON.serializeToJSON(mapper, description_0)
     val description_1 =
-      ProfileDescriptionJSON.deserializeFromJSON(mapper, node)
+      ProfileDescriptionJSON.deserializeFromJSON(mapper, node, AccountID.generate())
 
     this.logger.debug("{}", ProfileDescriptionJSON.serializeToString(ObjectMapper(), description_1))
     assertEquals(description_0, description_1)
@@ -74,21 +75,30 @@ class ProfileDescriptionJSONTest {
   @Test
   fun testLFA_0() {
     val mapper = ObjectMapper()
-
+    val mostRecentAccount = AccountID.generate()
     val description =
-      ProfileDescriptionJSON.deserializeFromText(mapper, this.ofResource("profile-lfa-0.json"))
+      ProfileDescriptionJSON.deserializeFromText(
+        mapper,
+        this.ofResource("profile-lfa-0.json"),
+        mostRecentAccount
+      )
 
     this.logger.debug("{}", ProfileDescriptionJSON.serializeToString(ObjectMapper(), description))
     assertEquals("Eggbert", description.displayName)
     assertEquals("developer", description.attributes.role)
+    assertEquals(mostRecentAccount, description.preferences.mostRecentAccount)
   }
 
   @Test
   fun testLFA_1() {
     val mapper = ObjectMapper()
-
+    val mostRecentAccount = AccountID.generate()
     val description =
-      ProfileDescriptionJSON.deserializeFromText(mapper, this.ofResource("profile-lfa-1.json"))
+      ProfileDescriptionJSON.deserializeFromText(
+        mapper,
+        this.ofResource("profile-lfa-1.json"),
+        mostRecentAccount
+      )
 
     this.logger.debug("{}", ProfileDescriptionJSON.serializeToString(ObjectMapper(), description))
     assertEquals("Newbert", description.displayName)
@@ -96,30 +106,42 @@ class ProfileDescriptionJSONTest {
     assertEquals("student", description.attributes.role)
     assertEquals("ຊັ້ນ 8", description.attributes.grade)
     assertEquals("ສົ້ນຂົວ", description.attributes.school)
+    assertEquals(mostRecentAccount, description.preferences.mostRecentAccount)
   }
 
   @Test
   fun testNYPL_0() {
     val mapper = ObjectMapper()
-
+    val mostRecentAccount = AccountID.generate()
     val description =
-      ProfileDescriptionJSON.deserializeFromText(mapper, this.ofResource("profile-nypl-0.json"))
+      ProfileDescriptionJSON.deserializeFromText(
+        mapper,
+        this.ofResource("profile-nypl-0.json"),
+        mostRecentAccount
+      )
 
     this.logger.debug("{}", ProfileDescriptionJSON.serializeToString(ObjectMapper(), description))
     assertEquals("", description.displayName)
+    assertEquals(mostRecentAccount, description.preferences.mostRecentAccount)
   }
 
   @Test
   fun testSMA92() {
     val mapper = ObjectMapper()
+    val mostRecentAccountFallback = AccountID.generate()
     val description =
-      ProfileDescriptionJSON.deserializeFromText(mapper, this.ofResource("profile-sma-92.json"))
+      ProfileDescriptionJSON.deserializeFromText(
+        mapper,
+        this.ofResource("profile-sma-92.json"),
+        mostRecentAccountFallback
+      )
 
     assertEquals("", description.displayName)
     assertEquals(1.0, description.preferences.readerPreferences.brightness())
     assertEquals(100.0, description.preferences.readerPreferences.fontScale())
     assertEquals(ReaderFontSelection.READER_FONT_OPEN_DYSLEXIC, description.preferences.readerPreferences.fontFamily())
     assertEquals(ReaderColorScheme.SCHEME_WHITE_ON_BLACK, description.preferences.readerPreferences.colorScheme())
+    assertEquals("5310437f-db1a-492e-a09f-1ceaa43303dd", description.preferences.mostRecentAccount.uuid.toString())
   }
 
   private fun ofResource(name: String): String {

@@ -119,16 +119,26 @@ internal class Profile internal constructor(
     val deleted = this.accounts.deleteAccountByProvider(accountProvider)
     val mostRecent = this.descriptionCurrent.preferences.mostRecentAccount
     if (mostRecent == deleted) {
-      this.clearMostRecentAccount()
+      this.updateMostRecentAccount()
     }
     return deleted
   }
 
-  private fun clearMostRecentAccount() {
+  private fun updateMostRecentAccount() {
+    val accounts =
+      this.accounts.accounts().values
+    val mostRecent =
+      if (accounts.size > 1) {
+        // Return the first account created from a non-default provider
+        accounts.first { it.provider.id != this.owner!!.defaultAccountProvider.id }
+      } else {
+        // Return the first account
+        accounts.first()
+      }
     this.setDescription(
       this.descriptionCurrent.copy(
         preferences = this.descriptionCurrent.preferences.copy(
-          mostRecentAccount = null
+          mostRecentAccount = mostRecent.id
         )
       )
     )

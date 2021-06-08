@@ -35,7 +35,7 @@ data class ProfilePreferences(
 
   /** The most recently used account provider. */
 
-  val mostRecentAccount: AccountID?,
+  val mostRecentAccount: AccountID,
 
   /** @return `true` if the debug settings should be visible. */
 

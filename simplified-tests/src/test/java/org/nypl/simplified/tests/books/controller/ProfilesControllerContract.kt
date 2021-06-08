@@ -52,7 +52,6 @@ import org.nypl.simplified.profiles.api.ProfileDateOfBirth
 import org.nypl.simplified.profiles.api.ProfileDescription
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileNoneCurrentException
-import org.nypl.simplified.profiles.api.ProfilePreferences
 import org.nypl.simplified.profiles.api.ProfileUpdated
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimerType
@@ -217,29 +216,25 @@ abstract class ProfilesControllerContract {
     this.executorTimer.shutdown()
   }
 
-  private fun descriptionOf(
-    displayName: String,
+  private fun descriptionWith(
+    description: ProfileDescription,
     gender: String,
-    dateOfBirth: DateTime
+    dateOfBirth: DateTime,
   ): ProfileDescription {
-    val preferences =
-      ProfilePreferences(
-        dateOfBirth = ProfileDateOfBirth(dateOfBirth, true),
-        showTestingLibraries = true,
-        hasSeenLibrarySelectionScreen = false,
-        readerPreferences = ReaderPreferences.builder().build(),
-        mostRecentAccount = null
-      )
+    val preferences = description.preferences.copy(
+      dateOfBirth = ProfileDateOfBirth(dateOfBirth, true),
+    )
+
+    val attributeMap =
+      description.attributes.attributes + Pair(ProfileAttributes.GENDER_ATTRIBUTE_KEY, gender)
 
     val attributes =
       ProfileAttributes(
-        sortedMapOf(
-          Pair(ProfileAttributes.GENDER_ATTRIBUTE_KEY, gender)
-        )
+        attributeMap.toSortedMap()
       )
 
     return ProfileDescription(
-      displayName,
+      description.displayName,
       preferences,
       attributes
     )
@@ -294,8 +289,9 @@ abstract class ProfilesControllerContract {
         accountProviders = accountProviders
       )
 
-    controller.profileCreate(accountProvider, descriptionOf("Kermit", "Female", DateTime.now()))
-      .get()
+    controller.profileCreate("Kermit", accountProvider) { desc ->
+      this.descriptionWith(desc, gender = "Female", dateOfBirth = DateTime.now())
+    }.get()
     controller.profileSelect(profiles.profiles().firstKey()).get()
 
     this.profileEventsReceived.forEach { this.logger.debug("event: {}", it) }
@@ -332,8 +328,12 @@ abstract class ProfilesControllerContract {
 
     val date = DateTime.now()
 
-    controller.profileCreate(accountProvider, descriptionOf("Kermit", "Female", date)).get()
-    controller.profileCreate(accountProvider, descriptionOf("Kermit", "Female", date)).get()
+    controller.profileCreate("Kermit", accountProvider) { desc ->
+      this.descriptionWith(desc, "Female", date)
+    }.get()
+    controller.profileCreate("Kermit", accountProvider) { desc ->
+      this.descriptionWith(desc, "Female", date)
+    }.get()
 
     this.profileEventsReceived.forEach { this.logger.debug("event: {}", it) }
     this.accountEventsReceived.forEach { this.logger.debug("event: {}", it) }
@@ -368,8 +368,9 @@ abstract class ProfilesControllerContract {
         accountProviders = accountProviders
       )
 
-    controller.profileCreate(accountProvider, descriptionOf("Kermit", "Female", DateTime.now()))
-      .get()
+    controller.profileCreate("Kermit", accountProvider) { desc ->
+      this.descriptionWith(desc, "Female", DateTime.now())
+    }.get()
     controller.profileSelect(profiles.profiles().firstKey()).get()
     controller.profileAccountCreate(accountProvider.id).get()
     controller.profileEvents().subscribe { this.profileEventsReceived.add(it) }
@@ -433,8 +434,9 @@ abstract class ProfilesControllerContract {
         accountProviders = accountProviders
       )
 
-    controller.profileCreate(accountProvider, descriptionOf("Kermit", "Female", DateTime.now()))
-      .get()
+    controller.profileCreate("Kermit", accountProvider) { desc ->
+      this.descriptionWith(desc, "Female", DateTime.now())
+    }.get()
     controller.profileSelect(profiles.profiles().firstKey()).get()
     controller.profileAccountCreate(accountProvider.id).get()
     controller.profileEvents().subscribe { this.profileEventsReceived.add(it) }

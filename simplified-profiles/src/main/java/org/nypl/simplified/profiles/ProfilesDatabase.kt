@@ -79,6 +79,9 @@ internal class ProfilesDatabase internal constructor(
     }
   }
 
+  internal val defaultAccountProvider: AccountProviderType =
+    this.accountProviders.defaultProvider
+
   override fun anonymousProfileEnabled(): ProfilesDatabaseType.AnonymousProfileEnabled {
     return this.anonymousProfileEnabled
   }

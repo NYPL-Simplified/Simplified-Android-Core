@@ -58,15 +58,11 @@ import org.nypl.simplified.opds.core.OPDSSearchParser
 import org.nypl.simplified.patron.PatronUserProfileParsers
 import org.nypl.simplified.patron.api.PatronUserProfileParsersType
 import org.nypl.simplified.profiles.ProfilesDatabases
-import org.nypl.simplified.profiles.api.ProfileAttributes
 import org.nypl.simplified.profiles.api.ProfileCreationEvent
-import org.nypl.simplified.profiles.api.ProfileDescription
 import org.nypl.simplified.profiles.api.ProfileEvent
-import org.nypl.simplified.profiles.api.ProfilePreferences
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimer
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimerType
-import org.nypl.simplified.reader.api.ReaderPreferences
 import org.nypl.simplified.tests.TestDirectories
 import org.nypl.simplified.tests.mocking.MockAccountProviders
 import org.nypl.simplified.tests.mocking.MockBundledContentResolver
@@ -271,37 +267,14 @@ class Simply3635Test {
 
   @Test
   fun testReproduce() {
-    val preferences =
-      ProfilePreferences(
-        dateOfBirth = null,
-        showTestingLibraries = false,
-        hasSeenLibrarySelectionScreen = false,
-        readerPreferences = ReaderPreferences.builder().build(),
-        mostRecentAccount = null
-      )
-
-    val profileDescription0 =
-      ProfileDescription(
-        displayName = "Kermit",
-        preferences = preferences,
-        attributes = ProfileAttributes(sortedMapOf())
-      )
-
-    val profileDescription1 =
-      ProfileDescription(
-        displayName = "Grouch",
-        preferences = preferences,
-        attributes = ProfileAttributes(sortedMapOf())
-      )
-
     this.logger.debug("creating profile 0")
     val profileEvent0 =
-      this.controller.profileCreate(this.accountProvider, profileDescription0)
+      this.controller.profileCreate("Kermit", this.accountProvider)
         .get() as ProfileCreationEvent.ProfileCreationSucceeded
 
     this.logger.debug("creating profile 1")
     val profileEvent1 =
-      this.controller.profileCreate(this.accountProvider, profileDescription1)
+      this.controller.profileCreate("Grouch", this.accountProvider)
         .get() as ProfileCreationEvent.ProfileCreationSucceeded
 
     this.logger.debug("selecting profile 0")

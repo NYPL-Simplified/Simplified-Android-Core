@@ -35,8 +35,9 @@ class MockProfilesController(
 ) : ProfilesControllerType {
 
   override fun profileCreate(
+    displayName: String,
     accountProvider: AccountProviderType,
-    description: ProfileDescription
+    descriptionUpdate: (ProfileDescription) -> ProfileDescription
   ): FluentFuture<ProfileCreationEvent> {
     return FluentFuture.from(SettableFuture.create())
   }

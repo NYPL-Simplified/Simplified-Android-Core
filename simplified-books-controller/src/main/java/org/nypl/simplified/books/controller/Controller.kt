@@ -320,15 +320,17 @@ class Controller private constructor(
   }
 
   override fun profileCreate(
+    displayName: String,
     accountProvider: AccountProviderType,
-    description: ProfileDescription
+    descriptionUpdate: (ProfileDescription) -> ProfileDescription
   ): FluentFuture<ProfileCreationEvent> {
     return this.submitTask(
       ProfileCreationTask(
+        displayName = displayName,
         profiles = this.profiles,
         profileEvents = this.profileEvents,
         accountProvider = accountProvider,
-        description = description
+        descriptionUpdate = descriptionUpdate
       )
     )
   }
