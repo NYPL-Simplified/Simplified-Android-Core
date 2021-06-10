@@ -53,9 +53,9 @@
       tools:summary="6.2.0" />
 
     <Preference
-      android:key="settingsBuild"
+      android:key="settingsCommit"
       android:summary="@string/settingsBuildSummary"
-      android:title="@string/settingsBuild"
+      android:title="@string/settingsCommit"
       app:enableCopying="true"
       tools:summary="b3069242e" />
 

@@ -24,7 +24,7 @@ class SettingsMainFragment : PreferenceFragmentCompat() {
   private lateinit var settingsAbout: Preference
   private lateinit var settingsAcknowledgements: Preference
   private lateinit var settingsAccounts: Preference
-  private lateinit var settingsBuild: Preference
+  private lateinit var settingsCommit: Preference
   private lateinit var settingsDebug: Preference
   private lateinit var settingsEULA: Preference
   private lateinit var settingsFaq: Preference
@@ -44,7 +44,7 @@ class SettingsMainFragment : PreferenceFragmentCompat() {
     this.settingsAbout = this.findPreference("settingsAbout")!!
     this.settingsAcknowledgements = this.findPreference("settingsAcknowledgements")!!
     this.settingsAccounts = this.findPreference("settingsAccounts")!!
-    this.settingsBuild = this.findPreference("settingsBuild")!!
+    this.settingsCommit = this.findPreference("settingsCommit")!!
     this.settingsDebug = this.findPreference("settingsDebug")!!
     this.settingsEULA = this.findPreference("settingsEULA")!!
     this.settingsFaq = this.findPreference("settingsFaq")!!
@@ -55,7 +55,7 @@ class SettingsMainFragment : PreferenceFragmentCompat() {
     this.configureAbout(this.settingsAbout)
     this.configureAcknowledgements(this.settingsAcknowledgements)
     this.configureAccounts(this.settingsAccounts)
-    this.configureBuild(this.settingsBuild)
+    this.configureBuild(this.settingsCommit)
     this.configureDebug(this.settingsDebug)
     this.configureEULA(this.settingsEULA)
     this.configureFaq(this.settingsFaq)

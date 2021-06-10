@@ -8,7 +8,7 @@
   <string name="settingsAccountsSummary">Add, remove, or configure accounts</string>
   <string name="settingsAcknowledgements">Acknowledgements</string>
   <string name="settingsAcknowledgementsSummary" />
-  <string name="settingsBuild">Build</string>
+  <string name="settingsCommit">Commit</string>
   <string name="settingsBuildSummary" />
   <string name="settingsCancel">Cancel</string>
   <string name="settingsCardCreatorLabel">Don\'t have a library card?</string>
