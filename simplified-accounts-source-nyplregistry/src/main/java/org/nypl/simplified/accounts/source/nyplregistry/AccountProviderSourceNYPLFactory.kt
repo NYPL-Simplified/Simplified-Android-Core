@@ -6,6 +6,7 @@ import org.nypl.simplified.accounts.json.AccountProviderDescriptionCollectionPar
 import org.nypl.simplified.accounts.json.AccountProviderDescriptionCollectionSerializers
 import org.nypl.simplified.accounts.source.spi.AccountProviderSourceFactoryType
 import org.nypl.simplified.accounts.source.spi.AccountProviderSourceType
+import org.nypl.simplified.buildconfig.api.BuildConfigurationAccountsType
 import org.nypl.simplified.opds.auth_document.api.AuthenticationDocumentParsersType
 import org.nypl.simplified.opds2.irradia.OPDS2ParsersIrradia
 import java.util.ServiceLoader
@@ -24,13 +25,16 @@ class AccountProviderSourceNYPLFactory : AccountProviderSourceFactoryType {
 
   override fun create(
     context: Context,
-    http: LSHTTPClientType
+    http: LSHTTPClientType,
+    buildConfig: BuildConfigurationAccountsType
   ): AccountProviderSourceType {
     return AccountProviderSourceNYPLRegistry(
       http = http,
       authDocumentParsers = this.findAuthenticationDocumentParsers(),
       parsers = AccountProviderDescriptionCollectionParsers(OPDS2ParsersIrradia),
-      serializers = AccountProviderDescriptionCollectionSerializers()
+      serializers = AccountProviderDescriptionCollectionSerializers(),
+      uriProduction = buildConfig.libraryRegistry.registry,
+      uriQA = buildConfig.libraryRegistry.registryQA
     )
   }
 }

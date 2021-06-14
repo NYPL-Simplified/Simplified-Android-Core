@@ -44,8 +44,8 @@ class AccountProviderSourceNYPLRegistry(
   private val authDocumentParsers: AuthenticationDocumentParsersType,
   private val parsers: AccountProviderDescriptionCollectionParsersType,
   private val serializers: AccountProviderDescriptionCollectionSerializersType,
-  private val uriProduction: URI = URI("https://libraryregistry.librarysimplified.org/libraries"),
-  private val uriQA: URI = URI("https://libraryregistry.librarysimplified.org/libraries/qa")
+  private val uriProduction: URI,
+  private val uriQA: URI
 ) : AccountProviderSourceType {
 
   private val logger =

@@ -1,5 +1,6 @@
 dependencies {
   api project(':simplified-accounts-api')
+  api project(':simplified-buildconfig-api')
 
   api libraries.google_guava
   api libraries.io7m_jfunctional

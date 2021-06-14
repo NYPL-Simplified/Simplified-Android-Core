@@ -19,6 +19,7 @@ import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryStatus.R
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.accounts.source.spi.AccountProviderSourceFactoryType
 import org.nypl.simplified.accounts.source.spi.AccountProviderSourceType
+import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.slf4j.LoggerFactory
@@ -232,8 +233,10 @@ class AccountProviderRegistry private constructor(
     ): AccountProviderRegistryType {
       val loader =
         ServiceLoader.load(AccountProviderSourceFactoryType::class.java)
+      val buildConfig =
+        ServiceLoader.load(BuildConfigurationServiceType::class.java).first()
       val sources =
-        loader.toList().map { it.create(context, http) }
+        loader.toList().map { it.create(context, http, buildConfig) }
       return this.createFrom(context, sources, defaultProvider)
     }
 

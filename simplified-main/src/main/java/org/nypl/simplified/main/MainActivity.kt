@@ -4,7 +4,6 @@ import android.app.ActionBar
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.FragmentManager
@@ -32,7 +31,6 @@ import org.nypl.simplified.ui.profiles.ProfileModificationFragmentParameters
 import org.nypl.simplified.ui.profiles.ProfileModificationFragmentServiceType
 import org.nypl.simplified.ui.profiles.ProfileSelectionEvent
 import org.nypl.simplified.ui.profiles.ProfileSelectionFragment
-import org.nypl.simplified.ui.profiles.ProfileTabEvent
 import org.nypl.simplified.ui.splash.SplashEvent
 import org.nypl.simplified.ui.splash.SplashFragment
 import org.slf4j.LoggerFactory
@@ -46,7 +44,6 @@ class MainActivity : AppCompatActivity(R.layout.main_host) {
 
   private val logger = LoggerFactory.getLogger(MainActivity::class.java)
   private val listenerRepo: ListenerRepository<MainActivityListenedEvent, Unit> by listenerRepositories()
-  private val mainViewModel: MainActivityViewModel by viewModels()
 
   private val defaultViewModelFactory: ViewModelProvider.Factory by lazy {
     MainActivityDefaultViewModelFactory(super.getDefaultViewModelProviderFactory())
@@ -64,7 +61,6 @@ class MainActivity : AppCompatActivity(R.layout.main_host) {
     this.supportActionBar?.hide() // Hide toolbar until requested
 
     if (savedInstanceState == null) {
-      this.mainViewModel.clearHistory = true
       this.openSplashScreen()
     } else {
       if (savedInstanceState.getBoolean(STATE_ACTION_BAR_IS_SHOWING)) {
@@ -227,10 +223,6 @@ class MainActivity : AppCompatActivity(R.layout.main_host) {
   }
 
   private fun onOnboardingFinished() {
-    ViewModelProvider(this)
-      .get(MainActivityViewModel::class.java)
-      .clearHistory = true
-
     this.openMainFragment()
   }
 
@@ -261,13 +253,6 @@ class MainActivity : AppCompatActivity(R.layout.main_host) {
     }
   }
 
-  private fun handleProfileTabEvent(event: ProfileTabEvent) {
-    return when (event) {
-      ProfileTabEvent.SwitchProfileSelected ->
-        this.openProfileSelect()
-    }
-  }
-
   private fun openModificationFragment(
     parameters: ProfileModificationFragmentParameters
   ) {
@@ -291,8 +276,6 @@ class MainActivity : AppCompatActivity(R.layout.main_host) {
 
   private fun openMainBackStack() {
     this.logger.debug("openMain")
-    this.mainViewModel.clearHistory = true
-
     val mainFragment = MainFragment()
     this.supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
     this.supportFragmentManager.beginTransaction()
@@ -303,8 +286,6 @@ class MainActivity : AppCompatActivity(R.layout.main_host) {
 
   private fun openProfileSelect() {
     this.logger.debug("openProfileSelect")
-    this.mainViewModel.clearHistory = true
-
     val newFragment = ProfileSelectionFragment()
     this.supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
     this.supportFragmentManager.beginTransaction()

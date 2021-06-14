@@ -19,6 +19,7 @@ dependencies {
   implementation project(":simplified-ui-theme")
   implementation project(":simplified-ui-accounts")
   implementation project(":simplified-ui-errorpage")
+  implementation project(":simplified-ui-thread-api")
 
   implementation libraries.androidx_core
   implementation libraries.androidx_fragment

@@ -46,7 +46,7 @@ class SettingsMainViewModel(application: Application) : AndroidViewModel(applica
       val context = this.getApplication<Application>()
       val pkgManager = context.packageManager
       val pkgInfo = pkgManager.getPackageInfo(context.packageName, 0)
-      pkgInfo.versionName
+      "${pkgInfo.versionName} (Build ${pkgInfo.versionCode})"
     } catch (e: PackageManager.NameNotFoundException) {
       "Unknown"
     }

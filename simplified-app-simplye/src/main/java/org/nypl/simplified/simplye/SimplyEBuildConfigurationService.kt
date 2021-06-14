@@ -1,10 +1,17 @@
 package org.nypl.simplified.simplye
 
 import org.nypl.simplified.buildconfig.api.BuildConfigOAuthScheme
+import org.nypl.simplified.buildconfig.api.BuildConfigurationAccountsRegistryURIs
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.main.BuildConfig
+import java.net.URI
 
 class SimplyEBuildConfigurationService : BuildConfigurationServiceType {
+  override val libraryRegistry: BuildConfigurationAccountsRegistryURIs
+    get() = BuildConfigurationAccountsRegistryURIs(
+      registry = URI("https://libraryregistry.librarysimplified.org/libraries"),
+      registryQA = URI("https://libraryregistry.librarysimplified.org/libraries/qa")
+    )
   override val allowAccountsAccess: Boolean
     get() = true
   override val allowAccountsRegistryAccess: Boolean

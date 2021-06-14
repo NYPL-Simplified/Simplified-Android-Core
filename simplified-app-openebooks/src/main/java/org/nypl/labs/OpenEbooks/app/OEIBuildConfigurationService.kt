@@ -1,10 +1,17 @@
 package org.nypl.labs.OpenEbooks.app
 
 import org.nypl.simplified.buildconfig.api.BuildConfigOAuthScheme
+import org.nypl.simplified.buildconfig.api.BuildConfigurationAccountsRegistryURIs
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.main.BuildConfig
+import java.net.URI
 
 class OEIBuildConfigurationService : BuildConfigurationServiceType {
+  override val libraryRegistry: BuildConfigurationAccountsRegistryURIs
+    get() = BuildConfigurationAccountsRegistryURIs(
+      registry = URI("https://libraryregistry.librarysimplified.org/libraries"),
+      registryQA = URI("https://libraryregistry.librarysimplified.org/libraries/qa")
+    )
   override val vcsCommit: String
     get() = BuildConfig.GIT_COMMIT
   override val showSettingsTab: Boolean

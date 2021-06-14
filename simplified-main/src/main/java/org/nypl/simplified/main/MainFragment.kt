@@ -5,19 +5,15 @@ import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import io.reactivex.disposables.CompositeDisposable
-import org.librarysimplified.services.api.Services
-import org.nypl.simplified.accessibility.AccessibilityService
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventDeletion
 import org.nypl.simplified.accounts.api.AccountEventUpdated
 import org.nypl.simplified.android.ktx.supportActionBar
 import org.nypl.simplified.books.api.BookID
-import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookStatusEvent
 import org.nypl.simplified.listeners.api.FragmentListenerType
@@ -35,7 +31,6 @@ import org.nypl.simplified.ui.catalog.saml20.CatalogSAML20Fragment
 import org.nypl.simplified.ui.catalog.saml20.CatalogSAML20FragmentParameters
 import org.nypl.simplified.ui.navigation.tabs.TabbedNavigator
 import org.nypl.simplified.ui.profiles.ProfileDialogs
-import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.slf4j.LoggerFactory
 import java.net.URI
 
@@ -57,7 +52,6 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
   private val logger = LoggerFactory.getLogger(MainFragment::class.java)
   private val subscriptions = CompositeDisposable()
 
-  private val activityViewModel: MainActivityViewModel by activityViewModels()
   private val viewModel: MainFragmentViewModel by viewModels()
 
   private val listener: FragmentListenerType<MainFragmentEvent> by fragmentListeners()
@@ -95,20 +89,6 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
     setHasOptionsMenu(true)
 
     this.checkForAnnouncements()
-
-    val services = Services.serviceDirectory()
-
-    /*
-     * Register an accessibility controller.
-     */
-
-    this.lifecycle.addObserver(
-      AccessibilityService.create(
-        context = requireContext(),
-        bookRegistry = services.requireService(BookRegistryType::class.java),
-        uiThread = services.requireService(UIThreadServiceType::class.java)
-      )
-    )
   }
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -156,20 +136,6 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
         navigator = this.navigator
       )
     )
-
-    /*
-     * Because the BottomNavigator stores references to fragments and reuses
-     * them instead of instantiating them anew, it's necessary to aggressively clear the
-     * "root fragments" in case any of them are holding references to stale data such as
-     * profile and account identifiers. We use a view model to store a "clear history" flag
-     * so that we can avoid clearing the history due to device orientation changes and app
-     * foreground/background switches.
-     */
-
-    if (this.activityViewModel.clearHistory) {
-      this.navigator.clearHistory()
-      this.activityViewModel.clearHistory = false
-    }
   }
 
   override fun onOptionsItemSelected(item: MenuItem): Boolean {
