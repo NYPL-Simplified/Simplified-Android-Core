@@ -24,6 +24,7 @@ import org.librarysimplified.r2.api.SR2Event.SR2CommandEvent.SR2CommandExecution
 import org.librarysimplified.r2.api.SR2Event.SR2CommandEvent.SR2CommandExecutionStarted
 import org.librarysimplified.r2.api.SR2Event.SR2Error.SR2ChapterNonexistent
 import org.librarysimplified.r2.api.SR2Event.SR2Error.SR2WebViewInaccessible
+import org.librarysimplified.r2.api.SR2Event.SR2ExternalLinkSelected
 import org.librarysimplified.r2.api.SR2Locator
 import org.librarysimplified.r2.vanilla.SR2Controllers
 import org.librarysimplified.r2.views.SR2ControllerReference
@@ -374,6 +375,7 @@ class Reader2Activity : AppCompatActivity() {
       SR2BookmarksLoaded,
       is SR2ChapterNonexistent,
       is SR2WebViewInaccessible,
+      is SR2ExternalLinkSelected,
       is SR2CommandExecutionStarted,
       is SR2CommandExecutionRunningLong,
       is SR2CommandExecutionSucceeded,
