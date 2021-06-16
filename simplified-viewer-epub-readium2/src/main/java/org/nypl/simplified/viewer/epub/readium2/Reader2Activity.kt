@@ -5,9 +5,9 @@ import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.os.Bundle
 import android.webkit.WebView
-import androidx.annotation.UiThread
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import io.reactivex.disposables.Disposable
 import org.joda.time.LocalDateTime
@@ -95,7 +95,10 @@ class Reader2Activity : AppCompatActivity() {
   private lateinit var parameters: Reader2ActivityParameters
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var readerBookmarks: ReaderBookmarkServiceType
+  private lateinit var readerFragment: Fragment
   private lateinit var readerFragmentFactory: SR2ReaderFragmentFactory
+  private lateinit var readerModel: SR2ReaderViewModel
+  private lateinit var tocFragment: Fragment
   private lateinit var uiThread: UIThreadServiceType
   private var controller: SR2ControllerType? = null
   private var controllerSubscription: Disposable? = null
@@ -151,14 +154,29 @@ class Reader2Activity : AppCompatActivity() {
       return
     }
 
+    this.openController()
+
     if (savedInstanceState == null) {
+      this.readerFragment =
+        this.readerFragmentFactory.instantiate(this.classLoader, SR2ReaderFragment::class.java.name)
+      this.tocFragment =
+        this.readerFragmentFactory.instantiate(this.classLoader, SR2TOCFragment::class.java.name)
+
       this.setContentView(R.layout.reader2)
+
+      this.supportFragmentManager.beginTransaction()
+        .replace(R.id.reader2FragmentHost, this.readerFragment)
+        .add(R.id.reader2FragmentHost, this.tocFragment)
+        .hide(this.tocFragment)
+        .commit()
     }
   }
 
-  override fun onResume() {
-    super.onResume()
-    this.startReader()
+  override fun onStart() {
+    super.onStart()
+
+    this.viewSubscription =
+      this.readerModel.viewEvents.subscribe(this::onViewEvent)
   }
 
   override fun onStop() {
@@ -187,11 +205,10 @@ class Reader2Activity : AppCompatActivity() {
   }
 
   /**
-   * Start the reader with the given EPUB.
+   * Open a reader instance and stash it in a view model.
    */
 
-  @UiThread
-  private fun startReader() {
+  private fun openController() {
     this.uiThread.checkIsUIThread()
 
     /*
@@ -251,16 +268,9 @@ class Reader2Activity : AppCompatActivity() {
     this.readerFragmentFactory =
       SR2ReaderFragmentFactory(readerParameters)
 
-    val readerModel =
+    this.readerModel =
       ViewModelProvider(this, SR2ReaderViewModelFactory(readerParameters))
         .get(SR2ReaderViewModel::class.java)
-
-    this.viewSubscription =
-      readerModel.viewEvents.subscribe(this::onViewEvent)
-
-    this.supportFragmentManager.beginTransaction()
-      .replace(R.id.reader2FragmentHost, this.readerFragmentFactory.instantiate(this.classLoader, SR2ReaderFragment::class.java.name))
-      .commit()
   }
 
   /**
@@ -268,15 +278,13 @@ class Reader2Activity : AppCompatActivity() {
    */
 
   private fun onViewEvent(event: SR2ReaderViewEvent) {
+    this.uiThread.checkIsUIThread()
+
     return when (event) {
       SR2ReaderViewNavigationClose ->
-        this.uiThread.runOnUIThread {
-          this.supportFragmentManager.popBackStack()
-        }
-
+        this.tocClose()
       SR2ReaderViewNavigationOpenTOC ->
-        this.uiThread.runOnUIThread(this::openTOC)
-
+        this.tocOpen()
       is SR2ControllerBecameAvailable ->
         this.onControllerBecameAvailable(event.reference)
       is SR2BookLoadingFailed ->
@@ -316,6 +324,14 @@ class Reader2Activity : AppCompatActivity() {
     } else {
       // Refresh whatever the controller was looking at previously.
       reference.controller.submitCommand(SR2Command.Refresh)
+    }
+  }
+
+  override fun onBackPressed() {
+    if (this.tocFragment.isVisible) {
+      this.tocClose()
+    } else {
+      super.onBackPressed()
     }
   }
 
@@ -386,20 +402,30 @@ class Reader2Activity : AppCompatActivity() {
   }
 
   /**
+   * Close the table of contents.
+   */
+
+  private fun tocClose() {
+    this.uiThread.checkIsUIThread()
+
+    this.logger.debug("TOC closing")
+    this.supportFragmentManager.beginTransaction()
+      .hide(this.tocFragment)
+      .show(this.readerFragment)
+      .commit()
+  }
+
+  /**
    * Open the table of contents.
    */
 
-  @UiThread
-  private fun openTOC() {
+  private fun tocOpen() {
     this.uiThread.checkIsUIThread()
 
-    if (this.isFinishing || this.isDestroyed) {
-      return
-    }
-
+    this.logger.debug("TOC opening")
     this.supportFragmentManager.beginTransaction()
-      .replace(R.id.reader2FragmentHost, this.readerFragmentFactory.instantiate(this.classLoader, SR2TOCFragment::class.java.name))
-      .addToBackStack(null)
+      .hide(this.readerFragment)
+      .show(this.tocFragment)
       .commit()
   }
 
@@ -410,20 +436,20 @@ class Reader2Activity : AppCompatActivity() {
   private fun onBookLoadingFailed(
     exception: Throwable
   ) {
-    this.uiThread.runOnUIThread {
-      val actualException =
-        if (exception is ExecutionException) {
-          exception.cause ?: exception
-        } else {
-          exception
-        }
+    this.uiThread.checkIsUIThread()
 
-      AlertDialog.Builder(this)
-        .setTitle(R.string.bookOpenFailedTitle)
-        .setMessage(this.getString(R.string.bookOpenFailedMessage, actualException.javaClass.name, actualException.message))
-        .setOnDismissListener { this.finish() }
-        .create()
-        .show()
-    }
+    val actualException =
+      if (exception is ExecutionException) {
+        exception.cause ?: exception
+      } else {
+        exception
+      }
+
+    AlertDialog.Builder(this)
+      .setTitle(R.string.bookOpenFailedTitle)
+      .setMessage(this.getString(R.string.bookOpenFailedMessage, actualException.javaClass.name, actualException.message))
+      .setOnDismissListener { this.finish() }
+      .create()
+      .show()
   }
 }
