@@ -257,17 +257,13 @@ class Reader2Activity : AppCompatActivity() {
     this.viewSubscription =
       this.readerModel.viewEvents.subscribe(this::onViewEvent)
 
-    val transaction = this.supportFragmentManager.beginTransaction()
-    val existing = this.supportFragmentManager.findFragmentByTag("SR2ReaderFragment")
-    if (existing != null) {
-      this.logger.debug("removing existing fragment: {}", existing)
-      transaction.remove(existing)
-    }
+    val readerFragment =
+      this.readerFragmentFactory.instantiate(this.classLoader, SR2ReaderFragment::class.java.name)
 
-    val readerFragment = this.readerFragmentFactory.instantiate(this.classLoader, SR2ReaderFragment::class.java.name)
     this.logger.debug("creating reader fragment: {}", readerFragment)
-    transaction.replace(R.id.reader2FragmentHost, readerFragment, "SR2ReaderFragment")
-    transaction.commit()
+    this.supportFragmentManager.beginTransaction()
+      .replace(R.id.reader2FragmentHost, readerFragment, "SR2ReaderFragment")
+      .commit()
   }
 
   /**
