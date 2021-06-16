@@ -5,7 +5,6 @@ import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.os.Bundle
 import android.webkit.WebView
-import androidx.annotation.UiThread
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
@@ -96,6 +95,7 @@ class Reader2Activity : AppCompatActivity() {
   private lateinit var profilesController: ProfilesControllerType
   private lateinit var readerBookmarks: ReaderBookmarkServiceType
   private lateinit var readerFragmentFactory: SR2ReaderFragmentFactory
+  private lateinit var readerModel: SR2ReaderViewModel
   private lateinit var uiThread: UIThreadServiceType
   private var controller: SR2ControllerType? = null
   private var controllerSubscription: Disposable? = null
@@ -156,8 +156,8 @@ class Reader2Activity : AppCompatActivity() {
     }
   }
 
-  override fun onResume() {
-    super.onResume()
+  override fun onStart() {
+    super.onStart()
     this.startReader()
   }
 
@@ -190,7 +190,6 @@ class Reader2Activity : AppCompatActivity() {
    * Start the reader with the given EPUB.
    */
 
-  @UiThread
   private fun startReader() {
     this.uiThread.checkIsUIThread()
 
@@ -251,16 +250,24 @@ class Reader2Activity : AppCompatActivity() {
     this.readerFragmentFactory =
       SR2ReaderFragmentFactory(readerParameters)
 
-    val readerModel =
+    this.readerModel =
       ViewModelProvider(this, SR2ReaderViewModelFactory(readerParameters))
         .get(SR2ReaderViewModel::class.java)
 
     this.viewSubscription =
-      readerModel.viewEvents.subscribe(this::onViewEvent)
+      this.readerModel.viewEvents.subscribe(this::onViewEvent)
 
-    this.supportFragmentManager.beginTransaction()
-      .replace(R.id.reader2FragmentHost, this.readerFragmentFactory.instantiate(this.classLoader, SR2ReaderFragment::class.java.name))
-      .commit()
+    val transaction = this.supportFragmentManager.beginTransaction()
+    val existing = this.supportFragmentManager.findFragmentByTag("SR2ReaderFragment")
+    if (existing != null) {
+      this.logger.debug("removing existing fragment: {}", existing)
+      transaction.remove(existing)
+    }
+
+    val readerFragment = this.readerFragmentFactory.instantiate(this.classLoader, SR2ReaderFragment::class.java.name)
+    this.logger.debug("creating reader fragment: {}", readerFragment)
+    transaction.replace(R.id.reader2FragmentHost, readerFragment, "SR2ReaderFragment")
+    transaction.commit()
   }
 
   /**
@@ -268,15 +275,15 @@ class Reader2Activity : AppCompatActivity() {
    */
 
   private fun onViewEvent(event: SR2ReaderViewEvent) {
+    this.uiThread.checkIsUIThread()
+
     return when (event) {
-      SR2ReaderViewNavigationClose ->
-        this.uiThread.runOnUIThread {
-          this.supportFragmentManager.popBackStack()
-        }
-
+      SR2ReaderViewNavigationClose -> {
+        this.logger.debug("popping fragment backstack")
+        this.supportFragmentManager.popBackStack()
+      }
       SR2ReaderViewNavigationOpenTOC ->
-        this.uiThread.runOnUIThread(this::openTOC)
-
+        this.openTOC()
       is SR2ControllerBecameAvailable ->
         this.onControllerBecameAvailable(event.reference)
       is SR2BookLoadingFailed ->
@@ -389,7 +396,6 @@ class Reader2Activity : AppCompatActivity() {
    * Open the table of contents.
    */
 
-  @UiThread
   private fun openTOC() {
     this.uiThread.checkIsUIThread()
 
@@ -397,8 +403,12 @@ class Reader2Activity : AppCompatActivity() {
       return
     }
 
+    val tocFragment =
+      this.readerFragmentFactory.instantiate(this.classLoader, SR2TOCFragment::class.java.name)
+
+    this.logger.debug("creating TOC fragment: {}", tocFragment)
     this.supportFragmentManager.beginTransaction()
-      .replace(R.id.reader2FragmentHost, this.readerFragmentFactory.instantiate(this.classLoader, SR2TOCFragment::class.java.name))
+      .replace(R.id.reader2FragmentHost, tocFragment)
       .addToBackStack(null)
       .commit()
   }
@@ -410,20 +420,20 @@ class Reader2Activity : AppCompatActivity() {
   private fun onBookLoadingFailed(
     exception: Throwable
   ) {
-    this.uiThread.runOnUIThread {
-      val actualException =
-        if (exception is ExecutionException) {
-          exception.cause ?: exception
-        } else {
-          exception
-        }
+    this.uiThread.checkIsUIThread()
 
-      AlertDialog.Builder(this)
-        .setTitle(R.string.bookOpenFailedTitle)
-        .setMessage(this.getString(R.string.bookOpenFailedMessage, actualException.javaClass.name, actualException.message))
-        .setOnDismissListener { this.finish() }
-        .create()
-        .show()
-    }
+    val actualException =
+      if (exception is ExecutionException) {
+        exception.cause ?: exception
+      } else {
+        exception
+      }
+
+    AlertDialog.Builder(this)
+      .setTitle(R.string.bookOpenFailedTitle)
+      .setMessage(this.getString(R.string.bookOpenFailedMessage, actualException.javaClass.name, actualException.message))
+      .setOnDismissListener { this.finish() }
+      .create()
+      .show()
   }
 }
