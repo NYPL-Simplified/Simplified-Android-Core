@@ -262,7 +262,7 @@ class Reader2Activity : AppCompatActivity() {
 
     this.logger.debug("creating reader fragment: {}", readerFragment)
     this.supportFragmentManager.beginTransaction()
-      .replace(R.id.reader2FragmentHost, readerFragment, "SR2ReaderFragment")
+      .replace(R.id.reader2FragmentHost, readerFragment)
       .commit()
   }
 
@@ -394,10 +394,6 @@ class Reader2Activity : AppCompatActivity() {
 
   private fun openTOC() {
     this.uiThread.checkIsUIThread()
-
-    if (this.isFinishing || this.isDestroyed) {
-      return
-    }
 
     val tocFragment =
       this.readerFragmentFactory.instantiate(this.classLoader, SR2TOCFragment::class.java.name)
