@@ -52,7 +52,7 @@
         </c:change>
       </c:changes>
     </c:release>
-    <c:release date="2021-06-15T11:44:41+00:00" is-open="true" ticket-system="org.nypl.jira" version="7.0.0">
+    <c:release date="2021-06-16T12:43:53+00:00" is-open="true" ticket-system="org.nypl.jira" version="7.0.0">
       <c:changes>
         <c:change date="2021-03-26T00:00:00+00:00" summary="Standardize bookmarks across platforms">
           <c:tickets>
@@ -150,7 +150,12 @@
             <c:ticket id="SMA-185"/>
           </c:tickets>
         </c:change>
-        <c:change date="2021-06-15T11:44:41+00:00" summary="Fix internal and external links in R2"/>
+        <c:change date="2021-06-15T00:00:00+00:00" summary="Fix internal and external links in R2"/>
+        <c:change date="2021-06-16T12:43:53+00:00" summary="Fix an R2 lifecycle issue with the TOC">
+          <c:tickets>
+            <c:ticket id="SMA-194"/>
+          </c:tickets>
+        </c:change>
       </c:changes>
     </c:release>
   </c:releases>
