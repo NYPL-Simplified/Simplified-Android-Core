@@ -224,7 +224,7 @@ class CatalogButtons(
     val buttonLayoutParams = LinearLayout.LayoutParams(0, 0)
     buttonLayoutParams.weight = 1.0f
     buttonLayoutParams.height = LinearLayout.LayoutParams.WRAP_CONTENT
-    buttonLayoutParams.width = this.screenSizeInformation.dpToPixels(64).toInt()
+    buttonLayoutParams.width = this.screenSizeInformation.dpToPixels(80).toInt()
     return buttonLayoutParams
   }
 }
