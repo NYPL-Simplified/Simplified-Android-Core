@@ -35,7 +35,7 @@
   <string name="accountsDeleteConfirm">Are you sure you want to remove \"%1$s\" from this device?</string>
   <string name="accountsDeleteConfirmTitle">Remove account</string>
   <string name="accountsDeletionFailed">Account deletion failed</string>
-  <string name="accountsDeletionFailedMessage">The account \'%1$s\' could not be deleted.</string>
+  <string name="accountsDeletionFailedMessage">The account could not be deleted.</string>
   <string name="accountsDetails">Details</string>
   <string name="accountSyncBookmarks">Sync bookmarks</string>
   <string name="accountUserName">User Name</string>
