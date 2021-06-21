@@ -110,6 +110,7 @@ class AccountListAdapter(
           View.GONE
         }
 
+      this.imageLoader.loader.cancelRequest(this.accountIcon)
       ImageAccountIcons.loadAccountLogoIntoView(
         loader = this.imageLoader.loader,
         account = item.provider.toDescription(),

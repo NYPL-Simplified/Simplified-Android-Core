@@ -1,27 +1,32 @@
 package org.nypl.simplified.ui.accounts
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import hu.akarnokd.rxjava2.subjects.UnicastWorkSubject
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import org.joda.time.DateTime
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountEvent
+import org.nypl.simplified.accounts.api.AccountEventLoginStateChanged
+import org.nypl.simplified.accounts.api.AccountEventUpdated
 import org.nypl.simplified.accounts.api.AccountID
+import org.nypl.simplified.accounts.api.AccountLoginState
+import org.nypl.simplified.accounts.api.AccountPreferences
+import org.nypl.simplified.accounts.api.AccountProviderType
+import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.profiles.api.ProfileDateOfBirth
-import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceType
-import java.net.URI
 
 /**
  * A view model for storing state during login attempts.
  */
 
 class AccountDetailViewModel(
-  private val accountId: AccountID
+  val accountId: AccountID
 ) : ViewModel() {
 
   private val services =
@@ -33,21 +38,39 @@ class AccountDetailViewModel(
   private val readerBookmarkService =
     services.requireService(ReaderBookmarkServiceType::class.java)
 
-  private val subscriptions = CompositeDisposable(
-    this.profilesController.accountEvents()
-      .observeOn(AndroidSchedulers.mainThread())
-      .subscribe(this::onAccountEvent),
-    this.profilesController.profileEvents()
-      .observeOn(AndroidSchedulers.mainThread())
-      .subscribe(this::onProfileEvent)
-  )
+  private val subscriptions =
+    CompositeDisposable(
+      this.profilesController.accountEvents()
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(this::onAccountEvent)
+    )
 
-  private fun onAccountEvent(event: AccountEvent) {
-    this.accountEvents.onNext(event)
-  }
+  private val accountLiveMutable: MutableLiveData<AccountType> =
+    MutableLiveData(
+      this.profilesController
+        .profileCurrent()
+        .account(this.accountId)
+    )
 
-  private fun onProfileEvent(event: ProfileEvent) {
-    this.profileEvents.onNext(event)
+  private fun onAccountEvent(accountEvent: AccountEvent) {
+    return when (accountEvent) {
+      is AccountEventUpdated -> {
+        if (accountEvent.accountID == this.accountId) {
+          this.accountLiveMutable.value = this.account
+        } else {
+          // Don't care about events for other accounts
+        }
+      }
+      is AccountEventLoginStateChanged ->
+        if (accountEvent.accountID == this.accountId) {
+          this.accountLiveMutable.value = this.account
+        } else {
+          // Don't care about events for other accounts
+        }
+      else -> {
+        // Don't care about other events
+      }
+    }
   }
 
   override fun onCleared() {
@@ -55,24 +78,16 @@ class AccountDetailViewModel(
     this.subscriptions.clear()
   }
 
-  val accountEvents: UnicastWorkSubject<AccountEvent> =
-    UnicastWorkSubject.create()
-
-  val profileEvents: UnicastWorkSubject<ProfileEvent> =
-    UnicastWorkSubject.create()
-
   val buildConfig =
     services.requireService(BuildConfigurationServiceType::class.java)
 
-  val account =
-    this.profilesController
-      .profileCurrent()
-      .account(this.accountId)
+  val accountLive: LiveData<AccountType> =
+    this.accountLiveMutable
 
-  val eula: URI? =
-    this.account.provider.eula
+  val account: AccountType =
+    this.accountLive.value!!
 
-  /**
+    /**
    * Logging in was explicitly requested. This is tracked in order to allow for optionally
    * closing the account fragment on successful logins.
    */

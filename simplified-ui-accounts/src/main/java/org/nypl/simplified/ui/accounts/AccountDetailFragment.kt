@@ -22,9 +22,6 @@ import com.io7m.junreachable.UnreachableCodeException
 import io.reactivex.disposables.CompositeDisposable
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
-import org.nypl.simplified.accounts.api.AccountEvent
-import org.nypl.simplified.accounts.api.AccountEventLoginStateChanged
-import org.nypl.simplified.accounts.api.AccountEventUpdated
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggedIn
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingIn
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingInWaitingForExternalAuthentication
@@ -40,8 +37,6 @@ import org.nypl.simplified.cardcreator.CardCreatorServiceType
 import org.nypl.simplified.listeners.api.FragmentListenerType
 import org.nypl.simplified.listeners.api.fragmentListeners
 import org.nypl.simplified.oauth.OAuthCallbackIntentParsing
-import org.nypl.simplified.profiles.api.ProfileEvent
-import org.nypl.simplified.profiles.api.ProfileUpdated
 import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest
 import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest.Basic
 import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest.OAuthWithIntermediaryCancel
@@ -77,9 +72,17 @@ class AccountDetailFragment : Fragment(R.layout.account) {
     this.requireArguments()[PARAMETERS_ID] as AccountFragmentParameters
   }
 
+  private val services = Services.serviceDirectory()
+
   private val viewModel: AccountDetailViewModel by viewModels(
     factoryProducer = { AccountViewModelFactory(account = this.parameters.accountId) }
   )
+
+  private val cardCreatorService: CardCreatorServiceType? =
+    services.optionalService(CardCreatorServiceType::class.java)
+
+  private val imageLoader: ImageLoaderType =
+    services.requireService(ImageLoaderType::class.java)
 
   private lateinit var accountCustomOPDS: ViewGroup
   private lateinit var accountCustomOPDSField: TextView
@@ -94,7 +97,6 @@ class AccountDetailFragment : Fragment(R.layout.account) {
   private lateinit var bookmarkSyncCheck: SwitchCompat
   private lateinit var bookmarkSyncLabel: View
   private lateinit var eulaCheckbox: CheckBox
-  private lateinit var imageLoader: ImageLoaderType
   private lateinit var loginProgress: ViewGroup
   private lateinit var loginButtonErrorDetails: Button
   private lateinit var loginProgressBar: ProgressBar
@@ -110,7 +112,6 @@ class AccountDetailFragment : Fragment(R.layout.account) {
   private val cardCreatorResultCode = 101
   private val imageButtonLoadingTag = "IMAGE_BUTTON_LOADING"
   private val nyplCardCreatorScheme = "nypl.card-creator"
-  private var cardCreatorService: CardCreatorServiceType? = null
 
   companion object {
 
@@ -126,17 +127,6 @@ class AccountDetailFragment : Fragment(R.layout.account) {
       fragment.arguments = bundleOf(this.PARAMETERS_ID to parameters)
       return fragment
     }
-  }
-
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-
-    val services = Services.serviceDirectory()
-
-    this.cardCreatorService =
-      services.optionalService(CardCreatorServiceType::class.java)
-    this.imageLoader =
-      services.requireService(ImageLoaderType::class.java)
   }
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -200,14 +190,6 @@ class AccountDetailFragment : Fragment(R.layout.account) {
     this.reportIssueEmail =
       this.reportIssueGroup.findViewById(R.id.accountReportIssueEmail)
 
-    this.loginButtonErrorDetails.visibility = View.GONE
-    this.loginProgressBar.visibility = View.INVISIBLE
-    this.setLoginButtonStatus(AsLoginButtonDisabled)
-
-    if (savedInstanceState == null) {
-      this.loginProgressText.text = ""
-    }
-
     if (this.parameters.showPleaseLogInTitle) {
       this.loginTitle.visibility = View.VISIBLE
     } else {
@@ -215,59 +197,27 @@ class AccountDetailFragment : Fragment(R.layout.account) {
     }
 
     /*
-    * Only show a EULA checkbox if there's actually a EULA.
-    */
-
-    val eula = this.viewModel.eula
-    if (eula != null) {
-      this.eulaCheckbox.visibility = View.VISIBLE
-      this.eulaCheckbox.setOnCheckedChangeListener { _, checked ->
-        this.setLoginButtonStatus(this.determineLoginIsSatisfied())
-      }
-    } else {
-      this.eulaCheckbox.visibility = View.GONE
-    }
-
-    this.hideCardCreatorForNonNYPL()
-
-    this.accountTitle.text =
-      this.viewModel.account.provider.displayName
-    this.accountSubtitle.text =
-      this.viewModel.account.provider.subtitle
-
-    /*
-     * Conditionally enable sign up button
-     */
-
-    val signUpEnabled = this.shouldSignUpBeEnabled()
-    this.signUpButton.isEnabled = signUpEnabled
-    this.signUpLabel.isEnabled = signUpEnabled
-
-    /*
      * Instantiate views for alternative authentication methods.
      */
 
     this.authenticationAlternativesMake()
 
-    /*
-     * Show/hide the custom OPDS feed section.
-     */
+    ImageAccountIcons.loadAccountLogoIntoView(
+      this.imageLoader.loader,
+      this.viewModel.account.provider.toDescription(),
+      R.drawable.account_default,
+      this.accountIcon
+    )
 
-    val catalogURIOverride = this.viewModel.account.preferences.catalogURIOverride
-    this.accountCustomOPDSField.text = catalogURIOverride?.toString() ?: ""
-    this.accountCustomOPDS.visibility =
-      if (catalogURIOverride != null) {
-        View.VISIBLE
-      } else {
-        View.GONE
-      }
-
-    this.reconfigureAccountUI()
+    this.viewModel.accountLive.observe(this.viewLifecycleOwner) {
+      this.reconfigureAccountUI()
+    }
   }
 
   override fun onDestroyView() {
     super.onDestroyView()
     this.cancelImageButtonLoading()
+    this.imageLoader.loader.cancelRequest(this.accountIcon)
   }
 
   private fun onBasicUserPasswordChanged(
@@ -279,7 +229,7 @@ class AccountDetailFragment : Fragment(R.layout.account) {
 
   private fun determineLoginIsSatisfied(): AccountLoginButtonStatus {
     val authDescription = this.viewModel.account.provider.authentication
-    val eulaOk = this.determineEULAIsSatisfied()
+    val eulaOk = this.eulaCheckbox.isChecked
     val loginPossible = authDescription.isLoginPossible
     val satisfiedFor = this.authenticationViews.isSatisfiedFor(authDescription)
 
@@ -292,10 +242,6 @@ class AccountDetailFragment : Fragment(R.layout.account) {
     } else {
       AsLoginButtonDisabled
     }
-  }
-
-  private fun determineEULAIsSatisfied(): Boolean {
-    return this.eulaCheckbox.isChecked
   }
 
   private fun shouldSignUpBeEnabled(): Boolean {
@@ -348,12 +294,9 @@ class AccountDetailFragment : Fragment(R.layout.account) {
 
     this.configureToolbar(requireActivity())
 
-    ImageAccountIcons.loadAccountLogoIntoView(
-      this.imageLoader.loader,
-      this.viewModel.account.provider.toDescription(),
-      R.drawable.account_default,
-      this.accountIcon
-    )
+    this.eulaCheckbox.setOnCheckedChangeListener { _, checked ->
+      this.setLoginButtonStatus(this.determineLoginIsSatisfied())
+    }
 
     /*
      * Configure the COPPA age gate switch. If the user changes their age, a log out
@@ -384,14 +327,6 @@ class AccountDetailFragment : Fragment(R.layout.account) {
      */
 
     this.configureReportIssue()
-
-    this.viewModel.accountEvents
-      .subscribe(this::onAccountEvent)
-      .let { this.subscriptions.add(it) }
-
-    this.viewModel.profileEvents
-      .subscribe(this::onProfileEvent)
-      .let { this.subscriptions.add(it) }
   }
 
   private fun instantiateAlternativeAuthenticationViews() {
@@ -491,13 +426,13 @@ class AccountDetailFragment : Fragment(R.layout.account) {
     this.viewModel.loginExplicitlyRequested = true
     this.viewModel.tryLogin(
       ProfileAccountLoginRequest.SAML20Initiate(
-        accountId = this.viewModel.account.id,
+        accountId = this.viewModel.accountId,
         description = authenticationDescription
       )
     )
 
     this.listener.post(
-      AccountDetailEvent.OpenSAML20Login(this.viewModel.account.id, authenticationDescription)
+      AccountDetailEvent.OpenSAML20Login(this.viewModel.accountId, authenticationDescription)
     )
   }
 
@@ -583,16 +518,6 @@ class AccountDetailFragment : Fragment(R.layout.account) {
     this.subscriptions.clear()
   }
 
-  private fun onProfileEvent(event: ProfileEvent) {
-    return when (event) {
-      is ProfileUpdated -> {
-        this.reconfigureAccountUI()
-      }
-      else -> {
-      }
-    }
-  }
-
   private fun reconfigureAccountUI() {
     val isPermitted = this.viewModel.account.preferences.bookmarkSyncingPermitted
     val isSupported = this.viewModel.account.loginState.credentials ?.annotationsURI != null
@@ -602,10 +527,50 @@ class AccountDetailFragment : Fragment(R.layout.account) {
 
     this.authenticationViews.showFor(this.viewModel.account.provider.authentication)
 
+    /*
+     * Only show a EULA checkbox if there's actually a EULA.
+     */
+
+    if (this.viewModel.account.provider.eula != null) {
+      this.eulaCheckbox.visibility = View.VISIBLE
+      this.eulaCheckbox.setOnCheckedChangeListener { _, checked ->
+        this.setLoginButtonStatus(this.determineLoginIsSatisfied())
+      }
+    } else {
+      this.eulaCheckbox.visibility = View.GONE
+    }
+
+
+    this.hideCardCreatorForNonNYPL()
+
+    this.accountTitle.text =
+      this.viewModel.account.provider.displayName
+    this.accountSubtitle.text =
+      this.viewModel.account.provider.subtitle
+
+    /*
+     * Conditionally enable sign up button
+     */
+
+    val signUpEnabled = this.shouldSignUpBeEnabled()
+    this.signUpButton.isEnabled = signUpEnabled
+    this.signUpLabel.isEnabled = signUpEnabled
+
+    /*
+     * Show/hide the custom OPDS feed section.
+     */
+
+    val catalogURIOverride = this.viewModel.account.preferences.catalogURIOverride
+    this.accountCustomOPDSField.text = catalogURIOverride?.toString() ?: ""
+    this.accountCustomOPDS.visibility =
+      if (catalogURIOverride != null) {
+        View.VISIBLE
+      } else {
+        View.GONE
+      }
+
     return when (val loginState = this.viewModel.account.loginState) {
       AccountNotLoggedIn -> {
-        this.authenticationViews.setBasicUserAndPass("", "")
-
         this.loginProgress.visibility = View.GONE
         this.setLoginButtonStatus(
           AsLoginButtonEnabled {
@@ -901,27 +866,6 @@ class AccountDetailFragment : Fragment(R.layout.account) {
 
   private fun authenticationAlternativesHide() {
     this.authenticationAlternatives.visibility = View.GONE
-  }
-
-  private fun onAccountEvent(accountEvent: AccountEvent) {
-    return when (accountEvent) {
-      is AccountEventUpdated -> {
-        if (accountEvent.accountID == this.parameters.accountId) {
-          this.reconfigureAccountUI()
-        } else {
-          // Don't care about events for other accounts
-        }
-      }
-      is AccountEventLoginStateChanged ->
-        if (accountEvent.accountID == this.parameters.accountId) {
-          this.reconfigureAccountUI()
-        } else {
-          // Don't care about events for other accounts
-        }
-      else -> {
-        // Don't care about other events
-      }
-    }
   }
 
   private fun tryLogin() {
