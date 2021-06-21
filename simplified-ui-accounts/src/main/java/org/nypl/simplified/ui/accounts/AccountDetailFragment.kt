@@ -71,7 +71,7 @@ class AccountDetailFragment : Fragment(R.layout.account) {
   private val subscriptions: CompositeDisposable =
     CompositeDisposable()
 
-  private val listener: FragmentListenerType<org.nypl.simplified.ui.accounts.AccountDetailEvent> by fragmentListeners()
+  private val listener: FragmentListenerType<AccountDetailEvent> by fragmentListeners()
 
   private val parameters: AccountFragmentParameters by lazy {
     this.requireArguments()[PARAMETERS_ID] as AccountFragmentParameters
@@ -221,9 +221,7 @@ class AccountDetailFragment : Fragment(R.layout.account) {
     val eula = this.viewModel.eula
     if (eula != null) {
       this.eulaCheckbox.visibility = View.VISIBLE
-      this.eulaCheckbox.isChecked = eula.hasAgreed
       this.eulaCheckbox.setOnCheckedChangeListener { _, checked ->
-        eula.hasAgreed = checked
         this.setLoginButtonStatus(this.determineLoginIsSatisfied())
       }
     } else {
@@ -297,8 +295,7 @@ class AccountDetailFragment : Fragment(R.layout.account) {
   }
 
   private fun determineEULAIsSatisfied(): Boolean {
-    val eula = this.viewModel.eula
-    return eula?.hasAgreed ?: true
+    return this.eulaCheckbox.isChecked
   }
 
   private fun shouldSignUpBeEnabled(): Boolean {
