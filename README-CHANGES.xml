@@ -159,8 +159,14 @@
         <c:change date="2021-06-16T00:00:00+00:00" summary="Improve R2 behaviour with regards to spaces in filenames inside EPUB files"/>
       </c:changes>
     </c:release>
-    <c:release date="2021-06-23T15:08:21+00:00" is-open="true" ticket-system="org.nypl.jira" version="7.0.1">
-      <c:changes/>
+    <c:release date="2021-06-23T17:06:20+00:00" is-open="true" ticket-system="org.nypl.jira" version="7.0.1">
+      <c:changes>
+        <c:change date="2021-06-23T17:06:20+00:00" summary="Improve R2 accessibility">
+          <c:tickets>
+            <c:ticket id="SMA-197"/>
+          </c:tickets>
+        </c:change>
+      </c:changes>
     </c:release>
   </c:releases>
   <c:ticket-systems>
