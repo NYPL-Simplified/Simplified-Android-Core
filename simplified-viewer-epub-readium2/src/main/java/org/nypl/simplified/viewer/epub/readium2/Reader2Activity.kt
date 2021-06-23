@@ -26,6 +26,8 @@ import org.librarysimplified.r2.api.SR2Event.SR2Error.SR2ChapterNonexistent
 import org.librarysimplified.r2.api.SR2Event.SR2Error.SR2WebViewInaccessible
 import org.librarysimplified.r2.api.SR2Event.SR2ExternalLinkSelected
 import org.librarysimplified.r2.api.SR2Locator
+import org.librarysimplified.r2.api.SR2ScrollingMode.SCROLLING_MODE_CONTINUOUS
+import org.librarysimplified.r2.api.SR2ScrollingMode.SCROLLING_MODE_PAGINATED
 import org.librarysimplified.r2.vanilla.SR2Controllers
 import org.librarysimplified.r2.views.SR2ControllerReference
 import org.librarysimplified.r2.views.SR2ReaderFragment
@@ -43,6 +45,7 @@ import org.librarysimplified.services.api.Services
 import org.nypl.drm.core.AdobeAdeptFileAsset
 import org.nypl.drm.core.AxisNowFileAsset
 import org.nypl.drm.core.ContentProtectionProvider
+import org.nypl.simplified.accessibility.AccessibilityServiceType
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.analytics.api.AnalyticsEvent
 import org.nypl.simplified.analytics.api.AnalyticsType
@@ -88,6 +91,7 @@ class Reader2Activity : AppCompatActivity() {
   private val logger =
     LoggerFactory.getLogger(Reader2Activity::class.java)
 
+  private lateinit var accessibilityService: AccessibilityServiceType
   private lateinit var account: AccountType
   private lateinit var analyticsService: AnalyticsType
   private lateinit var bookmarkService: ReaderBookmarkServiceType
@@ -117,6 +121,8 @@ class Reader2Activity : AppCompatActivity() {
 
     val services = Services.serviceDirectory()
 
+    this.accessibilityService =
+      services.requireService(AccessibilityServiceType::class.java)
     this.analyticsService =
       services.requireService(AnalyticsType::class.java)
     this.bookmarkService =
@@ -262,7 +268,12 @@ class Reader2Activity : AppCompatActivity() {
         bookFile = bookFile,
         bookId = this.parameters.entry.feedEntry.id,
         theme = initialTheme,
-        controllers = SR2Controllers()
+        controllers = SR2Controllers(),
+        scrollingMode = if (this.accessibilityService.spokenFeedbackEnabled) {
+          SCROLLING_MODE_CONTINUOUS
+        } else {
+          SCROLLING_MODE_PAGINATED
+        }
       )
 
     this.readerFragmentFactory =

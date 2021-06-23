@@ -1,10 +1,11 @@
 dependencies {
+  implementation project(":simplified-accessibility")
+  implementation project(":simplified-analytics-api")
   implementation project(":simplified-feeds-api")
   implementation project(":simplified-reader-bookmarks-api")
   implementation project(":simplified-services-api")
   implementation project(":simplified-ui-thread-api")
   implementation project(":simplified-viewer-spi")
-  implementation project(":simplified-analytics-api")
 
   implementation libraries.androidx_activity
   implementation libraries.androidx_appcompat
