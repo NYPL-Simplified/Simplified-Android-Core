@@ -11,6 +11,7 @@ import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SwitchCompat
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -33,6 +34,7 @@ import org.nypl.simplified.accounts.api.AccountPassword
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.api.AccountUsername
 import org.nypl.simplified.android.ktx.supportActionBar
+import org.nypl.simplified.cardcreator.CardCreatorContract
 import org.nypl.simplified.cardcreator.CardCreatorServiceType
 import org.nypl.simplified.listeners.api.FragmentListenerType
 import org.nypl.simplified.listeners.api.fragmentListeners
@@ -41,14 +43,12 @@ import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest
 import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest.Basic
 import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest.OAuthWithIntermediaryCancel
 import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest.OAuthWithIntermediaryInitiate
-import org.nypl.simplified.taskrecorder.api.TaskStep
 import org.nypl.simplified.ui.accounts.AccountLoginButtonStatus.AsCancelButtonDisabled
 import org.nypl.simplified.ui.accounts.AccountLoginButtonStatus.AsCancelButtonEnabled
 import org.nypl.simplified.ui.accounts.AccountLoginButtonStatus.AsLoginButtonDisabled
 import org.nypl.simplified.ui.accounts.AccountLoginButtonStatus.AsLoginButtonEnabled
 import org.nypl.simplified.ui.accounts.AccountLoginButtonStatus.AsLogoutButtonDisabled
 import org.nypl.simplified.ui.accounts.AccountLoginButtonStatus.AsLogoutButtonEnabled
-import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.images.ImageAccountIcons
 import org.nypl.simplified.ui.images.ImageLoaderType
 import org.slf4j.LoggerFactory
@@ -75,11 +75,18 @@ class AccountDetailFragment : Fragment(R.layout.account) {
   private val services = Services.serviceDirectory()
 
   private val viewModel: AccountDetailViewModel by viewModels(
-    factoryProducer = { AccountViewModelFactory(account = this.parameters.accountId) }
+    factoryProducer = {
+      AccountDetailViewModelFactory(
+        account = this.parameters.accountId,
+        listener = this.listener
+      )
+    }
   )
 
-  private val cardCreatorService: CardCreatorServiceType? =
+  private val cardCreatorLauncher: ActivityResultLauncher<CardCreatorContract.Input>? =
     services.optionalService(CardCreatorServiceType::class.java)
+      ?.getCardCreatorContract()
+      ?.let { this.registerForActivityResult(it, this::onCardCreatorResult) }
 
   private val imageLoader: ImageLoaderType =
     services.requireService(ImageLoaderType::class.java)
@@ -109,7 +116,6 @@ class AccountDetailFragment : Fragment(R.layout.account) {
   private lateinit var signUpButton: Button
   private lateinit var signUpLabel: TextView
 
-  private val cardCreatorResultCode = 101
   private val imageButtonLoadingTag = "IMAGE_BUTTON_LOADING"
   private val nyplCardCreatorScheme = "nypl.card-creator"
 
@@ -257,7 +263,7 @@ class AccountDetailFragment : Fragment(R.layout.account) {
        */
 
       if (cardCreatorURI.scheme == this.nyplCardCreatorScheme) {
-        return this.cardCreatorService != null
+        return this.cardCreatorLauncher != null
       }
       true
     } else {
@@ -266,17 +272,15 @@ class AccountDetailFragment : Fragment(R.layout.account) {
   }
 
   private fun openCardCreator() {
-    val cardCreator = this.cardCreatorService
     val cardCreatorURI = this.viewModel.account.provider.cardCreatorURI
     if (cardCreatorURI != null) {
       if (cardCreatorURI.scheme == this.nyplCardCreatorScheme) {
-        if (cardCreator != null) {
-          cardCreator.openCardCreatorActivity(
-            this,
-            this.activity,
-            this.cardCreatorResultCode,
-            this.viewModel.account.loginState is AccountLoggedIn,
-            this.authenticationViews.getBasicUser().value.trim()
+        if (cardCreatorLauncher != null) {
+          cardCreatorLauncher.launch(
+            CardCreatorContract.Input(
+              this.authenticationViews.getBasicUser().value.trim(),
+              this.viewModel.account.loginState is AccountLoggedIn
+            )
           )
         } else {
           // We rely on [shouldSignUpBeEnabled] to have disabled the button
@@ -426,13 +430,13 @@ class AccountDetailFragment : Fragment(R.layout.account) {
     this.viewModel.loginExplicitlyRequested = true
     this.viewModel.tryLogin(
       ProfileAccountLoginRequest.SAML20Initiate(
-        accountId = this.viewModel.accountId,
+        accountId = this.parameters.accountId,
         description = authenticationDescription
       )
     )
 
     this.listener.post(
-      AccountDetailEvent.OpenSAML20Login(this.viewModel.accountId, authenticationDescription)
+      AccountDetailEvent.OpenSAML20Login(this.parameters.accountId, authenticationDescription)
     )
   }
 
@@ -632,7 +636,7 @@ class AccountDetailFragment : Fragment(R.layout.account) {
         )
         this.loginButtonErrorDetails.visibility = View.VISIBLE
         this.loginButtonErrorDetails.setOnClickListener {
-          this.openErrorPage(loginState.taskResult.steps)
+          this.viewModel.openErrorPage(loginState.taskResult.steps)
         }
         this.authenticationAlternativesShow()
       }
@@ -656,26 +660,17 @@ class AccountDetailFragment : Fragment(R.layout.account) {
         this.setLoginButtonStatus(
           AsLogoutButtonEnabled {
             this.loginFormLock()
-            this.tryLogout()
+            this.viewModel.tryLogout()
           }
         )
         this.authenticationAlternativesHide()
-
-        if (this.viewModel.loginExplicitlyRequested) {
-          this.logger.debug("scheduling explicit close of account fragment")
-          this.listener.post(AccountDetailEvent.LoginSucceeded)
-        } else {
-          // Doing nothing.
-        }
       }
 
       is AccountLoggingOut -> {
         when (val creds = loginState.credentials) {
           is AccountAuthenticationCredentials.Basic -> {
-            this.authenticationViews.setBasicUserAndPass(
-              user = creds.userName.value,
-              password = creds.password.value
-            )
+            this.authenticationViews.setBasicUserAndPass("", "")
+
           }
           is AccountAuthenticationCredentials.OAuthWithIntermediary -> {
             // No UI
@@ -711,13 +706,13 @@ class AccountDetailFragment : Fragment(R.layout.account) {
         this.setLoginButtonStatus(
           AsLogoutButtonEnabled {
             this.loginFormLock()
-            this.tryLogout()
+            this.viewModel.tryLogout()
           }
         )
 
         this.loginButtonErrorDetails.visibility = View.VISIBLE
         this.loginButtonErrorDetails.setOnClickListener {
-          this.openErrorPage(loginState.taskResult.steps)
+          this.viewModel.openErrorPage(loginState.taskResult.steps)
         }
       }
     }
@@ -804,19 +799,6 @@ class AccountDetailFragment : Fragment(R.layout.account) {
     }
   }
 
-  private fun openErrorPage(taskSteps: List<TaskStep>) {
-    val parameters =
-      ErrorPageParameters(
-        emailAddress = this.viewModel.buildConfig.supportErrorReportEmailAddress,
-        body = "",
-        subject = "[simplye-error-report]",
-        attributes = sortedMapOf(),
-        taskSteps = taskSteps
-      )
-
-    this.listener.post(AccountDetailEvent.OpenErrorPage(parameters))
-  }
-
   private fun loginFormLock() {
     this.authenticationViews.setCOPPAState(
       isOver13 = this.viewModel.isOver13,
@@ -885,25 +867,6 @@ class AccountDetailFragment : Fragment(R.layout.account) {
     }
   }
 
-  private fun tryLogout() {
-    return when (this.viewModel.account.provider.authentication) {
-      is AccountProviderAuthenticationDescription.Anonymous ->
-        Unit
-
-      /*
-       * Although COPPA age-gated accounts don't require "logging in" or "logging out" exactly,
-       * we *do* want local books to be deleted as part of a logout attempt.
-       */
-
-      is AccountProviderAuthenticationDescription.SAML2_0,
-      is AccountProviderAuthenticationDescription.OAuthWithIntermediary,
-      is AccountProviderAuthenticationDescription.COPPAAgeGate,
-      is AccountProviderAuthenticationDescription.Basic -> {
-        this.viewModel.tryLogout(this.viewModel.account.id)
-      }
-    }
-  }
-
   /**
    * Hides or show sign up options if is user in accessing the NYPL
    */
@@ -932,32 +895,22 @@ class AccountDetailFragment : Fragment(R.layout.account) {
       .setPositiveButton(R.string.accountDelete) { _, _ ->
         this.loginFormLock()
         this.viewModel.isOver13 = !isOver13
-        this.tryLogout()
+        this.viewModel.tryLogout()
       }
       .create()
       .show()
   }
 
-  override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-    super.onActivityResult(requestCode, resultCode, data)
-    if (requestCode == this.cardCreatorResultCode) {
-      when (resultCode) {
-        Activity.RESULT_OK -> {
-          if (data != null) {
-            val barcode = data.getStringExtra("barcode")
-            val pin = data.getStringExtra("pin")
-
-            this.authenticationViews.setBasicUserAndPass(
-              user = barcode,
-              password = pin
-            )
-            this.tryLogin()
-          }
-        }
-        Activity.RESULT_CANCELED -> {
-          this.logger.debug("User has exited the card creator")
-        }
-      }
+  private fun onCardCreatorResult(result: CardCreatorContract.Output?) {
+    if (result == null) {
+      this.logger.debug("User has exited the card creator")
+      return
     }
+
+    this.authenticationViews.setBasicUserAndPass(
+      user = result.barcode,
+      password = result.pin
+    )
+    this.tryLogin()
   }
 }

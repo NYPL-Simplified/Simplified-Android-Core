@@ -3,6 +3,7 @@ package org.nypl.simplified.ui.accounts
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.google.common.util.concurrent.FluentFuture
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import org.joda.time.DateTime
@@ -12,21 +13,24 @@ import org.nypl.simplified.accounts.api.AccountEventLoginStateChanged
 import org.nypl.simplified.accounts.api.AccountEventUpdated
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.api.AccountLoginState
-import org.nypl.simplified.accounts.api.AccountPreferences
-import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
+import org.nypl.simplified.listeners.api.FragmentListenerType
 import org.nypl.simplified.profiles.api.ProfileDateOfBirth
 import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceType
+import org.nypl.simplified.taskrecorder.api.TaskResult
+import org.nypl.simplified.taskrecorder.api.TaskStep
+import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 
 /**
  * A view model for storing state during login attempts.
  */
 
 class AccountDetailViewModel(
-  val accountId: AccountID
+  private val accountId: AccountID,
+  private val listener: FragmentListenerType<AccountDetailEvent>
 ) : ViewModel() {
 
   private val services =
@@ -53,22 +57,37 @@ class AccountDetailViewModel(
     )
 
   private fun onAccountEvent(accountEvent: AccountEvent) {
-    return when (accountEvent) {
+    when (accountEvent) {
       is AccountEventUpdated -> {
         if (accountEvent.accountID == this.accountId) {
-          this.accountLiveMutable.value = this.account
-        } else {
-          // Don't care about events for other accounts
+          this.handleAccountUpdated(accountEvent)
         }
       }
-      is AccountEventLoginStateChanged ->
+      is AccountEventLoginStateChanged -> {
         if (accountEvent.accountID == this.accountId) {
-          this.accountLiveMutable.value = this.account
-        } else {
-          // Don't care about events for other accounts
+          this.handleLoginStateChanged(accountEvent)
         }
-      else -> {
-        // Don't care about other events
+      }
+    }
+  }
+
+  private fun handleAccountUpdated(event: AccountEventUpdated) {
+    this.accountLiveMutable.value = this.account
+  }
+
+  private fun handleLoginStateChanged(event: AccountEventLoginStateChanged) {
+    this.accountLiveMutable.value = this.account
+
+    if (this.loginExplicitlyRequested) {
+      when (event.state) {
+        is AccountLoginState.AccountLoggedIn -> {
+          // Scheduling explicit close of account fragment
+          this.loginExplicitlyRequested = false
+          this.listener.post(AccountDetailEvent.LoginSucceeded)
+        }
+        is AccountLoginState.AccountLoginFailed -> {
+          this.loginExplicitlyRequested = false
+        }
       }
     }
   }
@@ -140,7 +159,20 @@ class AccountDetailViewModel(
     this.profilesController.profileAccountLogin(request)
   }
 
-  fun tryLogout(id: AccountID) {
-    this.profilesController.profileAccountLogout(id)
+  fun tryLogout(): FluentFuture<TaskResult<Unit>> {
+    return this.profilesController.profileAccountLogout(this.accountId)
+  }
+
+  fun openErrorPage(taskSteps: List<TaskStep>) {
+    val parameters =
+      ErrorPageParameters(
+        emailAddress = this.buildConfig.supportErrorReportEmailAddress,
+        body = "",
+        subject = "[simplye-error-report]",
+        attributes = sortedMapOf(),
+        taskSteps = taskSteps
+      )
+
+    this.listener.post(AccountDetailEvent.OpenErrorPage(parameters))
   }
 }

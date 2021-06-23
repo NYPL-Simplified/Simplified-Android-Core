@@ -18,6 +18,7 @@ import androidx.fragment.app.Fragment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.nypl.simplified.cardcreator.CardCreatorContract
 import org.nypl.simplified.cardcreator.R
 import org.nypl.simplified.cardcreator.databinding.FragmentConfirmationBinding
 import org.nypl.simplified.cardcreator.utils.Cache
@@ -168,13 +169,15 @@ class ConfirmationFragment : Fragment() {
    * Returns result to caller with card details
    */
   private fun returnResult() {
+    val bundle = CardCreatorContract.createResult(barcode, pin)
+    bundle.apply {
+      putString("type", type)
+      putString("username", username)
+      putBoolean("temporary", temporary)
+      putString("message", message)
+    }
     val data = Intent().apply {
-      putExtra("type", type)
-      putExtra("username", username)
-      putExtra("barcode", barcode)
-      putExtra("pin", pin)
-      putExtra("temporary", temporary)
-      putExtra("message", message)
+      putExtras(bundle)
     }
     if (requireActivity().intent.getBooleanExtra("isLoggedIn", false)) {
       requireActivity().setResult(Activity.RESULT_CANCELED, data)
