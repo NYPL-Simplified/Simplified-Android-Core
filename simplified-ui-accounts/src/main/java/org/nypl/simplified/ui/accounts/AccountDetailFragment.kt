@@ -417,7 +417,6 @@ class AccountDetailFragment : Fragment(R.layout.account) {
   private fun onTrySAML2Login(
     authenticationDescription: AccountProviderAuthenticationDescription.SAML2_0
   ) {
-    this.viewModel.loginExplicitlyRequested = true
     this.viewModel.tryLogin(
       ProfileAccountLoginRequest.SAML20Initiate(
         accountId = this.parameters.accountId,
@@ -433,7 +432,6 @@ class AccountDetailFragment : Fragment(R.layout.account) {
   private fun onTryOAuthLogin(
     authenticationDescription: AccountProviderAuthenticationDescription.OAuthWithIntermediary
   ) {
-    this.viewModel.loginExplicitlyRequested = true
     this.viewModel.tryLogin(
       OAuthWithIntermediaryInitiate(
         accountId = this.viewModel.account.id,
@@ -558,6 +556,11 @@ class AccountDetailFragment : Fragment(R.layout.account) {
             this.tryLogin()
           }
         )
+
+        if (this.viewModel.pendingLogout) {
+          this.authenticationViews.setBasicUserAndPass("", "")
+          this.viewModel.pendingLogout = false
+        }
         this.loginFormUnlock()
       }
 
@@ -645,7 +648,10 @@ class AccountDetailFragment : Fragment(R.layout.account) {
       is AccountLoggingOut -> {
         when (val creds = loginState.credentials) {
           is AccountAuthenticationCredentials.Basic -> {
-            this.authenticationViews.setBasicUserAndPass("", "")
+            this.authenticationViews.setBasicUserAndPass(
+              user = creds.userName.value,
+              password = creds.password.value
+            )
           }
           is AccountAuthenticationCredentials.OAuthWithIntermediary -> {
             // No UI
@@ -824,8 +830,6 @@ class AccountDetailFragment : Fragment(R.layout.account) {
   }
 
   private fun tryLogin() {
-    this.viewModel.loginExplicitlyRequested = true
-
     return when (val description = this.viewModel.account.provider.authentication) {
       is AccountProviderAuthenticationDescription.SAML2_0 ->
         this.onTrySAML2Login(description)

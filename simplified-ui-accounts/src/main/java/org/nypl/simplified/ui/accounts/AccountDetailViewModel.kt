@@ -42,6 +42,14 @@ class AccountDetailViewModel(
   private val readerBookmarkService =
     services.requireService(ReaderBookmarkServiceType::class.java)
 
+  /**
+   * Logging in was explicitly requested. This is tracked in order to allow for optionally
+   * closing the account fragment on successful logins.
+   */
+
+  @Volatile
+  private var loginExplicitlyRequested: Boolean = false
+
   private val subscriptions =
     CompositeDisposable(
       this.profilesController.accountEvents()
@@ -88,6 +96,9 @@ class AccountDetailViewModel(
         is AccountLoginState.AccountLoginFailed -> {
           this.loginExplicitlyRequested = false
         }
+        else -> {
+          // Doing nothing
+        }
       }
     }
   }
@@ -107,12 +118,11 @@ class AccountDetailViewModel(
     this.accountLive.value!!
 
   /**
-   * Logging in was explicitly requested. This is tracked in order to allow for optionally
-   * closing the account fragment on successful logins.
+   * Logging out was requested. This is tracked in order to allow for
+   * clearing the Barcode and PIN fields after the request has completed.
    */
 
-  @Volatile
-  var loginExplicitlyRequested: Boolean = false
+  var pendingLogout: Boolean = false
 
   /**
    * Enable/disable bookmark syncing.
@@ -156,10 +166,12 @@ class AccountDetailViewModel(
     )
 
   fun tryLogin(request: ProfileAccountLoginRequest) {
+    this.loginExplicitlyRequested = true
     this.profilesController.profileAccountLogin(request)
   }
 
   fun tryLogout(): FluentFuture<TaskResult<Unit>> {
+    this.pendingLogout = true
     return this.profilesController.profileAccountLogout(this.accountId)
   }
 
