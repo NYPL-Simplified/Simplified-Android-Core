@@ -52,7 +52,7 @@
         </c:change>
       </c:changes>
     </c:release>
-    <c:release date="2021-06-16T15:01:40+00:00" is-open="true" ticket-system="org.nypl.jira" version="7.0.0">
+    <c:release date="2021-06-23T00:00:00+00:00" is-open="false" ticket-system="org.nypl.jira" version="7.0.0">
       <c:changes>
         <c:change date="2021-03-26T00:00:00+00:00" summary="Standardize bookmarks across platforms">
           <c:tickets>
@@ -156,7 +156,16 @@
             <c:ticket id="SMA-194"/>
           </c:tickets>
         </c:change>
-        <c:change date="2021-06-16T15:01:40+00:00" summary="Improve R2 behaviour with regards to spaces in filenames inside EPUB files"/>
+        <c:change date="2021-06-16T00:00:00+00:00" summary="Improve R2 behaviour with regards to spaces in filenames inside EPUB files"/>
+      </c:changes>
+    </c:release>
+    <c:release date="2021-06-23T17:06:20+00:00" is-open="true" ticket-system="org.nypl.jira" version="7.0.1">
+      <c:changes>
+        <c:change date="2021-06-23T17:06:20+00:00" summary="Improve R2 accessibility">
+          <c:tickets>
+            <c:ticket id="SMA-197"/>
+          </c:tickets>
+        </c:change>
       </c:changes>
     </c:release>
   </c:releases>
