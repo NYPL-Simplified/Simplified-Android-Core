@@ -7,7 +7,7 @@ ext.android_min_sdk_version = 21
 // Dependency versions
 
 ext.versions = [
-  androidx_activity             : '1.1.0',
+  androidx_activity             : '1.2.3',
   androidx_appcompat            : '1.2.0',
   androidx_cardview             : '1.0.0',
   androidx_constraintlayout     : '1.1.3',

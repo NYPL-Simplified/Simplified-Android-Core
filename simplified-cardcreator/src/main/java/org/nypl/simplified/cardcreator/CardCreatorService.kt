@@ -1,12 +1,9 @@
 package org.nypl.simplified.cardcreator
 
 import android.content.Context
-import android.content.Intent
-import androidx.fragment.app.Fragment
 import org.slf4j.LoggerFactory
 import java.io.FileNotFoundException
 import java.io.InputStream
-import java.lang.NullPointerException
 import java.util.Properties
 
 class CardCreatorService(
@@ -58,20 +55,11 @@ class CardCreatorService(
     }
   }
 
-  override fun openCardCreatorActivity(
-    fragment: Fragment,
-    context: Context?,
-    resultCode: Int,
-    isLoggedIn: Boolean,
-    userIdentifier: String
-  ) {
-    val intent = Intent(context, CardCreatorActivity::class.java)
-    intent.putExtra("username", username)
-    intent.putExtra("password", password)
-    intent.putExtra("clientId", clientId)
-    intent.putExtra("clientSecret", clientSecret)
-    intent.putExtra("isLoggedIn", isLoggedIn)
-    intent.putExtra("userIdentifier", userIdentifier)
-    fragment.startActivityForResult(intent, resultCode)
-  }
+  override fun getCardCreatorContract(): CardCreatorContract =
+    CardCreatorContract(
+      this.username,
+      this.password,
+      this.clientId,
+      this.clientSecret
+    )
 }
