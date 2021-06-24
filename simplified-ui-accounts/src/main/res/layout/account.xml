@@ -55,19 +55,6 @@
       android:layout_width="match_parent"
       android:layout_height="16dp" />
 
-    <CheckBox
-      android:id="@+id/accountEULACheckbox"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:layout_marginStart="16dp"
-      android:layout_marginEnd="16dp"
-      android:gravity="center"
-      android:text="@string/accountEULAStatement" />
-
-    <Space
-      android:layout_width="match_parent"
-      android:layout_height="16dp" />
-
     <include layout="@layout/auth" />
 
     <androidx.constraintlayout.widget.ConstraintLayout

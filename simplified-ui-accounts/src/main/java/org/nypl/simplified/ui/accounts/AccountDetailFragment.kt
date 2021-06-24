@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -103,7 +102,6 @@ class AccountDetailFragment : Fragment(R.layout.account) {
   private lateinit var bookmarkSync: ViewGroup
   private lateinit var bookmarkSyncCheck: SwitchCompat
   private lateinit var bookmarkSyncLabel: View
-  private lateinit var eulaCheckbox: CheckBox
   private lateinit var loginProgress: ViewGroup
   private lateinit var loginButtonErrorDetails: Button
   private lateinit var loginProgressBar: ProgressBar
@@ -175,8 +173,6 @@ class AccountDetailFragment : Fragment(R.layout.account) {
       view.findViewById(R.id.accountLoginProgressText)
     this.loginButtonErrorDetails =
       view.findViewById(R.id.accountLoginButtonErrorDetails)
-    this.eulaCheckbox =
-      view.findViewById(R.id.accountEULACheckbox)
     this.signUpButton =
       view.findViewById(R.id.accountCardCreatorSignUp)
     this.signUpLabel =
@@ -235,12 +231,10 @@ class AccountDetailFragment : Fragment(R.layout.account) {
 
   private fun determineLoginIsSatisfied(): AccountLoginButtonStatus {
     val authDescription = this.viewModel.account.provider.authentication
-    val eulaOk = this.eulaCheckbox.isChecked
     val loginPossible = authDescription.isLoginPossible
     val satisfiedFor = this.authenticationViews.isSatisfiedFor(authDescription)
 
-    this.logger.debug("eula: {}, possible: {}, satisfied: {}", eulaOk, loginPossible, satisfiedFor)
-    return if (eulaOk && loginPossible && satisfiedFor) {
+    return if (loginPossible && satisfiedFor) {
       AsLoginButtonEnabled {
         this.loginFormLock()
         this.tryLogin()
@@ -297,10 +291,6 @@ class AccountDetailFragment : Fragment(R.layout.account) {
     super.onStart()
 
     this.configureToolbar(requireActivity())
-
-    this.eulaCheckbox.setOnCheckedChangeListener { _, checked ->
-      this.setLoginButtonStatus(this.determineLoginIsSatisfied())
-    }
 
     /*
      * Configure the COPPA age gate switch. If the user changes their age, a log out
@@ -530,20 +520,6 @@ class AccountDetailFragment : Fragment(R.layout.account) {
     this.bookmarkSyncLabel.isEnabled = isSupported
 
     this.authenticationViews.showFor(this.viewModel.account.provider.authentication)
-
-    /*
-     * Only show a EULA checkbox if there's actually a EULA.
-     */
-
-    if (this.viewModel.account.provider.eula != null) {
-      this.eulaCheckbox.visibility = View.VISIBLE
-      this.eulaCheckbox.setOnCheckedChangeListener { _, checked ->
-        this.setLoginButtonStatus(this.determineLoginIsSatisfied())
-      }
-    } else {
-      this.eulaCheckbox.visibility = View.GONE
-    }
-
 
     this.hideCardCreatorForNonNYPL()
 
@@ -806,7 +782,6 @@ class AccountDetailFragment : Fragment(R.layout.account) {
     )
 
     this.authenticationViews.lock()
-    this.eulaCheckbox.isEnabled = false
 
     this.setLoginButtonStatus(AsLoginButtonDisabled)
     this.authenticationAlternativesHide()
@@ -819,7 +794,6 @@ class AccountDetailFragment : Fragment(R.layout.account) {
     )
 
     this.authenticationViews.unlock()
-    this.eulaCheckbox.isEnabled = true
 
     val loginSatisfied = this.determineLoginIsSatisfied()
     this.setLoginButtonStatus(loginSatisfied)
