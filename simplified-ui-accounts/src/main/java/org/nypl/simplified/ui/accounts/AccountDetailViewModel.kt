@@ -106,7 +106,7 @@ class AccountDetailViewModel(
   val account: AccountType =
     this.accountLive.value!!
 
-    /**
+  /**
    * Logging in was explicitly requested. This is tracked in order to allow for optionally
    * closing the account fragment on successful logins.
    */

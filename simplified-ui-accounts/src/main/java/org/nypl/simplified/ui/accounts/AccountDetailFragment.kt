@@ -646,7 +646,6 @@ class AccountDetailFragment : Fragment(R.layout.account) {
         when (val creds = loginState.credentials) {
           is AccountAuthenticationCredentials.Basic -> {
             this.authenticationViews.setBasicUserAndPass("", "")
-
           }
           is AccountAuthenticationCredentials.OAuthWithIntermediary -> {
             // No UI
