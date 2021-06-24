@@ -2,8 +2,11 @@ dependencies {
   implementation project(":simplified-announcements")
   implementation project(":simplified-profiles-controller-api")
   implementation project(":simplified-ui-thread-api")
+  implementation project(":simplified-services-api")
 
   implementation libraries.androidx_appcompat
   implementation libraries.androidx_constraintlayout
   implementation libraries.androidx_lifecycle
+  implementation libraries.androidx_core_ktx
+  implementation libraries.androidx_fragment
 }

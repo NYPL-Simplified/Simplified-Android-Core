@@ -8,12 +8,15 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
+import org.librarysimplified.services.api.Services
+import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.android.ktx.tryPopBackStack
 import org.nypl.simplified.android.ktx.tryPopToRoot
 import org.nypl.simplified.listeners.api.FragmentListenerType
 import org.nypl.simplified.listeners.api.ListenerRepository
 import org.nypl.simplified.listeners.api.fragmentListeners
 import org.nypl.simplified.listeners.api.listenerRepositories
+import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.ui.accounts.AccountListRegistryFragment
 import org.nypl.simplified.ui.accounts.AccountListRegistryEvent
 import org.nypl.simplified.ui.errorpage.ErrorPageFragment
@@ -33,6 +36,10 @@ class OnboardingFragment :
   private val defaultViewModelFactory: ViewModelProvider.Factory by lazy {
     OnboardingDefaultViewModelFactory(super.getDefaultViewModelProviderFactory())
   }
+
+  private val profilesController: ProfilesControllerType =
+    Services.serviceDirectory()
+      .requireService(ProfilesControllerType::class.java)
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -107,11 +114,22 @@ class OnboardingFragment :
 
   private fun handleAccountListRegistryEvent(event: AccountListRegistryEvent) {
     return when (event) {
-      AccountListRegistryEvent.AccountCreated ->
-        this.onOnboardingCompleted()
+      is AccountListRegistryEvent.AccountCreated ->
+        this.onAccountCreated(event.accountID)
       is AccountListRegistryEvent.OpenErrorPage ->
         this.openErrorPage(event.parameters)
     }
+  }
+
+  private fun onAccountCreated(accountID: AccountID) {
+    this.profilesController.profileUpdate { description ->
+      description.copy(
+        preferences = description.preferences.copy(
+          mostRecentAccount = accountID
+        )
+      )
+    }.get()
+    this.onOnboardingCompleted()
   }
 
   private fun handleOnboardingStartScreenEvent(event: OnboardingStartScreenEvent) {

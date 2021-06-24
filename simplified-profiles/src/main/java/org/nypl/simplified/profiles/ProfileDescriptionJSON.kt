@@ -54,9 +54,10 @@ object ProfileDescriptionJSON {
   @Throws(IOException::class)
   fun deserializeFromFile(
     jom: ObjectMapper,
-    file: File
+    file: File,
+    mostRecentAccountFallback: AccountID
   ): ProfileDescription {
-    return this.deserializeFromText(jom, FileUtilities.fileReadUTF8(file))
+    return this.deserializeFromText(jom, FileUtilities.fileReadUTF8(file), mostRecentAccountFallback)
   }
 
   /**
@@ -71,9 +72,10 @@ object ProfileDescriptionJSON {
   @Throws(IOException::class)
   fun deserializeFromText(
     jom: ObjectMapper,
-    text: String
+    text: String,
+    mostRecentAccountFallback: AccountID
   ): ProfileDescription {
-    return this.deserializeFromJSON(jom, jom.readTree(text))
+    return this.deserializeFromJSON(jom, jom.readTree(text), mostRecentAccountFallback)
   }
 
   /**
@@ -88,7 +90,8 @@ object ProfileDescriptionJSON {
   @Throws(JSONParseException::class)
   fun deserializeFromJSON(
     objectMapper: ObjectMapper,
-    node: JsonNode
+    node: JsonNode,
+    mostRecentAccountFallback: AccountID
   ): ProfileDescription {
     val obj =
       JSONParserUtilities.checkObject(null, node)
@@ -96,23 +99,30 @@ object ProfileDescriptionJSON {
       JSONParserUtilities.getIntegerOrNull(obj, "@version")
 
     return when (version) {
-      null -> this.deserializeFromJSONUnversioned(objectMapper, obj)
-      20191201 -> this.deserialize20191201(objectMapper, obj)
-      20200504 -> this.deserialize20200504(objectMapper, obj)
+      null -> this.deserializeFromJSONUnversioned(objectMapper, obj, mostRecentAccountFallback)
+      20191201 -> this.deserialize20191201(objectMapper, obj, mostRecentAccountFallback)
+      20200504 -> this.deserialize20200504(objectMapper, obj, mostRecentAccountFallback)
+      /*
+       mostRecentAccount is mandatory since version 20210605,
+       so mostRecentAccountFallback won't be used  with that version
+       */
+      20210605 -> this.deserialize20200504(objectMapper, obj, mostRecentAccountFallback)
       else -> throw JSONParseException("Unsupported profile format version: $version")
     }
   }
 
   private fun deserialize20200504(
     objectMapper: ObjectMapper,
-    objectNode: ObjectNode
+    objectNode: ObjectNode,
+    mostRecentAccountFallback: AccountID
   ): ProfileDescription {
     val displayName =
       JSONParserUtilities.getString(objectNode, "displayName")
     val preferences =
       deserialize20200504Preferences(
         objectMapper,
-        JSONParserUtilities.getObject(objectNode, "preferences")
+        JSONParserUtilities.getObject(objectNode, "preferences"),
+        mostRecentAccountFallback
       )
     val attributes =
       deserialize20191201Attributes(JSONParserUtilities.getObject(objectNode, "attributes"))
@@ -126,14 +136,16 @@ object ProfileDescriptionJSON {
 
   private fun deserialize20191201(
     objectMapper: ObjectMapper,
-    objectNode: ObjectNode
+    objectNode: ObjectNode,
+    mostRecentAccountFallback: AccountID
   ): ProfileDescription {
     val displayName =
       JSONParserUtilities.getString(objectNode, "displayName")
     val preferences =
       deserialize20191201Preferences(
         objectMapper,
-        JSONParserUtilities.getObject(objectNode, "preferences")
+        JSONParserUtilities.getObject(objectNode, "preferences"),
+        mostRecentAccountFallback
       )
     val attributes =
       deserialize20191201Attributes(JSONParserUtilities.getObject(objectNode, "attributes"))
@@ -157,7 +169,8 @@ object ProfileDescriptionJSON {
 
   private fun deserialize20200504Preferences(
     objectMapper: ObjectMapper,
-    objectNode: ObjectNode
+    objectNode: ObjectNode,
+    mostRecentAccountFallback: AccountID
   ): ProfilePreferences {
     val dateFormatter =
       this.standardDateFormatter()
@@ -186,6 +199,7 @@ object ProfileDescriptionJSON {
     val mostRecentAccount =
       JSONParserUtilities.getStringOrNull(objectNode, "mostRecentAccount")
         ?.let { AccountID(UUID.fromString(it)) }
+        ?: mostRecentAccountFallback
 
     return ProfilePreferences(
       dateOfBirth = dateOfBirth,
@@ -199,7 +213,8 @@ object ProfileDescriptionJSON {
 
   private fun deserialize20191201Preferences(
     objectMapper: ObjectMapper,
-    objectNode: ObjectNode
+    objectNode: ObjectNode,
+    mostRecentAccountFallback: AccountID
   ): ProfilePreferences {
     val dateFormatter =
       this.standardDateFormatter()
@@ -222,6 +237,7 @@ object ProfileDescriptionJSON {
     val mostRecentAccount =
       JSONParserUtilities.getStringOrNull(objectNode, "mostRecentAccount")
         ?.let { AccountID(UUID.fromString(it)) }
+        ?: mostRecentAccountFallback
 
     return ProfilePreferences(
       dateOfBirth = dateOfBirth,
@@ -234,7 +250,8 @@ object ProfileDescriptionJSON {
 
   private fun deserializeFromJSONUnversioned(
     objectMapper: ObjectMapper,
-    objectNode: ObjectNode
+    objectNode: ObjectNode,
+    mostRecentAccountFallback: AccountID
   ): ProfileDescription {
     val displayName =
       JSONParserUtilities.getString(objectNode, "display_name")
@@ -283,7 +300,7 @@ object ProfileDescriptionJSON {
         dateOfBirth = this.someOrNull(dateOfBirth),
         showTestingLibraries = showTestingLibraries,
         readerPreferences = readerPrefs,
-        mostRecentAccount = null,
+        mostRecentAccount = mostRecentAccountFallback,
         hasSeenLibrarySelectionScreen = true
       )
 
@@ -342,28 +359,28 @@ object ProfileDescriptionJSON {
     description: ProfileDescription
   ): ObjectNode {
     val output = objectMapper.createObjectNode()
-    serialize20200504(objectMapper, output, description)
+    serialize20210605(objectMapper, output, description)
     return output
   }
 
-  private fun serialize20200504(
+  private fun serialize20210605(
     objectMapper: ObjectMapper,
     output: ObjectNode,
     description: ProfileDescription
   ) {
-    output.put("@version", 20200504)
+    output.put("@version", 20210605)
     output.put("displayName", description.displayName)
     output.set<ObjectNode>(
       "preferences",
-      serialize20200504Preferences(objectMapper, description.preferences)
+      serialize20210605Preferences(objectMapper, description.preferences)
     )
     output.set<ObjectNode>(
       "attributes",
-      serialize20200504Attributes(objectMapper, description.attributes)
+      serialize20210605Attributes(objectMapper, description.attributes)
     )
   }
 
-  private fun serialize20200504Attributes(
+  private fun serialize20210605Attributes(
     objectMapper: ObjectMapper,
     attributes: ProfileAttributes
   ): ObjectNode {
@@ -375,7 +392,7 @@ object ProfileDescriptionJSON {
     return output
   }
 
-  private fun serialize20200504Preferences(
+  private fun serialize20210605Preferences(
     objectMapper: ObjectMapper,
     preferences: ProfilePreferences
   ): ObjectNode {
@@ -383,11 +400,7 @@ object ProfileDescriptionJSON {
     output.put("showTestingLibraries", preferences.showTestingLibraries)
     output.put("hasSeenLibrarySelectionScreen", preferences.hasSeenLibrarySelectionScreen)
     output.put("showDebugSettings", preferences.showDebugSettings)
-
-    val mostRecentAccount = preferences.mostRecentAccount
-    if (mostRecentAccount != null) {
-      output.put("mostRecentAccount", mostRecentAccount.uuid.toString())
-    }
+    output.put("mostRecentAccount", preferences.mostRecentAccount.uuid.toString())
 
     output.set<ObjectNode>(
       "readerPreferences",

@@ -221,7 +221,7 @@ internal class MainFragmentListenerDelegate(
     state: MainFragmentState
   ): MainFragmentState {
     return when (event) {
-      AccountListRegistryEvent.AccountCreated -> {
+      is AccountListRegistryEvent.AccountCreated -> {
         this.popBackStack()
         state
       }

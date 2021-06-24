@@ -9,9 +9,9 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import io.reactivex.disposables.CompositeDisposable
-import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventDeletion
+import org.nypl.simplified.accounts.api.AccountEventUpdated
 import org.nypl.simplified.android.ktx.supportActionBar
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_registry.BookStatus
@@ -26,13 +26,11 @@ import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEna
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimeOutSoon
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimedOut
-import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
-import org.nypl.simplified.ui.announcements.AnnouncementsController
+import org.nypl.simplified.ui.announcements.AnnouncementsDialog
 import org.nypl.simplified.ui.catalog.saml20.CatalogSAML20Fragment
 import org.nypl.simplified.ui.catalog.saml20.CatalogSAML20FragmentParameters
 import org.nypl.simplified.ui.navigation.tabs.TabbedNavigator
 import org.nypl.simplified.ui.profiles.ProfileDialogs
-import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.slf4j.LoggerFactory
 import java.net.URI
 
@@ -44,6 +42,12 @@ import java.net.URI
  */
 
 class MainFragment : Fragment(R.layout.main_tabbed_host) {
+
+  companion object {
+
+    private val ANNOUNCEMENT_DIALOG_TAG =
+      AnnouncementsDialog::class.java.simpleName
+  }
 
   private val logger = LoggerFactory.getLogger(MainFragment::class.java)
   private val subscriptions = CompositeDisposable()
@@ -84,18 +88,7 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
 
     setHasOptionsMenu(true)
 
-    /*
-    * Register an announcements controller.
-    */
-
-    val services = Services.serviceDirectory()
-    this.lifecycle.addObserver(
-      AnnouncementsController(
-        context = requireContext(),
-        uiThread = services.requireService(UIThreadServiceType::class.java),
-        profileController = services.requireService(ProfilesControllerType::class.java)
-      )
-    )
+    this.checkForAnnouncements()
   }
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -178,6 +171,10 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
 
   private fun onAccountEvent(event: AccountEvent) {
     when (event) {
+      is AccountEventUpdated -> {
+        this.checkForAnnouncements()
+      }
+
       /*
        * We don't know which fragments on the backstack might refer to accounts that
        * have been deleted so we need to clear the history when an account is deleted.
@@ -216,6 +213,8 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
     if (oldAccountId != newAccountId) {
       this.navigator.clearHistory()
     }
+
+    this.checkForAnnouncements()
   }
 
   private fun onIdleTimedOut() {
@@ -239,6 +238,26 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
         this.openBookDownloadLogin(status.id, status.downloadURI)
       }
     }
+  }
+
+  private fun checkForAnnouncements() {
+    val currentProfile = this.viewModel.profilesController.profileCurrent()
+    val mostRecentAccountId = currentProfile.preferences().mostRecentAccount
+    val mostRecentAccount = currentProfile.account(mostRecentAccountId)
+    val acknowledged =
+      mostRecentAccount.preferences.announcementsAcknowledged.toSet()
+    val notYetAcknowledged =
+      mostRecentAccount.provider.announcements.filter { !acknowledged.contains(it.id) }
+
+    if (notYetAcknowledged.isNotEmpty() &&
+      this.childFragmentManager.findFragmentByTag(ANNOUNCEMENT_DIALOG_TAG) == null
+    ) {
+      this.showAnnouncementsDialog()
+    }
+  }
+
+  private fun showAnnouncementsDialog() {
+    AnnouncementsDialog().showNow(this.childFragmentManager, ANNOUNCEMENT_DIALOG_TAG)
   }
 
   private fun openBookDownloadLogin(

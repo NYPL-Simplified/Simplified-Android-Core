@@ -703,12 +703,12 @@ abstract class ProfilesDatabaseContract {
 
   /**
    * If the deleted account was the most recent account, the most recent account preference
-   * is cleared.
+   * is updated.
    */
 
   @Test
   @Throws(Exception::class)
-  fun testDeleteClearsMostRecent() {
+  fun testDeleteUpdateMostRecent() {
     val fileTemp = DirectoryUtilities.directoryCreateTemporary()
     val fileProfiles = File(fileTemp, "profiles")
 
@@ -742,7 +742,7 @@ abstract class ProfilesDatabaseContract {
 
     Assertions.assertEquals(acci1.id, p0.preferences().mostRecentAccount)
     p0.deleteAccountByProvider(acc1.id)
-    Assertions.assertEquals(null, p0.preferences().mostRecentAccount)
+    Assertions.assertNotEquals(acci1.id, p0.preferences().mostRecentAccount)
   }
 
   /**

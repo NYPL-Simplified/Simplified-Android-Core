@@ -79,8 +79,9 @@ interface ProfilesControllerType {
    */
 
   fun profileCreate(
+    displayName: String,
     accountProvider: AccountProviderType,
-    description: ProfileDescription
+    descriptionUpdate: (ProfileDescription) -> ProfileDescription = { it }
   ): FluentFuture<ProfileCreationEvent>
 
   /**

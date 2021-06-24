@@ -95,8 +95,8 @@ interface ProfileReadableType : Comparable<ProfileReadableType> {
    * @return The most recently used account, or null.
    */
 
-  fun mostRecentAccount(): AccountType? {
-    return this.preferences().mostRecentAccount?.let { accountId ->
+  fun mostRecentAccount(): AccountType {
+    return this.preferences().mostRecentAccount.let { accountId ->
       this.account(accountId)
     }
   }

@@ -9,13 +9,11 @@ import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.profiles.api.ProfileAttributes
 import org.nypl.simplified.profiles.api.ProfileDateOfBirth
-import org.nypl.simplified.profiles.api.ProfileDescription
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileID
 import org.nypl.simplified.profiles.api.ProfilePreferences
 import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
-import org.nypl.simplified.reader.api.ReaderPreferences
 
 class ProfileModificationDefaultViewModel : ViewModel() {
 
@@ -64,29 +62,29 @@ class ProfileModificationDefaultViewModel : ViewModel() {
   }
 
   fun createProfile(name: String) {
-    val preferences =
-      ProfilePreferences(
+    val preferencesUpdate = { preferences: ProfilePreferences ->
+      preferences.copy(
         dateOfBirth = ProfileDateOfBirth(DateTime.now(), true),
-        showTestingLibraries = false,
-        hasSeenLibrarySelectionScreen = false,
-        readerPreferences = ReaderPreferences.builder().build(),
-        mostRecentAccount = null
       )
+    }
 
-    val attributes =
-      ProfileAttributes(
+    val attributesUpdate = { attributes: ProfileAttributes ->
+      attributes.copy(
         sortedMapOf(
           Pair(ProfileAttributes.GENDER_ATTRIBUTE_KEY, "")
         )
       )
+    }
 
     this.profilesController.profileCreate(
+      displayName = name,
       accountProvider = this.accountProviderRegistry.defaultProvider,
-      description = ProfileDescription(
-        displayName = name,
-        preferences = preferences,
-        attributes = attributes
-      )
+      descriptionUpdate = { desc ->
+        desc.copy(
+          preferences = preferencesUpdate(desc.preferences),
+          attributes = attributesUpdate(desc.attributes)
+        )
+      }
     )
   }
 }

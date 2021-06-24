@@ -344,58 +344,72 @@ object ProfilesDatabases {
       return null
     }
 
-    val desc: ProfileDescription
-    try {
-      desc = ProfileDescriptionJSON.deserializeFromFile(jom, profileFile)
-    } catch (e: IOException) {
-      errors.add(IOException("Could not parse profile: $profileFile", e))
-      return null
-    }
-
     val profileAccountsDir = File(profileDir, "accounts")
 
-    try {
-      val accounts =
-        accountsDatabases.openDatabase(
-          accountAuthenticationCredentialsStore = accountCredentialsStore,
+    val accountsDatabase: AccountsDatabaseType =
+      try {
+        val accounts =
+          accountsDatabases.openDatabase(
+            accountAuthenticationCredentialsStore = accountCredentialsStore,
+            accountEvents = accountEvents,
+            accountProviders = accountProviders,
+            context = context,
+            directory = profileAccountsDir
+          )
+
+        this.createAutomaticAccounts(
+          accounts = accounts,
           accountEvents = accountEvents,
+          accountBundledCredentials = accountBundledCredentials,
           accountProviders = accountProviders,
-          context = context,
-          directory = profileAccountsDir
+          profile = profileId
         )
 
-      this.createAutomaticAccounts(
-        accounts = accounts,
-        accountEvents = accountEvents,
-        accountBundledCredentials = accountBundledCredentials,
-        accountProviders = accountProviders,
-        profile = profileId
-      )
+        if (accounts.accounts().isEmpty()) {
+          this.logger.debug("profile is empty, creating a default account")
+          accounts.createAccount(accountProviders.defaultProvider)
+        }
 
-      if (accounts.accounts().isEmpty()) {
-        this.logger.debug("profile is empty, creating a default account")
-        accounts.createAccount(accountProviders.defaultProvider)
+        accounts
+      } catch (e: AccountsDatabaseException) {
+        this.logger.error("[{}]: error opening accounts: ", profileId.uuid, e)
+        errors.add(e)
+        return null
       }
 
-      Preconditions.checkArgument(
-        !accounts.accounts().isEmpty(),
-        "Accounts database must not be empty"
-      )
+    val accounts =
+      accountsDatabase.accounts().values
 
-      val account = accounts.accounts()[accounts.accounts().firstKey()]!!
-      return Profile(
-        owner = null,
-        id = profileId,
-        directory = profileDir,
-        analytics = analytics,
-        accounts = accounts,
-        initialDescription = desc
-      )
-    } catch (e: AccountsDatabaseException) {
-      this.logger.error("[{}]: error opening accounts: ", profileId.uuid, e)
-      errors.add(e)
-      return null
-    }
+    Preconditions.checkArgument(
+      !accounts.isEmpty(),
+      "Accounts database must not be empty"
+    )
+
+    val mostRecentFallback =
+      if (accounts.size > 1) {
+        // Return the first account created from a non-default provider
+        accounts.first { it.provider.id != accountProviders.defaultProvider.id }
+      } else {
+        // Return the first account
+        accounts.first()
+      }
+
+    val desc: ProfileDescription =
+      try {
+        ProfileDescriptionJSON.deserializeFromFile(jom, profileFile, mostRecentFallback.id)
+      } catch (e: IOException) {
+        errors.add(IOException("Could not parse profile: $profileFile", e))
+        return null
+      }
+
+    return Profile(
+      owner = null,
+      id = profileId,
+      directory = profileDir,
+      analytics = analytics,
+      accounts = accountsDatabase,
+      initialDescription = desc
+    )
   }
 
   /**
@@ -430,19 +444,6 @@ object ProfilesDatabases {
       val profileAccountsDir =
         File(profileDir, "accounts")
 
-      val description =
-        ProfileDescription(
-          displayName = displayName,
-          preferences = ProfilePreferences(
-            dateOfBirth = null,
-            showTestingLibraries = false,
-            readerPreferences = ReaderPreferences.builder().build(),
-            mostRecentAccount = null,
-            hasSeenLibrarySelectionScreen = false
-          ),
-          attributes = ProfileAttributes(sortedMapOf())
-        )
-
       try {
         val accounts =
           accountsDatabases.openDatabase(
@@ -465,9 +466,22 @@ object ProfilesDatabases {
          * Create an account, unless one already exists for this provider
          */
 
-        accounts.accountsByProvider()[accountProvider.id] ?: run {
+        val account = accounts.accountsByProvider()[accountProvider.id] ?: run {
           accounts.createAccount(accountProvider)
         }
+
+        val description =
+          ProfileDescription(
+            displayName = displayName,
+            preferences = ProfilePreferences(
+              dateOfBirth = null,
+              showTestingLibraries = false,
+              readerPreferences = ReaderPreferences.builder().build(),
+              mostRecentAccount = account.id,
+              hasSeenLibrarySelectionScreen = false
+            ),
+            attributes = ProfileAttributes(sortedMapOf())
+          )
 
         val profile =
           Profile(
