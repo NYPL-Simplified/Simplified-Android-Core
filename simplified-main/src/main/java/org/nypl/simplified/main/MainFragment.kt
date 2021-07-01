@@ -100,10 +100,7 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
     /*
      * Hide various tabs based on build configuration and other settings.
      */
-
-    val holdsItem = this.bottomView.menu.findItem(R.id.tabHolds)
-    holdsItem.isVisible = viewModel.buildConfig.showHoldsTab
-    holdsItem.isEnabled = viewModel.buildConfig.showHoldsTab
+    this.setShowHoldsVisibility()
 
     val settingsItem = this.bottomView.menu.findItem(R.id.tabSettings)
     settingsItem.isVisible = viewModel.buildConfig.showSettingsTab
@@ -203,6 +200,13 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
     }
   }
 
+  private fun setShowHoldsVisibility() {
+    val showHolds = viewModel.showHoldsTab
+    val holdsItem = this.bottomView.menu.findItem(R.id.tabHolds)
+    holdsItem.isVisible = showHolds
+    holdsItem.isEnabled = showHolds
+  }
+
   private fun onProfileUpdateSucceeded(event: ProfileUpdated.Succeeded) {
     val oldAccountId = event.oldDescription.preferences.mostRecentAccount
     val newAccountId = event.newDescription.preferences.mostRecentAccount
@@ -215,6 +219,7 @@ class MainFragment : Fragment(R.layout.main_tabbed_host) {
     }
 
     this.checkForAnnouncements()
+    this.setShowHoldsVisibility()
   }
 
   private fun onIdleTimedOut() {

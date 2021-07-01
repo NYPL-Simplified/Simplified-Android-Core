@@ -36,6 +36,11 @@ class MainFragmentViewModel : ViewModel() {
     services.requireService(BookRegistryType::class.java)
   val buildConfig =
     services.requireService(BuildConfigurationServiceType::class.java)
+  val showHoldsTab: Boolean
+    get() {
+      return  buildConfig.showHoldsTab && profilesController.profileCurrent()
+        .mostRecentAccount()?.provider?.supportsReservations == true
+    }
 
   private val subscriptions: CompositeDisposable =
     CompositeDisposable()
