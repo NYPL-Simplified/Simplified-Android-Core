@@ -315,7 +315,8 @@ object AccountProvidersJSON {
 
       return AccountLibraryLocation(
         location = AccountGeoLocation.Coordinates(longitude, latitude),
-        distance = distance
+        distance = distance,
+        locationDescription = null
       )
     }
 

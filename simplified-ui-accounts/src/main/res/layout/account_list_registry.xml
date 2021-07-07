@@ -16,7 +16,6 @@
         android:text="@string/accountRegistrySelect"
         android:textStyle="bold" />
 
-    <!-- TODO -->
     <TextView
         android:id="@+id/accountRegistryNoLocation"
         android:layout_width="match_parent"

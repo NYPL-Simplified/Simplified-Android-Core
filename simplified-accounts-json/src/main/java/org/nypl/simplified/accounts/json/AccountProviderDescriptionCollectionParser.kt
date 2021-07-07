@@ -137,6 +137,7 @@ class AccountProviderDescriptionCollectionParser internal constructor(
       val longitude = segments[1].trim().toDouble()
       return AccountLibraryLocation(
         location = AccountGeoLocation.Coordinates(longitude, latitude),
+        locationDescription = location,
         distance = null
       )
     } catch (e: Exception) {
