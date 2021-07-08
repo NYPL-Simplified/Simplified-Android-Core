@@ -333,7 +333,8 @@ class Reader2Activity : AppCompatActivity() {
             SR2Locator.SR2LocatorPercent(
               chapterHref = first.node.navigationPoint.locator.chapterHref,
               chapterProgress = 0.0
-            ))
+            )
+          )
         )
       }
     } else {
