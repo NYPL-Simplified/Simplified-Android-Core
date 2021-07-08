@@ -9,9 +9,9 @@ import java.io.Serializable
 data class AccountListFragmentParameters(
 
   /**
-   * If set to `true`, then show the library registry menu in the toolbar.
+   * If set to `true`, then fragment won't navigate after a new account is added
    */
 
-  val shouldShowLibraryRegistryMenu: Boolean
+  val addMultipleAccounts: Boolean
 
 ) : Serializable

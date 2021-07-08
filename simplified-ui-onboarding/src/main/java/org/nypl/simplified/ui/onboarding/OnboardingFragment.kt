@@ -14,8 +14,9 @@ import org.nypl.simplified.listeners.api.FragmentListenerType
 import org.nypl.simplified.listeners.api.ListenerRepository
 import org.nypl.simplified.listeners.api.fragmentListeners
 import org.nypl.simplified.listeners.api.listenerRepositories
-import org.nypl.simplified.ui.accounts.AccountListRegistryFragment
-import org.nypl.simplified.ui.accounts.AccountListRegistryEvent
+import org.nypl.simplified.ui.accounts.AccountListFragment
+import org.nypl.simplified.ui.accounts.AccountListEvent
+import org.nypl.simplified.ui.accounts.AccountListFragmentParameters
 import org.nypl.simplified.ui.errorpage.ErrorPageFragment
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.slf4j.Logger
@@ -67,7 +68,7 @@ class OnboardingFragment :
     val actionBar = (requireActivity() as AppCompatActivity).supportActionBar
     when (childFragmentManager.fragments.last()) {
       is OnboardingStartScreenFragment -> actionBar?.hide()
-      is AccountListRegistryFragment -> actionBar?.show()
+      is AccountListFragment -> actionBar?.show()
     }
   }
 
@@ -105,11 +106,11 @@ class OnboardingFragment :
     }
   }
 
-  private fun handleAccountListRegistryEvent(event: AccountListRegistryEvent) {
-    return when (event) {
-      AccountListRegistryEvent.AccountCreated ->
+  private fun handleAccountListRegistryEvent(event: AccountListEvent) {
+    when (event) {
+      AccountListEvent.AccountCreated ->
         this.onOnboardingCompleted()
-      is AccountListRegistryEvent.OpenErrorPage ->
+      is AccountListEvent.OpenErrorPage ->
         this.openErrorPage(event.parameters)
     }
   }
@@ -138,7 +139,7 @@ class OnboardingFragment :
 
   private fun openSettingsAccountRegistry() {
     this.logger.debug("openSettingsAccountRegistry")
-    val fragment = AccountListRegistryFragment()
+    val fragment = AccountListFragment.create(AccountListFragmentParameters(false))
     this.childFragmentManager.commit {
       replace(R.id.onboarding_fragment_container, fragment)
       addToBackStack(null)

@@ -1,3 +1,9 @@
+android {
+  buildFeatures {
+    viewBinding = true
+  }
+}
+
 dependencies {
   implementation project(":simplified-android-ktx")
   implementation project(":simplified-buildconfig-api")

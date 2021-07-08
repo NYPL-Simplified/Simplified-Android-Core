@@ -1,18 +1,15 @@
-<?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/account"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="16dp"
-    android:background="@drawable/bg_account_list_item"
+    android:background="?android:selectableItemBackground"
     android:clickable="true"
     android:focusable="true"
     android:minHeight="?android:listPreferredItemHeight"
     android:orientation="horizontal"
-    android:padding="16dp"
-    tools:ignore="UseCompoundDrawables"
-    tools:layout_marginVertical="16dp">
+    android:padding="16dp">
 
     <TextView
         android:id="@+id/accountTitle"
@@ -63,7 +60,8 @@
         android:textAlignment="viewEnd"
         android:textAllCaps="true"
         android:textSize="12sp"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/accountMore"
+        android:layout_marginEnd="8dp"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="Online" />
 
@@ -76,7 +74,8 @@
         android:textAlignment="viewEnd"
         android:textAllCaps="true"
         android:textSize="12sp"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/accountMore"
+        android:layout_marginEnd="8dp"
         app:layout_constraintTop_toBottomOf="@id/accountDistance"
         tools:text="Online" />
 
@@ -94,12 +93,26 @@
         android:background="@drawable/bg_account_badge"
         android:paddingHorizontal="16dp"
         android:paddingVertical="2dp"
+        android:layout_marginEnd="8dp"
         android:text="TODO"
         android:textAlignment="center"
         android:textColor="@android:color/white"
         android:textSize="12sp"
+        app:layout_constraintEnd_toStartOf="@+id/accountMore"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageButton
+        android:id="@+id/accountMore"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        tools:visibility="visible"
+        android:background="?selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_more_vert"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:visibility="visible" />
+        app:tint="@android:color/black"
+        tools:tint="@android:color/black" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

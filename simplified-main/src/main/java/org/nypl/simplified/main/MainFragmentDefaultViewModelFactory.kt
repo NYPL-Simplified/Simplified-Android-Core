@@ -1,11 +1,10 @@
 package org.nypl.simplified.main
 
 import androidx.lifecycle.ViewModelProvider
-import org.nypl.simplified.listeners.api.ListenerRepositoryFactory
 import org.nypl.simplified.listeners.api.ListenerRepository
+import org.nypl.simplified.listeners.api.ListenerRepositoryFactory
 import org.nypl.simplified.ui.accounts.AccountDetailEvent
 import org.nypl.simplified.ui.accounts.AccountListEvent
-import org.nypl.simplified.ui.accounts.AccountListRegistryEvent
 import org.nypl.simplified.ui.accounts.AccountPickerEvent
 import org.nypl.simplified.ui.accounts.saml20.AccountSAML20Event
 import org.nypl.simplified.ui.catalog.CatalogBookDetailEvent
@@ -26,7 +25,6 @@ class MainFragmentDefaultViewModelFactory(fallbackFactory: ViewModelProvider.Fac
     repository.registerListener(CatalogBookDetailEvent::class, MainFragmentListenedEvent::CatalogBookDetailEvent)
     repository.registerListener(AccountSAML20Event::class, MainFragmentListenedEvent::AccountSAML20Event)
     repository.registerListener(AccountDetailEvent::class, MainFragmentListenedEvent::AccountDetailEvent)
-    repository.registerListener(AccountListRegistryEvent::class, MainFragmentListenedEvent::AccountListRegistryEvent)
     repository.registerListener(AccountListEvent::class, MainFragmentListenedEvent::AccountListEvent)
     repository.registerListener(AccountPickerEvent::class, MainFragmentListenedEvent::AccountPickerEvent)
     repository.registerListener(SettingsMainEvent::class, MainFragmentListenedEvent::SettingsMainEvent)
