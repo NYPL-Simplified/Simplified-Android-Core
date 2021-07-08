@@ -1,9 +1,9 @@
 package org.nypl.simplified.viewer.epub.readium2
 
-import org.librarysimplified.r2.api.SR2BookChapter
 import org.librarysimplified.r2.api.SR2BookMetadata
 import org.librarysimplified.r2.api.SR2Bookmark
 import org.librarysimplified.r2.api.SR2Locator
+import org.librarysimplified.r2.api.SR2NavigationNode.SR2NavigationReadingOrderNode
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.books.api.BookChapterProgress
 import org.nypl.simplified.books.api.BookID
@@ -127,7 +127,8 @@ object Reader2Bookmarks {
     source: Bookmark,
     location: BookLocation.BookLocationR1
   ): SR2Bookmark? {
-    val chapter = bookMetadata.readingOrder.find { chapter -> chapter.title == location.idRef }
+    val chapter =
+      bookMetadata.navigationGraph.readingOrder.find { chapter -> chapter.title == location.idRef }
     if (chapter != null) {
       return toSR2Chapter(chapter, source)
     }
@@ -135,7 +136,7 @@ object Reader2Bookmarks {
   }
 
   private fun toSR2Chapter(
-    chapter: SR2BookChapter,
+    chapter: SR2NavigationReadingOrderNode,
     source: Bookmark
   ): SR2Bookmark {
     return SR2Bookmark(
@@ -148,7 +149,7 @@ object Reader2Bookmarks {
       },
       title = source.chapterTitle,
       locator = SR2Locator.SR2LocatorPercent(
-        chapterHref = chapter.chapterHref,
+        chapterHref = chapter.navigationPoint.locator.chapterHref,
         chapterProgress = source.chapterProgress
       ),
       bookProgress = source.bookProgress
