@@ -327,9 +327,13 @@ class Reader2Activity : AppCompatActivity() {
       if (lastRead != null) {
         reference.controller.submitCommand(SR2Command.OpenChapter(lastRead.locator))
       } else {
-        val first = reference.controller.bookMetadata.readingOrder.first()
+        val first = reference.controller.bookMetadata.navigationGraph.start()
         reference.controller.submitCommand(
-          SR2Command.OpenChapter(SR2Locator.SR2LocatorPercent(first.chapterHref, 0.0))
+          SR2Command.OpenChapter(
+            SR2Locator.SR2LocatorPercent(
+              chapterHref = first.node.navigationPoint.locator.chapterHref,
+              chapterProgress = 0.0
+            ))
         )
       }
     } else {
