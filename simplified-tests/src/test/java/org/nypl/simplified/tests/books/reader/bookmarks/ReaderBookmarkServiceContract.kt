@@ -44,9 +44,9 @@ import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkEvent
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkHTTPCallsType
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceType
-import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceUsableType.SyncEnableResult.SYNC_DISABLED
-import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceUsableType.SyncEnableResult.SYNC_ENABLED
-import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceUsableType.SyncEnableResult.SYNC_ENABLE_NOT_SUPPORTED
+import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkSyncEnableResult.SYNC_DISABLED
+import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkSyncEnableResult.SYNC_ENABLED
+import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkSyncEnableResult.SYNC_ENABLE_NOT_SUPPORTED
 import org.nypl.simplified.tests.EventAssertions
 import org.nypl.simplified.tests.EventLogging
 import org.nypl.simplified.tests.mocking.MockProfilesController

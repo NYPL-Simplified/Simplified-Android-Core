@@ -19,7 +19,9 @@ import org.nypl.simplified.listeners.api.FragmentListenerType
 import org.nypl.simplified.profiles.api.ProfileDateOfBirth
 import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
+import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkEvent.ReaderBookmarkSyncSettingChanged
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceType
+import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkSyncEnableStatus
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.taskrecorder.api.TaskStep
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
@@ -50,12 +52,7 @@ class AccountDetailViewModel(
   @Volatile
   private var loginExplicitlyRequested: Boolean = false
 
-  private val subscriptions =
-    CompositeDisposable(
-      this.profilesController.accountEvents()
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(this::onAccountEvent)
-    )
+  private val subscriptions = CompositeDisposable()
 
   private val accountLiveMutable: MutableLiveData<AccountType> =
     MutableLiveData(
@@ -63,6 +60,42 @@ class AccountDetailViewModel(
         .profileCurrent()
         .account(this.accountId)
     )
+
+  val accountLive: LiveData<AccountType> =
+    this.accountLiveMutable
+
+  val account: AccountType =
+    this.accountLive.value!!
+
+  /**
+   * A live data element that tracks the status of the bookmark syncing switch for the
+   * current account.
+   */
+
+  private val accountSyncingSwitchStatusMutable: MutableLiveData<ReaderBookmarkSyncEnableStatus> =
+    MutableLiveData(this.readerBookmarkService.bookmarkSyncStatus(account.id))
+
+  val accountSyncingSwitchStatus: LiveData<ReaderBookmarkSyncEnableStatus> =
+    this.accountSyncingSwitchStatusMutable
+
+  init {
+    this.subscriptions.add(
+      this.profilesController.accountEvents()
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(this::onAccountEvent)
+    )
+    this.subscriptions.add(
+      this.readerBookmarkService.bookmarkEvents
+        .ofType(ReaderBookmarkSyncSettingChanged::class.java)
+        .filter { event -> event.accountID == this.accountId }
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(this::onBookmarkEvent)
+    )
+  }
+
+  private fun onBookmarkEvent(event: ReaderBookmarkSyncSettingChanged) {
+    this.accountSyncingSwitchStatusMutable.postValue(event.status)
+  }
 
   private fun onAccountEvent(accountEvent: AccountEvent) {
     when (accountEvent) {
@@ -81,6 +114,18 @@ class AccountDetailViewModel(
 
   private fun handleAccountUpdated(event: AccountEventUpdated) {
     this.accountLiveMutable.value = this.account
+
+    /*
+     * Synthesize a bookmark event so that we fetch up-to-date values if the account
+     * logs in or out.
+     */
+
+    this.onBookmarkEvent(
+      ReaderBookmarkSyncSettingChanged(
+        accountID = event.accountID,
+        status = this.readerBookmarkService.bookmarkSyncStatus(event.accountID)
+      )
+    )
   }
 
   private fun handleLoginStateChanged(event: AccountEventLoginStateChanged) {
@@ -110,12 +155,6 @@ class AccountDetailViewModel(
 
   val buildConfig =
     services.requireService(BuildConfigurationServiceType::class.java)
-
-  val accountLive: LiveData<AccountType> =
-    this.accountLiveMutable
-
-  val account: AccountType =
-    this.accountLive.value!!
 
   /**
    * Logging out was requested. This is tracked in order to allow for

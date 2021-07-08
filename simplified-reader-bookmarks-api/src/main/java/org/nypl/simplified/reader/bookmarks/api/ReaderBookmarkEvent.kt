@@ -10,6 +10,15 @@ import org.nypl.simplified.books.api.Bookmark
 sealed class ReaderBookmarkEvent {
 
   /**
+   * The status of bookmark syncing changed.
+   */
+
+  data class ReaderBookmarkSyncSettingChanged(
+    val accountID: AccountID,
+    val status: ReaderBookmarkSyncEnableStatus
+  ) : ReaderBookmarkEvent()
+
+  /**
    * Synchronizing bookmarks for the given account has started.
    */
 

@@ -5,6 +5,8 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import android.view.View.INVISIBLE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
@@ -22,6 +24,7 @@ import com.io7m.junreachable.UnreachableCodeException
 import io.reactivex.disposables.CompositeDisposable
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
+import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggedIn
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingIn
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggingInWaitingForExternalAuthentication
@@ -42,6 +45,10 @@ import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest
 import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest.Basic
 import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest.OAuthWithIntermediaryCancel
 import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest.OAuthWithIntermediaryInitiate
+import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkSyncEnableResult.SYNC_DISABLED
+import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkSyncEnableResult.SYNC_ENABLED
+import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkSyncEnableResult.SYNC_ENABLE_NOT_SUPPORTED
+import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkSyncEnableStatus
 import org.nypl.simplified.ui.accounts.AccountLoginButtonStatus.AsCancelButtonDisabled
 import org.nypl.simplified.ui.accounts.AccountLoginButtonStatus.AsCancelButtonEnabled
 import org.nypl.simplified.ui.accounts.AccountLoginButtonStatus.AsLoginButtonDisabled
@@ -102,8 +109,9 @@ class AccountDetailFragment : Fragment(R.layout.account) {
   private lateinit var bookmarkSync: ViewGroup
   private lateinit var bookmarkSyncCheck: SwitchCompat
   private lateinit var bookmarkSyncLabel: View
-  private lateinit var loginProgress: ViewGroup
+  private lateinit var bookmarkSyncProgress: ProgressBar
   private lateinit var loginButtonErrorDetails: Button
+  private lateinit var loginProgress: ViewGroup
   private lateinit var loginProgressBar: ProgressBar
   private lateinit var loginProgressText: TextView
   private lateinit var loginTitle: ViewGroup
@@ -156,6 +164,8 @@ class AccountDetailFragment : Fragment(R.layout.account) {
     this.authenticationAlternativesButtons =
       view.findViewById(R.id.accountAuthAlternativesButtons)
 
+    this.bookmarkSyncProgress =
+      view.findViewById(R.id.accountSyncProgress)
     this.bookmarkSync =
       view.findViewById(R.id.accountSyncBookmarks)
     this.bookmarkSyncCheck =
@@ -193,7 +203,7 @@ class AccountDetailFragment : Fragment(R.layout.account) {
       this.reportIssueGroup.findViewById(R.id.accountReportIssueEmail)
 
     if (this.parameters.showPleaseLogInTitle) {
-      this.loginTitle.visibility = View.VISIBLE
+      this.loginTitle.visibility = VISIBLE
     } else {
       this.loginTitle.visibility = View.GONE
     }
@@ -213,6 +223,56 @@ class AccountDetailFragment : Fragment(R.layout.account) {
 
     this.viewModel.accountLive.observe(this.viewLifecycleOwner) {
       this.reconfigureAccountUI()
+    }
+
+    this.viewModel.accountSyncingSwitchStatus.observe(this.viewLifecycleOwner) { status ->
+      this.reconfigureBookmarkSyncingSwitch(status)
+    }
+  }
+
+  private fun reconfigureBookmarkSyncingSwitch(status: ReaderBookmarkSyncEnableStatus) {
+
+    /*
+     * Remove the checked-change listener, because setting `isChecked` will trigger the listener.
+     */
+
+    this.bookmarkSyncCheck.setOnCheckedChangeListener(null)
+
+    /*
+     * Otherwise, the switch is doing something that interests us...
+     */
+
+    val account = this.viewModel.account
+    return when (status) {
+      is ReaderBookmarkSyncEnableStatus.Changing -> {
+        this.bookmarkSyncProgress.visibility = VISIBLE
+        this.bookmarkSyncCheck.isEnabled = false
+      }
+
+      is ReaderBookmarkSyncEnableStatus.Idle -> {
+        this.bookmarkSyncProgress.visibility = INVISIBLE
+
+        when (status.status) {
+          SYNC_ENABLE_NOT_SUPPORTED -> {
+            this.bookmarkSyncCheck.isChecked = false
+            this.bookmarkSyncCheck.isEnabled = false
+          }
+
+          SYNC_ENABLED,
+          SYNC_DISABLED -> {
+            val isPermitted = account.preferences.bookmarkSyncingPermitted
+            val isSupported = account.loginState.credentials?.annotationsURI != null
+
+            this.bookmarkSyncCheck.isChecked = isPermitted
+            this.bookmarkSyncCheck.isEnabled = isSupported
+            this.bookmarkSyncLabel.isEnabled = isSupported
+
+            this.bookmarkSyncCheck.setOnCheckedChangeListener { _, isChecked ->
+              this.viewModel.enableBookmarkSyncing(isChecked)
+            }
+          }
+        }
+      }
     }
   }
 
@@ -368,7 +428,7 @@ class AccountDetailFragment : Fragment(R.layout.account) {
     if (email != null) {
       val address = email.removePrefix("mailto:")
 
-      this.reportIssueGroup.visibility = View.VISIBLE
+      this.reportIssueGroup.visibility = VISIBLE
       this.reportIssueEmail.text = address
       this.reportIssueGroup.setOnClickListener {
         val emailIntent =
@@ -408,7 +468,7 @@ class AccountDetailFragment : Fragment(R.layout.account) {
       view = buttonImage,
       onSuccess = {
         container.background = null
-        buttonImage.visibility = View.VISIBLE
+        buttonImage.visibility = VISIBLE
         buttonText.visibility = View.GONE
       }
     )
@@ -511,12 +571,6 @@ class AccountDetailFragment : Fragment(R.layout.account) {
   }
 
   private fun reconfigureAccountUI() {
-    val isPermitted = this.viewModel.account.preferences.bookmarkSyncingPermitted
-    val isSupported = this.viewModel.account.loginState.credentials ?.annotationsURI != null
-    this.bookmarkSyncCheck.isChecked = isPermitted
-    this.bookmarkSyncCheck.isEnabled = isSupported
-    this.bookmarkSyncLabel.isEnabled = isSupported
-
     this.authenticationViews.showFor(this.viewModel.account.provider.authentication)
 
     this.hideCardCreatorForNonNYPL()
@@ -542,10 +596,12 @@ class AccountDetailFragment : Fragment(R.layout.account) {
     this.accountCustomOPDSField.text = catalogURIOverride?.toString() ?: ""
     this.accountCustomOPDS.visibility =
       if (catalogURIOverride != null) {
-        View.VISIBLE
+        VISIBLE
       } else {
         View.GONE
       }
+
+    this.disableSyncSwitchForLoginState(this.viewModel.account.loginState)
 
     return when (val loginState = this.viewModel.account.loginState) {
       AccountNotLoggedIn -> {
@@ -565,8 +621,8 @@ class AccountDetailFragment : Fragment(R.layout.account) {
       }
 
       is AccountLoggingIn -> {
-        this.loginProgress.visibility = View.VISIBLE
-        this.loginProgressBar.visibility = View.VISIBLE
+        this.loginProgress.visibility = VISIBLE
+        this.loginProgressBar.visibility = VISIBLE
         this.loginProgressText.text = loginState.status
         this.loginButtonErrorDetails.visibility = View.GONE
         this.loginFormLock()
@@ -584,8 +640,8 @@ class AccountDetailFragment : Fragment(R.layout.account) {
       }
 
       is AccountLoggingInWaitingForExternalAuthentication -> {
-        this.loginProgress.visibility = View.VISIBLE
-        this.loginProgressBar.visibility = View.VISIBLE
+        this.loginProgress.visibility = VISIBLE
+        this.loginProgressBar.visibility = VISIBLE
         this.loginProgressText.text = loginState.status
         this.loginButtonErrorDetails.visibility = View.GONE
         this.loginFormLock()
@@ -602,7 +658,7 @@ class AccountDetailFragment : Fragment(R.layout.account) {
       }
 
       is AccountLoginFailed -> {
-        this.loginProgress.visibility = View.VISIBLE
+        this.loginProgress.visibility = VISIBLE
         this.loginProgressBar.visibility = View.GONE
         this.loginProgressText.text = loginState.taskResult.steps.last().resolution.message
         this.loginFormUnlock()
@@ -613,7 +669,7 @@ class AccountDetailFragment : Fragment(R.layout.account) {
             this.tryLogin()
           }
         )
-        this.loginButtonErrorDetails.visibility = View.VISIBLE
+        this.loginButtonErrorDetails.visibility = VISIBLE
         this.loginButtonErrorDetails.setOnClickListener {
           this.viewModel.openErrorPage(loginState.taskResult.steps)
         }
@@ -658,9 +714,9 @@ class AccountDetailFragment : Fragment(R.layout.account) {
           }
         }
 
-        this.loginProgress.visibility = View.VISIBLE
+        this.loginProgress.visibility = VISIBLE
         this.loginButtonErrorDetails.visibility = View.GONE
-        this.loginProgressBar.visibility = View.VISIBLE
+        this.loginProgressBar.visibility = VISIBLE
         this.loginProgressText.text = loginState.status
         this.loginFormLock()
         this.setLoginButtonStatus(AsLogoutButtonDisabled)
@@ -679,7 +735,7 @@ class AccountDetailFragment : Fragment(R.layout.account) {
           }
         }
 
-        this.loginProgress.visibility = View.VISIBLE
+        this.loginProgress.visibility = VISIBLE
         this.loginProgressBar.visibility = View.GONE
         this.loginProgressText.text = loginState.taskResult.steps.last().resolution.message
         this.cancelImageButtonLoading()
@@ -691,10 +747,27 @@ class AccountDetailFragment : Fragment(R.layout.account) {
           }
         )
 
-        this.loginButtonErrorDetails.visibility = View.VISIBLE
+        this.loginButtonErrorDetails.visibility = VISIBLE
         this.loginButtonErrorDetails.setOnClickListener {
           this.viewModel.openErrorPage(loginState.taskResult.steps)
         }
+      }
+    }
+  }
+
+  private fun disableSyncSwitchForLoginState(loginState: AccountLoginState) {
+    return when (loginState) {
+      is AccountLoggedIn -> {
+      }
+      is AccountLoggingIn,
+      is AccountLoggingInWaitingForExternalAuthentication,
+      is AccountLoggingOut,
+      is AccountLoginFailed,
+      is AccountLogoutFailed,
+      AccountNotLoggedIn -> {
+        this.bookmarkSyncCheck.setOnCheckedChangeListener(null)
+        this.bookmarkSyncCheck.isChecked = false
+        this.bookmarkSyncCheck.isEnabled = false
       }
     }
   }
@@ -760,7 +833,7 @@ class AccountDetailFragment : Fragment(R.layout.account) {
   ) {
     if (uri != null) {
       view.setImageDrawable(null)
-      view.visibility = View.VISIBLE
+      view.visibility = VISIBLE
       this.imageLoader.loader.load(uri.toString())
         .fit()
         .tag(this.imageButtonLoadingTag)
@@ -821,7 +894,7 @@ class AccountDetailFragment : Fragment(R.layout.account) {
 
   private fun authenticationAlternativesShow() {
     if (this.viewModel.account.provider.authenticationAlternatives.isNotEmpty()) {
-      this.authenticationAlternatives.visibility = View.VISIBLE
+      this.authenticationAlternatives.visibility = VISIBLE
     }
   }
 
@@ -849,7 +922,7 @@ class AccountDetailFragment : Fragment(R.layout.account) {
    */
   private fun hideCardCreatorForNonNYPL() {
     if (this.viewModel.account.provider.cardCreatorURI != null) {
-      this.settingsCardCreator.visibility = View.VISIBLE
+      this.settingsCardCreator.visibility = VISIBLE
     }
   }
 
