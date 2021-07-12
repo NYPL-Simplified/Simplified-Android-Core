@@ -34,11 +34,12 @@ platform :android do
         next
       end
       gradle(task: "clean")
-      gradle(task: "assembleRelease")
+      gradle(task: "bundleRelease")
        firebase_app_distribution(
          app: "1:220408294534:android:594dde26dd9d35c301f507",
          groups: "librarysimplified",
          release_notes: "#{release_notes}",
+         android_artifact_type: "AAB",
          firebase_cli_path: ENV["FIREBASE_CLI_PATH"])
        slack(
         message: "New simplyE android build available on firebase",
