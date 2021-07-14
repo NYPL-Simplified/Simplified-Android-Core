@@ -159,7 +159,7 @@
         <c:change date="2021-06-16T00:00:00+00:00" summary="Improve R2 behaviour with regards to spaces in filenames inside EPUB files"/>
       </c:changes>
     </c:release>
-    <c:release date="2021-07-08T17:42:10+00:00" is-open="true" ticket-system="org.nypl.jira" version="7.0.1">
+    <c:release date="2021-07-14T16:54:42+00:00" is-open="true" ticket-system="org.nypl.jira" version="7.0.1">
       <c:changes>
         <c:change date="2021-06-23T00:00:00+00:00" summary="Improve R2 accessibility">
           <c:tickets>
@@ -172,9 +172,14 @@
             <c:ticket id="SMA-192"/>
           </c:tickets>
         </c:change>
-        <c:change date="2021-07-08T17:42:10+00:00" summary="Prevent rapid toggling of the bookmark syncing switch in account settings">
+        <c:change date="2021-07-08T00:00:00+00:00" summary="Prevent rapid toggling of the bookmark syncing switch in account settings">
           <c:tickets>
             <c:ticket id="SMA-186"/>
+          </c:tickets>
+        </c:change>
+        <c:change date="2021-07-14T16:54:42+00:00" summary="Improve fixed-layout EPUB handling.">
+          <c:tickets>
+            <c:ticket id="SMA-212"/>
           </c:tickets>
         </c:change>
       </c:changes>
