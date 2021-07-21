@@ -1,12 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <resources>
-  <!--
   <color name="oeColorPrimary">#8cc63e</color>
   <color name="oeColorPrimaryDark">#7baf38</color>
   <color name="oeColorAccent">#7baf38</color>
-  -->
-  <color name="oeColorPrimary">#ad387b</color>
-  <color name="oeColorPrimaryDark">#ad387b</color>
-  <color name="oeColorAccent">#ad387b</color>
 </resources>
