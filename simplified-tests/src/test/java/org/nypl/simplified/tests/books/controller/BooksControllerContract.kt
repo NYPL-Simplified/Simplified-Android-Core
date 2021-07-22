@@ -650,6 +650,13 @@ abstract class BooksControllerContract {
 
     controller.booksSync(account.id).get()
 
+    /*
+     * Wait for all subtasks to complete.
+     */
+
+    this.executorBooks.shutdown()
+    this.executorBooks.awaitTermination(30L, TimeUnit.SECONDS)
+
     Assertions.assertEquals(1, bookDatabase.books().size)
 
     bookDatabase.entry(

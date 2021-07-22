@@ -17,7 +17,6 @@ import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.controller.api.BooksControllerType
-import org.nypl.simplified.opds.core.OPDSAvailabilityRevoked
 import org.nypl.simplified.opds.core.OPDSFeedParserType
 import org.nypl.simplified.opds.core.OPDSParseException
 import org.nypl.simplified.patron.api.PatronUserProfile
@@ -233,9 +232,8 @@ class BookSyncTask(
     }
 
     /*
-     * Now delete any book that previously existed, but is not in the
-     * received set. Queue any revoked books for completion and then
-     * deletion.
+     * Now delete/revoke any book that previously existed, but is not in the
+     * received set.
      */
 
     val revoking = HashSet<BookID>(existing.size)
@@ -244,14 +242,8 @@ class BookSyncTask(
         this.logger.debug("[{}] checking for deletion", existingId.brief())
 
         if (!received.contains(existingId)) {
-          val dbEntry = bookDatabase.entry(existingId)
-          val a = dbEntry.book.entry.availability
-          if (a is OPDSAvailabilityRevoked) {
-            revoking.add(existingId)
-          }
-
-          this.logger.debug("[{}] deleting", existingId.brief())
-          dbEntry.delete()
+          revoking.add(existingId)
+          this.logger.debug("[{}] scheduling for deletion", existingId.brief())
         } else {
           this.logger.debug("[{}] keeping", existingId.brief())
         }
