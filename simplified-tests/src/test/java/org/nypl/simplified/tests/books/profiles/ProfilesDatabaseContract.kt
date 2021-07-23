@@ -1135,4 +1135,73 @@ abstract class ProfilesDatabaseContract {
     Assertions.assertEquals("Big Bird", p0.displayName)
     Assertions.assertEquals("Grouch", p1.displayName)
   }
+
+  /**
+   * If the "most recent account" ID refers to an account that doesn't exist, then it must
+   * be wiped out when the profiles database is opened.
+   *
+   * @throws Exception On errors
+   */
+
+  @Test
+  @Throws(Exception::class)
+  fun testInvalidMostRecent() {
+    val f_tmp = DirectoryUtilities.directoryCreateTemporary()
+    val f_pro = File(f_tmp, "profiles")
+
+    val accountProviders =
+      MockAccountProviders.fakeAccountProviders()
+
+    val db0 =
+      ProfilesDatabases.openWithAnonymousProfileEnabled(
+        this.context(),
+        this.analytics,
+        this.accountEvents,
+        accountProviders,
+        AccountBundledCredentialsEmpty.getInstance(),
+        this.credentialStore,
+        this.accountsDatabases(),
+        f_pro
+      )
+
+    val pro0 = db0.currentProfileUnsafe()
+    val acc0 = pro0.mostRecentAccount()
+
+    val acc1p = MockAccountProviders.fakeProvider("urn:fake:1")
+    val acc1 = pro0.createAccount(acc1p)
+
+    val pro0desc =
+      pro0.description()
+    val pro0descNew =
+      pro0desc.copy(preferences = pro0desc.preferences.copy(mostRecentAccount = acc1.id))
+
+    pro0.setDescription(pro0descNew)
+
+    /*
+     * Delete the account on disk without going through the proper channels.
+     */
+
+    val f_account =
+      File(File(File(f_pro, pro0.id.uuid.toString()), "accounts"), acc1.id.uuid.toString())
+
+    this.logger.debug("deleting account {}", acc1.id.uuid)
+    f_account.deleteRecursively()
+
+    val db1 =
+      ProfilesDatabases.openWithAnonymousProfileEnabled(
+        this.context(),
+        this.analytics,
+        this.accountEvents,
+        accountProviders,
+        AccountBundledCredentialsEmpty.getInstance(),
+        this.credentialStore,
+        this.accountsDatabases(),
+        f_pro
+      )
+
+    val pro1 = db1.currentProfileUnsafe()
+    pro1.account(pro1.preferences().mostRecentAccount)
+
+    Assertions.assertEquals(acc0.id, pro1.preferences().mostRecentAccount)
+  }
 }
