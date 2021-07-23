@@ -159,7 +159,9 @@ class FeedLoader private constructor(
 
     val linearizedPaths = OPDSAcquisitionPaths.linearize(entry)
     for (path in linearizedPaths) {
-      if (this.isRelationSupported(path.source.relation) && this.isTypePathSupported(path)) {
+      val relationSupported = this.isRelationSupported(path.source.relation)
+      val typePathSupported = this.isTypePathSupported(path)
+      if (relationSupported && typePathSupported) {
         return true
       }
     }
@@ -176,8 +178,9 @@ class FeedLoader private constructor(
       ACQUISITION_SUBSCRIBE -> false
     }
 
-  private fun isTypePathSupported(path: OPDSAcquisitionPath) =
-    this.bookFormatSupport.isSupportedPath(path.asMIMETypes())
+  private fun isTypePathSupported(path: OPDSAcquisitionPath): Boolean {
+    return this.bookFormatSupport.isSupportedPath(path.asMIMETypes())
+  }
 
   private fun parseFromContentResolver(
     accountId: AccountID,

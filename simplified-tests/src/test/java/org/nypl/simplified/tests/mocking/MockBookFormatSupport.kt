@@ -16,6 +16,7 @@ class MockBookFormatSupport : BookFormatSupportType {
   override fun isSupportedFinalContentType(mime: MIMEType): Boolean =
     this.onIsSupportedFinalContentType(mime)
 
-  override fun isSupportedPath(typePath: List<MIMEType>): Boolean =
-    this.onIsSupportedPath(typePath)
+  override fun isSupportedPath(typePath: List<MIMEType>): Boolean {
+    return this.onIsSupportedPath(typePath)
+  }
 }

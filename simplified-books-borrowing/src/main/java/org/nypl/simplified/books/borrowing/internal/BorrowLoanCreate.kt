@@ -44,6 +44,8 @@ import java.net.URI
 
 /**
  * A task that creates an OPDS loan by hitting an acquisition URI.
+ *
+ * XXX: Use [FeedLoading.loadSingleEntryFeed]
  */
 
 class BorrowLoanCreate private constructor() : BorrowSubtaskType {
