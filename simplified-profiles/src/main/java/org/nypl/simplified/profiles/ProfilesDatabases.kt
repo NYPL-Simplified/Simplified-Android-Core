@@ -394,7 +394,7 @@ object ProfilesDatabases {
         accounts.first()
       }
 
-    val desc: ProfileDescription =
+    var description: ProfileDescription =
       try {
         ProfileDescriptionJSON.deserializeFromFile(jom, profileFile, mostRecentFallback.id)
       } catch (e: IOException) {
@@ -408,7 +408,7 @@ object ProfilesDatabases {
       directory = profileDir,
       analytics = analytics,
       accounts = accountsDatabase,
-      initialDescription = desc
+      initialDescription = description
     )
   }
 

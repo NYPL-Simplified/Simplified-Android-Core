@@ -218,7 +218,6 @@ class Controller private constructor(
       if (crash != null) {
         ControllerCrashlytics.configureCrashlytics(
           profile = profile,
-          accountProviders = accountProviders,
           crashlytics = crash
         )
       }

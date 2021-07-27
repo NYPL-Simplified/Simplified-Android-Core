@@ -1,22 +1,25 @@
 package org.nypl.simplified.books.controller
 
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
-import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.crashlytics.api.CrashlyticsServiceType
 import org.nypl.simplified.profiles.api.ProfileReadableType
+import org.slf4j.LoggerFactory
 import java.security.MessageDigest
 
 internal object ControllerCrashlytics {
 
+  private val logger =
+    LoggerFactory.getLogger(ControllerCrashlytics::class.java)
+
   fun configureCrashlytics(
     profile: ProfileReadableType,
-    accountProviders: AccountProviderRegistryType,
     crashlytics: CrashlyticsServiceType
   ) {
-    val account =
-      profile.mostRecentAccount() ?: profile.accountsByProvider()[accountProviders.defaultProvider.id]
-    if (account != null) {
+    try {
+      val account = profile.mostRecentAccount()
       this.configureCrashlyticsForCredentials(crashlytics, account.loginState.credentials)
+    } catch (e: Exception) {
+      this.logger.debug("exception raised when configuring crashlytics: ", e)
     }
   }
 
