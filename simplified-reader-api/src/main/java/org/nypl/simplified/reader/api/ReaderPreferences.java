@@ -19,6 +19,7 @@ public abstract class ReaderPreferences {
     builder.setFontFamily(ReaderFontSelection.READER_FONT_SANS_SERIF);
     builder.setBrightness(1.0);
     builder.setFontScale(100.0);
+    builder.setPublisherCSS(ReaderPublisherCSS.PUBLISHER_DEFAULT_CSS_DISABLED);
     return builder;
   }
 
@@ -47,11 +48,16 @@ public abstract class ReaderPreferences {
   public abstract Builder toBuilder();
 
   /**
-   *
    * @return The screen brightness value in the range {@code [0.0, 1.0]}
    */
 
   public abstract double brightness();
+
+  /**
+   * @return The publisher CSS setting
+   */
+
+  public abstract ReaderPublisherCSS publisherCSS();
 
   /**
    * A mutable builder for reader preferences.
@@ -92,7 +98,17 @@ public abstract class ReaderPreferences {
 
     public abstract Builder setBrightness(double brightness);
 
+    /**
+     * @param css The new css setting
+     * @return This builder
+     * @see #publisherCSS()
+     */
+
+    public abstract Builder setPublisherCSS(ReaderPublisherCSS css);
+
     public abstract double brightness();
+
+    public abstract ReaderPublisherCSS publisherCSS();
 
     public abstract double fontScale();
 
