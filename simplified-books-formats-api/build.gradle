@@ -1,4 +1,6 @@
 dependencies {
+  api project(":simplified-books-api")
+
   api libraries.irradia_mime_api
   api libraries.irradia_mime_vanilla
 
