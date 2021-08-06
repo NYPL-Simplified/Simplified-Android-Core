@@ -40,4 +40,8 @@ class OEIBuildConfigurationService : BuildConfigurationServiceType {
     false
   override val showAgeGateUi: Boolean
     get() = false
+
+  override fun allowReturns(): Boolean {
+    return false
+  }
 }
