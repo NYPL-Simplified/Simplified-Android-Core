@@ -17,6 +17,7 @@
     <link href="urn:book:0:cover.jpg" type="image/jpeg" rel="http://opds-spec.org/image"/>
     <link href="urn:book:0:cover.jpg" type="image/jpeg" rel="http://opds-spec.org/image/thumbnail"/>
     <link href="urn:book:0:book.epub" type="application/epub+zip" rel="http://opds-spec.org/acquisition/open-access"/>
+    <link href="http://localhost:9000/book/0" rel="alternate"/>
   </entry>
 
   <entry schema:additionalType="http://schema.org/Book">
@@ -31,6 +32,7 @@
     <link href="urn:book:1:cover.jpg" type="image/jpeg" rel="http://opds-spec.org/image"/>
     <link href="urn:book:1:cover.jpg" type="image/jpeg" rel="http://opds-spec.org/image/thumbnail"/>
     <link href="urn:book:1:book.epub" type="application/epub+zip" rel="http://opds-spec.org/acquisition/open-access"/>
+    <link href="http://localhost:9000/book/1" rel="alternate"/>
   </entry>
 
   <entry schema:additionalType="http://schema.org/Book">
@@ -45,6 +47,7 @@
     <link href="urn:book:2:cover.jpg" type="image/jpeg" rel="http://opds-spec.org/image"/>
     <link href="urn:book:2:cover.jpg" type="image/jpeg" rel="http://opds-spec.org/image/thumbnail"/>
     <link href="urn:book:2:book.epub" type="application/epub+zip" rel="http://opds-spec.org/acquisition/open-access"/>
+    <link href="http://localhost:9000/book/2" rel="alternate"/>
   </entry>
 
 </feed>

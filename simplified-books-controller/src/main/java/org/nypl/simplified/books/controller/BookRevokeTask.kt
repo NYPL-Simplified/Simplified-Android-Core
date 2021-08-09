@@ -4,12 +4,9 @@ import com.io7m.jfunctional.Some
 import com.io7m.junreachable.UnreachableCodeException
 import org.joda.time.DateTime
 import org.joda.time.Duration
-import org.librarysimplified.http.api.LSHTTPAuthorizationType
 import org.nypl.drm.core.AdobeAdeptExecutorType
 import org.nypl.drm.core.AdobeAdeptLoan
-import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePostActivationCredentials
-import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions
@@ -25,7 +22,6 @@ import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.controller.api.BookRevokeExceptionBadFeed
 import org.nypl.simplified.books.controller.api.BookRevokeExceptionDeviceNotActivated
-import org.nypl.simplified.books.controller.api.BookRevokeExceptionNoCredentials
 import org.nypl.simplified.books.controller.api.BookRevokeExceptionNotRevocable
 import org.nypl.simplified.books.controller.api.BookRevokeStringResourcesType
 import org.nypl.simplified.feeds.api.Feed
@@ -288,6 +284,10 @@ class BookRevokeTask(
     this.publishStatusFromDatabase()
     this.databaseEntry.delete()
   }
+
+  /*
+   * XXX: Use [FeedLoading.loadSingleEntryFeed]
+   */
 
   private fun revokeNotifyServerURIFeed(targetURI: URI, account: AccountType): Feed {
     val httpAuth = this.createHttpAuthIfRequired(account)
@@ -584,38 +584,6 @@ class BookRevokeTask(
         this.revokeStrings.revokeBookDatabaseLookupFailed, "unexpectedException", e
       )
       throw TaskFailedHandled(e)
-    }
-  }
-
-  /**
-   * If the account requires credentials, create HTTP auth details. If no credentials
-   * are provided, throw an exception.
-   */
-
-  private fun createHttpAuthIfRequired(account: AccountType): LSHTTPAuthorizationType? {
-    return if (account.requiresCredentials) {
-      AccountAuthenticatedHTTP.createAuthorization(this.getRequiredAccountCredentials(account))
-    } else {
-      null
-    }
-  }
-
-  /**
-   * Assume that account credentials are required and fetch them. If they're not present, fail
-   * loudly.
-   */
-
-  private fun getRequiredAccountCredentials(account: AccountType): AccountAuthenticationCredentials {
-    val loginState = account.loginState
-    val credentials = loginState.credentials
-    if (credentials != null) {
-      return credentials
-    } else {
-      this.error("revocation requires credentials, but none are available")
-      val exception = BookRevokeExceptionNoCredentials()
-      val message = this.revokeStrings.revokeCredentialsRequired
-      this.taskRecorder.currentStepFailed(message, "revokeCredentialsRequired", exception)
-      throw TaskFailedHandled(exception)
     }
   }
 

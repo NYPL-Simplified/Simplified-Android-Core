@@ -1,0 +1,25 @@
+<feed xmlns:schema="http://schema.org/" xmlns="http://www.w3.org/2005/Atom" xmlns:opds="http://opds-spec.org/2010/catalog">
+  <id>urn:feed:1</id>
+  <title>Feed</title>
+  <updated>2015-03-24T17:23:50Z</updated>
+  <link href="urn:feed:1" rel="self"/>
+
+  <entry schema:additionalType="http://schema.org/Book">
+    <id>urn:book:1</id>
+    <title>Book 0</title>
+    <author>
+      <name>A. Author</name>
+    </author>
+    <summary type="html">No Description Available</summary>
+    <updated>2017-02-09T18:18:35Z</updated>
+    <published>2016-11-18T17:28:14Z</published>
+    <link href="urn:book:1:cover.jpg" type="image/jpeg" rel="http://opds-spec.org/image"/>
+    <link href="urn:book:1:cover.jpg" type="image/jpeg" rel="http://opds-spec.org/image/thumbnail"/>
+    <link href="urn:book:1:book.epub" type="application/epub+zip" rel="http://opds-spec.org/acquisition/borrow">
+      <opds:availability since="2018-10-05T12:51:06Z" status="available" until="2018-10-26T18:51:07Z" />
+      <opds:holds total="0" />
+      <opds:copies available="5" total="5" />
+    </link>
+    <link href="http://localhost:9000/book/1" rel="alternate"/>
+  </entry>
+</feed>

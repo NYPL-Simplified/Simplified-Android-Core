@@ -1298,7 +1298,7 @@ class BookRevokeTaskAdobeDRMTest {
     TaskDumps.dump(logger, result)
     result as TaskResult.Failure
 
-    Assertions.assertEquals("revokeCredentialsRequired", result.lastErrorCode)
+    Assertions.assertEquals("credentialsRequired", result.lastErrorCode)
     Mockito.verify(bookDatabaseEntry, Times(0)).delete()
   }
 
