@@ -29,6 +29,7 @@ object MainBookFormatSupport {
         supportsPDF = this.isPDFSupported(),
         supportsAdobeDRM = adobeDRM != null,
         supportsAxisNow = axisNowService != null,
+        supportsLCP = false,
         supportsAudioBooks = BookFormatAudioSupportParameters(
           supportsFindawayAudioBooks = this.isFindawaySupported(),
           supportsOverdriveAudioBooks = overdriveSecretService != null,

@@ -39,6 +39,7 @@ class FeedLoaderTest : FeedLoaderContract() {
       BookFormatSupport.create(
         BookFormatSupportParameters(
           supportsPDF = false,
+          supportsLCP = false,
           supportsAdobeDRM = false,
           supportsAxisNow = false,
           supportsAudioBooks = null

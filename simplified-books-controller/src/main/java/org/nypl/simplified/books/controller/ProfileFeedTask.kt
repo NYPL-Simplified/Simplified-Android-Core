@@ -5,6 +5,7 @@ import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.books.book_registry.BookRegistryReadableType
 import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookWithStatus
+import org.nypl.simplified.books.formats.api.BookFormatSupportType
 import org.nypl.simplified.feeds.api.Feed
 import org.nypl.simplified.feeds.api.FeedBooksSelection
 import org.nypl.simplified.feeds.api.FeedEntry
@@ -22,9 +23,10 @@ import java.util.Locale
 import java.util.concurrent.Callable
 
 internal class ProfileFeedTask(
-  val bookRegistry: BookRegistryReadableType,
-  val profiles: ProfilesControllerType,
-  val request: ProfileFeedRequest
+  private val bookFormatSupport: BookFormatSupportType,
+  private val bookRegistry: BookRegistryReadableType,
+  private val profiles: ProfilesControllerType,
+  private val request: ProfileFeedRequest
 ) : Callable<Feed.FeedWithoutGroups> {
 
   private val logger =
@@ -212,10 +214,25 @@ internal class ProfileFeedTask(
     val iter = books.iterator()
     while (iter.hasNext()) {
       val book = iter.next()
+
+      if (!isBookSupported(book)) {
+        iter.remove()
+        continue
+      }
       if (!filter.invoke(book.status)) {
         iter.remove()
+        continue
       }
     }
+  }
+
+  private fun isBookSupported(book: BookWithStatus): Boolean {
+    for (format in book.book.formats) {
+      if (this.bookFormatSupport.isDRMSupported(format.drmInformation.kind)) {
+        return true
+      }
+    }
+    return false
   }
 
   private fun collectAllBooks(bookRegistry: BookRegistryReadableType): ArrayList<BookWithStatus> {
