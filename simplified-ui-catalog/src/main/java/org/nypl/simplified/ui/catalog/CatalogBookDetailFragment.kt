@@ -25,6 +25,7 @@ import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.covers.BookCoverProviderType
+import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS
 import org.nypl.simplified.listeners.api.FragmentListenerType
 import org.nypl.simplified.listeners.api.fragmentListeners
@@ -84,6 +85,7 @@ class CatalogBookDetailFragment : Fragment(R.layout.book_detail) {
   private var thumbnailLoading: FluentFuture<Unit>? = null
 
   private lateinit var authors: TextView
+  private lateinit var buildConfig: BuildConfigurationServiceType
   private lateinit var buttonCreator: CatalogButtons
   private lateinit var buttons: LinearLayout
   private lateinit var cover: ImageView
@@ -136,6 +138,9 @@ class CatalogBookDetailFragment : Fragment(R.layout.book_detail) {
       services.requireService(ScreenSizeInformationType::class.java)
     this.covers =
       services.requireService(BookCoverProviderType::class.java)
+    this.buildConfig =
+      services.requireService(BuildConfigurationServiceType::class.java)
+
     this.buttonCreator =
       CatalogButtons(this.requireContext(), this.screenSize)
   }
@@ -542,7 +547,7 @@ class CatalogBookDetailFragment : Fragment(R.layout.book_detail) {
         }
     }
 
-    if (bookStatus.returnable) {
+    if (bookStatus.returnable && this.buildConfig.allowReturns()) {
       this.buttons.addView(this.buttonCreator.createButtonSpace())
       this.buttons.addView(
         this.buttonCreator.createRevokeLoanButton {

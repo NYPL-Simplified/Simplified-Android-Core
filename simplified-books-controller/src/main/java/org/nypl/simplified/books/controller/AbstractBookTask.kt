@@ -1,8 +1,12 @@
 package org.nypl.simplified.books.controller
 
+import org.librarysimplified.http.api.LSHTTPAuthorizationType
+import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
+import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes
+import org.nypl.simplified.books.controller.api.BookRevokeExceptionNoCredentials
 import org.nypl.simplified.profiles.api.ProfileID
 import org.nypl.simplified.profiles.api.ProfileNonexistentException
 import org.nypl.simplified.profiles.api.ProfileReadableType
@@ -125,5 +129,38 @@ abstract class AbstractBookTask(
     this.taskRecorder.addAttribute("Account", account.provider.displayName)
     this.taskRecorder.currentStepSucceeded("Located account.")
     return account
+  }
+
+  /**
+   * If the account requires credentials, create HTTP auth details. If no credentials
+   * are provided, throw an exception.
+   */
+
+  protected fun createHttpAuthIfRequired(account: AccountType): LSHTTPAuthorizationType? {
+    return if (account.requiresCredentials) {
+      AccountAuthenticatedHTTP.createAuthorization(this.getRequiredAccountCredentials(account))
+    } else {
+      null
+    }
+  }
+
+  /**
+   * Assume that account credentials are required and fetch them. If they're not present, fail
+   * loudly.
+   */
+
+  protected fun getRequiredAccountCredentials(
+    account: AccountType
+  ): AccountAuthenticationCredentials {
+    val loginState = account.loginState
+    val credentials = loginState.credentials
+    if (credentials != null) {
+      return credentials
+    } else {
+      this.logger.debug("credentials required but none are available")
+      val exception = BookRevokeExceptionNoCredentials()
+      this.taskRecorder.currentStepFailed("Credentials required, but none are available.", "credentialsRequired", exception)
+      throw TaskFailedHandled(exception)
+    }
   }
 }

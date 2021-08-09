@@ -1,5 +1,6 @@
 package org.nypl.simplified.books.controller
 
+import com.io7m.jfunctional.Some
 import org.librarysimplified.http.api.LSHTTPClientType
 import org.librarysimplified.http.api.LSHTTPResponseStatus
 import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
@@ -12,11 +13,14 @@ import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.api.BookIDs
+import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
 import org.nypl.simplified.books.book_database.api.BookDatabaseException
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.controller.api.BooksControllerType
+import org.nypl.simplified.feeds.api.FeedLoaderType
+import org.nypl.simplified.feeds.api.FeedLoading
 import org.nypl.simplified.opds.core.OPDSAvailabilityRevoked
 import org.nypl.simplified.opds.core.OPDSFeedParserType
 import org.nypl.simplified.opds.core.OPDSParseException
@@ -30,15 +34,18 @@ import org.slf4j.LoggerFactory
 import java.io.ByteArrayInputStream
 import java.io.IOException
 import java.io.InputStream
+import java.net.URI
 import java.util.HashSet
+import java.util.concurrent.TimeUnit
 
 class BookSyncTask(
-  accountID: AccountID,
+  private val accountID: AccountID,
   profileID: ProfileID,
   profiles: ProfilesDatabaseType,
   private val booksController: BooksControllerType,
   private val accountRegistry: AccountProviderRegistryType,
   private val bookRegistry: BookRegistryType,
+  private val feedLoader: FeedLoaderType,
   private val patronParsers: PatronUserProfileParsersType,
   private val http: LSHTTPClientType,
   private val feedParser: OPDSFeedParserType
@@ -233,9 +240,8 @@ class BookSyncTask(
     }
 
     /*
-     * Now delete any book that previously existed, but is not in the
-     * received set. Queue any revoked books for completion and then
-     * deletion.
+     * Now delete/revoke any book that previously existed, but is not in the
+     * received set.
      */
 
     val revoking = HashSet<BookID>(existing.size)
@@ -248,10 +254,11 @@ class BookSyncTask(
           val a = dbEntry.book.entry.availability
           if (a is OPDSAvailabilityRevoked) {
             revoking.add(existingId)
+          } else {
+            this.logger.debug("[{}] deleting", existingId.brief())
+            this.updateRegistryForBook(account, dbEntry)
+            dbEntry.delete()
           }
-
-          this.logger.debug("[{}] deleting", existingId.brief())
-          dbEntry.delete()
         } else {
           this.logger.debug("[{}] keeping", existingId.brief())
         }
@@ -267,6 +274,43 @@ class BookSyncTask(
     for (revoke_id in revoking) {
       this.logger.debug("[{}] revoking", revoke_id.brief())
       this.booksController.bookRevoke(account.id, revoke_id)
+    }
+  }
+
+  private fun updateRegistryForBook(
+    account: AccountType,
+    dbEntry: BookDatabaseEntryType
+  ) {
+    this.logger.debug("attempting to fetch book permalink to update registry")
+    val alternateOpt = dbEntry.book.entry.alternate
+    return if (alternateOpt is Some<URI>) {
+      val alternate = alternateOpt.get()
+      val entry =
+        FeedLoading.loadSingleEntryFeed(
+          feedLoader = this.feedLoader,
+          taskRecorder = this.taskRecorder,
+          accountID = this.accountID,
+          uri = alternate,
+          timeout = Pair(30L, TimeUnit.SECONDS),
+          httpAuth = null,
+          method = "GET"
+        )
+
+      /*
+       * Write a new book database entry based on the server state, and pretend that all the
+       * books have been deleted. The code will delete the entire database entry after this
+       * method returns anyway, so this code ensures that something sensible goes into the
+       * book registry.
+       */
+
+      dbEntry.writeOPDSEntry(entry.feedEntry)
+      val newBook = dbEntry.book.copy(formats = emptyList())
+      val status = BookStatus.fromBook(newBook)
+
+      this.logger.debug("book's new state is {}", status)
+      this.bookRegistry.update(BookWithStatus(newBook, status))
+    } else {
+      throw IOException("No alternate link is available")
     }
   }
 
