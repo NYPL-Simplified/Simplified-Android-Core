@@ -159,7 +159,7 @@
         <c:change date="2021-06-16T00:00:00+00:00" summary="Improve R2 behaviour with regards to spaces in filenames inside EPUB files"/>
       </c:changes>
     </c:release>
-    <c:release date="2021-07-14T16:54:42+00:00" is-open="true" ticket-system="org.nypl.jira" version="7.0.1">
+    <c:release date="2021-08-10T08:36:29+00:00" is-open="true" ticket-system="org.nypl.jira" version="7.0.1">
       <c:changes>
         <c:change date="2021-06-23T00:00:00+00:00" summary="Improve R2 accessibility">
           <c:tickets>
@@ -177,9 +177,20 @@
             <c:ticket id="SMA-186"/>
           </c:tickets>
         </c:change>
-        <c:change date="2021-07-14T16:54:42+00:00" summary="Improve fixed-layout EPUB handling.">
+        <c:change date="2021-07-14T00:00:00+00:00" summary="Improve fixed-layout EPUB handling.">
           <c:tickets>
             <c:ticket id="SMA-212"/>
+          </c:tickets>
+        </c:change>
+        <c:change date="2021-08-10T00:00:00+00:00" summary="Add a publisher CSS toggle">
+          <c:tickets>
+            <c:ticket id="SMA-228"/>
+            <c:ticket id="SMA-229"/>
+          </c:tickets>
+        </c:change>
+        <c:change date="2021-08-10T08:36:29+00:00" summary="Correctly remove expired loans">
+          <c:tickets>
+            <c:ticket id="SMA-205"/>
           </c:tickets>
         </c:change>
       </c:changes>
