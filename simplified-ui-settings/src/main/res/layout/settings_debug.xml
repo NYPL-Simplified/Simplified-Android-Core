@@ -206,5 +206,14 @@
       android:layout_height="wrap_content"
       android:layout_marginBottom="16dp"
       android:text="Add Custom OPDS Feed" />
+
+    <Button
+      android:id="@+id/settingsVersionDevEnableOpenEBooksQA"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginBottom="16dp"
+      android:checked="false"
+      android:enabled="true"
+      android:text="Toggle OpenEBooks QA Account" />
   </LinearLayout>
 </ScrollView>

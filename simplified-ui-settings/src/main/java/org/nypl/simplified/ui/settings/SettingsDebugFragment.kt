@@ -48,6 +48,7 @@ class SettingsDebugFragment : Fragment(R.layout.settings_debug) {
   private lateinit var showOnlySupportedBooks: SwitchCompat
   private lateinit var showTesting: SwitchCompat
   private lateinit var syncAccountsButton: Button
+  private lateinit var enableOpenEBooksQA: Button
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
@@ -84,6 +85,8 @@ class SettingsDebugFragment : Fragment(R.layout.settings_debug) {
       view.findViewById(R.id.settingsVersionDevCustomOPDS)
     this.crashlyticsId =
       view.findViewById(R.id.settingsVersionCrashlyticsID)
+    this.enableOpenEBooksQA =
+      view.findViewById(R.id.settingsVersionDevEnableOpenEBooksQA)
 
     this.drmTable.addView(
       this.createDrmSupportRow("Adobe Acs", this.viewModel.adeptSupported)
@@ -206,6 +209,14 @@ class SettingsDebugFragment : Fragment(R.layout.settings_debug) {
 
     this.customOPDS.setOnClickListener {
       this.listener.post(SettingsDebugEvent.OpenCustomOPDS)
+    }
+
+    /*
+     * Configure the Open EBooks QA button.
+     */
+
+    this.enableOpenEBooksQA.setOnClickListener {
+      this.viewModel.openEbooksQAToggle()
     }
   }
 
