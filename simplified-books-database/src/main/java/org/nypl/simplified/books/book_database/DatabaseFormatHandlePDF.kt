@@ -7,9 +7,11 @@ import org.nypl.simplified.books.api.BookDRMKind
 import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.books.book_database.api.BookDRMInformationHandle
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandlePDF
+import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.files.FileUtilities
 import java.io.File
 import java.io.IOException
+import java.lang.IllegalStateException
 
 /**
  * Operations on PDF formats in database entries.
@@ -32,7 +34,7 @@ internal class DatabaseFormatHandlePDF internal constructor(
   private var drmHandleRef: BookDRMInformationHandle
 
   init {
-    val drmHandleOpt =
+    val drmHandleInitial =
       BookDRMInformationHandles.open(
         directory = this.parameters.directory,
         format = this.formatDefinition,
@@ -40,21 +42,29 @@ internal class DatabaseFormatHandlePDF internal constructor(
         onUpdate = this::onDRMUpdated
       )
 
-    if (drmHandleOpt == null) {
+    if (drmHandleInitial == null) {
       try {
-        FileUtilities.fileDelete(this.fileBook)
+        if (this.fileBook.isDirectory) {
+          DirectoryUtilities.directoryDelete(this.fileBook)
+        } else {
+          FileUtilities.fileDelete(this.fileBook)
+        }
       } catch (e: Exception) {
         // Not much we can do about this.
       }
-    }
 
-    this.drmHandleRef =
-      BookDRMInformationHandles.open(
-        directory = this.parameters.directory,
-        format = this.formatDefinition,
-        bookFormats = this.parameters.bookFormatSupport,
-        onUpdate = this::onDRMUpdated
-      )!!
+      val drmHandleNext =
+        BookDRMInformationHandles.open(
+          directory = this.parameters.directory,
+          format = this.formatDefinition,
+          bookFormats = this.parameters.bookFormatSupport,
+          onUpdate = this::onDRMUpdated
+        ) ?: throw IllegalStateException("Still could not open a DRM handle!")
+
+      this.drmHandleRef = drmHandleNext
+    } else {
+      this.drmHandleRef = drmHandleInitial
+    }
   }
 
   @GuardedBy("dataLock")
