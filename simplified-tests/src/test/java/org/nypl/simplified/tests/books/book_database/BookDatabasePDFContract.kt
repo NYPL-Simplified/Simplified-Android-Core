@@ -23,6 +23,7 @@ import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess
 import org.nypl.simplified.opds.core.OPDSJSONParser
 import org.nypl.simplified.opds.core.OPDSJSONSerializer
+import org.nypl.simplified.tests.books.BookFormatsTesting
 import org.slf4j.LoggerFactory
 import java.net.URI
 import java.util.UUID
@@ -48,7 +49,7 @@ abstract class BookDatabasePDFContract {
     val parser = OPDSJSONParser.newParser()
     val serializer = OPDSJSONSerializer.newSerializer()
     val directory = DirectoryUtilities.directoryCreateTemporary()
-    val bookDatabase = BookDatabase.open(context(), parser, serializer, accountID, directory)
+    val bookDatabase = BookDatabase.open(context(), parser, serializer, BookFormatsTesting.supportsEverything, accountID, directory)
 
     val feedEntry: OPDSAcquisitionFeedEntry = this.acquisitionFeedEntryWithPDF()
     val bookID = BookIDs.newFromText("abcd")
@@ -85,7 +86,7 @@ abstract class BookDatabasePDFContract {
     val parser = OPDSJSONParser.newParser()
     val serializer = OPDSJSONSerializer.newSerializer()
     val directory = DirectoryUtilities.directoryCreateTemporary()
-    val database0 = BookDatabase.open(context(), parser, serializer, accountID, directory)
+    val database0 = BookDatabase.open(context(), parser, serializer, BookFormatsTesting.supportsEverything, accountID, directory)
 
     val feedEntry: OPDSAcquisitionFeedEntry = this.acquisitionFeedEntryWithPDF()
     val bookID = BookIDs.newFromText("abcd")

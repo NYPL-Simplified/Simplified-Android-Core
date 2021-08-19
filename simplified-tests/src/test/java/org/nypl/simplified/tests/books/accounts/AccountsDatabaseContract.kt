@@ -21,6 +21,7 @@ import org.nypl.simplified.books.book_database.BookDatabases
 import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.files.FileUtilities
 import org.nypl.simplified.profiles.api.ProfileEvent
+import org.nypl.simplified.tests.books.BookFormatsTesting
 import org.nypl.simplified.tests.mocking.FakeAccountCredentialStorage
 import org.nypl.simplified.tests.mocking.MockAccountProviders
 import org.slf4j.LoggerFactory
@@ -97,6 +98,7 @@ abstract class AccountsDatabaseContract {
         this.context(),
         this.accountEvents,
         this.bookDatabases(),
+        BookFormatsTesting.supportsEverything,
         this.credentialStore,
         this.accountProviders,
         f_acc
@@ -143,6 +145,7 @@ abstract class AccountsDatabaseContract {
         this.context(),
         this.accountEvents,
         this.bookDatabases(),
+        BookFormatsTesting.supportsEverything,
         this.credentialStore,
         this.accountProviders,
         f_acc
@@ -174,6 +177,7 @@ abstract class AccountsDatabaseContract {
         this.context(),
         this.accountEvents,
         this.bookDatabases(),
+        BookFormatsTesting.supportsEverything,
         this.credentialStore,
         this.accountProviders,
         f_acc
@@ -208,6 +212,7 @@ abstract class AccountsDatabaseContract {
         this.context(),
         this.accountEvents,
         this.bookDatabases(),
+        BookFormatsTesting.supportsEverything,
         this.credentialStore,
         this.accountProviders,
         f_acc
@@ -235,6 +240,7 @@ abstract class AccountsDatabaseContract {
       this.context(),
       this.accountEvents,
       this.bookDatabases(),
+      BookFormatsTesting.supportsEverything,
       this.credentialStore,
       this.accountProviders,
       f_acc
@@ -261,6 +267,7 @@ abstract class AccountsDatabaseContract {
       this.context(),
       this.accountEvents,
       this.bookDatabases(),
+      BookFormatsTesting.supportsEverything,
       this.credentialStore,
       this.accountProviders,
       f_acc
@@ -304,6 +311,7 @@ abstract class AccountsDatabaseContract {
         this.context(),
         this.accountEvents,
         this.bookDatabases(),
+        BookFormatsTesting.supportsEverything,
         this.credentialStore,
         this.accountProviders,
         f_acc
@@ -333,6 +341,7 @@ abstract class AccountsDatabaseContract {
       this.context(),
       this.accountEvents,
       this.bookDatabases(),
+      BookFormatsTesting.supportsEverything,
       this.credentialStore,
       this.accountProviders,
       f_acc
@@ -350,6 +359,7 @@ abstract class AccountsDatabaseContract {
       this.context(),
       this.accountEvents,
       this.bookDatabases(),
+      BookFormatsTesting.supportsEverything,
       this.credentialStore,
       this.accountProviders,
       f_acc
@@ -380,6 +390,7 @@ abstract class AccountsDatabaseContract {
       this.context(),
       this.accountEvents,
       this.bookDatabases(),
+      BookFormatsTesting.supportsEverything,
       this.credentialStore,
       this.accountProviders,
       f_acc
@@ -432,6 +443,7 @@ abstract class AccountsDatabaseContract {
       this.context(),
       this.accountEvents,
       this.bookDatabases(),
+      BookFormatsTesting.supportsEverything,
       this.credentialStore,
       this.accountProviders,
       f_acc
@@ -463,6 +475,7 @@ abstract class AccountsDatabaseContract {
       this.context(),
       this.accountEvents,
       this.bookDatabases(),
+      BookFormatsTesting.supportsEverything,
       this.credentialStore,
       this.accountProviders,
       f_acc

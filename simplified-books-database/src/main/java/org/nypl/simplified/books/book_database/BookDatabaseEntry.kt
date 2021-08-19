@@ -11,6 +11,7 @@ import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
 import org.nypl.simplified.books.book_database.api.BookDatabaseException
 import org.nypl.simplified.books.book_database.api.BookFormats
+import org.nypl.simplified.books.formats.api.BookFormatSupportType
 import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.files.FileUtilities
 import org.nypl.simplified.json.core.JSONSerializerUtilities
@@ -32,6 +33,7 @@ internal class BookDatabaseEntry internal constructor(
   private val context: Context,
   private val bookDir: File,
   private val serializer: OPDSJSONSerializerType,
+  private val formats: BookFormatSupportType,
   @GuardedBy("bookLock")
   private var bookRef: Book,
   private val onDelete: Runnable
@@ -107,7 +109,8 @@ internal class BookDatabaseEntry internal constructor(
           onUpdate = { format -> this.onFormatUpdated(format) },
           existingFormats = this.formatHandlesRef,
           contentTypes = acquisition.availableFinalContentTypes(),
-          objectMapper = objectMapper
+          objectMapper = objectMapper,
+          bookFormats = this.formats
         )
       }
 
@@ -258,12 +261,21 @@ internal class BookDatabaseEntry internal constructor(
       ownerDirectory: File,
       owner: BookDatabaseEntryType,
       onUpdate: (BookFormat) -> Unit,
+      bookFormats: BookFormatSupportType,
       existingFormats: MutableMap<Class<out BookDatabaseEntryFormatHandle>, BookDatabaseEntryFormatHandle>,
       contentTypes: Set<MIMEType>
     ) {
       for (contentType in contentTypes) {
         for ((format, constructor) in constructors) {
           if (format.supports(contentType)) {
+            if (!bookFormats.isSupportedFinalContentType(contentType)) {
+              logger.debug(
+                "[{}]: skipping unsupported format {} for content type {}",
+                owner.book.id.brief(), constructor.classType.simpleName, contentType
+              )
+              continue
+            }
+
             // Skip if handler already exists for type
             if (existingFormats.containsKey(constructor.classType)) {
               logger.debug(
@@ -287,7 +299,8 @@ internal class BookDatabaseEntry internal constructor(
                 onUpdated = onUpdate,
                 entry = owner,
                 contentType = contentType,
-                objectMapper = objectMapper
+                objectMapper = objectMapper,
+                bookFormatSupport = bookFormats
               )
 
             existingFormats[constructor.classType] = constructor.constructor.invoke(params)

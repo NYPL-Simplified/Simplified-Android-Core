@@ -1,6 +1,7 @@
 dependencies {
   api project(":simplified-accounts-api")
   api project(":simplified-books-database-api")
+  api project(":simplified-books-formats-api")
 
   implementation project(':simplified-files')
   implementation project(':simplified-opds-core')

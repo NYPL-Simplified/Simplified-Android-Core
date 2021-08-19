@@ -10,6 +10,7 @@ import org.nypl.simplified.accounts.database.api.AccountsDatabaseType
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.books.book_database.BookDatabases
 import org.nypl.simplified.books.book_database.api.BookDatabaseFactoryType
+import org.nypl.simplified.books.formats.api.BookFormatSupportType
 import java.io.File
 
 /**
@@ -24,6 +25,7 @@ object AccountsDatabases : AccountsDatabaseFactoryType {
     accountEvents: Subject<AccountEvent>,
     accountProviders: AccountProviderRegistryType,
     bookDatabases: BookDatabaseFactoryType,
+    bookFormatSupport: BookFormatSupportType,
     context: Context,
     directory: File
   ): AccountsDatabaseType {
@@ -31,6 +33,7 @@ object AccountsDatabases : AccountsDatabaseFactoryType {
       context = context,
       accountEvents = accountEvents,
       bookDatabases = bookDatabases,
+      bookFormatSupport = bookFormatSupport,
       accountCredentials = accountAuthenticationCredentialsStore,
       accountProviders = accountProviders,
       directory = directory
@@ -42,6 +45,7 @@ object AccountsDatabases : AccountsDatabaseFactoryType {
     accountAuthenticationCredentialsStore: AccountAuthenticationCredentialsStoreType,
     accountEvents: Subject<AccountEvent>,
     accountProviders: AccountProviderRegistryType,
+    bookFormatSupport: BookFormatSupportType,
     context: Context,
     directory: File
   ): AccountsDatabaseType {
@@ -49,6 +53,7 @@ object AccountsDatabases : AccountsDatabaseFactoryType {
       context = context,
       accountEvents = accountEvents,
       bookDatabases = BookDatabases,
+      bookFormatSupport = bookFormatSupport,
       accountCredentials = accountAuthenticationCredentialsStore,
       accountProviders = accountProviders,
       directory = directory

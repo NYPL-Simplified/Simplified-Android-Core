@@ -17,6 +17,7 @@ import org.nypl.simplified.accounts.database.api.AccountsDatabaseOpenException
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseType
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.analytics.api.AnalyticsType
+import org.nypl.simplified.books.formats.api.BookFormatSupportType
 import org.nypl.simplified.files.FileLocking
 import org.nypl.simplified.files.FileUtilities
 import org.nypl.simplified.profiles.api.ProfileAttributes
@@ -69,6 +70,7 @@ object ProfilesDatabases {
     accountBundledCredentials: AccountBundledCredentialsType,
     accountCredentialsStore: AccountAuthenticationCredentialsStoreType,
     accountsDatabases: AccountsDatabaseFactoryType,
+    bookFormatSupport: BookFormatSupportType,
     directory: File
   ): ProfilesDatabaseType {
     this.logger.debug("opening profile database: {}", directory)
@@ -85,6 +87,7 @@ object ProfilesDatabases {
       accountBundledCredentials = accountBundledCredentials,
       accountCredentialsStore = accountCredentialsStore,
       accountsDatabases = accountsDatabases,
+      bookFormatSupport = bookFormatSupport,
       directory = directory,
       profiles = profiles,
       jom = jom,
@@ -111,6 +114,7 @@ object ProfilesDatabases {
       accountCredentialsStore = accountCredentialsStore,
       accountsDatabases = accountsDatabases,
       anonymousProfileEnabled = ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_DISABLED,
+      bookFormatSupport = bookFormatSupport,
       context = context,
       directory = directory,
       profiles = profiles
@@ -125,6 +129,7 @@ object ProfilesDatabases {
     accountBundledCredentials: AccountBundledCredentialsType,
     accountCredentialsStore: AccountAuthenticationCredentialsStoreType,
     accountsDatabases: AccountsDatabaseFactoryType,
+    bookFormatSupport: BookFormatSupportType,
     directory: File,
     profiles: SortedMap<ProfileID, Profile>,
     jom: ObjectMapper,
@@ -151,6 +156,7 @@ object ProfilesDatabases {
             accountsDatabases = accountsDatabases,
             accountBundledCredentials = accountBundledCredentials,
             accountCredentialsStore = accountCredentialsStore,
+            bookFormatSupport = bookFormatSupport,
             jom = jom,
             directory = directory,
             errors = errors,
@@ -177,6 +183,7 @@ object ProfilesDatabases {
     accountBundledCredentials: AccountBundledCredentialsType,
     accountCredentialsStore: AccountAuthenticationCredentialsStoreType,
     accountsDatabases: AccountsDatabaseFactoryType,
+    bookFormatSupport: BookFormatSupportType,
     directory: File
   ): ProfilesDatabaseType {
     this.logger.debug("opening profile database: {}", directory)
@@ -193,6 +200,7 @@ object ProfilesDatabases {
       accountBundledCredentials = accountBundledCredentials,
       accountCredentialsStore = accountCredentialsStore,
       accountsDatabases = accountsDatabases,
+      bookFormatSupport = bookFormatSupport,
       directory = directory,
       profiles = profiles,
       jom = jom,
@@ -210,6 +218,7 @@ object ProfilesDatabases {
           accountsDatabases = accountsDatabases,
           accountCredentialsStore = accountCredentialsStore,
           accountProvider = accountProviders.defaultProvider,
+          bookFormatSupport = bookFormatSupport,
           directory = directory,
           displayName = "",
           id = this.ANONYMOUS_PROFILE_ID
@@ -232,6 +241,7 @@ object ProfilesDatabases {
         accountCredentialsStore = accountCredentialsStore,
         accountsDatabases = accountsDatabases,
         anonymousProfileEnabled = ANONYMOUS_PROFILE_ENABLED,
+        bookFormatSupport = bookFormatSupport,
         context = context,
         directory = directory,
         profiles = profiles
@@ -329,6 +339,7 @@ object ProfilesDatabases {
     accountsDatabases: AccountsDatabaseFactoryType,
     accountBundledCredentials: AccountBundledCredentialsType,
     accountCredentialsStore: AccountAuthenticationCredentialsStoreType,
+    bookFormatSupport: BookFormatSupportType,
     jom: ObjectMapper,
     directory: File,
     errors: MutableList<Exception>,
@@ -353,6 +364,7 @@ object ProfilesDatabases {
             accountAuthenticationCredentialsStore = accountCredentialsStore,
             accountEvents = accountEvents,
             accountProviders = accountProviders,
+            bookFormatSupport = bookFormatSupport,
             context = context,
             directory = profileAccountsDir
           )
@@ -434,6 +446,7 @@ object ProfilesDatabases {
     accountsDatabases: AccountsDatabaseFactoryType,
     accountCredentialsStore: AccountAuthenticationCredentialsStoreType,
     accountProvider: AccountProviderType,
+    bookFormatSupport: BookFormatSupportType,
     directory: File,
     displayName: String,
     id: ProfileID
@@ -450,6 +463,7 @@ object ProfilesDatabases {
             accountAuthenticationCredentialsStore = accountCredentialsStore,
             accountEvents = accountEvents,
             accountProviders = accountProviders,
+            bookFormatSupport = bookFormatSupport,
             context = context,
             directory = profileAccountsDir
           )

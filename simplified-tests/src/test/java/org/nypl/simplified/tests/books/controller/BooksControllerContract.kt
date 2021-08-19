@@ -67,6 +67,7 @@ import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.tests.EventAssertions
 import org.nypl.simplified.tests.ExtraAssertions.assertInstanceOf
 import org.nypl.simplified.tests.MutableServiceDirectory
+import org.nypl.simplified.tests.books.BookFormatsTesting
 import org.nypl.simplified.tests.books.idle_timer.InoperableIdleTimer
 import org.nypl.simplified.tests.mocking.FakeAccountCredentialStorage
 import org.nypl.simplified.tests.mocking.MockAccountCreationStringResources
@@ -832,14 +833,15 @@ abstract class BooksControllerContract {
     dirProfiles: File
   ): ProfilesDatabaseType {
     return ProfilesDatabases.openWithAnonymousProfileDisabled(
-      context(),
-      this.analytics,
-      accountEvents,
-      MockAccountProviders.fakeAccountProviders(),
-      AccountBundledCredentialsEmpty.getInstance(),
-      this.credentialsStore,
-      AccountsDatabases,
-      dirProfiles
+      context = context(),
+      analytics = this.analytics,
+      accountEvents = accountEvents,
+      accountProviders = MockAccountProviders.fakeAccountProviders(),
+      accountBundledCredentials = AccountBundledCredentialsEmpty.getInstance(),
+      accountCredentialsStore = this.credentialsStore,
+      accountsDatabases = AccountsDatabases,
+      bookFormatSupport = BookFormatsTesting.supportsEverything,
+      directory = dirProfiles
     )
   }
 

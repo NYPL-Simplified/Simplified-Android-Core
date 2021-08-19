@@ -52,12 +52,33 @@ internal class DatabaseFormatHandleAudioBook internal constructor(
   private val dataLock: Any = Any()
 
   @GuardedBy("dataLock")
-  private var drmHandleRef =
-    BookDRMInformationHandles.open(
-      directory = this.parameters.directory,
-      format = this.formatDefinition,
-      onUpdate = this::onDRMUpdated
-    )
+  private var drmHandleRef: BookDRMInformationHandle
+
+  init {
+    val drmHandleOpt =
+      BookDRMInformationHandles.open(
+        directory = this.parameters.directory,
+        format = this.formatDefinition,
+        bookFormats = this.parameters.bookFormatSupport,
+        onUpdate = this::onDRMUpdated
+      )
+
+    if (drmHandleOpt == null) {
+      try {
+        FileUtilities.fileDelete(this.fileManifest)
+      } catch (e: Exception) {
+        // Not much we can do about this.
+      }
+    }
+
+    this.drmHandleRef =
+      BookDRMInformationHandles.open(
+        directory = this.parameters.directory,
+        format = this.formatDefinition,
+        bookFormats = this.parameters.bookFormatSupport,
+        onUpdate = this::onDRMUpdated
+      )!!
+  }
 
   @GuardedBy("dataLock")
   private var formatRef: BookFormat.BookFormatAudioBook =
