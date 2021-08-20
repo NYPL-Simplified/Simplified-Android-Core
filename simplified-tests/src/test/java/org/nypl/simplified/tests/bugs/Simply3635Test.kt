@@ -64,6 +64,7 @@ import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimer
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimerType
 import org.nypl.simplified.tests.TestDirectories
+import org.nypl.simplified.tests.books.BookFormatsTesting
 import org.nypl.simplified.tests.mocking.MockAccountProviders
 import org.nypl.simplified.tests.mocking.MockBundledContentResolver
 import org.nypl.simplified.tests.mocking.MockStrings
@@ -182,6 +183,7 @@ class Simply3635Test {
         accountBundledCredentials = this.accountBundledCredentials,
         accountCredentialsStore = this.accountCredentialsStore,
         accountsDatabases = this.accountsDatabases,
+        bookFormatSupport = BookFormatsTesting.supportsEverything,
         directory = this.profilesDirectory
       )
 

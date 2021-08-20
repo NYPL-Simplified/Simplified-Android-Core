@@ -10,6 +10,7 @@ import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle
 import org.nypl.simplified.files.FileUtilities
 import java.io.File
 import java.io.IOException
+import java.lang.IllegalStateException
 
 /**
  * Operations on PDF formats in database entries.
@@ -29,12 +30,37 @@ internal class DatabaseFormatHandlePDF internal constructor(
   private val dataLock: Any = Any()
 
   @GuardedBy("dataLock")
-  private var drmHandleRef =
-    BookDRMInformationHandles.open(
-      directory = this.parameters.directory,
-      format = this.formatDefinition,
-      onUpdate = this::onDRMUpdated
-    )
+  private var drmHandleRef: BookDRMInformationHandle
+
+  init {
+    val drmHandleInitial =
+      BookDRMInformationHandles.open(
+        directory = this.parameters.directory,
+        format = this.formatDefinition,
+        bookFormats = this.parameters.bookFormatSupport,
+        onUpdate = this::onDRMUpdated
+      )
+
+    if (drmHandleInitial == null) {
+      try {
+        FileUtilities.fileDelete(this.fileBook)
+      } catch (e: Exception) {
+        // Not much we can do about this.
+      }
+
+      val drmHandleNext =
+        BookDRMInformationHandles.open(
+          directory = this.parameters.directory,
+          format = this.formatDefinition,
+          bookFormats = this.parameters.bookFormatSupport,
+          onUpdate = this::onDRMUpdated
+        ) ?: throw IllegalStateException("Still could not open a DRM handle!")
+
+      this.drmHandleRef = drmHandleNext
+    } else {
+      this.drmHandleRef = drmHandleInitial
+    }
+  }
 
   @GuardedBy("dataLock")
   private var formatRef: BookFormat.BookFormatPDF =

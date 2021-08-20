@@ -44,6 +44,9 @@ class BookDRMInformationHandleACS(
         nameACSM(format),
         nameMetaJSON(format)
       )
+
+    fun deleteFiles(directory: File) {
+    }
   }
 
   init {

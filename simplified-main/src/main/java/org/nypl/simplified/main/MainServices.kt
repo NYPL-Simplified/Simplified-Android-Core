@@ -351,6 +351,7 @@ internal object MainServices {
     accountProviders: AccountProviderRegistryType,
     accountBundledCredentials: AccountBundledCredentialsType,
     accountCredentialsStore: AccountAuthenticationCredentialsStoreType,
+    bookFormatSupport: BookFormatSupportType,
     directory: File
   ): ProfilesDatabaseType {
     /*
@@ -361,27 +362,29 @@ internal object MainServices {
     if (anonymous) {
       this.logger.debug("opening profile database with anonymous profile")
       return ProfilesDatabases.openWithAnonymousProfileEnabled(
-        context,
-        analytics,
-        accountEvents,
-        accountProviders,
-        accountBundledCredentials,
-        accountCredentialsStore,
-        AccountsDatabases,
-        directory
+        context = context,
+        analytics = analytics,
+        accountEvents = accountEvents,
+        accountProviders = accountProviders,
+        accountBundledCredentials = accountBundledCredentials,
+        accountCredentialsStore = accountCredentialsStore,
+        accountsDatabases = AccountsDatabases,
+        bookFormatSupport = bookFormatSupport,
+        directory = directory
       )
     }
 
     this.logger.debug("opening profile database without anonymous profile")
     return ProfilesDatabases.openWithAnonymousProfileDisabled(
-      context,
-      analytics,
-      accountEvents,
-      accountProviders,
-      accountBundledCredentials,
-      accountCredentialsStore,
-      AccountsDatabases,
-      directory
+      context = context,
+      analytics = analytics,
+      accountEvents = accountEvents,
+      accountProviders = accountProviders,
+      accountBundledCredentials = accountBundledCredentials,
+      accountCredentialsStore = accountCredentialsStore,
+      accountsDatabases = AccountsDatabases,
+      bookFormatSupport = bookFormatSupport,
+      directory = directory
     )
   }
 
@@ -807,40 +810,6 @@ internal object MainServices {
     val accountEvents =
       PublishSubject.create<AccountEvent>()
 
-    val profilesDatabase =
-      addService(
-        message = strings.bootingGeneral("profiles database"),
-        interfaceType = ProfilesDatabaseType::class.java,
-        serviceConstructor = {
-          this.createProfileDatabase(
-            context,
-            context.resources,
-            analytics,
-            accountEvents,
-            accountProviderRegistry,
-            accountBundledCredentials,
-            accountCredentials,
-            directories.directoryStorageProfiles
-          )
-        }
-      )
-
-    val bundledContent =
-      addService(
-        message = strings.bootingGeneral("bundled content"),
-        interfaceType = BundledContentResolverType::class.java,
-        serviceConstructor = { MainBundledContentResolver.create(context.assets) }
-      )
-
-    val opdsFeedParser =
-      addService(
-        message = strings.bootingGeneral("feed parser"),
-        interfaceType = OPDSFeedParserType::class.java,
-        serviceConstructor = {
-          this.createFeedParser()
-        }
-      )
-
     val feedbooksSecretService =
       addServiceOptionally(
         message = strings.bootingGeneral("Feedbook secret service"),
@@ -866,6 +835,41 @@ internal object MainServices {
             feedbooksSecretService = feedbooksSecretService,
             overdriveSecretService = overdriveSecretService
           )
+        }
+      )
+
+    val profilesDatabase =
+      addService(
+        message = strings.bootingGeneral("profiles database"),
+        interfaceType = ProfilesDatabaseType::class.java,
+        serviceConstructor = {
+          this.createProfileDatabase(
+            context,
+            context.resources,
+            analytics,
+            accountEvents,
+            accountProviderRegistry,
+            accountBundledCredentials,
+            accountCredentials,
+            bookFormatService,
+            directories.directoryStorageProfiles
+          )
+        }
+      )
+
+    val bundledContent =
+      addService(
+        message = strings.bootingGeneral("bundled content"),
+        interfaceType = BundledContentResolverType::class.java,
+        serviceConstructor = { MainBundledContentResolver.create(context.assets) }
+      )
+
+    val opdsFeedParser =
+      addService(
+        message = strings.bootingGeneral("feed parser"),
+        interfaceType = OPDSFeedParserType::class.java,
+        serviceConstructor = {
+          this.createFeedParser()
         }
       )
 

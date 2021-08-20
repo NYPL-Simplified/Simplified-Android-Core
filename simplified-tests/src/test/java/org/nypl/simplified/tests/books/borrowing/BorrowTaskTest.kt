@@ -73,6 +73,7 @@ import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.tests.MutableServiceDirectory
 import org.nypl.simplified.tests.TestDirectories
 import org.nypl.simplified.tests.TestDirectories.temporaryFileOf
+import org.nypl.simplified.tests.books.BookFormatsTesting
 import org.nypl.simplified.tests.books.audio.AudioBookSucceedingParsers.playerManifest
 import org.nypl.simplified.tests.books.borrowing.BorrowTestFeeds.FeedRequirements
 import org.nypl.simplified.tests.books.borrowing.BorrowTestFeeds.PathElement
@@ -217,6 +218,7 @@ class BorrowTaskTest {
         context = androidContext,
         parser = OPDSJSONParser.newParser(),
         serializer = OPDSJSONSerializer.newSerializer(),
+        formats = BookFormatsTesting.supportsEverything,
         owner = this.accountId,
         directory = TestDirectories.temporaryDirectory()
       )

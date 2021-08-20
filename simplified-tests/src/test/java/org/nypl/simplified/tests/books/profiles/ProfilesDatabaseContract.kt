@@ -28,6 +28,7 @@ import org.nypl.simplified.profiles.api.ProfileDescription
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfileID
 import org.nypl.simplified.profiles.api.ProfileType
+import org.nypl.simplified.tests.books.BookFormatsTesting
 import org.nypl.simplified.tests.mocking.FakeAccountCredentialStorage
 import org.nypl.simplified.tests.mocking.MockAccountProviderRegistry
 import org.nypl.simplified.tests.mocking.MockAccountProviders
@@ -85,6 +86,7 @@ abstract class ProfilesDatabaseContract {
           AccountBundledCredentialsEmpty.getInstance(),
           this.credentialStore,
           this.accountsDatabases(),
+          BookFormatsTesting.supportsEverything,
           fileProfiles
         )
       }
@@ -118,6 +120,7 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
+      BookFormatsTesting.supportsEverything,
       fileProfiles
     )
   }
@@ -147,6 +150,7 @@ abstract class ProfilesDatabaseContract {
           AccountBundledCredentialsEmpty.getInstance(),
           this.credentialStore,
           this.accountsDatabases(),
+          BookFormatsTesting.supportsEverything,
           fileProfiles
         )
       }
@@ -184,6 +188,7 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
+      BookFormatsTesting.supportsEverything,
       fileProfiles
     )
   }
@@ -215,6 +220,7 @@ abstract class ProfilesDatabaseContract {
           AccountBundledCredentialsEmpty.getInstance(),
           this.credentialStore,
           this.accountsDatabases(),
+          BookFormatsTesting.supportsEverything,
           fileProfiles
         )
       }
@@ -244,6 +250,7 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
+      BookFormatsTesting.supportsEverything,
       fileProfiles
     )
 
@@ -276,6 +283,7 @@ abstract class ProfilesDatabaseContract {
         AccountBundledCredentialsEmpty.getInstance(),
         this.credentialStore,
         this.accountsDatabases(),
+        BookFormatsTesting.supportsEverything,
         fileProfiles
       )
 
@@ -329,6 +337,7 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
+      BookFormatsTesting.supportsEverything,
       fileProfiles
     )
 
@@ -347,6 +356,7 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
+      BookFormatsTesting.supportsEverything,
       fileProfiles
     )
 
@@ -385,6 +395,7 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
+      BookFormatsTesting.supportsEverything,
       fileProfiles
     )
 
@@ -420,6 +431,7 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
+      BookFormatsTesting.supportsEverything,
       fileProfiles
     )
 
@@ -452,6 +464,7 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
+      BookFormatsTesting.supportsEverything,
       fileProfiles
     )
 
@@ -483,6 +496,7 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
+      BookFormatsTesting.supportsEverything,
       fileProfiles
     )
 
@@ -514,6 +528,7 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
+      BookFormatsTesting.supportsEverything,
       fileProfiles
     )
 
@@ -550,6 +565,7 @@ abstract class ProfilesDatabaseContract {
         AccountBundledCredentialsEmpty.getInstance(),
         this.credentialStore,
         this.accountsDatabases(),
+        BookFormatsTesting.supportsEverything,
         fileProfiles
       )
 
@@ -582,6 +598,7 @@ abstract class ProfilesDatabaseContract {
         AccountBundledCredentialsEmpty.getInstance(),
         this.credentialStore,
         this.accountsDatabases(),
+        BookFormatsTesting.supportsEverything,
         fileProfiles
       )
 
@@ -612,6 +629,7 @@ abstract class ProfilesDatabaseContract {
         AccountBundledCredentialsEmpty.getInstance(),
         this.credentialStore,
         this.accountsDatabases(),
+        BookFormatsTesting.supportsEverything,
         fileProfiles
       )
 
@@ -647,6 +665,7 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
+      BookFormatsTesting.supportsEverything,
       fileProfiles
     )
 
@@ -684,6 +703,7 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
+      BookFormatsTesting.supportsEverything,
       fileProfiles
     )
 
@@ -720,6 +740,7 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
+      BookFormatsTesting.supportsEverything,
       fileProfiles
     )
 
@@ -763,6 +784,7 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
+      BookFormatsTesting.supportsEverything,
       fileProfiles
     )
 
@@ -802,6 +824,7 @@ abstract class ProfilesDatabaseContract {
         AccountBundledCredentialsEmpty.getInstance(),
         this.credentialStore,
         this.accountsDatabases(),
+        BookFormatsTesting.supportsEverything,
         fileProfiles
       )
 
@@ -821,6 +844,7 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
+      BookFormatsTesting.supportsEverything,
       fileProfiles
     )
   }
@@ -854,6 +878,7 @@ abstract class ProfilesDatabaseContract {
         AccountBundledCredentialsEmpty.getInstance(),
         this.credentialStore,
         this.accountsDatabases(),
+        BookFormatsTesting.supportsEverything,
         fileProfiles
       )
 
@@ -869,6 +894,7 @@ abstract class ProfilesDatabaseContract {
         AccountBundledCredentialsEmpty.getInstance(),
         this.credentialStore,
         this.accountsDatabases(),
+        BookFormatsTesting.supportsEverything,
         fileProfiles
       )
 
@@ -900,6 +926,7 @@ abstract class ProfilesDatabaseContract {
         AccountBundledCredentialsEmpty.getInstance(),
         this.credentialStore,
         this.accountsDatabases(),
+        BookFormatsTesting.supportsEverything,
         fileProfiles
       )
 
@@ -919,6 +946,7 @@ abstract class ProfilesDatabaseContract {
         AccountBundledCredentialsEmpty.getInstance(),
         this.credentialStore,
         this.accountsDatabases(),
+        BookFormatsTesting.supportsEverything,
         fileProfiles
       )
 
@@ -952,6 +980,7 @@ abstract class ProfilesDatabaseContract {
         AccountBundledCredentialsEmpty.getInstance(),
         this.credentialStore,
         this.accountsDatabases(),
+        BookFormatsTesting.supportsEverything,
         fileProfiles
       )
 
@@ -995,6 +1024,7 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
+      BookFormatsTesting.supportsEverything,
       f_pro
     )
 
@@ -1033,6 +1063,7 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
+      BookFormatsTesting.supportsEverything,
       f_pro
     )
 
@@ -1052,6 +1083,7 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
+      BookFormatsTesting.supportsEverything,
       f_pro
     )
 
@@ -1081,6 +1113,7 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
+      BookFormatsTesting.supportsEverything,
       f_pro
     )
 
@@ -1121,6 +1154,7 @@ abstract class ProfilesDatabaseContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialStore,
       this.accountsDatabases(),
+      BookFormatsTesting.supportsEverything,
       f_pro
     )
 
@@ -1161,6 +1195,7 @@ abstract class ProfilesDatabaseContract {
         AccountBundledCredentialsEmpty.getInstance(),
         this.credentialStore,
         this.accountsDatabases(),
+        BookFormatsTesting.supportsEverything,
         f_pro
       )
 
@@ -1196,6 +1231,7 @@ abstract class ProfilesDatabaseContract {
         AccountBundledCredentialsEmpty.getInstance(),
         this.credentialStore,
         this.accountsDatabases(),
+        BookFormatsTesting.supportsEverything,
         f_pro
       )
 

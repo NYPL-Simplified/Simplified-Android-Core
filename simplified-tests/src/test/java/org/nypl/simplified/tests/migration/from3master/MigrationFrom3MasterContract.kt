@@ -28,6 +28,7 @@ import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSJSONParser
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskResult
+import org.nypl.simplified.tests.books.BookFormatsTesting
 import org.slf4j.Logger
 import java.io.ByteArrayInputStream
 import java.io.File
@@ -425,6 +426,7 @@ abstract class MigrationFrom3MasterContract {
     val bookDatabase =
       BookDatabases.openDatabase(
         context = this.context,
+        formats = BookFormatsTesting.supportsEverything,
         owner = AccountID(UUID.randomUUID()),
         directory = this.tempBookDatabaseDir
       )
@@ -698,6 +700,7 @@ abstract class MigrationFrom3MasterContract {
     val bookDatabase =
       BookDatabases.openDatabase(
         context = this.context,
+        formats = BookFormatsTesting.supportsEverything,
         owner = AccountID(UUID.randomUUID()),
         directory = this.tempBookDatabaseDir
       )

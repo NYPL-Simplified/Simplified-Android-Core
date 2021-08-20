@@ -65,6 +65,7 @@ import org.nypl.simplified.reader.api.ReaderPreferences
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkEvent
 import org.nypl.simplified.tests.EventAssertions
 import org.nypl.simplified.tests.MutableServiceDirectory
+import org.nypl.simplified.tests.books.BookFormatsTesting
 import org.nypl.simplified.tests.books.idle_timer.InoperableIdleTimer
 import org.nypl.simplified.tests.mocking.FakeAccountCredentialStorage
 import org.nypl.simplified.tests.mocking.MockAccountCreationStringResources
@@ -474,6 +475,7 @@ abstract class ProfilesControllerContract {
       AccountBundledCredentialsEmpty.getInstance(),
       this.credentialsStore,
       AccountsDatabases,
+      BookFormatsTesting.supportsEverything,
       dir_profiles
     )
   }
