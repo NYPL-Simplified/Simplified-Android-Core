@@ -44,11 +44,7 @@ internal class DatabaseFormatHandlePDF internal constructor(
 
     if (drmHandleInitial == null) {
       try {
-        if (this.fileBook.isDirectory) {
-          DirectoryUtilities.directoryDelete(this.fileBook)
-        } else {
-          FileUtilities.fileDelete(this.fileBook)
-        }
+        FileUtilities.fileDelete(this.fileBook)
       } catch (e: Exception) {
         // Not much we can do about this.
       }

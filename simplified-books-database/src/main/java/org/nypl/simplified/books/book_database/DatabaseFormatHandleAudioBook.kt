@@ -67,11 +67,7 @@ internal class DatabaseFormatHandleAudioBook internal constructor(
 
     if (drmHandleInitial == null) {
       try {
-        if (this.fileBook.isDirectory) {
-          DirectoryUtilities.directoryDelete(this.fileBook)
-        } else {
-          FileUtilities.fileDelete(this.fileBook)
-        }
+        FileUtilities.fileDelete(this.fileManifest)
       } catch (e: Exception) {
         // Not much we can do about this.
       }
