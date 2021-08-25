@@ -47,7 +47,7 @@ ext.versions = [
   mockito_core                  : '3.4.4',
   mockito_kotlin                : '2.2.0',
   moshi                         : '1.8.0',
-  nypl_audiobook_api            : '6.5.0',
+  nypl_audiobook_api            : '6.6.0',
   nypl_drm_adobe                : '1.2.2',
   nypl_drm_axis                 : '1.0.0-SNAPSHOT',
   nypl_drm_core                 : '1.2.2',
