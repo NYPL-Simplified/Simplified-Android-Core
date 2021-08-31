@@ -53,7 +53,7 @@ data class Bookmark private constructor(
    */
 
   @Deprecated("Use progress information from the BookLocation")
-  val bookProgress: Double,
+  val bookProgress: Double?,
 
   /**
    * The identifier of the device that created the bookmark, if one is available.
@@ -124,7 +124,7 @@ data class Bookmark private constructor(
       kind: BookmarkKind,
       time: DateTime,
       chapterTitle: String,
-      bookProgress: Double,
+      bookProgress: Double?,
       deviceID: String,
       uri: URI?
     ): Bookmark {

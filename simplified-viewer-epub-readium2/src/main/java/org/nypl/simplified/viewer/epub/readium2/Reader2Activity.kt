@@ -25,7 +25,7 @@ import org.librarysimplified.r2.api.SR2Event.SR2CommandEvent.SR2CommandExecution
 import org.librarysimplified.r2.api.SR2Event.SR2Error.SR2ChapterNonexistent
 import org.librarysimplified.r2.api.SR2Event.SR2Error.SR2WebViewInaccessible
 import org.librarysimplified.r2.api.SR2Event.SR2ExternalLinkSelected
-import org.librarysimplified.r2.api.SR2Locator
+import org.librarysimplified.r2.api.SR2PageNumberingMode
 import org.librarysimplified.r2.api.SR2ScrollingMode.SCROLLING_MODE_CONTINUOUS
 import org.librarysimplified.r2.api.SR2ScrollingMode.SCROLLING_MODE_PAGINATED
 import org.librarysimplified.r2.vanilla.SR2Controllers
@@ -273,7 +273,8 @@ class Reader2Activity : AppCompatActivity(R.layout.reader2) {
         SCROLLING_MODE_CONTINUOUS
       } else {
         SCROLLING_MODE_PAGINATED
-      }
+      },
+      pageNumberingMode = SR2PageNumberingMode.WHOLE_BOOK
     )
   }
 
@@ -317,19 +318,8 @@ class Reader2Activity : AppCompatActivity(R.layout.reader2) {
 
       val lastRead = bookmarks.find { bookmark -> bookmark.type == SR2Bookmark.Type.LAST_READ }
       reference.controller.submitCommand(SR2Command.BookmarksLoad(bookmarks))
-      if (lastRead != null) {
-        reference.controller.submitCommand(SR2Command.OpenChapter(lastRead.locator))
-      } else {
-        val first = reference.controller.bookMetadata.navigationGraph.start()
-        reference.controller.submitCommand(
-          SR2Command.OpenChapter(
-            SR2Locator.SR2LocatorPercent(
-              chapterHref = first.node.navigationPoint.locator.chapterHref,
-              chapterProgress = 0.0
-            )
-          )
-        )
-      }
+      val startLocator = lastRead?.locator ?: reference.controller.bookMetadata.start
+      reference.controller.submitCommand(SR2Command.OpenChapter(startLocator))
     } else {
       // Refresh whatever the controller was looking at previously.
       reference.controller.submitCommand(SR2Command.Refresh)
