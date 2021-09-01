@@ -3,7 +3,6 @@ package org.nypl.simplified.viewer.epub.readium2
 import org.librarysimplified.r2.api.SR2BookMetadata
 import org.librarysimplified.r2.api.SR2Bookmark
 import org.librarysimplified.r2.api.SR2Locator
-import org.librarysimplified.r2.api.SR2NavigationNode.SR2NavigationReadingOrderNode
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.books.api.BookChapterProgress
 import org.nypl.simplified.books.api.BookID
@@ -118,42 +117,8 @@ object Reader2Bookmarks {
       is BookLocation.BookLocationR2 ->
         this.r2ToSR2Bookmark(source, location)
       is BookLocation.BookLocationR1 ->
-        this.r1ToSR2Bookmark(bookMetadata, source, location)
+        null // R1 bookmarks are not supported any more.
     }
-  }
-
-  private fun r1ToSR2Bookmark(
-    bookMetadata: SR2BookMetadata,
-    source: Bookmark,
-    location: BookLocation.BookLocationR1
-  ): SR2Bookmark? {
-    val chapter =
-      bookMetadata.navigationGraph.readingOrder.find { chapter -> chapter.title == location.idRef }
-    if (chapter != null) {
-      return toSR2Chapter(chapter, source)
-    }
-    return null
-  }
-
-  private fun toSR2Chapter(
-    chapter: SR2NavigationReadingOrderNode,
-    source: Bookmark
-  ): SR2Bookmark {
-    return SR2Bookmark(
-      date = source.time.toDateTime(),
-      type = when (source.kind) {
-        BookmarkKind.ReaderBookmarkLastReadLocation ->
-          SR2Bookmark.Type.LAST_READ
-        BookmarkKind.ReaderBookmarkExplicit ->
-          SR2Bookmark.Type.EXPLICIT
-      },
-      title = source.chapterTitle,
-      locator = SR2Locator.SR2LocatorPercent(
-        chapterHref = chapter.navigationPoint.locator.chapterHref,
-        chapterProgress = source.chapterProgress
-      ),
-      bookProgress = source.bookProgress
-    )
   }
 
   private fun r2ToSR2Bookmark(

@@ -90,7 +90,7 @@ object BookmarkAnnotations {
       kind = BookmarkKind.ofMotivation(annotation.motivation),
       time = time,
       chapterTitle = annotation.body.chapterTitle ?: "",
-      bookProgress = annotation.body.bookProgress?.toDouble() ?: 0.0,
+      bookProgress = annotation.body.bookProgress?.toDouble(),
       uri = if (annotation.id != null) URI.create(annotation.id) else null,
       deviceID = annotation.body.device
     )
@@ -116,7 +116,7 @@ object BookmarkAnnotations {
       if (bookmark.bookProgress == 0.0) {
         null
       } else {
-        bookmark.bookProgress.toFloat()
+        bookmark.bookProgress?.toFloat()
       }
 
     val timestamp =
