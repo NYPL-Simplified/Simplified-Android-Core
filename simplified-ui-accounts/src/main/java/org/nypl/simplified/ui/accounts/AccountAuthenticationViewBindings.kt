@@ -252,11 +252,11 @@ sealed class AccountAuthenticationViewBindings {
     }
 
     fun getPassword(): AccountPassword {
-      return AccountPassword(this.pass.text.toString())
+      return AccountPassword(this.pass.text.toString().trim())
     }
 
     fun getUser(): AccountUsername {
-      return AccountUsername(this.user.text.toString())
+      return AccountUsername(this.user.text.toString().trim())
     }
 
     companion object {
