@@ -60,18 +60,6 @@
             android:required="false" />
 
         <activity
-            android:name="org.nypl.simplified.viewer.epub.readium1.ReaderActivity"
-            android:contentDescription="@string/appName"
-            android:exported="false"
-            android:label="@string/appName" />
-
-        <activity
-            android:name="org.nypl.simplified.viewer.epub.readium1.toc.ReaderTOCActivity"
-            android:contentDescription="@string/appName"
-            android:exported="false"
-            android:label="@string/appName" />
-
-        <activity
           android:name="org.nypl.simplified.viewer.epub.readium2.Reader2Activity"
           android:configChanges="orientation|keyboardHidden"
           android:exported="false"
