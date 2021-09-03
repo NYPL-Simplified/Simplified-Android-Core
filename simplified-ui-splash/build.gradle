@@ -9,6 +9,7 @@ dependencies {
   api project(":simplified-services-api")
   api project(":simplified-buildconfig-api")
   api project(":simplified-ui-accounts")
+  implementation project(":simplified-webview")
 
   implementation libraries.androidx_appcompat
   implementation libraries.androidx_constraintlayout

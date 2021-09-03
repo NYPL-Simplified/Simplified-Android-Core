@@ -9,6 +9,7 @@ import androidx.fragment.app.setFragmentResult
 import org.librarysimplified.documents.DocumentStoreType
 import org.librarysimplified.documents.EULAType
 import org.librarysimplified.services.api.Services
+import org.nypl.simplified.webview.WebViewUtilities
 import org.slf4j.LoggerFactory
 
 class EulaFragment : Fragment(R.layout.splash_eula) {
@@ -44,6 +45,7 @@ class EulaFragment : Fragment(R.layout.splash_eula) {
       setSupportMultipleWindows(false)
       allowUniversalAccessFromFileURLs = false
       javaScriptEnabled = false
+      WebViewUtilities.setForcedDark(this, resources.configuration)
     }
 
     webview.webViewClient = MailtoWebViewClient(requireActivity())

@@ -12,6 +12,7 @@ import org.librarysimplified.services.api.Services
 import org.nypl.simplified.listeners.api.FragmentListenerType
 import org.nypl.simplified.listeners.api.fragmentListeners
 import org.nypl.simplified.ui.catalog.R
+import org.nypl.simplified.webview.WebViewUtilities
 
 /**
  * A fragment that performs the SAML 2.0 borrowing login workflow.
@@ -66,6 +67,7 @@ class CatalogSAML20Fragment : Fragment(R.layout.book_saml20) {
     this.webView.webChromeClient = CatalogSAML20ChromeClient(this.progress)
     this.webView.webViewClient = this.viewModel.webViewClient
     this.webView.settings.javaScriptEnabled = true
+    WebViewUtilities.setForcedDark(this.webView.settings, resources.configuration)
     this.webView.setDownloadListener { _, _, _, mime, _ -> this.viewModel.downloadStarted(mime) }
 
     this.viewModel.webviewRequest.observe(this.viewLifecycleOwner) {

@@ -16,6 +16,7 @@ import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskStep
 import org.nypl.simplified.ui.accounts.R
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
+import org.nypl.simplified.webview.WebViewUtilities
 
 /**
  * A fragment that performs the SAML 2.0 login workflow.
@@ -63,8 +64,9 @@ class AccountSAML20Fragment : Fragment(R.layout.account_saml20) {
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
-    this.webView = view.findViewById(R.id.saml20WebView)
     this.progress = view.findViewById(R.id.saml20progressBar)
+    this.webView = view.findViewById(R.id.saml20WebView)
+    WebViewUtilities.setForcedDark(this.webView.settings, resources.configuration)
   }
 
   override fun onStart() {
