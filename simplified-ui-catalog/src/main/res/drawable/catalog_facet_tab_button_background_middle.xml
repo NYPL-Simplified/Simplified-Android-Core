@@ -7,7 +7,7 @@
       <shape android:shape="rectangle">
         <padding android:bottom="@dimen/catalogFacetTabPaddingBottom" android:left="@dimen/catalogFacetTabPaddingLeft" android:right="@dimen/catalogFacetTabPaddingRight" android:top="@dimen/catalogFacetTabPaddingTop" />
         <solid android:color="?attr/simplifiedColorBackground" />
-        <stroke android:width="@dimen/catalogFacetTabStroke" android:color="?attr/colorPrimary" />
+        <stroke android:width="@dimen/catalogFacetTabStroke" android:color="?attr/simplifiedColorPrimary" />
       </shape>
     </inset>
   </item>
@@ -16,7 +16,7 @@
     <inset android:insetRight="-2dp">
       <shape android:shape="rectangle">
         <padding android:bottom="@dimen/catalogFacetTabPaddingBottom" android:left="@dimen/catalogFacetTabPaddingLeft" android:right="@dimen/catalogFacetTabPaddingRight" android:top="@dimen/catalogFacetTabPaddingTop" />
-        <solid android:color="?attr/colorPrimary" />
+        <solid android:color="?attr/simplifiedColorPrimary" />
         <stroke android:width="@dimen/catalogFacetTabStroke" android:color="?attr/colorPrimary" />
       </shape>
     </inset>

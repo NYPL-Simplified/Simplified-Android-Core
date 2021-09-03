@@ -6,6 +6,6 @@
     android:color="?attr/simplifiedColorPrimary" />
 
   <item
-    android:color="@color/dkgray"/>
+    android:color="?attr/simplifiedColorNavigationUnselected"/>
 
 </selector>
