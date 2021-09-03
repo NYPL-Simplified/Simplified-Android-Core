@@ -71,7 +71,8 @@
 
     <activity
       android:name="org.nypl.simplified.viewer.audiobook.AudioBookPlayerActivity"
-      android:exported="false" />
+      android:exported="false"
+      android:theme="@style/VanillaTheme_ActionBar"/>
 
     <activity
       android:name="org.nypl.simplified.cardcreator.CardCreatorActivity"

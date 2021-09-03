@@ -8,7 +8,6 @@ dependencies {
   implementation project(":simplified-profiles-controller-api")
   implementation project(":simplified-services-api")
   implementation project(':simplified-ui-listeners-api')
-  implementation project(":simplified-ui-theme")
 
   implementation libraries.kotlin_stdlib
   implementation libraries.kotlin_reflect

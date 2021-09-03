@@ -5,6 +5,7 @@
   <color name="simplifiedColorPrimary">#0d47a1</color>
   <color name="simplifiedColorPrimaryDark">#002171</color>
   <color name="simplifiedColorDisabled">#dddddd</color>
+  <color name="dkgray">#ff444444</color>
   <color name="simplifiedColorBackground">#ffffff</color>
   <dimen name="simplifiedButtonCornerRadius">6dp</dimen>
   <dimen name="simplifiedButtonVerticalPadding">8dp</dimen>
@@ -24,6 +25,7 @@
     <attr name="simplifiedButtonCornerRadius" format="dimension" />
     <attr name="simplifiedButtonVerticalPadding" format="dimension" />
     <attr name="simplifiedButtonHorizontalPadding" format="dimension" />
+    <attr name="simplifiedButtonMoreVertical" format="reference"/>
   </declare-styleable>
 
   <!--
@@ -54,15 +56,18 @@
     <item name="simplifiedButtonCornerRadius">@dimen/simplifiedButtonCornerRadius</item>
     <item name="simplifiedButtonVerticalPadding">@dimen/simplifiedButtonVerticalPadding</item>
     <item name="simplifiedButtonHorizontalPadding">@dimen/simplifiedButtonHorizontalPadding</item>
+    <item name="simplifiedButtonMoreVertical">@drawable/ic_more_vert</item>
 
     <item name="android:actionBarStyle">@style/Simplified.ActionBar</item>
     <item name="android:alertDialogStyle">@style/SimplifiedAlertDialog</item>
     <item name="android:alertDialogTheme">@style/SimplifiedAlertDialog</item>
     <item name="android:buttonStyle">@style/SimplifiedButton</item>
+    <item name="android:radioButtonStyle">@style/SimplifiedRadioButton</item>
     <item name="android:dialogTheme">@style/SimplifiedDialog</item>
     <item name="android:editTextStyle">@style/SimplifiedEditText</item>
     <item name="android:windowBackground">?attr/simplifiedColorBackground</item>
     <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
+    <item name="bottomNavigationStyle">@style/Simplified.BottomNav</item>
   </style>
 
   <!--
@@ -83,15 +88,18 @@
     <item name="simplifiedButtonCornerRadius">@dimen/simplifiedButtonCornerRadius</item>
     <item name="simplifiedButtonVerticalPadding">@dimen/simplifiedButtonVerticalPadding</item>
     <item name="simplifiedButtonHorizontalPadding">@dimen/simplifiedButtonHorizontalPadding</item>
+    <item name="simplifiedButtonMoreVertical">@drawable/ic_more_vert</item>
 
     <item name="android:actionBarStyle">@style/Simplified.ActionBar</item>
     <item name="android:alertDialogStyle">@style/SimplifiedAlertDialog</item>
     <item name="android:alertDialogTheme">@style/SimplifiedAlertDialog</item>
     <item name="android:buttonStyle">@style/SimplifiedButton</item>
+    <item name="android:radioButtonStyle">@style/SimplifiedRadioButton</item>
     <item name="android:dialogTheme">@style/SimplifiedDialog</item>
     <item name="android:editTextStyle">@style/SimplifiedEditText</item>
     <item name="android:windowBackground">?attr/simplifiedColorBackground</item>
     <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
+    <item name="bottomNavigationStyle">@style/Simplified.BottomNav</item>
   </style>
 
   <!-- Empty root style; for nesting. -->
@@ -124,6 +132,8 @@
   <style name="Simplified.BottomNav">
     <item name="itemTextAppearanceActive">@style/Simplified.BottomNav.TextAppearance.Active</item>
     <item name="itemTextAppearanceInactive">@style/Simplified.BottomNav.TextAppearance.Inactive</item>
+    <item name="itemIconTint">@drawable/simplified_bottom_navigation</item>
+    <item name="itemTextColor">@drawable/simplified_bottom_navigation</item>
   </style>
   <style name="Simplified.BottomNav.TextAppearance">
     <item name="android:textSize" tools:ignore="SpUsage">12dp</item>
@@ -143,6 +153,10 @@
       'scrollbars' attribute is set to 'none'.
     -->
     <item name="android:scrollbars">none</item>
+  </style>
+
+  <style name="SimplifiedRadioButton" parent="@android:style/Widget.Button">
+    <item name="android:textColor">@drawable/simplified_radio_button_text</item>
   </style>
 
   <style name="SimplifiedAlertDialog" parent="Theme.AppCompat.Light.Dialog.Alert">

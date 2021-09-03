@@ -24,7 +24,7 @@
     android:layout_height="0dp"
     android:layout_margin="16dp"
     android:text="@string/catalogCorrupted"
-    android:textColor="@color/simplifiedColorBackground"
+    android:textColor="?attr/simplifiedColorBackground"
     android:textStyle="bold"
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toEndOf="parent"

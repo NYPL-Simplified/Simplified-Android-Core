@@ -37,6 +37,7 @@ dependencies {
   implementation project(":simplified-analytics-circulation")
   implementation project(":simplified-crashlytics")
   implementation project(":simplified-migration-from3master")
+  implementation project(":simplified-ui-theme")
   implementation libraries.firebase_analytics
   implementation libraries.firebase_crashlytics
   implementation libraries.nypl_readium

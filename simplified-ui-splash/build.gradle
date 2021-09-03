@@ -6,7 +6,6 @@ dependencies {
   api project(":simplified-reports")
   api project(":simplified-ui-branding")
   api project(':simplified-ui-listeners-api')
-  api project(":simplified-ui-theme")
   api project(":simplified-services-api")
   api project(":simplified-buildconfig-api")
   api project(":simplified-ui-accounts")
