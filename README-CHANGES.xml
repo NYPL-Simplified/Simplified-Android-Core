@@ -200,7 +200,7 @@
         </c:change>
       </c:changes>
     </c:release>
-    <c:release date="2021-09-01T17:02:36+00:00" is-open="true" ticket-system="org.nypl.jira" version="7.0.2">
+    <c:release date="2021-09-02T12:27:18+00:00" is-open="true" ticket-system="org.nypl.jira" version="7.0.2">
       <c:changes>
         <c:change date="2021-08-31T00:00:00+00:00" summary="Switch to a global byte-based page numbering">
           <c:tickets>
@@ -212,9 +212,14 @@
             <c:ticket id="SMA-213"/>
           </c:tickets>
         </c:change>
-        <c:change date="2021-09-01T17:02:36+00:00" summary="Strip whitespace around usernames and passwords during basic authentication">
+        <c:change date="2021-09-01T00:00:00+00:00" summary="Strip whitespace around usernames and passwords during basic authentication">
           <c:tickets>
             <c:ticket id="SMA-200"/>
+          </c:tickets>
+        </c:change>
+        <c:change date="2021-09-02T12:27:18+00:00" summary="Treat publisher default as a font in the settings screen">
+          <c:tickets>
+            <c:ticket id="SMA-237"/>
           </c:tickets>
         </c:change>
       </c:changes>
