@@ -44,7 +44,7 @@
     <item name="simplifiedButtonHorizontalPadding">@dimen/simplifiedButtonHorizontalPadding</item>
     <item name="simplifiedButtonMoreVertical">@drawable/ic_more_vert</item>
 
-    <item name="android:actionBarStyle">@style/Simplified.ActionBar</item>
+    <item name="android:actionBarTheme">@style/Simplified.ActionBarTheme</item>
     <item name="android:alertDialogStyle">@style/Simplified.AlertDialog</item>
     <item name="android:alertDialogTheme">@style/Simplified.AlertDialog</item>
     <item name="android:buttonStyle">@style/Simplified.Button</item>
@@ -82,7 +82,7 @@
     <item name="simplifiedButtonHorizontalPadding">@dimen/simplifiedButtonHorizontalPadding</item>
     <item name="simplifiedButtonMoreVertical">@drawable/ic_more_vert</item>
 
-    <item name="android:actionBarStyle">@style/Simplified.ActionBar</item>
+    <item name="android:actionBarTheme">@style/Simplified.ActionBarTheme</item>
     <item name="android:alertDialogStyle">@style/Simplified.AlertDialog</item>
     <item name="android:alertDialogTheme">@style/Simplified.AlertDialog</item>
     <item name="android:buttonStyle">@style/Simplified.Button</item>

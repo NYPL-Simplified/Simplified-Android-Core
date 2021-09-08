@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources
+  xmlns:tools="http://schemas.android.com/tools"
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  >
 
   <!-- Empty root style; for nesting. -->
 
@@ -7,22 +11,27 @@
 
   <!-- Action Bar -->
 
-  <style name="Simplified.ActionBar" parent="Widget.AppCompat.Light.ActionBar.Solid.Inverse">
-    <item name="android:background">?attr/colorPrimary</item>
-    <item name="android:displayOptions">homeAsUp|showTitle</item>
-    <item name="titleTextAppearance">@style/Simplified.Toolbar.Title</item>
-    <item name="subtitleTextAppearance">@style/Simplified.Toolbar.Subtitle</item>
-    <item name="popupTheme">@style/Simplified.Toolbar.PopupTheme</item>
+  <style name="Simplified.ActionBarTheme" parent="ThemeOverlay.AppCompat.ActionBar">
+    <item name="toolbarStyle">@style/Simplified.ActionBarStyle</item>
+    <item name="colorControlNormal">@color/white</item>
   </style>
 
-  <!-- Toolbar -->
+  <style name="Simplified.ActionBarStyle" parent="Widget.AppCompat.ActionBar.Solid">
+    <item name="android:displayOptions">homeAsUp|showTitle</item>
+    <item name="android:background">?attr/simplifiedColorPrimary</item>
+    <item name="android:minHeight">?android:attr/actionBarSize</item>
+    <item name="buttonGravity">center_vertical</item>
+    <item name="titleTextAppearance">@style/Simplified.ActionBarTitle</item>
+    <item name="subtitleTextAppearance">@style/Simplified.ActionBarSubtitle</item>
+    <item name="popupTheme">@style/ThemeOverlay.AppCompat.DayNight</item>
+  </style>
 
-  <style name="Simplified.Toolbar" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
-  <style name="Simplified.Toolbar.PopupTheme" parent="ThemeOverlay.AppCompat.Light" />
-  <style name="Simplified.Toolbar.Title" parent="@style/TextAppearance.Widget.AppCompat.Toolbar.Title">
+  <style name="Simplified.ActionBarTitle" parent="TextAppearance.AppCompat.Widget.ActionBar.Title">
+    <item name="android:textColor">@color/white</item>
     <item name="android:textSize" tools:ignore="SpUsage">18dp</item>
   </style>
-  <style name="Simplified.Toolbar.Subtitle" parent="@style/TextAppearance.Widget.AppCompat.Toolbar.Subtitle">
+  <style name="Simplified.ActionBarSubtitle" parent="TextAppearance.AppCompat.Widget.ActionBar.Subtitle">
+    <item name="android:textColor">@color/white</item>
     <item name="android:textSize" tools:ignore="SpUsage">12dp</item>
   </style>
 
