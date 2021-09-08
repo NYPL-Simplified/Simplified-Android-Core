@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+  <color name="seColorPrimary">@color/simplified_material_red_primary</color>
+  <color name="seColorPrimaryDark">@color/simplified_material_red_primary_dark</color>
+  <color name="seColorPrimaryLight">@color/simplified_material_red_primary_light</color>
+</resources>
