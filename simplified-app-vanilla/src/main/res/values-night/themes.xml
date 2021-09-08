@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <style name="VanillaTheme_NoActionBar" parent="SimplifiedTheme.NoActionBar" />
+  <style name="VanillaTheme_ActionBar" parent="SimplifiedTheme.ActionBar" />
+</resources>

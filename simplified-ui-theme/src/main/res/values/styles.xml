@@ -13,7 +13,7 @@
 
   <style name="Simplified.ActionBarTheme" parent="ThemeOverlay.AppCompat.ActionBar">
     <item name="toolbarStyle">@style/Simplified.ActionBarStyle</item>
-    <item name="colorControlNormal">@color/white</item>
+    <item name="colorControlNormal">?attr/simplifiedColorControlActionBar</item>
   </style>
 
   <style name="Simplified.ActionBarStyle" parent="Widget.AppCompat.ActionBar.Solid">

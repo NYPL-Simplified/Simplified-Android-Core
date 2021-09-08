@@ -1,6 +1,7 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
   android:width="36dp"
   android:height="24dp"
+  android:tint="?attr/simplifiedColorControlActionBar"
   android:viewportWidth="5.1585283"
   android:viewportHeight="3.1749961">
   <path
