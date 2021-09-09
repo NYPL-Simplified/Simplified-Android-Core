@@ -40,8 +40,8 @@
   <style name="Simplified.BottomNav">
     <item name="itemTextAppearanceActive">@style/Simplified.BottomNav.TextAppearance.Active</item>
     <item name="itemTextAppearanceInactive">@style/Simplified.BottomNav.TextAppearance.Inactive</item>
-    <item name="itemIconTint">@drawable/simplified_bottom_navigation</item>
-    <item name="itemTextColor">@drawable/simplified_bottom_navigation</item>
+    <item name="itemIconTint">@color/simplified_bottom_navigation</item>
+    <item name="itemTextColor">@color/simplified_bottom_navigation</item>
   </style>
   <style name="Simplified.BottomNav.TextAppearance">
     <item name="android:textSize" tools:ignore="SpUsage">12dp</item>
@@ -64,7 +64,7 @@
   </style>
 
   <style name="Simplified.RadioButton" parent="@android:style/Widget.Button">
-    <item name="android:textColor">@drawable/simplified_radio_button_text</item>
+    <item name="android:textColor">@color/simplified_radio_button_text</item>
   </style>
 
   <style name="Simplified.AlertDialog" parent="Theme.AppCompat.Light.Dialog.Alert">

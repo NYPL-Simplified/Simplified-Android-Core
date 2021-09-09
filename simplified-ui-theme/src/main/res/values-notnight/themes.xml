@@ -13,6 +13,7 @@
     <item name="simplifiedColorDisabled">@color/platinum</item>
     <item name="simplifiedColorNavigationSelected">?attr/simplifiedColorPrimary</item>"
     <item name="simplifiedColorNavigationUnselected">@color/dkgray</item>"
+    <item name="simplifiedColorSegmentedControlBackground">@color/simplified_segmented_control_background</item>
 
     <item name="simplifiedColorText">?attr/simplifiedColorPrimaryDark</item>
     <item name="simplifiedColorControlActionBar">@color/white</item>
@@ -29,8 +30,9 @@
 
     <item name="simplifiedColorBackground">@color/white</item>
     <item name="simplifiedColorDisabled">@color/platinum</item>
-    <item name="simplifiedColorNavigationSelected">?attr/simplifiedColorPrimary</item>"
-    <item name="simplifiedColorNavigationUnselected">@color/dkgray</item>"
+    <item name="simplifiedColorNavigationSelected">?attr/simplifiedColorPrimary</item>
+    <item name="simplifiedColorNavigationUnselected">@color/dkgray</item>
+    <item name="simplifiedColorSegmentedControlBackground">@color/simplified_segmented_control_background</item>
 
     <item name="simplifiedColorText">?attr/simplifiedColorPrimaryDark</item>
     <item name="simplifiedColorControlActionBar">@color/white</item>

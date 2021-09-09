@@ -13,6 +13,7 @@
     <item name="simplifiedColorDisabled">@color/platinum</item>
     <item name="simplifiedColorNavigationSelected">?attr/simplifiedColorText</item>"
     <item name="simplifiedColorNavigationUnselected">@color/platinum_gray</item>"
+    <item name="simplifiedColorSegmentedControlBackground">@color/simplified_segmented_control_background</item>
 
     <item name="simplifiedColorText">@color/blue</item>
     <item name="simplifiedColorControlActionBar">?attr/simplifiedColorText</item>
@@ -31,6 +32,7 @@
     <item name="simplifiedColorDisabled">@color/platinum</item>
     <item name="simplifiedColorNavigationSelected">?attr/simplifiedColorText</item>"
     <item name="simplifiedColorNavigationUnselected">@color/platinum_gray</item>"
+    <item name="simplifiedColorSegmentedControlBackground">@color/simplified_segmented_control_background</item>
 
     <item name="simplifiedColorText">@color/blue</item>
     <item name="simplifiedColorControlActionBar">?attr/simplifiedColorText</item>

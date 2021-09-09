@@ -13,6 +13,7 @@
     <attr name="simplifiedColorDisabled" format="color" />
     <attr name="simplifiedColorText" format="color" />
     <attr name="simplifiedColorControlActionBar" format="color" />
+    <attr name="simplifiedColorSegmentedControlBackground" format="color"/>
     <attr name="simplifiedColorNavigationSelected" format="color" />
     <attr name="simplifiedColorNavigationUnselected" format="color" />
     <attr name="simplifiedButtonCornerRadius" format="dimension" />
