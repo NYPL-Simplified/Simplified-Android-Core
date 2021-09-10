@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <color name="white">#ffffff</color>
   <color name="almost_black">#121212</color>
   <color name="dkgray">#ff444444</color>
-  <color name="platinum">#dddddd</color>
   <color name="platinum_gray">#797979</color>
+  <color name="santas_gray">#9999A1</color>
+  <color name="platinum">#dddddd</color>
   <color name="blue">#009AFF</color>
+  <color name="white">#ffffff</color>
+
 
   <!-- Material Design Color Palette -->
   <color name="simplified_material_red_primary">#f44336</color>

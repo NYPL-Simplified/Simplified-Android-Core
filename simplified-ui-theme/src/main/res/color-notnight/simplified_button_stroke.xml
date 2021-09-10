@@ -5,10 +5,18 @@
   tools:ignore="MissingDefaultResource">
 
   <item
-    android:state_checked="true"
+    android:state_enabled="false"
+    android:color="?attr/simplifiedColorDisabled" />
+
+  <item
+    android:state_pressed="true"
     android:color="?attr/simplifiedColorBackground" />
 
   <item
-    android:color="?attr/simplifiedColorPrimary"/>
+    android:state_focused="true"
+    android:color="?attr/simplifiedColorPrimary" />
+
+  <item
+    android:color="?attr/simplifiedColorPrimary" />
 
 </selector>
