@@ -222,6 +222,11 @@
             <c:ticket id="SMA-237"/>
           </c:tickets>
         </c:change>
+        <c:change date="2021-09-13T12:27:18+00:00" summary="Account identifier disappears">
+          <c:tickets>
+            <c:ticket id="SMA-226"/>
+          </c:tickets>
+        </c:change>
       </c:changes>
     </c:release>
   </c:releases>
