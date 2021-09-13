@@ -17,6 +17,7 @@ import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.feeds.api.FeedBooksSelection
 import org.nypl.simplified.feeds.api.FeedFacet
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
+import org.nypl.simplified.ui.accounts.AccountListRegistryFragment
 import org.nypl.simplified.ui.catalog.CatalogFeedArguments
 import org.nypl.simplified.ui.catalog.CatalogFeedOwnership
 import org.nypl.simplified.ui.catalog.CatalogFeedFragment
@@ -124,6 +125,7 @@ object BottomNavigators {
         return profile.account(mostRecentId)
       } catch (e: Exception) {
         logger.error("stale account: ", e)
+        throw StaleAccountException("$mostRecentId is a stale account")
       }
     }
 
@@ -197,7 +199,11 @@ object BottomNavigators {
       if (settingsConfiguration.showBooksFromAllAccounts) {
         null
       } else {
-        pickDefaultAccount(profilesController, defaultProvider).id
+        try {
+          pickDefaultAccount(profilesController, defaultProvider).id
+        } catch (e: StaleAccountException) {
+          return AccountListRegistryFragment()
+        }
       }
 
     return CatalogFeedFragment.create(
@@ -229,7 +235,11 @@ object BottomNavigators {
       if (settingsConfiguration.showBooksFromAllAccounts) {
         null
       } else {
-        pickDefaultAccount(profilesController, defaultProvider).id
+        try {
+          pickDefaultAccount(profilesController, defaultProvider).id
+        } catch (e: StaleAccountException) {
+          return AccountListRegistryFragment()
+        }
       }
 
     return CatalogFeedFragment.create(
@@ -252,4 +262,9 @@ object BottomNavigators {
     logger.debug("[{}]: creating catalog fragment", id)
     return CatalogFeedFragment.create(feedArguments)
   }
+
+  /**
+   * Occurs when an profile cannot be accessed for a given ID
+   */
+  class StaleAccountException(message: String) : Exception(message)
 }
