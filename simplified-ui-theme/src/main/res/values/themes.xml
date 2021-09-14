@@ -19,6 +19,7 @@
     <attr name="simplifiedColorSegmentedControlBackground" format="color"/>
     <attr name="simplifiedColorNavigationSelected" format="color" />
     <attr name="simplifiedColorNavigationUnselected" format="color" />
+    <attr name="simplifiedColorBookStatus" format="color" />
     <attr name="simplifiedButtonCornerRadius" format="dimension" />
     <attr name="simplifiedButtonVerticalPadding" format="dimension" />
     <attr name="simplifiedButtonHorizontalPadding" format="dimension" />
