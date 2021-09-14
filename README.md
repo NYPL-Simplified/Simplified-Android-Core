@@ -330,9 +330,10 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.analytics.circulation](simplified-analytics-circulation)|Circulation manager analytics implementation|
 |[org.librarysimplified.android.ktx](simplified-android-ktx)|Kotlin Android Extensions|
 |[org.librarysimplified.announcements](simplified-announcements)|Announcements API|
-|[org.nypl.labs.OpenEbooks.app](simplified-app-openebooks)|Open eBooks Application|
-|[org.librarysimplified.simplye.app](simplified-app-simplye)|SimplyE Application|
+|[org.nypl.labs.OpenEbooks.app](simplified-app-openebooks)|Open eBooks(Application|
+|[org.librarysimplified.simplye.app](simplified-app-simplye)|SimplyE (Application|
 |[org.librarysimplified.app.vanilla](simplified-app-vanilla)|Vanilla application|
+|[org.librarysimplified.axe](simplified-axe)|Axe Accessibility API|
 |[org.librarysimplified.books.api](simplified-books-api)|Book types|
 |[org.librarysimplified.books.audio](simplified-books-audio)|Audio book support code|
 |[org.librarysimplified.books.borrowing](simplified-books-borrowing)|Book borrowing|
@@ -359,6 +360,8 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.links](simplified-links)|Link types|
 |[org.librarysimplified.links.json](simplified-links-json)|Link JSON parsing|
 |[org.librarysimplified.main](simplified-main)|Main application module|
+|[org.librarysimplified.metrics](simplified-metrics)|Metrics|
+|[org.librarysimplified.metrics](simplified-metrics-api)|Metrics|
 |[org.librarysimplified.migration.api](simplified-migration-api)|Data migration API|
 |[org.librarysimplified.migration.fake](simplified-migration-fake)|Fake data migration for testing purposes|
 |[org.librarysimplified.migration.from3master](simplified-migration-from3master)|Data migration from 3.0.0 master branch data|
@@ -371,9 +374,9 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.opds.auth_document.api](simplified-opds-auth-document-api)|OPDS authentication document parser API|
 |[org.librarysimplified.opds.core](simplified-opds-core)|OPDS feed parser|
 |[org.librarysimplified.opds2](simplified-opds2)|OPDS 2.0 model definitions|
-|[org.librarysimplified.opds2.irradia](simplified-opds2-irradia)|OPDS 2.0 Parser (Irradia)|
+|[org.librarysimplified.opds2.irradia](simplified-opds2-irradia)|OPDS 2.0 Parser [Irradia]|
 |[org.librarysimplified.opds2.parser.api](simplified-opds2-parser-api)|OPDS 2.0 parser API|
-|[org.librarysimplified.opds2.r2](simplified-opds2-r2)|OPDS 2.0 Parser (R2)|
+|[org.librarysimplified.opds2.r2](simplified-opds2-r2)|OPDS 2.0 Parser [R2]|
 |[org.librarysimplified.parser.api](simplified-parser-api)|Parser API|
 |[org.librarysimplified.patron](simplified-patron)|Patron user profile parser implementation|
 |[org.librarysimplified.patron.api](simplified-patron-api)|Patron user profile parser API|
