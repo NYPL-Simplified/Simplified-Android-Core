@@ -10,10 +10,15 @@
     <item name="simplifiedColorPrimaryDark">@color/simplified_material_dark_grey_primary_dark</item>
 
     <item name="simplifiedColorBackground">@color/almost_black</item>
+    <item name="simplifiedColorItemBackground">@color/lighter_black</item>
+    <item name="simplifiedColorItemStroke">@color/morado_gray</item>
     <item name="simplifiedColorDisabled">@color/santas_gray</item>
+
     <item name="simplifiedColorNavigationSelected">?attr/simplifiedColorText</item>"
     <item name="simplifiedColorNavigationUnselected">@color/white</item>"
+
     <item name="simplifiedColorSegmentedControlBackground">@color/simplified_segmented_control_background</item>
+    <item name="simplifiedColorSegmentedControlStroke">?attr/simplifiedColorSegmentedControlBackground</item>
 
     <item name="simplifiedColorText">@color/blue</item>
     <item name="simplifiedColorControlActionBar">?attr/simplifiedColorText</item>
@@ -29,10 +34,15 @@
     <item name="simplifiedColorPrimaryDark">@color/simplified_material_dark_grey_primary_dark</item>
 
     <item name="simplifiedColorBackground">@color/almost_black</item>
+    <item name="simplifiedColorItemBackground">@color/lighter_black</item>
+    <item name="simplifiedColorItemStroke">@color/morado_gray</item>
     <item name="simplifiedColorDisabled">@color/santas_gray</item>
+
     <item name="simplifiedColorNavigationSelected">?attr/simplifiedColorText</item>"
     <item name="simplifiedColorNavigationUnselected">@color/white</item>"
+
     <item name="simplifiedColorSegmentedControlBackground">@color/simplified_segmented_control_background</item>
+    <item name="simplifiedColorSegmentedControlStroke">?attr/simplifiedColorSegmentedControlBackground</item>
 
     <item name="simplifiedColorText">@color/blue</item>
     <item name="simplifiedColorControlActionBar">?attr/simplifiedColorText</item>

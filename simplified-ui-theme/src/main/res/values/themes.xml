@@ -10,9 +10,12 @@
     <attr name="simplifiedColorPrimaryLight" format="color" />
     <attr name="simplifiedColorPrimaryDark" format="color" />
     <attr name="simplifiedColorBackground" format="color" />
+    <attr name="simplifiedColorItemBackground" format="color" />
+    <attr name="simplifiedColorItemStroke" format="color" />
     <attr name="simplifiedColorDisabled" format="color" />
     <attr name="simplifiedColorText" format="color" />
     <attr name="simplifiedColorControlActionBar" format="color" />
+    <attr name="simplifiedColorSegmentedControlStroke" format="color" />
     <attr name="simplifiedColorSegmentedControlBackground" format="color"/>
     <attr name="simplifiedColorNavigationSelected" format="color" />
     <attr name="simplifiedColorNavigationUnselected" format="color" />

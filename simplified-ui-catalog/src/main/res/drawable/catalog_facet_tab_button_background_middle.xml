@@ -3,6 +3,6 @@
   <shape android:shape="rectangle">
     <padding android:bottom="@dimen/catalogFacetTabPaddingBottom" android:left="@dimen/catalogFacetTabPaddingLeft" android:right="@dimen/catalogFacetTabPaddingRight" android:top="@dimen/catalogFacetTabPaddingTop" />
     <solid android:color="?attr/simplifiedColorSegmentedControlBackground" />
-    <stroke android:width="@dimen/catalogFacetTabStroke" android:color="?attr/simplifiedColorPrimary" />
+    <stroke android:width="@dimen/catalogFacetTabStroke" android:color="?attr/simplifiedColorSegmentedControlStroke" />
   </shape>
 </inset>

@@ -4,6 +4,6 @@
     <padding android:bottom="@dimen/catalogFacetTabPaddingBottom" android:left="@dimen/catalogFacetTabPaddingLeft" android:right="@dimen/catalogFacetTabPaddingRight" android:top="@dimen/catalogFacetTabPaddingTop" />
     <corners android:bottomLeftRadius="3dp" android:bottomRightRadius="0dp" android:topLeftRadius="3dp" android:topRightRadius="0dp" />
     <solid android:color="?attr/simplifiedColorSegmentedControlBackground" />
-    <stroke android:width="@dimen/catalogFacetTabStroke" android:color="?attr/colorPrimary" />
+    <stroke android:width="@dimen/catalogFacetTabStroke" android:color="?attr/simplifiedColorSegmentedControlStroke" />
   </shape>
 </inset>
