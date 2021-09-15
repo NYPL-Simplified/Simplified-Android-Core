@@ -15,6 +15,7 @@
     <attr name="simplifiedColorDisabled" format="color" />
     <attr name="simplifiedColorText" format="color" />
     <attr name="simplifiedColorControlActionBar" format="color" />
+    <attr name="simplifiedColorControlActivated" format="color" />
     <attr name="simplifiedColorSegmentedControlStroke" format="color" />
     <attr name="simplifiedColorSegmentedControlBackground" format="color"/>
     <attr name="simplifiedColorNavigationSelected" format="color" />
@@ -34,6 +35,7 @@
     <item name="colorPrimary">?attr/simplifiedColorPrimary</item>
     <item name="colorPrimaryDark">?attr/simplifiedColorPrimaryDark</item>
     <item name="colorAccent">?attr/simplifiedColorPrimaryLight</item>
+    <item name="colorControlActivated">?attr/simplifiedColorControlActivated</item>
 
     <item name="android:colorPrimary">?attr/simplifiedColorPrimary</item>
     <item name="android:colorPrimaryDark">?attr/simplifiedColorPrimaryDark</item>
@@ -64,6 +66,7 @@
     <item name="colorPrimary">?attr/simplifiedColorPrimary</item>
     <item name="colorPrimaryDark">?attr/simplifiedColorPrimaryDark</item>
     <item name="colorAccent">?attr/simplifiedColorPrimaryLight</item>
+    <item name="colorControlActivated">?attr/simplifiedColorControlActivated</item>
 
     <item name="android:colorPrimary">?attr/simplifiedColorPrimary</item>
     <item name="android:colorPrimaryDark">?attr/simplifiedColorPrimaryDark</item>
