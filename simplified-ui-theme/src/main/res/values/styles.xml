@@ -80,6 +80,8 @@
     <item name="android:buttonStyle">@style/Simplified.Button</item>
   </style>
 
+  <style name="Simplified.BottomSheetDialog" parent="Theme.MaterialComponents.DayNight.BottomSheetDialog" />
+
   <style name="Simplified.EditText" parent="Widget.AppCompat.EditText">
     <item name="android:colorAccent">?attr/simplifiedColorPrimaryLight</item>
     <item name="android:colorPrimary">?attr/simplifiedColorPrimary</item>
