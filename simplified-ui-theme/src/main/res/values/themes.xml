@@ -14,6 +14,7 @@
     <attr name="simplifiedColorItemStroke" format="color" />
     <attr name="simplifiedColorDisabled" format="color" />
     <attr name="simplifiedColorText" format="color" />
+    <attr name="simplifiedColorPreferenceCategory" format="color" />
     <attr name="simplifiedColorControlActionBar" format="color" />
     <attr name="simplifiedColorControlActivated" format="color" />
     <attr name="simplifiedColorSegmentedControlStroke" format="color" />
@@ -55,7 +56,7 @@
     <item name="android:dialogTheme">@style/Simplified.Dialog</item>
     <item name="android:editTextStyle">@style/Simplified.EditText</item>
     <item name="android:windowBackground">?attr/simplifiedColorBackground</item>
-    <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
+    <item name="preferenceTheme">@style/Simplified.PreferenceTheme</item>
     <item name="bottomNavigationStyle">@style/Simplified.BottomNav</item>
   </style>
 
@@ -87,7 +88,7 @@
     <item name="android:dialogTheme">@style/Simplified.Dialog</item>
     <item name="android:editTextStyle">@style/Simplified.EditText</item>
     <item name="android:windowBackground">?attr/simplifiedColorBackground</item>
-    <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
+    <item name="preferenceTheme">@style/Simplified.PreferenceTheme</item>
     <item name="bottomNavigationStyle">@style/Simplified.BottomNav</item>
   </style>
 

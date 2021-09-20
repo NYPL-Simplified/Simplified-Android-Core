@@ -23,6 +23,7 @@
     <item name="simplifiedColorSegmentedControlStroke">?attr/simplifiedColorPrimary</item>
 
     <item name="simplifiedColorText">?attr/simplifiedColorPrimaryDark</item>
+    <item name="simplifiedColorPreferenceCategory">?attr/simplifiedColorPrimary</item>
     <item name="simplifiedColorControlActionBar">@color/white</item>
   </style>
 
@@ -49,6 +50,7 @@
     <item name="simplifiedColorSegmentedControlStroke">?attr/simplifiedColorPrimary</item>
 
     <item name="simplifiedColorText">?attr/simplifiedColorPrimaryDark</item>
+    <item name="simplifiedColorPreferenceCategory">?attr/simplifiedColorPrimary</item>
     <item name="simplifiedColorControlActionBar">@color/white</item>
   </style>
 

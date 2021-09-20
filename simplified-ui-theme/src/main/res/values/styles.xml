@@ -93,4 +93,13 @@
     <item name="colorControlNormal">?attr/simplifiedColorPrimary</item>
   </style>
 
+  <style name="Simplified.PreferenceCategoryStyle" parent="Preference.Category.Material">
+    <item name="android:layout">@layout/simplified_preference_category</item>
+  </style>
+
+  <style name="Simplified.PreferenceTheme" parent="PreferenceThemeOverlay.v14.Material">
+    <item name="preferenceCategoryStyle">@style/Simplified.PreferenceCategoryStyle</item>
+  </style>
+
+
 </resources>
