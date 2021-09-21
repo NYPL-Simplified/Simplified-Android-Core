@@ -1,2 +1,2 @@
 json_key_file("play_store_api_key.json")
-package_name("org.librarysimplified.deployment_testing")
+package_name("org.nypl.simplified.simplye")

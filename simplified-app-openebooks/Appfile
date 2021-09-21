@@ -1,0 +1,2 @@
+json_key_file("play_store_api_key.json")
+package_name("org.nypl.labs.OpenEbooks.app")
