@@ -17,7 +17,7 @@
     android:ellipsize="end"
     android:maxLines="1"
     android:text="@string/catalogPlaceholder"
-    android:textColor="?attr/simplifiedColorPrimaryDark"
+    android:textColor="?attr/simplifiedColorText"
     android:textSize="18sp"
     android:textStyle="bold" />
 

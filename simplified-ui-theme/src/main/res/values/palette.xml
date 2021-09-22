@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <color name="white">#ffffff</color>
-  <color name="black">#000000</color>
+  <color name="almost_black">#121212</color>
+  <color name="lighter_black">#1C1C1D</color>
   <color name="dkgray">#ff444444</color>
-  <color name="platinum">#dddddd</color>
   <color name="platinum_gray">#797979</color>
+  <color name="santas_gray">#9999A1</color>
+  <color name="platinum">#dddddd</color>
+  <color name="yet_another_gray">#EEEEEF</color>
+  <color name="morado_gray">#8d8d93</color>
+  <color name="lighter_gray">#616161</color>
+  <color name="blue">#009AFF</color>
+  <color name="white">#ffffff</color>
 
   <!-- Material Design Color Palette -->
   <color name="simplified_material_red_primary">#f44336</color>
@@ -52,6 +58,9 @@
   <color name="simplified_material_grey_primary">#9e9e9e</color>
   <color name="simplified_material_grey_primary_light">#cfcfcf</color>
   <color name="simplified_material_grey_primary_dark">#707070</color>
+  <color name="simplified_material_dark_grey_primary">#121212</color>
+  <color name="simplified_material_dark_grey_primary_light">#383838</color>
+  <color name="simplified_material_dark_grey_primary_dark">#000000</color>
   <color name="simplified_material_blue_grey_primary">#607d8b</color>
   <color name="simplified_material_blue_grey_primary_light">#8eacbb</color>
   <color name="simplified_material_blue_grey_primary_dark">#34515e</color>

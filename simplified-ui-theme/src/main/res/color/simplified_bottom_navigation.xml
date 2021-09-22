@@ -3,7 +3,7 @@
 
   <item
     android:state_checked="true"
-    android:color="?attr/simplifiedColorPrimary" />
+    android:color="?attr/simplifiedColorNavigationSelected" />
 
   <item
     android:color="?attr/simplifiedColorNavigationUnselected"/>

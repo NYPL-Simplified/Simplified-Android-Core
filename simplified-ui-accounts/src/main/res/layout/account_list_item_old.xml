@@ -59,7 +59,7 @@
         android:layout_height="32dp"
         android:layout_gravity="center_vertical"
         android:layout_marginStart="16dp"
-        android:background="?selectableItemBackgroundBorderless"
+        android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/accountMore"
         android:focusable="true"
         android:src="?attr/simplifiedButtonMoreVertical"

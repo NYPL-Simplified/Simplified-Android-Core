@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<resources>
+    <style name="SimplyE_NoActionBar" parent="SimplifiedTheme.NoActionBar">
+        <item name="simplifiedColorPrimaryLight">@color/seColorPrimaryLight</item>
+        <item name="simplifiedColorPrimary">@color/seColorPrimary</item>
+        <item name="simplifiedColorPrimaryDark">@color/seColorPrimaryDark</item>
+    </style>
+
+    <style name="SimplyE_ActionBar" parent="SimplifiedTheme.ActionBar">
+        <item name="simplifiedColorPrimaryLight">@color/seColorPrimaryLight</item>
+        <item name="simplifiedColorPrimary">@color/seColorPrimary</item>
+        <item name="simplifiedColorPrimaryDark">@color/seColorPrimaryDark</item>
+    </style>
+</resources>

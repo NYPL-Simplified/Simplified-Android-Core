@@ -15,7 +15,7 @@
     android:contentDescription="@string/appName"
     android:icon="@mipmap/ic_launcher"
     android:label="@string/appName"
-    android:theme="@style/SimplifiedTheme_NoActionBar_Red"
+    android:theme="@style/SimplyE_NoActionBar"
     android:usesCleartextTraffic="true"
     tools:replace="android:allowBackup">
 
@@ -60,7 +60,7 @@
       android:exported="false"
       android:parentActivityName="org.nypl.simplified.main.MainActivity"
       android:screenOrientation="portrait"
-      android:theme="@style/SimplifiedTheme_NoActionBar_Red" />
+      android:theme="@style/SimplyE_NoActionBar" />
 
     <activity
       android:name="org.nypl.simplified.viewer.pdf.PdfReaderActivity"
@@ -73,7 +73,7 @@
       android:contentDescription="@string/appName"
       android:exported="false"
       android:label="@string/appName"
-      android:theme="@style/SimplifiedTheme_ActionBar_Red"/>
+      android:theme="@style/SimplyE_ActionBar"/>
 
     <activity
         android:name="org.nypl.simplified.cardcreator.CardCreatorActivity"
