@@ -62,7 +62,7 @@
         android:background="?selectableItemBackgroundBorderless"
         android:contentDescription="@string/accountMore"
         android:focusable="true"
-        android:src="@drawable/ic_more_vert"
+        android:src="?attr/simplifiedButtonMoreVertical"
         android:visibility="gone"
         tools:visibility="visible" />
 </LinearLayout>

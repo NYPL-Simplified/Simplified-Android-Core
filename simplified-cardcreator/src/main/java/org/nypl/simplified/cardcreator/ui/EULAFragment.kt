@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import org.nypl.simplified.cardcreator.databinding.FragmentEulaBinding
+import org.nypl.simplified.webview.WebViewUtilities
 
 /**
  * Screen for viewing the End User License Agreement
@@ -19,13 +20,14 @@ class EULAFragment : Fragment() {
     inflater: LayoutInflater,
     container: ViewGroup?,
     savedInstanceState: Bundle?
-  ): View? {
+  ): View {
     _binding = FragmentEulaBinding.inflate(inflater, container, false)
     return binding.root
   }
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
+    WebViewUtilities.setForcedDark(binding.webview.settings, resources.configuration)
 
     arguments?.let {
       binding.webview.loadUrl(EULAFragmentArgs.fromBundle(it).url)

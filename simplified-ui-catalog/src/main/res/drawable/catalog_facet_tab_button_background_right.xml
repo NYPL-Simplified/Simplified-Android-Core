@@ -7,7 +7,7 @@
       <padding android:bottom="@dimen/catalogFacetTabPaddingBottom" android:left="@dimen/catalogFacetTabPaddingLeft" android:right="@dimen/catalogFacetTabPaddingRight" android:top="@dimen/catalogFacetTabPaddingTop" />
       <corners android:bottomLeftRadius="0dp" android:bottomRightRadius="@dimen/catalogFacetTabCornerRadius" android:topLeftRadius="0dp" android:topRightRadius="@dimen/catalogFacetTabCornerRadius" />
       <solid android:color="?attr/simplifiedColorBackground" />
-      <stroke android:width="@dimen/catalogFacetTabStroke" android:color="?attr/colorPrimary" />
+      <stroke android:width="@dimen/catalogFacetTabStroke" android:color="?attr/simplifiedColorPrimary" />
     </shape>
   </item>
 
@@ -15,8 +15,8 @@
     <shape android:shape="rectangle">
       <padding android:bottom="@dimen/catalogFacetTabPaddingBottom" android:left="@dimen/catalogFacetTabPaddingLeft" android:right="@dimen/catalogFacetTabPaddingRight" android:top="@dimen/catalogFacetTabPaddingTop" />
       <corners android:bottomLeftRadius="0dp" android:bottomRightRadius="@dimen/catalogFacetTabCornerRadius" android:topLeftRadius="0dp" android:topRightRadius="@dimen/catalogFacetTabCornerRadius" />
-      <solid android:color="?attr/colorPrimary" />
-      <stroke android:width="@dimen/catalogFacetTabStroke" android:color="?attr/colorPrimary" />
+      <solid android:color="?attr/simplifiedColorPrimary" />
+      <stroke android:width="@dimen/catalogFacetTabStroke" android:color="?attr/simplifiedColorPrimary" />
     </shape>
   </item>
 

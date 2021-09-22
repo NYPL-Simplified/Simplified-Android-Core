@@ -5,7 +5,6 @@ dependencies {
   api project(':simplified-ui-listeners-api')
   api project(":simplified-ui-profiles")
   api project(":simplified-ui-settings")
-  api project(":simplified-ui-theme")
 
   implementation project(":simplified-profiles-controller-api")
   implementation project(":simplified-viewer-api")

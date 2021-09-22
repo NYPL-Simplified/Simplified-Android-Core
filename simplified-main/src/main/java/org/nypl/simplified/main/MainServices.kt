@@ -6,9 +6,6 @@ import android.content.res.AssetManager
 import android.content.res.Resources
 import android.graphics.Color
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.io7m.jfunctional.Option
-import com.io7m.jfunctional.OptionType
-import com.io7m.jfunctional.Some
 import com.squareup.picasso.Picasso
 import io.reactivex.subjects.PublishSubject
 import org.joda.time.LocalDateTime
@@ -109,16 +106,12 @@ import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceUsableType
 import org.nypl.simplified.tenprint.TenPrintGenerator
 import org.nypl.simplified.tenprint.TenPrintGeneratorType
 import org.nypl.simplified.threads.NamedThreadPools
-import org.nypl.simplified.ui.branding.BrandingThemeOverrideServiceType
 import org.nypl.simplified.ui.catalog.CatalogCoverBadgeImages
 import org.nypl.simplified.ui.images.ImageAccountIconRequestHandler
 import org.nypl.simplified.ui.images.ImageLoaderType
 import org.nypl.simplified.ui.profiles.ProfileModificationFragmentServiceType
 import org.nypl.simplified.ui.screen.ScreenSizeInformation
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
-import org.nypl.simplified.ui.theme.ThemeControl
-import org.nypl.simplified.ui.theme.ThemeServiceType
-import org.nypl.simplified.ui.theme.ThemeValue
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -203,30 +196,6 @@ internal object MainServices {
       directoryStorageDocuments = directoryStorageDocuments,
       directoryStorageProfiles = directoryStorageProfiles
     )
-  }
-
-  private class ThemeService(
-    private val brandingThemeOverride: OptionType<ThemeValue>
-  ) : ThemeServiceType {
-    override fun findCurrentTheme(): ThemeValue {
-      if (this.brandingThemeOverride.isSome) {
-        return (this.brandingThemeOverride as Some<ThemeValue>).get()
-      }
-      return ThemeControl.themeFallback
-    }
-  }
-
-  private fun loadOptionalBrandingThemeOverride(): OptionType<ThemeValue> {
-    val iter =
-      ServiceLoader.load(BrandingThemeOverrideServiceType::class.java)
-        .iterator()
-
-    if (iter.hasNext()) {
-      val service = iter.next()
-      return Option.some(service.overrideTheme())
-    }
-
-    return Option.none()
   }
 
   private fun findAdobeConfiguration(
@@ -989,19 +958,6 @@ internal object MainServices {
       message = strings.bootingGeneral("network connectivity service"),
       interfaceType = NetworkConnectivityType::class.java,
       serviceConstructor = { NetworkConnectivity.create(context) }
-    )
-
-    publishEvent(strings.bootingGeneral("branding service"))
-    val brandingThemeOverride = this.loadOptionalBrandingThemeOverride()
-
-    addService(
-      message = strings.bootingGeneral("theme service"),
-      interfaceType = ThemeServiceType::class.java,
-      serviceConstructor = {
-        ThemeService(
-          brandingThemeOverride = brandingThemeOverride
-        )
-      }
     )
 
     val idleTimerConfiguration =

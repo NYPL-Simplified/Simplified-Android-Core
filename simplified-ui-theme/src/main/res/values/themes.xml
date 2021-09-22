@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <!--
+   These are the attributes supported by Simplified themes. They are intended to be
+   overridden by themes.
+  -->
+
+  <declare-styleable name="SimplifiedCustomAttributes">
+    <attr name="simplifiedColorPrimary" format="color" />
+    <attr name="simplifiedColorPrimaryLight" format="color" />
+    <attr name="simplifiedColorPrimaryDark" format="color" />
+    <attr name="simplifiedColorBackground" format="color" />
+    <attr name="simplifiedColorDisabled" format="color" />
+    <attr name="simplifiedColorNavigationUnselected" format="color" />
+    <attr name="simplifiedButtonCornerRadius" format="dimension" />
+    <attr name="simplifiedButtonVerticalPadding" format="dimension" />
+    <attr name="simplifiedButtonHorizontalPadding" format="dimension" />
+    <attr name="simplifiedButtonMoreVertical" format="reference"/>
+  </declare-styleable>
+
+  <!--
+    The default theme that has no action bar.
+  -->
+
+  <style name="SimplifiedTheme.NoActionBar.Base" parent="Theme.AppCompat.DayNight.NoActionBar">
+    <item name="simplifiedColorPrimary">@color/simplifiedColorPrimary</item>
+    <item name="simplifiedColorPrimaryLight">@color/simplifiedColorPrimaryLight</item>
+    <item name="simplifiedColorPrimaryDark">@color/simplifiedColorPrimaryDark</item>
+
+    <item name="colorPrimary">?attr/simplifiedColorPrimary</item>
+    <item name="colorPrimaryDark">?attr/simplifiedColorPrimaryDark</item>
+    <item name="colorAccent">?attr/simplifiedColorPrimaryLight</item>
+
+    <item name="android:colorPrimary">?attr/simplifiedColorPrimary</item>
+    <item name="android:colorPrimaryDark">?attr/simplifiedColorPrimaryDark</item>
+    <item name="android:colorAccent">?attr/simplifiedColorPrimaryLight</item>
+
+    <item name="simplifiedColorBackground">@color/simplifiedColorBackground</item>
+    <item name="simplifiedColorDisabled">@color/simplifiedColorDisabled</item>
+    <item name="simplifiedColorNavigationUnselected">@color/simplifiedColorNavigationTextUnselected</item>"
+
+    <item name="simplifiedButtonCornerRadius">@dimen/simplifiedButtonCornerRadius</item>
+    <item name="simplifiedButtonVerticalPadding">@dimen/simplifiedButtonVerticalPadding</item>
+    <item name="simplifiedButtonHorizontalPadding">@dimen/simplifiedButtonHorizontalPadding</item>
+    <item name="simplifiedButtonMoreVertical">@drawable/ic_more_vert</item>
+
+    <item name="android:actionBarStyle">@style/Simplified.ActionBar</item>
+    <item name="android:alertDialogStyle">@style/Simplified.AlertDialog</item>
+    <item name="android:alertDialogTheme">@style/Simplified.AlertDialog</item>
+    <item name="android:buttonStyle">@style/Simplified.Button</item>
+    <item name="android:radioButtonStyle">@style/Simplified.RadioButton</item>
+    <item name="android:dialogTheme">@style/Simplified.Dialog</item>
+    <item name="android:editTextStyle">@style/Simplified.EditText</item>
+    <item name="android:windowBackground">?attr/simplifiedColorBackground</item>
+    <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
+    <item name="bottomNavigationStyle">@style/Simplified.BottomNav</item>
+  </style>
+
+  <!--
+    The default theme that has an action bar.
+  -->
+
+  <style name="SimplifiedTheme.ActionBar.Base" parent="Theme.AppCompat.DayNight.DarkActionBar">
+    <item name="simplifiedColorPrimary">@color/simplifiedColorPrimary</item>
+    <item name="simplifiedColorPrimaryLight">@color/simplifiedColorPrimaryLight</item>
+    <item name="simplifiedColorPrimaryDark">@color/simplifiedColorPrimaryDark</item>
+
+    <item name="colorPrimary">?attr/simplifiedColorPrimary</item>
+    <item name="colorPrimaryDark">?attr/simplifiedColorPrimaryDark</item>
+    <item name="colorAccent">?attr/simplifiedColorPrimaryLight</item>
+
+    <item name="android:colorPrimary">?attr/simplifiedColorPrimary</item>
+    <item name="android:colorPrimaryDark">?attr/simplifiedColorPrimaryDark</item>
+    <item name="android:colorAccent">?attr/simplifiedColorPrimaryLight</item>
+
+    <item name="simplifiedColorBackground">@color/simplifiedColorBackground</item>
+    <item name="simplifiedColorDisabled">@color/simplifiedColorDisabled</item>
+    <item name="simplifiedColorNavigationUnselected">@color/simplifiedColorNavigationTextUnselected</item>"
+
+    <item name="simplifiedButtonCornerRadius">@dimen/simplifiedButtonCornerRadius</item>
+    <item name="simplifiedButtonVerticalPadding">@dimen/simplifiedButtonVerticalPadding</item>
+    <item name="simplifiedButtonHorizontalPadding">@dimen/simplifiedButtonHorizontalPadding</item>
+    <item name="simplifiedButtonMoreVertical">@drawable/ic_more_vert</item>
+
+    <item name="android:actionBarStyle">@style/Simplified.ActionBar</item>
+    <item name="android:alertDialogStyle">@style/Simplified.AlertDialog</item>
+    <item name="android:alertDialogTheme">@style/Simplified.AlertDialog</item>
+    <item name="android:buttonStyle">@style/Simplified.Button</item>
+    <item name="android:radioButtonStyle">@style/Simplified.RadioButton</item>
+    <item name="android:dialogTheme">@style/Simplified.Dialog</item>
+    <item name="android:editTextStyle">@style/Simplified.EditText</item>
+    <item name="android:windowBackground">?attr/simplifiedColorBackground</item>
+    <item name="preferenceTheme">@style/PreferenceThemeOverlay.v14.Material</item>
+    <item name="bottomNavigationStyle">@style/Simplified.BottomNav</item>
+  </style>
+
+  <!-- Predefined themes -->
+  <!-- Automatically generated, see styles.sh -->
+  <style name="SimplifiedTheme_NoActionBar_Red" parent="SimplifiedTheme.NoActionBar.Base">
+    <item name="simplifiedColorPrimaryLight">@color/simplified_material_red_primary_light</item>
+    <item name="simplifiedColorPrimary">@color/simplified_material_red_primary</item>
+    <item name="simplifiedColorPrimaryDark">@color/simplified_material_red_primary_dark</item>
+  </style>
+  <style name="SimplifiedTheme_ActionBar_Red" parent="SimplifiedTheme.ActionBar.Base">
+    <item name="simplifiedColorPrimaryLight">@color/simplified_material_red_primary_light</item>
+    <item name="simplifiedColorPrimary">@color/simplified_material_red_primary</item>
+    <item name="simplifiedColorPrimaryDark">@color/simplified_material_red_primary_dark</item>
+  </style>
+  <style name="SimplifiedTheme_NoActionBar_Pink" parent="SimplifiedTheme.NoActionBar.Base">
+    <item name="simplifiedColorPrimaryLight">@color/simplified_material_pink_primary_light</item>
+    <item name="simplifiedColorPrimary">@color/simplified_material_pink_primary</item>
+    <item name="simplifiedColorPrimaryDark">@color/simplified_material_pink_primary_dark</item>
+  </style>
+  <style name="SimplifiedTheme_ActionBar_Pink" parent="SimplifiedTheme.ActionBar.Base">
+    <item name="simplifiedColorPrimaryLight">@color/simplified_material_pink_primary_light</item>
+    <item name="simplifiedColorPrimary">@color/simplified_material_pink_primary</item>
+    <item name="simplifiedColorPrimaryDark">@color/simplified_material_pink_primary_dark</item>
+  </style>
+  <style name="SimplifiedTheme_NoActionBar_Purple" parent="SimplifiedTheme.NoActionBar.Base">
+    <item name="simplifiedColorPrimaryLight">@color/simplified_material_purple_primary_light</item>
+    <item name="simplifiedColorPrimary">@color/simplified_material_purple_primary</item>
+    <item name="simplifiedColorPrimaryDark">@color/simplified_material_purple_primary_dark</item>
+  </style>
+  <style name="SimplifiedTheme_ActionBar_Purple" parent="SimplifiedTheme.ActionBar.Base">
+    <item name="simplifiedColorPrimaryLight">@color/simplified_material_purple_primary_light</item>
+    <item name="simplifiedColorPrimary">@color/simplified_material_purple_primary</item>
+    <item name="simplifiedColorPrimaryDark">@color/simplified_material_purple_primary_dark</item>
+  </style>
+  <style name="SimplifiedTheme_NoActionBar_DeepPurple" parent="SimplifiedTheme.NoActionBar.Base">
+    <item name="simplifiedColorPrimaryLight">@color/simplified_material_deep_purple_primary_light</item>
+    <item name="simplifiedColorPrimary">@color/simplified_material_deep_purple_primary</item>
+    <item name="simplifiedColorPrimaryDark">@color/simplified_material_deep_purple_primary_dark</item>
+  </style>
+  <style name="SimplifiedTheme_ActionBar_DeepPurple" parent="SimplifiedTheme.ActionBar.Base">
+    <item name="simplifiedColorPrimaryLight">@color/simplified_material_deep_purple_primary_light</item>
+    <item name="simplifiedColorPrimary">@color/simplified_material_deep_purple_primary</item>
+    <item name="simplifiedColorPrimaryDark">@color/simplified_material_deep_purple_primary_dark</item>
+  </style>
+  <style name="SimplifiedTheme_NoActionBar_Indigo" parent="SimplifiedTheme.NoActionBar.Base">
+    <item name="simplifiedColorPrimaryLight">@color/simplified_material_indigo_primary_light</item>
+    <item name="simplifiedColorPrimary">@color/simplified_material_indigo_primary</item>
+    <item name="simplifiedColorPrimaryDark">@color/simplified_material_indigo_primary_dark</item>
+  </style>
+  <style name="SimplifiedTheme_ActionBar_Indigo" parent="SimplifiedTheme.ActionBar.Base">
+    <item name="simplifiedColorPrimaryLight">@color/simplified_material_indigo_primary_light</item>
+    <item name="simplifiedColorPrimary">@color/simplified_material_indigo_primary</item>
+    <item name="simplifiedColorPrimaryDark">@color/simplified_material_indigo_primary_dark</item>
+  </style>
+  <style name="SimplifiedTheme_NoActionBar_Blue" parent="SimplifiedTheme.NoActionBar.Base">
+    <item name="simplifiedColorPrimaryLight">@color/simplified_material_blue_primary_light</item>
+    <item name="simplifiedColorPrimary">@color/simplified_material_blue_primary</item>
+    <item name="simplifiedColorPrimaryDark">@color/simplified_material_blue_primary_dark</item>
+  </style>
+  <style name="SimplifiedTheme_ActionBar_Blue" parent="SimplifiedTheme.ActionBar.Base">
+    <item name="simplifiedColorPrimaryLight">@color/simplified_material_blue_primary_light</item>
+    <item name="simplifiedColorPrimary">@color/simplified_material_blue_primary</item>
+    <item name="simplifiedColorPrimaryDark">@color/simplified_material_blue_primary_dark</item>
+  </style>
+  <style name="SimplifiedTheme_NoActionBar_LightBlue" parent="SimplifiedTheme.NoActionBar.Base">
+    <item name="simplifiedColorPrimaryLight">@color/simplified_material_light_blue_primary_light</item>
+    <item name="simplifiedColorPrimary">@color/simplified_material_light_blue_primary</item>
+    <item name="simplifiedColorPrimaryDark">@color/simplified_material_light_blue_primary_dark</item>
+  </style>
+  <style name="SimplifiedTheme_ActionBar_LightBlue" parent="SimplifiedTheme.ActionBar.Base">
+    <item name="simplifiedColorPrimaryLight">@color/simplified_material_light_blue_primary_light</item>
+    <item name="simplifiedColorPrimary">@color/simplified_material_light_blue_primary</item>
+    <item name="simplifiedColorPrimaryDark">@color/simplified_material_light_blue_primary_dark</item>
+  </style>
+  <style name="SimplifiedTheme_NoActionBar_Cyan" parent="SimplifiedTheme.NoActionBar.Base">
+    <item name="simplifiedColorPrimaryLight">@color/simplified_material_cyan_primary_light</item>
+    <item name="simplifiedColorPrimary">@color/simplified_material_cyan_primary</item>
+    <item name="simplifiedColorPrimaryDark">@color/simplified_material_cyan_primary_dark</item>
+  </style>
+  <style name="SimplifiedTheme_ActionBar_Cyan" parent="SimplifiedTheme.ActionBar.Base">
+    <item name="simplifiedColorPrimaryLight">@color/simplified_material_cyan_primary_light</item>
+    <item name="simplifiedColorPrimary">@color/simplified_material_cyan_primary</item>
+    <item name="simplifiedColorPrimaryDark">@color/simplified_material_cyan_primary_dark</item>
+  </style>
+  <style name="SimplifiedTheme_NoActionBar_Teal" parent="SimplifiedTheme.NoActionBar.Base">
+    <item name="simplifiedColorPrimaryLight">@color/simplified_material_teal_primary_light</item>
+    <item name="simplifiedColorPrimary">@color/simplified_material_teal_primary</item>
+    <item name="simplifiedColorPrimaryDark">@color/simplified_material_teal_primary_dark</item>
+  </style>
+  <style name="SimplifiedTheme_ActionBar_Teal" parent="SimplifiedTheme.ActionBar.Base">
+    <item name="simplifiedColorPrimaryLight">@color/simplified_material_teal_primary_light</item>
+    <item name="simplifiedColorPrimary">@color/simplified_material_teal_primary</item>
+    <item name="simplifiedColorPrimaryDark">@color/simplified_material_teal_primary_dark</item>
+  </style>
+  <style name="SimplifiedTheme_NoActionBar_Green" parent="SimplifiedTheme.NoActionBar.Base">
+    <item name="simplifiedColorPrimaryLight">@color/simplified_material_green_primary_light</item>
+    <item name="simplifiedColorPrimary">@color/simplified_material_green_primary</item>
+    <item name="simplifiedColorPrimaryDark">@color/simplified_material_green_primary_dark</item>
+  </style>
+  <style name="SimplifiedTheme_ActionBar_Green" parent="SimplifiedTheme.ActionBar.Base">
+    <item name="simplifiedColorPrimaryLight">@color/simplified_material_green_primary_light</item>
+    <item name="simplifiedColorPrimary">@color/simplified_material_green_primary</item>
+    <item name="simplifiedColorPrimaryDark">@color/simplified_material_green_primary_dark</item>
+  </style>
+  <style name="SimplifiedTheme_NoActionBar_Amber" parent="SimplifiedTheme.NoActionBar.Base">
+    <item name="simplifiedColorPrimaryLight">@color/simplified_material_amber_primary_light</item>
+    <item name="simplifiedColorPrimary">@color/simplified_material_amber_primary</item>
+    <item name="simplifiedColorPrimaryDark">@color/simplified_material_amber_primary_dark</item>
+  </style>
+  <style name="SimplifiedTheme_ActionBar_Amber" parent="SimplifiedTheme.ActionBar.Base">
+    <item name="simplifiedColorPrimaryLight">@color/simplified_material_amber_primary_light</item>
+    <item name="simplifiedColorPrimary">@color/simplified_material_amber_primary</item>
+    <item name="simplifiedColorPrimaryDark">@color/simplified_material_amber_primary_dark</item>
+  </style>
+  <style name="SimplifiedTheme_NoActionBar_Orange" parent="SimplifiedTheme.NoActionBar.Base">
+    <item name="simplifiedColorPrimaryLight">@color/simplified_material_orange_primary_light</item>
+    <item name="simplifiedColorPrimary">@color/simplified_material_orange_primary</item>
+    <item name="simplifiedColorPrimaryDark">@color/simplified_material_orange_primary_dark</item>
+  </style>
+  <style name="SimplifiedTheme_ActionBar_Orange" parent="SimplifiedTheme.ActionBar.Base">
+    <item name="simplifiedColorPrimaryLight">@color/simplified_material_orange_primary_light</item>
+    <item name="simplifiedColorPrimary">@color/simplified_material_orange_primary</item>
+    <item name="simplifiedColorPrimaryDark">@color/simplified_material_orange_primary_dark</item>
+  </style>
+  <style name="SimplifiedTheme_NoActionBar_DeepOrange" parent="SimplifiedTheme.NoActionBar.Base">
+    <item name="simplifiedColorPrimaryLight">@color/simplified_material_deep_orange_primary_light</item>
+    <item name="simplifiedColorPrimary">@color/simplified_material_deep_orange_primary</item>
+    <item name="simplifiedColorPrimaryDark">@color/simplified_material_deep_orange_primary_dark</item>
+  </style>
+  <style name="SimplifiedTheme_ActionBar_DeepOrange" parent="SimplifiedTheme.ActionBar.Base">
+    <item name="simplifiedColorPrimaryLight">@color/simplified_material_deep_orange_primary_light</item>
+    <item name="simplifiedColorPrimary">@color/simplified_material_deep_orange_primary</item>
+    <item name="simplifiedColorPrimaryDark">@color/simplified_material_deep_orange_primary_dark</item>
+  </style>
+  <style name="SimplifiedTheme_NoActionBar_Brown" parent="SimplifiedTheme.NoActionBar.Base">
+    <item name="simplifiedColorPrimaryLight">@color/simplified_material_brown_primary_light</item>
+    <item name="simplifiedColorPrimary">@color/simplified_material_brown_primary</item>
+    <item name="simplifiedColorPrimaryDark">@color/simplified_material_brown_primary_dark</item>
+  </style>
+  <style name="SimplifiedTheme_ActionBar_Brown" parent="SimplifiedTheme.ActionBar.Base">
+    <item name="simplifiedColorPrimaryLight">@color/simplified_material_brown_primary_light</item>
+    <item name="simplifiedColorPrimary">@color/simplified_material_brown_primary</item>
+    <item name="simplifiedColorPrimaryDark">@color/simplified_material_brown_primary_dark</item>
+  </style>
+  <style name="SimplifiedTheme_NoActionBar_Grey" parent="SimplifiedTheme.NoActionBar.Base">
+    <item name="simplifiedColorPrimaryLight">@color/simplified_material_grey_primary_light</item>
+    <item name="simplifiedColorPrimary">@color/simplified_material_grey_primary</item>
+    <item name="simplifiedColorPrimaryDark">@color/simplified_material_grey_primary_dark</item>
+  </style>
+  <style name="SimplifiedTheme_ActionBar_Grey" parent="SimplifiedTheme.ActionBar.Base">
+    <item name="simplifiedColorPrimaryLight">@color/simplified_material_grey_primary_light</item>
+    <item name="simplifiedColorPrimary">@color/simplified_material_grey_primary</item>
+    <item name="simplifiedColorPrimaryDark">@color/simplified_material_grey_primary_dark</item>
+  </style>
+  <style name="SimplifiedTheme_NoActionBar_BlueGrey" parent="SimplifiedTheme.NoActionBar.Base">
+    <item name="simplifiedColorPrimaryLight">@color/simplified_material_blue_grey_primary_light</item>
+    <item name="simplifiedColorPrimary">@color/simplified_material_blue_grey_primary</item>
+    <item name="simplifiedColorPrimaryDark">@color/simplified_material_blue_grey_primary_dark</item>
+  </style>
+  <style name="SimplifiedTheme_ActionBar_BlueGrey" parent="SimplifiedTheme.ActionBar.Base">
+    <item name="simplifiedColorPrimaryLight">@color/simplified_material_blue_grey_primary_light</item>
+    <item name="simplifiedColorPrimary">@color/simplified_material_blue_grey_primary</item>
+    <item name="simplifiedColorPrimaryDark">@color/simplified_material_blue_grey_primary_dark</item>
+  </style>
+
+</resources>

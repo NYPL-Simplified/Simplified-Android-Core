@@ -1,8 +1,6 @@
 package org.nypl.simplified.ui.navigation.tabs
 
 import android.content.Context
-import android.content.res.ColorStateList
-import android.graphics.Color
 import androidx.annotation.IdRes
 import androidx.fragment.app.Fragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -18,11 +16,10 @@ import org.nypl.simplified.feeds.api.FeedBooksSelection
 import org.nypl.simplified.feeds.api.FeedFacet
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.ui.catalog.CatalogFeedArguments
-import org.nypl.simplified.ui.catalog.CatalogFeedOwnership
 import org.nypl.simplified.ui.catalog.CatalogFeedFragment
+import org.nypl.simplified.ui.catalog.CatalogFeedOwnership
 import org.nypl.simplified.ui.profiles.ProfileTabFragment
 import org.nypl.simplified.ui.settings.SettingsMainFragment
-import org.nypl.simplified.ui.theme.ThemeControl
 import org.slf4j.LoggerFactory
 
 object BottomNavigators {
@@ -94,8 +91,6 @@ object BottomNavigators {
         instanceOwner = fragment
       )
 
-    navigationView.itemIconTintList = colorStateListForTabs(context)
-    navigationView.itemTextColor = colorStateListForTabs(context)
     navigationView.labelVisibilityMode = LabelVisibilityMode.LABEL_VISIBILITY_LABELED
 
     return navigator
@@ -157,22 +152,6 @@ object BottomNavigators {
       isSearchResults = false,
       title = context.getString(R.string.tabCatalog)
     )
-  }
-
-  private fun colorStateListForTabs(context: Context): ColorStateList {
-    val states =
-      arrayOf(
-        intArrayOf(android.R.attr.state_checked),
-        intArrayOf(-android.R.attr.state_checked)
-      )
-
-    val colors =
-      intArrayOf(
-        ThemeControl.resolveColorAttribute(context.theme, R.attr.colorPrimary),
-        Color.DKGRAY
-      )
-
-    return ColorStateList(states, colors)
   }
 
   private fun createSettingsFragment(id: Int): Fragment {
