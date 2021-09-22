@@ -44,7 +44,7 @@
 
     <!-- Account Information -->
     <string name="account_information">Account Information</string>
-    <string name="username_desc">Usernames must be 5–25 letters or numbers only. PINs must be four digits.</string>
+    <string name="username_desc">Usernames must be 5–25 letters or numbers only. PINs must be 4–32 characters.</string>
     <string name="validating_username">Validating username&#8230;</string>
 
     <!-- Home Address -->

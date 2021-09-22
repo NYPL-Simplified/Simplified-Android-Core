@@ -34,6 +34,7 @@ class AccountInformationFragment : Fragment() {
   private var back = false
 
   private val minPinChars = 4
+  private val maxPinChars = 32
   private val usernameMinChars = 5
   private val usernameMaxChars = 25
   private val usernameAvailable = "available-username"
@@ -46,7 +47,7 @@ class AccountInformationFragment : Fragment() {
     inflater: LayoutInflater,
     container: ViewGroup?,
     savedInstanceState: Bundle?
-  ): View? {
+  ): View {
     _binding = FragmentAccountInformationBinding.inflate(inflater, container, false)
     return binding.root
   }
@@ -146,8 +147,8 @@ class AccountInformationFragment : Fragment() {
   }
 
   private fun validateForm() {
-    binding.nextBtn.isEnabled = binding.pinEt.text.length ==
-      minPinChars &&
+    binding.nextBtn.isEnabled =
+      binding.pinEt.text.length in minPinChars..maxPinChars &&
       binding.usernameEt.text.length in usernameMinChars..usernameMaxChars
   }
 

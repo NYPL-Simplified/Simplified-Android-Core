@@ -59,7 +59,8 @@
                     style="@style/WizardFormEditText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/required" />
+                    android:hint="@string/required"
+                    android:maxLength="25" />
 
                 <TextView
                     style="@style/WizardFormLabel"
@@ -73,8 +74,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/required"
-                    android:inputType="number"
-                    android:maxLength="4" />
+                    android:maxLength="32" />
 
             </LinearLayout>
 
