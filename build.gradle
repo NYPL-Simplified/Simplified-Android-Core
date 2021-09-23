@@ -10,23 +10,22 @@ buildscript {
   repositories {
     mavenCentral()
     google()
-    jcenter()
   }
 
   dependencies {
-    classpath 'com.android.tools.build:gradle:4.1.1'
+    classpath 'com.android.tools.build:gradle:7.0.2'
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     classpath "androidx.navigation:navigation-safe-args-gradle-plugin:${versions.androidx_navigation}"
-    classpath "biz.aQute.bnd:biz.aQute.bnd.gradle:5.2.0"
+    classpath "biz.aQute.bnd:biz.aQute.bnd.gradle:5.3.0"
     classpath "com.nabilhachicha:android-native-dependencies:0.1.2"
     classpath 'com.google.gms:google-services:4.3.4'
-    classpath 'com.google.firebase:firebase-crashlytics-gradle:2.4.1'
+    classpath 'com.google.firebase:firebase-crashlytics-gradle:2.5.2'
     classpath "de.mannodermaus.gradle.plugins:android-junit5:1.7.1.1"
   }
 }
 
 plugins {
-  id "com.github.ben-manes.versions" version "0.27.0"
+  id "com.github.ben-manes.versions" version "0.39.0"
   id "ru.vyarus.animalsniffer" version "1.5.0"
 }
 
@@ -162,7 +161,10 @@ subprojects { project ->
     }
 
     maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
-    maven { url "http://maven.findawayworld.com/artifactory/libs-release/" }
+    maven {
+      url "http://maven.findawayworld.com/artifactory/libs-release/"
+      allowInsecureProtocol true
+    }
     maven { url "https://jitpack.io" }
     jcenter()
   }
