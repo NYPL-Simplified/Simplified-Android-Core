@@ -82,6 +82,21 @@ This creates a new `release/99.0.0` branch to which various commits
 may be made to increment version numbers, update change logs, run
 any last test builds, etc.
 
+#### Verify Library Dependencies
+
+SimplyE uses several remote repositories as library dependencies published to Maven Central. Verify that each library dependency is referencing the latest version in the `build_libraries.gradle` file. The main libraries to focus on here are:  
+[nypl_audiobook_api](https://github.com/NYPL-Simplified/audiobook-android)
+[nypl_drm_adobe](https://github.com/NYPL-Simplified/DRM-Android-Adobe)
+[nypl_drm_axis](https://github.com/NYPL-Simplified/DRM-Android-Axis)
+[nypl_drm_core](https://github.com/NYPL-Simplified/DRM-Android-Core)
+[nypl_findaway](https://github.com/NYPL-Simplified/audiobook-audioengine-android)
+[nypl_http](https://github.com/NYPL-Simplified/Simplified-Android-HTTP)
+[nypl_overdrive](https://github.com/NYPL-Simplified/audiobook-android-overdrive)
+[nypl_pdf](https://github.com/NYPL-Simplified/pdfreader-android)
+[nypl_readium2](https://github.com/NYPL-Simplified/Simplified-R2-Android)
+
+*Note: In some cases, there will be unreleased work in the above library dependencies. In that case it may require doing a Maven Central release for that library dependency order to get that back in the main project. Currently CI will not automatically check for this.*
+
 #### Update Version Numbers
 
 The `gradle.properties` file for the project defines the version number
