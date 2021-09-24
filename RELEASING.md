@@ -84,7 +84,7 @@ any last test builds, etc.
 
 #### Verify Library Dependencies
 
-SimplyE uses several remote repositories as library dependencies published to Maven Central. Verify that each library dependency is referencing the latest version in the `build_libraries.gradle` file. The main libraries to focus on here are:  
+SimplyE uses several remote repositories as library dependencies published to Maven Central. Verify that each library dependency is referencing the latest version in the `build_libraries.gradle` file or, if not, check with Product to see if exclusion is approved. The main libraries to focus on here are:  
 [nypl_audiobook_api](https://github.com/NYPL-Simplified/audiobook-android)  
 [nypl_drm_adobe](https://github.com/NYPL-Simplified/DRM-Android-Adobe)  
 [nypl_drm_axis](https://github.com/NYPL-Simplified/DRM-Android-Axis)  
