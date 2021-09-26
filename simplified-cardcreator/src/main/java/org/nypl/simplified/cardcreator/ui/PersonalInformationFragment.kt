@@ -40,7 +40,7 @@ class PersonalInformationFragment : Fragment(), DatePickerDialog.OnDateSetListen
     inflater: LayoutInflater,
     container: ViewGroup?,
     savedInstanceState: Bundle?
-  ): View? {
+  ): View {
     _binding = FragmentPersonalInformationBinding.inflate(inflater, container, false)
     return binding.root
   }

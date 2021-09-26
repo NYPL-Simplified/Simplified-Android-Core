@@ -10,7 +10,7 @@ import androidx.navigation.NavDirections
 import androidx.navigation.Navigation
 import org.nypl.simplified.cardcreator.R
 import org.nypl.simplified.cardcreator.databinding.FragmentConfirmAlternateAddressBinding
-import org.nypl.simplified.cardcreator.model.AddressDetails
+import org.nypl.simplified.cardcreator.model.Address
 import org.nypl.simplified.cardcreator.model.AddressType
 import org.nypl.simplified.cardcreator.utils.Cache
 import org.slf4j.LoggerFactory
@@ -19,7 +19,7 @@ class ConfirmAlternateAddressFragment : Fragment() {
 
   private val logger = LoggerFactory.getLogger(ConfirmAlternateAddressFragment::class.java)
 
-  private lateinit var address: AddressDetails
+  private lateinit var address: Address
 
   private var _binding: FragmentConfirmAlternateAddressBinding? = null
   private val binding get() = _binding!!
@@ -31,7 +31,7 @@ class ConfirmAlternateAddressFragment : Fragment() {
     inflater: LayoutInflater,
     container: ViewGroup?,
     savedInstanceState: Bundle?
-  ): View? {
+  ): View {
     _binding = FragmentConfirmAlternateAddressBinding.inflate(inflater, container, false)
     return binding.root
   }
@@ -52,7 +52,7 @@ class ConfirmAlternateAddressFragment : Fragment() {
       }
 
       binding.addressRb.text = """
-      ${address.line_1}
+      ${address.line1}
       ${address.city}
       ${address.state} ${address.zip}
       """.trimIndent()

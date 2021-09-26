@@ -7,30 +7,17 @@ import kotlinx.coroutines.launch
 import org.nypl.simplified.cardcreator.model.Address
 import org.nypl.simplified.cardcreator.model.ValidateAddressResponse
 import org.nypl.simplified.cardcreator.network.CardCreatorService
-import org.slf4j.LoggerFactory
-import retrofit2.HttpException
-import java.lang.Exception
 
-class AddressViewModel : ViewModel() {
-
-  private val logger = LoggerFactory.getLogger(AddressViewModel::class.java)
+class AddressViewModel(
+  private val cardCreatorService: CardCreatorService
+) : ViewModel() {
 
   val validateAddressResponse = MutableLiveData<ValidateAddressResponse>()
-  val apiError = MutableLiveData<Int?>()
 
-  fun validateAddress(address: Address, username: String, password: String) {
+  fun validateAddress(address: Address) {
     viewModelScope.launch {
-      try {
-        val cardCreatorService = CardCreatorService(username, password)
-        val response = cardCreatorService.validateAddress(address)
-        validateAddressResponse.postValue(response)
-      } catch (e: Exception) {
-        logger.error("validateAddress call failed!", e)
-        when (e) {
-          is HttpException -> { apiError.postValue(e.code()) }
-          else -> { apiError.postValue(null) }
-        }
-      }
+      val response = cardCreatorService.validateAddress(address)
+      validateAddressResponse.postValue(response)
     }
   }
 }

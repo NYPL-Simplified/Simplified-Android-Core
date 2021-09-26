@@ -185,12 +185,6 @@
             android:name="pin"
             app:argType="string" />
         <argument
-            android:name="type"
-            app:argType="string" />
-        <argument
-            android:name="temporary"
-            app:argType="boolean" />
-        <argument
             android:name="message"
             app:argType="string" />
         <argument

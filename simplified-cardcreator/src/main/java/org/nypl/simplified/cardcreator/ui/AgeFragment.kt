@@ -34,7 +34,7 @@ class AgeFragment : Fragment() {
     inflater: LayoutInflater,
     container: ViewGroup?,
     savedInstanceState: Bundle?
-  ): View? {
+  ): View {
     _binding = FragmentAgeBinding.inflate(inflater, container, false)
     return binding.root
   }

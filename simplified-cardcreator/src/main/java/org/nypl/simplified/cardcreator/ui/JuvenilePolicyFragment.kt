@@ -14,17 +14,16 @@ import android.widget.TextView.BufferType
 import androidx.activity.addCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.NavController
 import androidx.navigation.NavDirections
 import androidx.navigation.Navigation
 import org.nypl.simplified.cardcreator.R
 import org.nypl.simplified.cardcreator.databinding.FragmentJuvenilePolicyBinding
+import org.nypl.simplified.cardcreator.model.DependentEligibilityResponse
 import org.nypl.simplified.cardcreator.utils.Constants
-import org.nypl.simplified.cardcreator.utils.getCache
-import org.nypl.simplified.cardcreator.viewmodel.PlatformViewModel
-import org.nypl.simplified.cardcreator.viewmodel.TokenViewModel
+import org.nypl.simplified.cardcreator.viewmodel.JuvenileViewModel
 import org.slf4j.LoggerFactory
 
 /**
@@ -40,8 +39,7 @@ class JuvenilePolicyFragment : Fragment() {
   private lateinit var navController: NavController
   private lateinit var nextAction: NavDirections
 
-  private val viewModel: TokenViewModel by viewModels()
-  private val platformViewModel: PlatformViewModel by viewModels()
+  private val juvenileViewModel: JuvenileViewModel by activityViewModels()
 
   private var dialog: AlertDialog? = null
 
@@ -49,7 +47,7 @@ class JuvenilePolicyFragment : Fragment() {
     inflater: LayoutInflater,
     container: ViewGroup?,
     savedInstanceState: Bundle?
-  ): View? {
+  ): View {
     _binding = FragmentJuvenilePolicyBinding.inflate(inflater, container, false)
     return binding.root
   }
@@ -96,100 +94,37 @@ class JuvenilePolicyFragment : Fragment() {
     binding.nextBtn.setOnClickListener {
       if (validateForm()) {
         binding.progress.visibility = View.VISIBLE
-        getToken()
+        getEligibility()
       } else {
         requireActivity().setResult(Activity.RESULT_CANCELED)
         requireActivity().finish()
       }
     }
 
-    viewModel.issoTokenData.observe(
+    juvenileViewModel.dependentEligibilityResponse.observe(
       viewLifecycleOwner,
-      Observer {
-        getCache().token = it.access_token
-        getEligibility()
-      }
-    )
+      Observer { response ->
+        binding.progress.visibility = View.GONE
 
-    platformViewModel.dependentEligibilityData.observe(
-      viewLifecycleOwner,
-      Observer {
-        if (it.eligible) {
-          nextAction = JuvenilePolicyFragmentDirections.actionLocation()
-          navController.navigate(nextAction)
-        } else {
-          val dialogBuilder = AlertDialog.Builder(requireContext())
-          dialogBuilder.setMessage(it.description)
-            .setCancelable(false)
-            .setNegativeButton(getString(R.string.cancel)) { _, _ ->
-              requireActivity().setResult(Activity.RESULT_CANCELED)
-              requireActivity().finish()
+        when (response) {
+          is DependentEligibilityResponse.DependentEligibilityData -> {
+            nextAction = JuvenilePolicyFragmentDirections.actionLocation()
+            navController.navigate(nextAction)
+          }
+          is DependentEligibilityResponse.DependentEligibilityError -> {
+            if (response.isNotEligible) {
+              val message = getString(R.string.juvenile_not_eligible)
+              showNotEligibleDialog(message)
+            } else {
+              val message = getString(R.string.juvenile_eligibility_error)
+              showTryAgainDialog(message)
             }
-          if (dialog == null) {
-            dialog = dialogBuilder.create()
           }
-          dialog?.show()
+          is DependentEligibilityResponse.DependentEligibilityException -> {
+            val message = getString(R.string.juvenile_eligibility_error)
+            showTryAgainDialog(message)
+          }
         }
-      }
-    )
-
-    platformViewModel.apiErrorMessage.observe(
-      viewLifecycleOwner,
-      Observer {
-        binding.progress.visibility = View.GONE
-        val dialogBuilder = AlertDialog.Builder(requireContext())
-        dialogBuilder.setMessage("$it")
-          .setCancelable(false)
-          .setPositiveButton(getString(R.string.try_again)) { _, _ ->
-            getToken()
-          }
-          .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
-            dialog.cancel()
-          }
-        if (dialog == null) {
-          dialog = dialogBuilder.create()
-        }
-        dialog?.show()
-      }
-    )
-
-    platformViewModel.apiError.observe(
-      viewLifecycleOwner,
-      Observer {
-        binding.progress.visibility = View.GONE
-        val dialogBuilder = AlertDialog.Builder(requireContext())
-        dialogBuilder.setMessage("$it Error")
-          .setCancelable(false)
-          .setPositiveButton(getString(R.string.try_again)) { _, _ ->
-            getToken()
-          }
-          .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
-            dialog.cancel()
-          }
-        if (dialog == null) {
-          dialog = dialogBuilder.create()
-        }
-        dialog?.show()
-      }
-    )
-
-    viewModel.apiError.observe(
-      viewLifecycleOwner,
-      Observer {
-        binding.progress.visibility = View.GONE
-        val dialogBuilder = AlertDialog.Builder(requireContext())
-        dialogBuilder.setMessage("$it Error")
-          .setCancelable(false)
-          .setPositiveButton(getString(R.string.try_again)) { _, _ ->
-            getToken()
-          }
-          .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
-            dialog.cancel()
-          }
-        if (dialog == null) {
-          dialog = dialogBuilder.create()
-        }
-        dialog?.show()
       }
     )
 
@@ -200,24 +135,42 @@ class JuvenilePolicyFragment : Fragment() {
     callback.isEnabled = true
   }
 
+  private fun showNotEligibleDialog(message: String) {
+    val dialogBuilder = AlertDialog.Builder(requireContext())
+    dialogBuilder.setMessage(message)
+      .setCancelable(false)
+      .setNegativeButton(getString(R.string.cancel)) { _, _ ->
+        requireActivity().setResult(Activity.RESULT_CANCELED)
+        requireActivity().finish()
+      }
+    if (dialog == null) {
+      dialog = dialogBuilder.create()
+    }
+    dialog?.show()
+  }
+
+  private fun showTryAgainDialog(message: String) {
+    val dialogBuilder = AlertDialog.Builder(requireContext())
+    dialogBuilder.setMessage(message)
+      .setCancelable(false)
+      .setPositiveButton(getString(R.string.try_again)) { _, _ ->
+        getEligibility()
+      }
+      .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
+        dialog.cancel()
+      }
+    if (dialog == null) {
+      dialog = dialogBuilder.create()
+    }
+    dialog?.show()
+  }
+
   /**
    * Check to see if the user is eligible to create child cards
    */
   private fun getEligibility() {
-    platformViewModel.getDependentEligibility(
-      requireActivity().intent.getStringExtra("userIdentifier")!!,
-      getCache().token.toString()
-    )
-  }
-
-  /**
-   * Get token needed for platform API calls
-   */
-  private fun getToken() {
-    binding.progress.visibility = View.VISIBLE
-    viewModel.getToken(
-      requireActivity().intent.getStringExtra("clientId")!!,
-      requireActivity().intent.getStringExtra("clientSecret")!!
+    juvenileViewModel.getDependentEligibility(
+      requireActivity().intent.getStringExtra("userIdentifier")!!
     )
   }
 

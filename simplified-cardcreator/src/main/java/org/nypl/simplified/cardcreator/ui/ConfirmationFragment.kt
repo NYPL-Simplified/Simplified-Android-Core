@@ -36,11 +36,9 @@ class ConfirmationFragment : Fragment() {
   private var _binding: FragmentConfirmationBinding? = null
   private val binding get() = _binding!!
 
-  private lateinit var type: String
   private lateinit var username: String
   private lateinit var barcode: String
   private lateinit var pin: String
-  private var temporary: Boolean = true
   private lateinit var message: String
 
   private val storageRequestCode = 203
@@ -50,7 +48,7 @@ class ConfirmationFragment : Fragment() {
     inflater: LayoutInflater,
     container: ViewGroup?,
     savedInstanceState: Bundle?
-  ): View? {
+  ): View {
     _binding = FragmentConfirmationBinding.inflate(inflater, container, false)
     return binding.root
   }
@@ -60,11 +58,9 @@ class ConfirmationFragment : Fragment() {
 
     arguments?.let {
       val bundle = ConfirmationFragmentArgs.fromBundle(it)
-      type = bundle.type
       username = bundle.username
       barcode = bundle.barcode
       pin = bundle.pin
-      temporary = bundle.temporary
       message = bundle.message
 
       binding.nameCard.text = bundle.name
@@ -171,9 +167,7 @@ class ConfirmationFragment : Fragment() {
   private fun returnResult() {
     val bundle = CardCreatorContract.createResult(barcode, pin)
     bundle.apply {
-      putString("type", type)
       putString("username", username)
-      putBoolean("temporary", temporary)
       putString("message", message)
     }
     val data = Intent().apply {

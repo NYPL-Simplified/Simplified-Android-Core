@@ -28,7 +28,7 @@ class ConfirmHomeAddressFragment : Fragment() {
     inflater: LayoutInflater,
     container: ViewGroup?,
     savedInstanceState: Bundle?
-  ): View? {
+  ): View {
     _binding = FragmentConfirmHomeAddressBinding.inflate(inflater, container, false)
     return binding.root
   }
@@ -41,7 +41,7 @@ class ConfirmHomeAddressFragment : Fragment() {
     val address = Cache(requireContext()).getHomeAddress()
 
     binding.addressRb.text = """
-      ${address.line_1}
+      ${address.line1}
       ${address.city}
       ${address.state} ${address.zip}
     """.trimIndent()

@@ -10,13 +10,14 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.NavController
 import androidx.navigation.NavDirections
 import androidx.navigation.Navigation
 import org.nypl.simplified.cardcreator.R
 import org.nypl.simplified.cardcreator.databinding.FragmentAccountInformationBinding
+import org.nypl.simplified.cardcreator.model.ValidateUsernameResponse
 import org.nypl.simplified.cardcreator.utils.Cache
 import org.nypl.simplified.cardcreator.utils.hideKeyboard
 import org.nypl.simplified.cardcreator.viewmodel.UsernameViewModel
@@ -37,9 +38,8 @@ class AccountInformationFragment : Fragment() {
   private val maxPinChars = 32
   private val usernameMinChars = 5
   private val usernameMaxChars = 25
-  private val usernameAvailable = "available-username"
 
-  private val viewModel: UsernameViewModel by viewModels()
+  private val viewModel: UsernameViewModel by activityViewModels()
 
   private var dialog: AlertDialog? = null
 
@@ -96,12 +96,17 @@ class AccountInformationFragment : Fragment() {
 
   private fun validateUsername() {
     showLoading(true)
+
     viewModel.validateUsernameResponse.observe(
       viewLifecycleOwner,
       Observer { response ->
-        if (!back) {
-          showLoading(false)
-          if (response.type == usernameAvailable) {
+        if (back) {
+          return@Observer
+        }
+
+        showLoading(false)
+        when (response) {
+          is ValidateUsernameResponse.ValidateUsernameData -> {
             logger.debug("Username is valid")
             Cache(requireContext()).setAccountInformation(
               binding.usernameEt.text.toString(),
@@ -109,41 +114,43 @@ class AccountInformationFragment : Fragment() {
             )
             nextAction = AccountInformationFragmentDirections.actionNext()
             navController.navigate(nextAction)
-          } else {
-            Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
+          }
+          is ValidateUsernameResponse.ValidateUsernameError -> {
+            if (response.isUnavailableUsername) {
+              val message = getString(R.string.unavailable_username)
+              Toast.makeText(activity, message, Toast.LENGTH_SHORT).show()
+            } else {
+              val message = getString(R.string.validate_username_error, response.status)
+              showTryAgainDialog(message)
+            }
+          }
+          is ValidateUsernameResponse.ValidateUsernameException -> {
+            val message = getString(R.string.validate_username_general_error)
+            showTryAgainDialog(message)
           }
         }
       }
     )
 
-    viewModel.apiError.observe(
-      viewLifecycleOwner,
-      Observer {
-        showLoading(false)
-        var error = getString(R.string.validate_username_general_error)
-        if (it != null) {
-          error = getString(R.string.validate_username_error, it)
-        }
-        val dialogBuilder = AlertDialog.Builder(requireContext())
-        dialogBuilder.setMessage(error)
-          .setCancelable(false)
-          .setPositiveButton(getString(R.string.try_again)) { _, _ ->
-            validateUsername()
-          }
-          .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
-            dialog.cancel()
-          }
-        if (dialog == null) {
-          dialog = dialogBuilder.create()
-        }
-        dialog?.show()
-      }
-    )
     viewModel.validateUsername(
-      binding.usernameEt.text.toString(),
-      requireActivity().intent.getStringExtra("username")!!,
-      requireActivity().intent.getStringExtra("password")!!
+      binding.usernameEt.text.toString()
     )
+  }
+
+  private fun showTryAgainDialog(message: String) {
+    val dialogBuilder = AlertDialog.Builder(requireContext())
+    dialogBuilder.setMessage(message)
+      .setCancelable(false)
+      .setPositiveButton(getString(R.string.try_again)) { _, _ ->
+        validateUsername()
+      }
+      .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
+        dialog.cancel()
+      }
+    if (dialog == null) {
+      dialog = dialogBuilder.create()
+    }
+    dialog?.show()
   }
 
   private fun validateForm() {
