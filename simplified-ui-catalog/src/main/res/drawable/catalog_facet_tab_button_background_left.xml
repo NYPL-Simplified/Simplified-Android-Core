@@ -1,27 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-
-  <item android:state_checked="false">
-    <inset android:insetRight="-2dp">
-      <shape android:shape="rectangle">
-        <padding android:bottom="@dimen/catalogFacetTabPaddingBottom" android:left="@dimen/catalogFacetTabPaddingLeft" android:right="@dimen/catalogFacetTabPaddingRight" android:top="@dimen/catalogFacetTabPaddingTop" />
-        <corners android:bottomLeftRadius="3dp" android:bottomRightRadius="0dp" android:topLeftRadius="3dp" android:topRightRadius="0dp" />
-        <solid android:color="?attr/simplifiedColorBackground" />
-        <stroke android:width="@dimen/catalogFacetTabStroke" android:color="?attr/colorPrimary" />
-      </shape>
-    </inset>
-  </item>
-
-  <item android:state_checked="true">
-    <inset android:insetRight="-2dp">
-      <shape android:shape="rectangle">
-        <padding android:bottom="@dimen/catalogFacetTabPaddingBottom" android:left="@dimen/catalogFacetTabPaddingLeft" android:right="@dimen/catalogFacetTabPaddingRight" android:top="@dimen/catalogFacetTabPaddingTop" />
-        <corners android:bottomLeftRadius="3dp" android:bottomRightRadius="0dp" android:topLeftRadius="3dp" android:topRightRadius="0dp" />
-        <solid android:color="?attr/colorPrimary" />
-        <stroke android:width="@dimen/catalogFacetTabStroke" android:color="?attr/colorPrimary" />
-      </shape>
-    </inset>
-  </item>
-
-</selector>
+<inset xmlns:android="http://schemas.android.com/apk/res/android" android:insetRight="-2dp">
+  <shape android:shape="rectangle">
+    <padding android:bottom="@dimen/catalogFacetTabPaddingBottom" android:left="@dimen/catalogFacetTabPaddingLeft" android:right="@dimen/catalogFacetTabPaddingRight" android:top="@dimen/catalogFacetTabPaddingTop" />
+    <corners android:bottomLeftRadius="3dp" android:bottomRightRadius="0dp" android:topLeftRadius="3dp" android:topRightRadius="0dp" />
+    <solid android:color="?attr/simplifiedColorSegmentedControlBackground" />
+    <stroke android:width="@dimen/catalogFacetTabStroke" android:color="?attr/simplifiedColorSegmentedControlStroke" />
+  </shape>
+</inset>

@@ -1,5 +1,7 @@
 package org.nypl.simplified.accounts.api
 
+import java.net.URI
+
 /**
  * A set of account credentials.
  */
@@ -33,6 +35,13 @@ sealed class AccountAuthenticationCredentials {
   abstract val authenticationDescription: String?
 
   /**
+   * The annotations URI for the account. This is used to send analytics events to the
+   * Circulation Manager if the feature is enabled for the account.
+   */
+
+  abstract val annotationsURI: URI?
+
+  /**
    * The user used basic authentication to authenticate.
    */
 
@@ -40,7 +49,8 @@ sealed class AccountAuthenticationCredentials {
     val userName: AccountUsername,
     val password: AccountPassword,
     override val adobeCredentials: AccountAuthenticationAdobePreActivationCredentials?,
-    override val authenticationDescription: String?
+    override val authenticationDescription: String?,
+    override val annotationsURI: URI?
   ) : AccountAuthenticationCredentials() {
     override fun withoutAdobePostActivationCredentials(): AccountAuthenticationCredentials {
       return this.copy(
@@ -62,7 +72,8 @@ sealed class AccountAuthenticationCredentials {
   data class OAuthWithIntermediary(
     val accessToken: String,
     override val adobeCredentials: AccountAuthenticationAdobePreActivationCredentials?,
-    override val authenticationDescription: String?
+    override val authenticationDescription: String?,
+    override val annotationsURI: URI?
   ) : AccountAuthenticationCredentials() {
     override fun withoutAdobePostActivationCredentials(): AccountAuthenticationCredentials {
       return this.copy(
@@ -86,7 +97,8 @@ sealed class AccountAuthenticationCredentials {
     val patronInfo: String,
     val cookies: List<AccountCookie>,
     override val adobeCredentials: AccountAuthenticationAdobePreActivationCredentials?,
-    override val authenticationDescription: String?
+    override val authenticationDescription: String?,
+    override val annotationsURI: URI?
   ) : AccountAuthenticationCredentials() {
     override fun withoutAdobePostActivationCredentials(): AccountAuthenticationCredentials {
       return this.copy(

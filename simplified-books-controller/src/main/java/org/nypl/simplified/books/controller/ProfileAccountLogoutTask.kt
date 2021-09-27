@@ -19,6 +19,14 @@ import org.nypl.simplified.accounts.api.AccountLogoutStringResourcesType
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions
 import org.nypl.simplified.books.book_registry.BookRegistryType
+import org.nypl.simplified.books.book_registry.BookStatus
+import org.nypl.simplified.books.book_registry.BookWithStatus
+import org.nypl.simplified.feeds.api.Feed
+import org.nypl.simplified.feeds.api.FeedEntry
+import org.nypl.simplified.feeds.api.FeedLoaderResult
+import org.nypl.simplified.feeds.api.FeedLoaderType
+import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
+import org.nypl.simplified.opds.core.getOrNull
 import org.nypl.simplified.patron.api.PatronDRMAdobe
 import org.nypl.simplified.patron.api.PatronUserProfileParsersType
 import org.nypl.simplified.profiles.api.ProfileReadableType
@@ -30,6 +38,7 @@ import java.net.URI
 import java.util.concurrent.Callable
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
 
 /**
  * A task that performs a logout for the given account in the given profile.
@@ -39,11 +48,14 @@ class ProfileAccountLogoutTask(
   private val account: AccountType,
   private val adeptExecutor: AdobeAdeptExecutorType?,
   private val bookRegistry: BookRegistryType,
+  private val feedLoader: FeedLoaderType,
   private val http: LSHTTPClientType,
   private val logoutStrings: AccountLogoutStringResourcesType,
   private val patronParsers: PatronUserProfileParsersType,
   private val profile: ProfileReadableType
 ) : Callable<TaskResult<Unit>> {
+
+  private class StepFailedHandled(override val cause: Throwable) : Exception()
 
   init {
     Preconditions.checkState(
@@ -90,6 +102,7 @@ class ProfileAccountLogoutTask(
     return try {
       this.updateLoggingOutState()
       this.runDeviceDeactivation()
+      this.runUpdateOPDSEntries()
       this.runBookRegistryClear()
       this.account.setLoginState(AccountNotLoggedIn)
       return this.steps.finishSuccess(Unit)
@@ -238,35 +251,118 @@ class ProfileAccountLogoutTask(
       }
     }
 
-  private fun updateLoggingOutState() {
+  private fun updateLoggingOutState(status: String? = null) {
     this.account.setLoginState(
       AccountLoggingOut(
         this.credentials,
-        this.steps.currentStep()?.description ?: ""
+        status ?: this.steps.currentStep()?.description ?: ""
       )
     )
   }
 
-  private fun runBookRegistryClear() {
-    this.debug("clearing book database and registry")
+  private fun runUpdateOPDSEntries() {
+    this.debug("updating OPDS entries in the database")
+    this.updateLoggingOutState("Updating OPDS entries in the database.")
 
-    this.steps.beginNewStep(this.logoutStrings.logoutClearingBookRegistry)
-    this.updateLoggingOutState()
-    try {
-      for (book in this.account.bookDatabase.books()) {
-        this.bookRegistry.clearFor(book)
+    for (book in this.account.bookDatabase.books()) {
+      val stepDesc = this.logoutStrings.logoutUpdatingOPDSEntry(book.toString())
+      this.debug(stepDesc)
+      this.steps.beginNewStep(stepDesc)
+
+      try {
+        val entry = account.bookDatabase.entry(book)
+        val alternate = entry.book.entry.alternate.getOrNull()
+        if (alternate == null) {
+          this.error("no alternate link available for book $book. skipping...")
+          val message = this.logoutStrings.logoutNoAlternateLinkInDatabase
+          this.steps.currentStepFailed(message, "noAlternateLink")
+        } else {
+          val newFeedEntry = this.fetchOPDSEntry(alternate)
+          entry.writeOPDSEntry(newFeedEntry)
+        }
+      } catch (e: StepFailedHandled) {
+        this.error("step failed with exception", e.cause)
+      } catch (e: Exception) {
+        this.error("step failed with unexpected exception", e)
+        val message = this.logoutStrings.logoutUnexpectedException
+        this.steps.currentStepFailed(message, "unexpectedException", e)
       }
-    } catch (e: Throwable) {
-      this.error("could not clear book registry: ", e)
-      this.steps.currentStepFailed(
-        this.logoutStrings.logoutClearingBookRegistryFailed, "unexpectedException"
-      )
     }
+  }
+
+  private fun fetchOPDSEntry(uri: URI): OPDSAcquisitionFeedEntry {
+    val feedResult = try {
+      this.feedLoader.fetchURI(
+        account = this.account.id,
+        uri = uri,
+        auth = null,
+        method = "GET"
+      ).get()
+    } catch (e: TimeoutException) {
+      val message = this.logoutStrings.logoutOPDSFeedTimedOut
+      this.steps.currentStepFailed(message, "timedOut", e)
+      throw StepFailedHandled(e)
+    } catch (e: ExecutionException) {
+      throw e.cause!!
+    }
+
+    val feed =
+      when (feedResult) {
+        is FeedLoaderResult.FeedLoaderSuccess ->
+          feedResult.feed
+        is FeedLoaderResult.FeedLoaderFailure.FeedLoaderFailedAuthentication -> {
+          this.debug(feedResult.message)
+          // FIXME: Some servers require authentication
+          throw feedResult.exception
+        }
+        is FeedLoaderResult.FeedLoaderFailure.FeedLoaderFailedGeneral -> {
+          val message = this.logoutStrings.logoutOPDSFeedFailed
+          this.steps.currentStepFailed(message, "feedLoaderFailed", feedResult.exception)
+          throw StepFailedHandled(feedResult.exception)
+        }
+      }
+
+    if (feed.size == 0) {
+      val message = this.logoutStrings.logoutOPDSFeedEmpty
+      val exception = Exception(message)
+      this.steps.currentStepFailed(message, "feedEmpty")
+      throw StepFailedHandled(exception)
+    }
+
+    return when (feed) {
+      is Feed.FeedWithoutGroups -> {
+        when (val feedEntry = feed.entriesInOrder[0]) {
+          is FeedEntry.FeedEntryCorrupt -> {
+            val message = this.logoutStrings.logoutOPDSFeedCorrupt
+            this.steps.currentStepFailed(message, "feedCorrupted", feedEntry.error)
+            throw StepFailedHandled(feedEntry.error)
+          }
+          is FeedEntry.FeedEntryOPDS ->
+            feedEntry.feedEntry
+        }
+      }
+      is Feed.FeedWithGroups -> {
+        val message = this.logoutStrings.logoutOPDSFeedWithGroups
+        val exception = Exception(message)
+        this.steps.currentStepFailed(message, "feedUnusable")
+        throw StepFailedHandled(exception)
+      }
+    }
+  }
+
+  private fun runBookRegistryClear() {
+    this.debug("clearing book database and updating registry")
 
     this.steps.beginNewStep(this.logoutStrings.logoutClearingBookDatabase)
     this.updateLoggingOutState()
     try {
-      this.account.bookDatabase.delete()
+      for (book in this.account.bookDatabase.books()) {
+        val entry = account.bookDatabase.entry(book)
+        val newBook = entry.book.copy(formats = emptyList())
+        entry.delete()
+        val status = BookStatus.fromBook(newBook)
+        this.bookRegistry.update(BookWithStatus(entry.book, status))
+      }
     } catch (e: Throwable) {
       this.error("could not clear book database: ", e)
       this.steps.currentStepFailed(

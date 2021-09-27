@@ -22,19 +22,14 @@
     <Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="?actionBarSize"
         android:background="@android:color/black"
+        android:navigationIcon="?homeAsUpIndicator"
+        android:title="@string/sign_up"
+        android:titleTextAppearance="@style/WizardToolbar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <TextView
-            android:id="@+id/toolbar_title_tv"
-            style="@style/WizardToolbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/sign_up"
-            android:textColor="@android:color/white" />
-    </Toolbar>
+        app:layout_constraintTop_toTopOf="parent"
+        tools:titleTextColor="@android:color/white"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

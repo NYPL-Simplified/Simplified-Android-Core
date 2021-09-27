@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<resources>
+    <style name="OEI_NoActionBar" parent="SimplifiedTheme.NoActionBar" />
+    <style name="OEI_ActionBar" parent="SimplifiedTheme.ActionBar" />
+</resources>

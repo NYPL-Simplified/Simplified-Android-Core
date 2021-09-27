@@ -1,6 +1,7 @@
 package org.nypl.simplified.books.api
 
-import org.joda.time.LocalDateTime
+import org.joda.time.DateTime
+import org.joda.time.DateTimeZone
 import java.io.Serializable
 import java.net.URI
 import java.nio.charset.Charset
@@ -15,7 +16,7 @@ import java.security.NoSuchAlgorithmException
  * that serialized values of this class will be compatible with future releases.</p>
  */
 
-data class Bookmark(
+data class Bookmark private constructor(
 
   /**
    * The identifier of the book taken from the OPDS entry that provided it.
@@ -39,7 +40,7 @@ data class Bookmark(
    * The time the bookmark was created.
    */
 
-  val time: LocalDateTime,
+  val time: DateTime,
 
   /**
    * The title of the chapter.
@@ -51,13 +52,14 @@ data class Bookmark(
    * An estimate of the current book progress, in the range [0, 1]
    */
 
-  val bookProgress: Double,
+  @Deprecated("Use progress information from the BookLocation")
+  val bookProgress: Double?,
 
   /**
    * The identifier of the device that created the bookmark, if one is available.
    */
 
-  val deviceID: String?,
+  val deviceID: String,
 
   /**
    * The URI of this bookmark, if the bookmark exists on a remote server.
@@ -66,12 +68,21 @@ data class Bookmark(
   val uri: URI?
 ) : Serializable {
 
+  init {
+    check(this.time.zone == DateTimeZone.UTC) {
+      "Bookmark time zones must be UTC"
+    }
+  }
+
   /**
    * An estimate of the current chapter progress, in the range [0, 1]
    */
 
   val chapterProgress: Double =
-    this.location.progress?.chapterProgress ?: 0.0
+    when (this.location) {
+      is BookLocation.BookLocationR2 -> this.location.progress.chapterProgress
+      is BookLocation.BookLocationR1 -> this.location.progress ?: 0.0
+    }
 
   /**
    * The ID of the book to which the bookmark belongs.
@@ -104,6 +115,42 @@ data class Bookmark(
   companion object {
 
     /**
+     * Create a bookmark.
+     */
+
+    fun create(
+      opdsId: String,
+      location: BookLocation,
+      kind: BookmarkKind,
+      time: DateTime,
+      chapterTitle: String,
+      bookProgress: Double?,
+      deviceID: String,
+      uri: URI?
+    ): Bookmark {
+      return Bookmark(
+        opdsId = opdsId,
+        location = location,
+        kind = kind,
+        time = ensureUTC(time),
+        chapterTitle = chapterTitle,
+        bookProgress = bookProgress,
+        deviceID = deviceID,
+        uri = uri
+      )
+    }
+
+    /**
+     * Ensure a timestamp has a UTC timezone.
+     */
+
+    private fun ensureUTC(
+      dateTime: DateTime
+    ): DateTime {
+      return dateTime.toDateTime(DateTimeZone.UTC)
+    }
+
+    /**
      * Create a bookmark ID from the given book ID, location, and kind.
      */
 
@@ -117,21 +164,25 @@ data class Bookmark(
         val utf8 = Charset.forName("UTF-8")
         messageDigest.update(book.value().toByteArray(utf8))
 
-        val chapterProgress = location.progress
-        if (chapterProgress != null) {
-          messageDigest.update(chapterProgress.chapterIndex.toString().toByteArray(utf8))
-          val truncatedProgress = String.format("%.6f", chapterProgress.chapterProgress)
-          messageDigest.update(truncatedProgress.toByteArray(utf8))
+        when (location) {
+          is BookLocation.BookLocationR2 -> {
+            val chapterProgress = location.progress
+            messageDigest.update(chapterProgress.chapterHref.toByteArray(utf8))
+            val truncatedProgress = String.format("%.6f", chapterProgress.chapterProgress)
+            messageDigest.update(truncatedProgress.toByteArray(utf8))
+          }
+          is BookLocation.BookLocationR1 -> {
+            val cfi = location.contentCFI
+            if (cfi != null) {
+              messageDigest.update(cfi.toByteArray(utf8))
+            }
+            val idRef = location.idRef
+            if (idRef != null) {
+              messageDigest.update(idRef.toByteArray(utf8))
+            }
+          }
         }
 
-        val cfi = location.contentCFI
-        if (cfi != null) {
-          messageDigest.update(cfi.toByteArray(utf8))
-        }
-        val idRef = location.idRef
-        if (idRef != null) {
-          messageDigest.update(idRef.toByteArray(utf8))
-        }
         messageDigest.update(kind.motivationURI.toByteArray(utf8))
 
         val digestResult = messageDigest.digest()

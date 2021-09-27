@@ -2,7 +2,6 @@ package org.nypl.simplified.ui.catalog
 
 import androidx.lifecycle.LiveData
 import androidx.paging.PagedList
-import com.google.common.util.concurrent.FluentFuture
 import org.nypl.simplified.feeds.api.Feed
 import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.feeds.api.FeedFacet
@@ -50,7 +49,6 @@ sealed class CatalogFeedState {
 
   data class CatalogFeedLoading(
     override val arguments: CatalogFeedArguments,
-    val future: FluentFuture<FeedLoaderResult>
   ) : CatalogFeedState() {
     override val title: String = ""
     override val search: FeedSearch? = null

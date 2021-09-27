@@ -25,7 +25,7 @@ object ImageAccountIcons {
     loader: Picasso,
     account: AccountProviderDescription,
     @DrawableRes defaultIcon: Int,
-    iconView: ImageView
+    iconView: ImageView,
   ) {
     val uri = account.logoURI?.hrefURI
     this.logger.debug("configuring account logo: {}", uri)

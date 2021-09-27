@@ -17,6 +17,7 @@ import org.nypl.simplified.accounts.database.api.AccountsDatabaseOpenException
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseType
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.analytics.api.AnalyticsType
+import org.nypl.simplified.books.formats.api.BookFormatSupportType
 import org.nypl.simplified.files.FileLocking
 import org.nypl.simplified.files.FileUtilities
 import org.nypl.simplified.profiles.api.ProfileAttributes
@@ -69,6 +70,7 @@ object ProfilesDatabases {
     accountBundledCredentials: AccountBundledCredentialsType,
     accountCredentialsStore: AccountAuthenticationCredentialsStoreType,
     accountsDatabases: AccountsDatabaseFactoryType,
+    bookFormatSupport: BookFormatSupportType,
     directory: File
   ): ProfilesDatabaseType {
     this.logger.debug("opening profile database: {}", directory)
@@ -85,6 +87,7 @@ object ProfilesDatabases {
       accountBundledCredentials = accountBundledCredentials,
       accountCredentialsStore = accountCredentialsStore,
       accountsDatabases = accountsDatabases,
+      bookFormatSupport = bookFormatSupport,
       directory = directory,
       profiles = profiles,
       jom = jom,
@@ -111,6 +114,7 @@ object ProfilesDatabases {
       accountCredentialsStore = accountCredentialsStore,
       accountsDatabases = accountsDatabases,
       anonymousProfileEnabled = ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_DISABLED,
+      bookFormatSupport = bookFormatSupport,
       context = context,
       directory = directory,
       profiles = profiles
@@ -125,6 +129,7 @@ object ProfilesDatabases {
     accountBundledCredentials: AccountBundledCredentialsType,
     accountCredentialsStore: AccountAuthenticationCredentialsStoreType,
     accountsDatabases: AccountsDatabaseFactoryType,
+    bookFormatSupport: BookFormatSupportType,
     directory: File,
     profiles: SortedMap<ProfileID, Profile>,
     jom: ObjectMapper,
@@ -151,6 +156,7 @@ object ProfilesDatabases {
             accountsDatabases = accountsDatabases,
             accountBundledCredentials = accountBundledCredentials,
             accountCredentialsStore = accountCredentialsStore,
+            bookFormatSupport = bookFormatSupport,
             jom = jom,
             directory = directory,
             errors = errors,
@@ -177,6 +183,7 @@ object ProfilesDatabases {
     accountBundledCredentials: AccountBundledCredentialsType,
     accountCredentialsStore: AccountAuthenticationCredentialsStoreType,
     accountsDatabases: AccountsDatabaseFactoryType,
+    bookFormatSupport: BookFormatSupportType,
     directory: File
   ): ProfilesDatabaseType {
     this.logger.debug("opening profile database: {}", directory)
@@ -193,6 +200,7 @@ object ProfilesDatabases {
       accountBundledCredentials = accountBundledCredentials,
       accountCredentialsStore = accountCredentialsStore,
       accountsDatabases = accountsDatabases,
+      bookFormatSupport = bookFormatSupport,
       directory = directory,
       profiles = profiles,
       jom = jom,
@@ -210,6 +218,7 @@ object ProfilesDatabases {
           accountsDatabases = accountsDatabases,
           accountCredentialsStore = accountCredentialsStore,
           accountProvider = accountProviders.defaultProvider,
+          bookFormatSupport = bookFormatSupport,
           directory = directory,
           displayName = "",
           id = this.ANONYMOUS_PROFILE_ID
@@ -232,6 +241,7 @@ object ProfilesDatabases {
         accountCredentialsStore = accountCredentialsStore,
         accountsDatabases = accountsDatabases,
         anonymousProfileEnabled = ANONYMOUS_PROFILE_ENABLED,
+        bookFormatSupport = bookFormatSupport,
         context = context,
         directory = directory,
         profiles = profiles
@@ -329,6 +339,7 @@ object ProfilesDatabases {
     accountsDatabases: AccountsDatabaseFactoryType,
     accountBundledCredentials: AccountBundledCredentialsType,
     accountCredentialsStore: AccountAuthenticationCredentialsStoreType,
+    bookFormatSupport: BookFormatSupportType,
     jom: ObjectMapper,
     directory: File,
     errors: MutableList<Exception>,
@@ -344,58 +355,73 @@ object ProfilesDatabases {
       return null
     }
 
-    val desc: ProfileDescription
-    try {
-      desc = ProfileDescriptionJSON.deserializeFromFile(jom, profileFile)
-    } catch (e: IOException) {
-      errors.add(IOException("Could not parse profile: $profileFile", e))
-      return null
-    }
-
     val profileAccountsDir = File(profileDir, "accounts")
 
-    try {
-      val accounts =
-        accountsDatabases.openDatabase(
-          accountAuthenticationCredentialsStore = accountCredentialsStore,
+    val accountsDatabase: AccountsDatabaseType =
+      try {
+        val accounts =
+          accountsDatabases.openDatabase(
+            accountAuthenticationCredentialsStore = accountCredentialsStore,
+            accountEvents = accountEvents,
+            accountProviders = accountProviders,
+            bookFormatSupport = bookFormatSupport,
+            context = context,
+            directory = profileAccountsDir
+          )
+
+        this.createAutomaticAccounts(
+          accounts = accounts,
           accountEvents = accountEvents,
+          accountBundledCredentials = accountBundledCredentials,
           accountProviders = accountProviders,
-          context = context,
-          directory = profileAccountsDir
+          profile = profileId
         )
 
-      this.createAutomaticAccounts(
-        accounts = accounts,
-        accountEvents = accountEvents,
-        accountBundledCredentials = accountBundledCredentials,
-        accountProviders = accountProviders,
-        profile = profileId
-      )
+        if (accounts.accounts().isEmpty()) {
+          this.logger.debug("profile is empty, creating a default account")
+          accounts.createAccount(accountProviders.defaultProvider)
+        }
 
-      if (accounts.accounts().isEmpty()) {
-        this.logger.debug("profile is empty, creating a default account")
-        accounts.createAccount(accountProviders.defaultProvider)
+        accounts
+      } catch (e: AccountsDatabaseException) {
+        this.logger.error("[{}]: error opening accounts: ", profileId.uuid, e)
+        errors.add(e)
+        return null
       }
 
-      Preconditions.checkArgument(
-        !accounts.accounts().isEmpty(),
-        "Accounts database must not be empty"
-      )
+    val accounts =
+      accountsDatabase.accounts().values
 
-      val account = accounts.accounts()[accounts.accounts().firstKey()]!!
-      return Profile(
-        owner = null,
-        id = profileId,
-        directory = profileDir,
-        analytics = analytics,
-        accounts = accounts,
-        initialDescription = desc
-      )
-    } catch (e: AccountsDatabaseException) {
-      this.logger.error("[{}]: error opening accounts: ", profileId.uuid, e)
-      errors.add(e)
-      return null
-    }
+    Preconditions.checkArgument(
+      !accounts.isEmpty(),
+      "Accounts database must not be empty"
+    )
+
+    val mostRecentFallback =
+      if (accounts.size > 1) {
+        // Return the first account created from a non-default provider
+        accounts.first { it.provider.id != accountProviders.defaultProvider.id }
+      } else {
+        // Return the first account
+        accounts.first()
+      }
+
+    var description: ProfileDescription =
+      try {
+        ProfileDescriptionJSON.deserializeFromFile(jom, profileFile, mostRecentFallback.id)
+      } catch (e: IOException) {
+        errors.add(IOException("Could not parse profile: $profileFile", e))
+        return null
+      }
+
+    return Profile(
+      owner = null,
+      id = profileId,
+      directory = profileDir,
+      analytics = analytics,
+      accounts = accountsDatabase,
+      initialDescription = description
+    )
   }
 
   /**
@@ -420,6 +446,7 @@ object ProfilesDatabases {
     accountsDatabases: AccountsDatabaseFactoryType,
     accountCredentialsStore: AccountAuthenticationCredentialsStoreType,
     accountProvider: AccountProviderType,
+    bookFormatSupport: BookFormatSupportType,
     directory: File,
     displayName: String,
     id: ProfileID
@@ -430,25 +457,13 @@ object ProfilesDatabases {
       val profileAccountsDir =
         File(profileDir, "accounts")
 
-      val description =
-        ProfileDescription(
-          displayName = displayName,
-          preferences = ProfilePreferences(
-            dateOfBirth = null,
-            showTestingLibraries = false,
-            readerPreferences = ReaderPreferences.builder().build(),
-            mostRecentAccount = null,
-            hasSeenLibrarySelectionScreen = false
-          ),
-          attributes = ProfileAttributes(sortedMapOf())
-        )
-
       try {
         val accounts =
           accountsDatabases.openDatabase(
             accountAuthenticationCredentialsStore = accountCredentialsStore,
             accountEvents = accountEvents,
             accountProviders = accountProviders,
+            bookFormatSupport = bookFormatSupport,
             context = context,
             directory = profileAccountsDir
           )
@@ -465,9 +480,22 @@ object ProfilesDatabases {
          * Create an account, unless one already exists for this provider
          */
 
-        accounts.accountsByProvider()[accountProvider.id] ?: run {
+        val account = accounts.accountsByProvider()[accountProvider.id] ?: run {
           accounts.createAccount(accountProvider)
         }
+
+        val description =
+          ProfileDescription(
+            displayName = displayName,
+            preferences = ProfilePreferences(
+              dateOfBirth = null,
+              showTestingLibraries = false,
+              readerPreferences = ReaderPreferences.builder().build(),
+              mostRecentAccount = account.id,
+              hasSeenLibrarySelectionScreen = false
+            ),
+            attributes = ProfileAttributes(sortedMapOf())
+          )
 
         val profile =
           Profile(

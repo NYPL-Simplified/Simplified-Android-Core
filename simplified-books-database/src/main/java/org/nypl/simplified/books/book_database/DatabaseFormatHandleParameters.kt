@@ -6,6 +6,7 @@ import one.irradia.mime.api.MIMEType
 import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
+import org.nypl.simplified.books.formats.api.BookFormatSupportType
 import java.io.File
 
 /**
@@ -56,5 +57,11 @@ internal data class DatabaseFormatHandleParameters(
    * A JSON object mapper.
    */
 
-  val objectMapper: ObjectMapper
+  val objectMapper: ObjectMapper,
+
+  /**
+   * The book format support.
+   */
+
+  val bookFormatSupport: BookFormatSupportType
 )

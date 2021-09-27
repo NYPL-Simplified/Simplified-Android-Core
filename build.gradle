@@ -5,27 +5,27 @@ import java.time.ZoneOffset
 buildscript {
   // Load in our list of dependencies.
   //
-  apply from: file("$rootDir/libraries.gradle")
+  apply from: file("$rootDir/build_libraries.gradle")
 
   repositories {
     mavenCentral()
     google()
-    jcenter()
   }
 
   dependencies {
-    classpath 'com.android.tools.build:gradle:4.1.1'
+    classpath 'com.android.tools.build:gradle:7.0.2'
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     classpath "androidx.navigation:navigation-safe-args-gradle-plugin:${versions.androidx_navigation}"
-    classpath "biz.aQute.bnd:biz.aQute.bnd.gradle:5.2.0"
+    classpath "biz.aQute.bnd:biz.aQute.bnd.gradle:5.3.0"
     classpath "com.nabilhachicha:android-native-dependencies:0.1.2"
     classpath 'com.google.gms:google-services:4.3.4'
-    classpath 'com.google.firebase:firebase-crashlytics-gradle:2.4.1'
+    classpath 'com.google.firebase:firebase-crashlytics-gradle:2.5.2'
+    classpath "de.mannodermaus.gradle.plugins:android-junit5:1.7.1.1"
   }
 }
 
 plugins {
-  id "com.github.ben-manes.versions" version "0.27.0"
+  id "com.github.ben-manes.versions" version "0.39.0"
   id "ru.vyarus.animalsniffer" version "1.5.0"
 }
 
@@ -65,6 +65,47 @@ ext {
         ^ required by 'org.librarysimplified.drm.enabled'\
       """.stripIndent())
   }
+
+  //
+  // Check that non -SNAPSHOT builds don't use -SNAPSHOT dependencies.
+  //
+
+  final String versionName = project.ext["VERSION_NAME"];
+  if (!versionName.endsWith("-SNAPSHOT")) {
+    final Set<String> snapshots = new HashSet<>();
+    ext.libraries.each { name, version ->
+      if (version.toString().endsWith("-SNAPSHOT")) {
+        snapshots.add(version.toString())
+      }
+    }
+
+    if (!snapshots.isEmpty()) {
+      final StringBuilder builder = new StringBuilder();
+      builder.append("The current non-SNAPSHOT build (")
+      builder.append(versionName)
+      builder.append(") depends on the following -SNAPSHOT dependencies:")
+      builder.append("\n")
+      snapshots.each { version ->
+        builder.append("  ")
+        builder.append(version)
+        builder.append("\n")
+      }
+      final String text = builder.toString()
+      logger.error("{}", text)
+      throw new GradleException(text);
+    }
+  }
+}
+
+subprojects {
+  /*
+   * We currently have transitive dependencies that specify dependencies on newer versions
+   * of SLF4J. These are subtly incompatible with Logback-Android, and it will be a while before
+   * new versions appear of both artifacts. Remove this when both are updated!
+   */
+  configurations.all {
+    resolutionStrategy.force libraries.slf4j
+  }
 }
 
 subprojects { project ->
@@ -80,6 +121,24 @@ subprojects { project ->
       break
     case "jar":
       apply from: file("$rootDir/build_jar.gradle")
+      break
+    default:
+      throw new IllegalStateException(
+        "Unrecognized packaging type ${POM_PACKAGING} for ${project}")
+  }
+
+  /*
+   * Configure publishing for the various project types.
+   */
+
+  switch (POM_PACKAGING) {
+    case "jar":
+      apply from: file("$rootDir/build_publishing.gradle")
+      break
+    case "apk":
+      break
+    case "aar":
+      apply from: file("$rootDir/build_publishing.gradle")
       break
     default:
       throw new IllegalStateException(
@@ -102,35 +161,12 @@ subprojects { project ->
     }
 
     maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
-    maven { url "http://maven.findawayworld.com/artifactory/libs-release/" }
+    maven {
+      url "http://maven.findawayworld.com/artifactory/libs-release/"
+      allowInsecureProtocol true
+    }
     maven { url "https://jitpack.io" }
     jcenter()
-  }
-
-  // Configure publishing for java projects
-  //
-  pluginManager.withPlugin("java") {
-    logger.info("Configuring publishing for ${project} (${POM_PACKAGING})")
-    apply from: file("$rootDir/.publish/publishing.gradle")
-  }
-
-  // Configure publishing for android-library projects
-  //
-  pluginManager.withPlugin("com.android.library") {
-    logger.info("Configuring publishing for ${project} (${POM_PACKAGING})")
-    apply from: file("$rootDir/.publish/publishing.gradle")
-  }
-
-  configurations.all {
-    // We currently have transitive dependencies that specify dependencies on newer versions
-    // of SLF4J. These are subtly incompatible with Logback-Android, and it will be a while before
-    // new versions appear of both artifacts. Remove this when both are updated!
-    //
-    resolutionStrategy.force libraries.slf4j
-
-    // one.irradia.mime.api depends on an outdated version of kotlin-reflect
-    //
-    resolutionStrategy.force libraries.kotlin_reflect
   }
 
   // Skip tasks for projects that require drm; unless drm is enabled
@@ -152,6 +188,7 @@ task verifySemanticVersioning {}
 /**
  * Displays properties starting with 'org.librarysimplified'.
  */
+
 task listProperties(group: 'NYPL') {
   description = "Displays properties starting with 'org.librarysimplified'."
   doLast {
@@ -164,10 +201,15 @@ task listProperties(group: 'NYPL') {
   }
 }
 
-// Add ktlint tasks to root project. This executes faster than
-// configuring the task for each individual subproject.
-//
-apply from: file("$rootDir/ktlint.gradle")
+/*
+ * Add ktlint tasks.
+ */
+
+apply from: file("$rootDir/build_ktlint.gradle")
+
+subprojects {
+  assemble.dependsOn ktlint
+}
 
 /**
  * Expand the 'tilde' character to user.home.

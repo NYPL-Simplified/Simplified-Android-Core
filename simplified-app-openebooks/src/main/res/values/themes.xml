@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<resources>
+    <style name="OEI_NoActionBar" parent="SimplifiedTheme.NoActionBar">
+        <item name="simplifiedColorPrimaryLight">@color/oeColorAccent</item>
+        <item name="simplifiedColorPrimary">@color/oeColorPrimary</item>
+        <item name="simplifiedColorPrimaryDark">@color/oeColorPrimaryDark</item>
+    </style>
+
+    <style name="OEI_ActionBar" parent="SimplifiedTheme.ActionBar">
+        <item name="simplifiedColorPrimaryLight">@color/oeColorAccent</item>
+        <item name="simplifiedColorPrimary">@color/oeColorPrimary</item>
+        <item name="simplifiedColorPrimaryDark">@color/oeColorPrimaryDark</item>
+    </style>
+</resources>

@@ -25,6 +25,7 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileNotFoundException
 import java.io.IOException
+import java.lang.IllegalStateException
 import java.net.URI
 
 /**
@@ -52,12 +53,37 @@ internal class DatabaseFormatHandleAudioBook internal constructor(
   private val dataLock: Any = Any()
 
   @GuardedBy("dataLock")
-  private var drmHandleRef =
-    BookDRMInformationHandles.open(
-      directory = this.parameters.directory,
-      format = this.formatDefinition,
-      onUpdate = this::onDRMUpdated
-    )
+  private var drmHandleRef: BookDRMInformationHandle
+
+  init {
+    val drmHandleInitial =
+      BookDRMInformationHandles.open(
+        directory = this.parameters.directory,
+        format = this.formatDefinition,
+        bookFormats = this.parameters.bookFormatSupport,
+        onUpdate = this::onDRMUpdated
+      )
+
+    if (drmHandleInitial == null) {
+      try {
+        FileUtilities.fileDelete(this.fileManifest)
+      } catch (e: Exception) {
+        // Not much we can do about this.
+      }
+
+      val drmHandleNext =
+        BookDRMInformationHandles.open(
+          directory = this.parameters.directory,
+          format = this.formatDefinition,
+          bookFormats = this.parameters.bookFormatSupport,
+          onUpdate = this::onDRMUpdated
+        ) ?: throw IllegalStateException("Still could not open a DRM handle!")
+
+      this.drmHandleRef = drmHandleNext
+    } else {
+      this.drmHandleRef = drmHandleInitial
+    }
+  }
 
   @GuardedBy("dataLock")
   private var formatRef: BookFormat.BookFormatAudioBook =

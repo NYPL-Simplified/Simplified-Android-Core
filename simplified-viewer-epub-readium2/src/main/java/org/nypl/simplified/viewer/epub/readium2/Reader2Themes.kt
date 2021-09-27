@@ -2,10 +2,16 @@ package org.nypl.simplified.viewer.epub.readium2
 
 import org.librarysimplified.r2.api.SR2ColorScheme
 import org.librarysimplified.r2.api.SR2Font
+import org.librarysimplified.r2.api.SR2PublisherCSS
+import org.librarysimplified.r2.api.SR2PublisherCSS.SR2_PUBLISHER_DEFAULT_CSS_DISABLED
+import org.librarysimplified.r2.api.SR2PublisherCSS.SR2_PUBLISHER_DEFAULT_CSS_ENABLED
 import org.librarysimplified.r2.api.SR2Theme
 import org.nypl.simplified.reader.api.ReaderColorScheme
 import org.nypl.simplified.reader.api.ReaderFontSelection
 import org.nypl.simplified.reader.api.ReaderPreferences
+import org.nypl.simplified.reader.api.ReaderPublisherCSS
+import org.nypl.simplified.reader.api.ReaderPublisherCSS.PUBLISHER_DEFAULT_CSS_DISABLED
+import org.nypl.simplified.reader.api.ReaderPublisherCSS.PUBLISHER_DEFAULT_CSS_ENABLED
 
 object Reader2Themes {
 
@@ -19,7 +25,17 @@ object Reader2Themes {
       .setColorScheme(fromSR2Color(theme.colorScheme))
       .setFontFamily(fromSR2Font(theme.font))
       .setFontScale(fromSR2Size(theme.textSize))
+      .setPublisherCSS(fromSR2PublisherCSS(theme.publisherCSS))
       .build()
+  }
+
+  private fun fromSR2PublisherCSS(
+    publisherCSS: SR2PublisherCSS
+  ): ReaderPublisherCSS {
+    return when (publisherCSS) {
+      SR2_PUBLISHER_DEFAULT_CSS_ENABLED -> PUBLISHER_DEFAULT_CSS_ENABLED
+      SR2_PUBLISHER_DEFAULT_CSS_DISABLED -> PUBLISHER_DEFAULT_CSS_DISABLED
+    }
   }
 
   private fun fromSR2Size(
@@ -64,8 +80,18 @@ object Reader2Themes {
     return SR2Theme(
       colorScheme = toSR2Color(readerPreferences.colorScheme()),
       font = toSR2Font(readerPreferences.fontFamily()),
-      textSize = toSR2Size(readerPreferences.fontScale())
+      textSize = toSR2Size(readerPreferences.fontScale()),
+      publisherCSS = toSR2PublisherCSS(readerPreferences.publisherCSS())
     )
+  }
+
+  private fun toSR2PublisherCSS(
+    publisherCSS: ReaderPublisherCSS
+  ): SR2PublisherCSS {
+    return when (publisherCSS) {
+      PUBLISHER_DEFAULT_CSS_ENABLED -> SR2_PUBLISHER_DEFAULT_CSS_ENABLED
+      PUBLISHER_DEFAULT_CSS_DISABLED -> SR2_PUBLISHER_DEFAULT_CSS_DISABLED
+    }
   }
 
   private fun toSR2Size(

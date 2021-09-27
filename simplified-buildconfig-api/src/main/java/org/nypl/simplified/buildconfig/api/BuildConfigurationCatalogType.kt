@@ -35,4 +35,11 @@ interface BuildConfigurationCatalogType {
    */
 
   val showBooksFromAllAccounts: Boolean
+
+  /**
+   * Enable/disable returning books.
+   */
+
+  @Deprecated(message = "Intended to solve a temporary issue with Open eBooks")
+  fun allowReturns(): Boolean = true
 }

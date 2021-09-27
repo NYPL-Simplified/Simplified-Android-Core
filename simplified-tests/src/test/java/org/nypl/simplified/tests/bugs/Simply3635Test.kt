@@ -10,9 +10,9 @@ import okhttp3.internal.closeQuietly
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.joda.time.DateTime
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.librarysimplified.http.api.LSHTTPClientConfiguration
 import org.librarysimplified.http.api.LSHTTPClientType
 import org.librarysimplified.http.vanilla.LSHTTPClients
@@ -58,19 +58,16 @@ import org.nypl.simplified.opds.core.OPDSSearchParser
 import org.nypl.simplified.patron.PatronUserProfileParsers
 import org.nypl.simplified.patron.api.PatronUserProfileParsersType
 import org.nypl.simplified.profiles.ProfilesDatabases
-import org.nypl.simplified.profiles.api.ProfileAttributes
 import org.nypl.simplified.profiles.api.ProfileCreationEvent
-import org.nypl.simplified.profiles.api.ProfileDescription
 import org.nypl.simplified.profiles.api.ProfileEvent
-import org.nypl.simplified.profiles.api.ProfilePreferences
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimer
 import org.nypl.simplified.profiles.api.idle_timer.ProfileIdleTimerType
-import org.nypl.simplified.reader.api.ReaderPreferences
-import org.nypl.simplified.tests.MockAccountProviders
-import org.nypl.simplified.tests.MockBundledContentResolver
-import org.nypl.simplified.tests.MockStrings
 import org.nypl.simplified.tests.TestDirectories
+import org.nypl.simplified.tests.books.BookFormatsTesting
+import org.nypl.simplified.tests.mocking.MockAccountProviders
+import org.nypl.simplified.tests.mocking.MockBundledContentResolver
+import org.nypl.simplified.tests.mocking.MockStrings
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.util.concurrent.ExecutorService
@@ -112,7 +109,7 @@ class Simply3635Test {
   private lateinit var server: MockWebServer
   private lateinit var services: ServiceDirectoryType
 
-  @Before
+  @BeforeEach
   fun setup() {
     this.server = MockWebServer()
     this.server.start()
@@ -186,6 +183,7 @@ class Simply3635Test {
         accountBundledCredentials = this.accountBundledCredentials,
         accountCredentialsStore = this.accountCredentialsStore,
         accountsDatabases = this.accountsDatabases,
+        bookFormatSupport = BookFormatsTesting.supportsEverything,
         directory = this.profilesDirectory
       )
 
@@ -194,6 +192,7 @@ class Simply3635Test {
         BookFormatSupportParameters(
           supportsPDF = false,
           supportsAdobeDRM = false,
+          supportsLCP = false,
           supportsAudioBooks = null,
           supportsAxisNow = false
         )
@@ -210,7 +209,6 @@ class Simply3635Test {
         parser = this.opdsParser,
         searchParser = OPDSSearchParser.newParser(),
         transport = FeedHTTPTransport(this.http),
-        bookRegistry = this.bookRegistry,
         bundledContent = this.bundledContent
       )
 
@@ -250,7 +248,7 @@ class Simply3635Test {
       )
   }
 
-  @After
+  @AfterEach
   fun tearDown() {
     try {
       this.executorService.shutdown()
@@ -272,38 +270,14 @@ class Simply3635Test {
 
   @Test
   fun testReproduce() {
-    val preferences =
-      ProfilePreferences(
-        dateOfBirth = null,
-        showTestingLibraries = false,
-        hasSeenLibrarySelectionScreen = false,
-        readerPreferences = ReaderPreferences.builder().build(),
-        mostRecentAccount = null,
-        useExperimentalR2 = false
-      )
-
-    val profileDescription0 =
-      ProfileDescription(
-        displayName = "Kermit",
-        preferences = preferences,
-        attributes = ProfileAttributes(sortedMapOf())
-      )
-
-    val profileDescription1 =
-      ProfileDescription(
-        displayName = "Grouch",
-        preferences = preferences,
-        attributes = ProfileAttributes(sortedMapOf())
-      )
-
     this.logger.debug("creating profile 0")
     val profileEvent0 =
-      this.controller.profileCreate(this.accountProvider, profileDescription0)
+      this.controller.profileCreate("Kermit", this.accountProvider)
         .get() as ProfileCreationEvent.ProfileCreationSucceeded
 
     this.logger.debug("creating profile 1")
     val profileEvent1 =
-      this.controller.profileCreate(this.accountProvider, profileDescription1)
+      this.controller.profileCreate("Grouch", this.accountProvider)
         .get() as ProfileCreationEvent.ProfileCreationSucceeded
 
     this.logger.debug("selecting profile 0")

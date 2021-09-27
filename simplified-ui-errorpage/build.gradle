@@ -9,5 +9,6 @@ dependencies {
   implementation libraries.androidx_constraintlayout
   implementation libraries.androidx_recyclerview
   implementation libraries.kotlin_stdlib
+  implementation libraries.kotlin_reflect
   implementation libraries.slf4j
 }

@@ -3,7 +3,7 @@
   android:id="@+id/bookDetailStatus"
   android:layout_width="match_parent"
   android:layout_height="@dimen/catalogBookDetailStatusHeight"
-  android:background="?attr/simplifiedColorPrimary">
+  android:background="?attr/simplifiedColorBookStatus">
 
   <include layout="@layout/book_detail_status_idle" />
   <include layout="@layout/book_detail_status_failed" />

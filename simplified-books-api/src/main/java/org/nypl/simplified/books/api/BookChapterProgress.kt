@@ -9,10 +9,10 @@ import java.io.Serializable
 data class BookChapterProgress(
 
   /**
-   * The index of the chapter.
+   * The href of the chapter.
    */
 
-  val chapterIndex: Int,
+  val chapterHref: String,
 
   /**
    * The progress through the chapter.

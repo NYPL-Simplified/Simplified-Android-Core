@@ -55,19 +55,6 @@
       android:layout_width="match_parent"
       android:layout_height="16dp" />
 
-    <CheckBox
-      android:id="@+id/accountEULACheckbox"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:layout_marginStart="16dp"
-      android:layout_marginEnd="16dp"
-      android:gravity="center"
-      android:text="@string/accountEULAStatement" />
-
-    <Space
-      android:layout_width="match_parent"
-      android:layout_height="16dp" />
-
     <include layout="@layout/auth" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -102,6 +89,7 @@
         android:textAlignment="center"
         android:textSize="14sp"
         android:textStyle="bold"
+        android:freezesText="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/accountLoginProgressBar" />
@@ -226,8 +214,21 @@
         android:labelFor="@id/accountSyncBookmarksCheck"
         android:text="@string/accountSyncBookmarks"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/accountSyncBookmarksCheck"
+        app:layout_constraintEnd_toStartOf="@+id/accountSyncProgress"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+      <ProgressBar
+        android:id="@+id/accountSyncProgress"
+        style="?android:attr/progressBarStyle"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:indeterminate="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/accountSyncBookmarksCheck"
         app:layout_constraintTop_toTopOf="parent" />
 
       <androidx.appcompat.widget.SwitchCompat
@@ -242,6 +243,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout

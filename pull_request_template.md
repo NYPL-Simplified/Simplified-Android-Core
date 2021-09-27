@@ -10,6 +10,8 @@
 **Dependencies for merging? Releasing to production?**
 [Description of any watchouts, dependencies, or issues we should be aware of goes here]
 
+**Have you updated the changelog?**
+
 **Has the application documentation been updated for these changes?**
 
 **Did someone actually run this code to verify it works?**

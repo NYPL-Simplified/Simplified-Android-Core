@@ -34,13 +34,16 @@ dependencies {
   implementation project(":simplified-accounts-source-nyplregistry")
   implementation project(":simplified-analytics-circulation")
   implementation project(":simplified-crashlytics")
+  implementation project(":simplified-ui-theme")
   implementation libraries.firebase_analytics
   implementation libraries.firebase_crashlytics
+  implementation libraries.nypl_readium
   implementation libraries.nypl_drm_core
   implementation libraries.nypl_findaway
 
   if (nyplNexusDepend) {
-    implementation libraries.nypl_drm_adobe
+    // implementation libraries.nypl_drm_adobe
+    implementation libraries.nypl_drm_axis
   }
   annotationProcessor libraries.google_autovalue_processor
 }

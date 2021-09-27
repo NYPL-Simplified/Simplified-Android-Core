@@ -15,6 +15,7 @@ import org.nypl.simplified.accounts.database.api.AccountsDatabaseFactoryType
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.analytics.api.AnalyticsEvent
 import org.nypl.simplified.analytics.api.AnalyticsType
+import org.nypl.simplified.books.formats.api.BookFormatSupportType
 import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.profiles.api.ProfileAnonymousDisabledException
 import org.nypl.simplified.profiles.api.ProfileAnonymousEnabledException
@@ -47,6 +48,7 @@ internal class ProfilesDatabase internal constructor(
   private val accountProviders: AccountProviderRegistryType,
   private val accountCredentialsStore: AccountAuthenticationCredentialsStoreType,
   private val accountsDatabases: AccountsDatabaseFactoryType,
+  private val bookFormatSupport: BookFormatSupportType,
   private val analytics: AnalyticsType,
   private val anonymousProfileEnabled: ProfilesDatabaseType.AnonymousProfileEnabled,
   private val context: Context,
@@ -78,6 +80,9 @@ internal class ProfilesDatabase internal constructor(
       profile.setOwner(this)
     }
   }
+
+  internal val defaultAccountProvider: AccountProviderType =
+    this.accountProviders.defaultProvider
 
   override fun anonymousProfileEnabled(): ProfilesDatabaseType.AnonymousProfileEnabled {
     return this.anonymousProfileEnabled
@@ -132,6 +137,7 @@ internal class ProfilesDatabase internal constructor(
         accountsDatabases = this.accountsDatabases,
         accountCredentialsStore = this.accountCredentialsStore,
         accountProvider = accountProvider,
+        bookFormatSupport = this.bookFormatSupport,
         directory = this.directory,
         displayName = displayName,
         id = next

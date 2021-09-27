@@ -4,5 +4,6 @@ dependencies {
   api libraries.picasso
 
   implementation libraries.kotlin_stdlib
+  implementation libraries.kotlin_reflect
   implementation libraries.slf4j
 }

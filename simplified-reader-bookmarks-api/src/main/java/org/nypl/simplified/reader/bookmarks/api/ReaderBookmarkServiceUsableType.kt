@@ -20,6 +20,23 @@ interface ReaderBookmarkServiceUsableType {
   val bookmarkEvents: Observable<ReaderBookmarkEvent>
 
   /**
+   * Fetch the bookmark sync status for the given account.
+   */
+
+  fun bookmarkSyncStatus(
+    accountID: AccountID
+  ): ReaderBookmarkSyncEnableStatus
+
+  /**
+   * Enable/disable bookmark syncing on the server.
+   */
+
+  fun bookmarkSyncEnable(
+    accountID: AccountID,
+    enabled: Boolean
+  ): FluentFuture<ReaderBookmarkSyncEnableResult>
+
+  /**
    * The user wants their current bookmarks.
    */
 

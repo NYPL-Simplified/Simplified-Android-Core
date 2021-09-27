@@ -7,13 +7,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.Button
 import android.widget.Spinner
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 import org.slf4j.LoggerFactory
-import java.lang.ClassCastException
 import java.util.Calendar
-import kotlin.collections.ArrayList
 
 /**
  * The AgeGateDialog is the solution to Google's policy violation of the SimplyE age gate not being
@@ -30,6 +29,8 @@ class AgeGateDialog : DialogFragment(), AdapterView.OnItemSelectedListener {
   private val currentYear = Calendar.getInstance().get(Calendar.YEAR)
   private lateinit var birthYearSelectedListener: BirthYearSelectedListener
   private val century = 100
+  private val positiveButton: Button?
+    get() = (dialog as? AlertDialog)?.getButton(AlertDialog.BUTTON_POSITIVE)
 
   interface BirthYearSelectedListener {
     fun onBirthYearSelected(isOver13: Boolean)
@@ -38,7 +39,7 @@ class AgeGateDialog : DialogFragment(), AdapterView.OnItemSelectedListener {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     try {
-      birthYearSelectedListener = requireContext() as BirthYearSelectedListener
+      birthYearSelectedListener = requireParentFragment() as BirthYearSelectedListener
     } catch (exception: ClassCastException) {
       throw ClassCastException("${context?.javaClass?.simpleName} must implement BirthYearSelectedListener")
     }
@@ -80,13 +81,14 @@ class AgeGateDialog : DialogFragment(), AdapterView.OnItemSelectedListener {
 
   override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
     logger.debug("Year selected: ${birthYearSpinner.getItemAtPosition(position)}")
+    positiveButton?.isEnabled = position > 0
   }
 
-  override fun onNothingSelected(parent: AdapterView<*>?) {}
+  override fun onNothingSelected(parent: AdapterView<*>?) {
+    positiveButton?.isEnabled = false
+  }
 
   companion object {
-    const val REQUEST_CODE = 13
-    const val TAG = "AgeGateDialog"
     fun create(): AgeGateDialog {
       return AgeGateDialog()
     }

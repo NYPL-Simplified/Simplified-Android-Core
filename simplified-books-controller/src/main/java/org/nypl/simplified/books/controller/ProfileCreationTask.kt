@@ -14,21 +14,21 @@ import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import java.util.concurrent.Callable
 
 class ProfileCreationTask(
+  private val displayName: String,
   private val profiles: ProfilesDatabaseType,
   private val profileEvents: Subject<ProfileEvent>,
   private val accountProvider: AccountProviderType,
-  private val description: ProfileDescription
+  private val descriptionUpdate: (ProfileDescription) -> ProfileDescription
 ) : Callable<ProfileCreationEvent> {
 
   private fun execute(): ProfileCreationEvent {
-    val displayName = this.description.displayName
-    if (this.profiles.findProfileWithDisplayName(displayName).isSome) {
-      return ProfileCreationFailed.of(displayName, ERROR_DISPLAY_NAME_ALREADY_USED, Option.none())
+    if (this.profiles.findProfileWithDisplayName(this.displayName).isSome) {
+      return ProfileCreationFailed.of(this.displayName, ERROR_DISPLAY_NAME_ALREADY_USED, Option.none())
     }
 
     return try {
-      val profile = this.profiles.createProfile(this.accountProvider, displayName)
-      profile.setDescription(this.description)
+      val profile = this.profiles.createProfile(this.accountProvider, this.displayName)
+      this.descriptionUpdate(profile.description())
       ProfileCreationSucceeded.of(displayName, profile.id)
     } catch (e: Exception) {
       ProfileCreationFailed.of(displayName, ERROR_GENERAL, Option.some(e))

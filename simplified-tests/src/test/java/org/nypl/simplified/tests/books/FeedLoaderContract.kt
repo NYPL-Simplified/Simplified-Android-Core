@@ -2,10 +2,10 @@ package org.nypl.simplified.tests.books
 
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
-import org.junit.After
-import org.junit.Assert
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.feeds.api.FeedLoaderResult
 import org.nypl.simplified.feeds.api.FeedLoaderType
@@ -21,12 +21,12 @@ abstract class FeedLoaderContract {
 
   private lateinit var exec: ListeningExecutorService
 
-  @Before
+  @BeforeEach
   fun setup() {
     this.exec = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(1))
   }
 
-  @After
+  @AfterEach
   fun tearDown() {
     this.exec.shutdown()
   }
@@ -49,9 +49,9 @@ abstract class FeedLoaderContract {
     val result =
       future.get()
 
-    Assert.assertTrue(result is FeedLoaderResult.FeedLoaderSuccess)
+    Assertions.assertTrue(result is FeedLoaderResult.FeedLoaderSuccess)
     val feed = (result as FeedLoaderResult.FeedLoaderSuccess).feed
-    Assert.assertEquals(0, feed.size)
+    Assertions.assertEquals(0, feed.size)
   }
 
   /**
@@ -72,8 +72,8 @@ abstract class FeedLoaderContract {
     val result =
       future.get()
 
-    Assert.assertTrue(result is FeedLoaderResult.FeedLoaderSuccess)
+    Assertions.assertTrue(result is FeedLoaderResult.FeedLoaderSuccess)
     val feed = (result as FeedLoaderResult.FeedLoaderSuccess).feed
-    Assert.assertEquals(0, feed.size)
+    Assertions.assertEquals(0, feed.size)
   }
 }

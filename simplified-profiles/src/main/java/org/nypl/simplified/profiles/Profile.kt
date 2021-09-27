@@ -32,17 +32,41 @@ internal class Profile internal constructor(
   override val directory: File,
   private val analytics: AnalyticsType,
   private val accounts: AccountsDatabaseType,
-  initialDescription: ProfileDescription
+  private var initialDescription: ProfileDescription
 ) : ProfileType {
 
-  private val logger = LoggerFactory.getLogger(Profile::class.java)
+  private val logger =
+    LoggerFactory.getLogger(Profile::class.java)
+
+  init {
+
+    /*
+     * If an account is deleted for any reason, and the profile preferences are not updated,
+     * then it's possible for the preferences to refer to the destroyed account. This checks
+     * for that unlikely occurrence and fixes the preferences.
+     */
+
+    val preferences = this.initialDescription.preferences
+    val accountMap = this.accounts.accounts()
+    if (!accountMap.containsKey(preferences.mostRecentAccount)) {
+      val newAccountId = accountMap.firstKey()
+      this.logger.debug(
+        "fixing dangling account ID: {} -> {}",
+        preferences.mostRecentAccount.uuid,
+        newAccountId.uuid
+      )
+      this.initialDescription = this.initialDescription.copy(
+        preferences = preferences.copy(mostRecentAccount = newAccountId)
+      )
+    }
+  }
 
   @Volatile
   private var deleted: Boolean = false
 
   private val descriptionLock: Any = Any()
   @GuardedBy("descriptionLock")
-  private var descriptionCurrent: ProfileDescription = initialDescription
+  private var descriptionCurrent: ProfileDescription = this.initialDescription
 
   internal fun setOwner(owner: ProfilesDatabase) {
     this.owner = owner
@@ -119,16 +143,26 @@ internal class Profile internal constructor(
     val deleted = this.accounts.deleteAccountByProvider(accountProvider)
     val mostRecent = this.descriptionCurrent.preferences.mostRecentAccount
     if (mostRecent == deleted) {
-      this.clearMostRecentAccount()
+      this.updateMostRecentAccount()
     }
     return deleted
   }
 
-  private fun clearMostRecentAccount() {
+  private fun updateMostRecentAccount() {
+    val accounts =
+      this.accounts.accounts().values
+    val mostRecent =
+      if (accounts.size > 1) {
+        // Return the first account created from a non-default provider
+        accounts.first { it.provider.id != this.owner!!.defaultAccountProvider.id }
+      } else {
+        // Return the first account
+        accounts.first()
+      }
     this.setDescription(
       this.descriptionCurrent.copy(
         preferences = this.descriptionCurrent.preferences.copy(
-          mostRecentAccount = null
+          mostRecentAccount = mostRecent.id
         )
       )
     )

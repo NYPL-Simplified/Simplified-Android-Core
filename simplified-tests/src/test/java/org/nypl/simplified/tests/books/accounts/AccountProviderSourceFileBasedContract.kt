@@ -1,8 +1,8 @@
 package org.nypl.simplified.tests.books.accounts
 
 import android.content.Context
-import org.junit.Assert
-import org.junit.Test
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Test
 import org.nypl.simplified.accounts.source.filebased.AccountProviderSourceFileBased
 import org.nypl.simplified.accounts.source.spi.AccountProviderSourceType.SourceResult.SourceSucceeded
 import org.slf4j.Logger
@@ -32,6 +32,6 @@ abstract class AccountProviderSourceFileBasedContract {
     val result = provider.load(this.context, true)
     this.logger.debug("status: {}", result)
     val success = result as SourceSucceeded
-    Assert.assertEquals(172, success.results.size)
+    Assertions.assertEquals(172, success.results.size)
   }
 }

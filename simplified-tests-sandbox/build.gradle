@@ -1,6 +1,8 @@
 android {
   packagingOptions {
     exclude "META-INF/LICENSE"
+    exclude "META-INF/LICENSE.md"
+    exclude "META-INF/LICENSE-notice.md"
 
     // The PDF library and Readium both provide this shared library. This will
     // cause the build to fail because Gradle doesn"t know which one to pick.
@@ -24,7 +26,7 @@ dependencies {
   implementation project(":simplified-ui-catalog")
   implementation project(":simplified-ui-errorpage")
   implementation project(":simplified-ui-images")
-  implementation project(":simplified-ui-navigation-api")
+  implementation project(':simplified-ui-listeners-api')
   implementation project(":simplified-ui-profiles")
   implementation project(":simplified-ui-screen")
   implementation project(":simplified-ui-settings")
@@ -33,7 +35,6 @@ dependencies {
   implementation project(":simplified-ui-thread-api")
   implementation project(":simplified-viewer-api")
   implementation project(":simplified-viewer-audiobook")
-  implementation project(":simplified-viewer-epub-readium1")
   implementation project(":simplified-viewer-pdf")
   implementation project(':simplified-ui-navigation-tabs')
 
@@ -46,6 +47,7 @@ dependencies {
   implementation libraries.io7m_jfunctional
   implementation libraries.io7m_junreachable
   implementation libraries.kotlin_stdlib
+  implementation libraries.kotlin_reflect
   implementation libraries.leak_canary
   implementation libraries.logback_android
   implementation libraries.mockito_android

@@ -107,7 +107,6 @@ class AccountProviderResolution(
         AccountProvider(
           addAutomatically = this.description.isAutomatic,
           announcements = announcements,
-          annotationsURI = annotationsURI,
           authentication = authentications.first,
           authenticationAlternatives = authentications.second,
           authenticationDocumentURI = this.description.authenticationDocumentURI?.hrefURI,
@@ -127,7 +126,8 @@ class AccountProviderResolution(
           subtitle = authDocument?.description,
           supportEmail = authDocument?.supportURI?.toString(),
           supportsReservations = supportsReservations,
-          updated = updated
+          updated = updated,
+          location = this.description.location
         )
 
       taskRecorder.finishSuccess(accountProvider)

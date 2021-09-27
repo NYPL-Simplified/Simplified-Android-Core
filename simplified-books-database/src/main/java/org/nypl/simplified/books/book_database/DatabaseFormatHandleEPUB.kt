@@ -18,6 +18,7 @@ import org.nypl.simplified.files.FileUtilities
 import org.nypl.simplified.json.core.JSONParserUtilities
 import java.io.File
 import java.io.IOException
+import java.lang.IllegalStateException
 
 /**
  * Operations on EPUB formats in database entries.
@@ -41,12 +42,41 @@ internal class DatabaseFormatHandleEPUB internal constructor(
   private val dataLock: Any = Any()
 
   @GuardedBy("dataLock")
-  private var drmHandleRef =
-    BookDRMInformationHandles.open(
-      directory = this.parameters.directory,
-      format = this.formatDefinition,
-      onUpdate = this::onDRMUpdated
-    )
+  private var drmHandleRef: BookDRMInformationHandle
+
+  init {
+    val drmHandleInitial =
+      BookDRMInformationHandles.open(
+        directory = this.parameters.directory,
+        format = this.formatDefinition,
+        bookFormats = this.parameters.bookFormatSupport,
+        onUpdate = this::onDRMUpdated
+      )
+
+    if (drmHandleInitial == null) {
+      try {
+        if (this.fileBook.isDirectory) {
+          DirectoryUtilities.directoryDelete(this.fileBook)
+        } else {
+          FileUtilities.fileDelete(this.fileBook)
+        }
+      } catch (e: Exception) {
+        // Not much we can do about this.
+      }
+
+      val drmHandleNext =
+        BookDRMInformationHandles.open(
+          directory = this.parameters.directory,
+          format = this.formatDefinition,
+          bookFormats = this.parameters.bookFormatSupport,
+          onUpdate = this::onDRMUpdated
+        ) ?: throw IllegalStateException("Still could not open a DRM handle!")
+
+      this.drmHandleRef = drmHandleNext
+    } else {
+      this.drmHandleRef = drmHandleInitial
+    }
+  }
 
   @GuardedBy("dataLock")
   private var formatRef: BookFormat.BookFormatEPUB =

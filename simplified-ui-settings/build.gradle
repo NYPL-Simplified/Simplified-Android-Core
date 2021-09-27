@@ -1,12 +1,4 @@
 dependencies {
-  api project(":simplified-ui-accounts")
-  api project(":simplified-ui-errorpage")
-
-  api libraries.androidx_appcompat
-  api libraries.androidx_constraintlayout
-  api libraries.androidx_preference
-  api libraries.androidx_recyclerview
-
   implementation project(":simplified-accessibility")
   implementation project(":simplified-adobe-extensions")
   implementation project(":simplified-analytics-api")
@@ -22,12 +14,19 @@ dependencies {
   implementation project(":simplified-reports")
   implementation project(":simplified-services-api")
   implementation project(":simplified-threads")
-  implementation project(":simplified-ui-accounts")
   implementation project(":simplified-ui-images")
-  implementation project(":simplified-ui-navigation-api")
-  implementation project(":simplified-ui-theme")
-  implementation project(":simplified-ui-thread-api")
+  implementation project(':simplified-ui-listeners-api')
+  implementation project(":simplified-ui-errorpage")
 
+  implementation libraries.rxjava2
+  implementation libraries.rxjava2extensions
+  implementation libraries.rxandroid2
   implementation libraries.kotlin_stdlib
+  implementation libraries.kotlin_reflect
   implementation libraries.slf4j
+  implementation libraries.androidx_appcompat
+  implementation libraries.androidx_constraintlayout
+  implementation libraries.androidx_recyclerview
+
+  api libraries.androidx_preference
 }

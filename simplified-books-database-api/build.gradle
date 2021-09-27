@@ -1,6 +1,7 @@
 dependencies {
   api project(":simplified-accounts-api")
   api project(":simplified-books-api")
+  api project(":simplified-books-formats-api")
   api project(":simplified-opds-core")
 
   api libraries.irradia_mime_api
@@ -8,4 +9,5 @@ dependencies {
   api libraries.nypl_audiobook_api
 
   implementation libraries.kotlin_stdlib
+  implementation libraries.kotlin_reflect
 }

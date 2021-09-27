@@ -8,6 +8,7 @@ import org.nypl.drm.core.AxisNowServiceType
 import org.nypl.simplified.accounts.api.AccountReadableType
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.api.Book
+import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.api.BookIDs
 import org.nypl.simplified.books.audio.AudioBookManifestStrategiesType
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
@@ -68,10 +69,17 @@ class BorrowTask private constructor(
 
   private val logger =
     LoggerFactory.getLogger(BorrowTask::class.java)
-  private val bookIdBrief =
-    BookIDs.newFromOPDSEntry(this.request.opdsAcquisitionFeedEntry).brief()
+
   private val cancelled =
     AtomicBoolean(false)
+
+  private val bookId by lazy {
+    BookIDs.newFromOPDSEntry(this.request.opdsAcquisitionFeedEntry)
+  }
+
+  private val bookIdBrief by lazy {
+    bookId.brief()
+  }
 
   private var databaseEntry: BookDatabaseEntryType? = null
   private lateinit var account: AccountType
@@ -106,6 +114,17 @@ class BorrowTask private constructor(
     }
   }
 
+  private fun publishRequestingDownload(bookID: BookID) {
+    this.requirements.bookRegistry.bookOrNull(bookID)?.let { bookWithStatus ->
+      this.requirements.bookRegistry.update(
+        BookWithStatus(
+          book = bookWithStatus.book,
+          status = BookStatus.RequestingDownload(bookID)
+        )
+      )
+    }
+  }
+
   override fun cancel() {
     this.cancelled.set(true)
   }
@@ -116,7 +135,9 @@ class BorrowTask private constructor(
   private fun executeStart(start: BorrowRequest.Start): TaskResult<*> {
     this.taskRecorder.addAttribute("Book", start.opdsAcquisitionFeedEntry.title)
     this.taskRecorder.addAttribute("Author", start.opdsAcquisitionFeedEntry.authorsCommaSeparated)
-    this.taskRecorder.addAttribute("Profile ID", start.profile.uuid.toString())
+    this.taskRecorder.addAttribute("Profile ID", start.profileId.toString())
+
+    this.publishRequestingDownload(this.bookId)
 
     /*
      * The initial book value. Note that this is a synthesized value because we need to be
@@ -128,7 +149,7 @@ class BorrowTask private constructor(
 
     val bookInitial =
       Book(
-        id = BookIDs.newFromOPDSEntry(start.opdsAcquisitionFeedEntry),
+        id = bookId,
         account = start.accountId,
         cover = null,
         thumbnail = null,
@@ -136,8 +157,8 @@ class BorrowTask private constructor(
         formats = listOf()
       )
 
-    val profile = this.findProfile(start.profile, bookInitial)
-    this.findAccount(profile, bookInitial)
+    val profile = this.findProfile(start.profileId, bookInitial)
+    this.account = this.findAccount(profile, bookInitial)
     val book = this.createBookDatabaseEntry(bookInitial, start.opdsAcquisitionFeedEntry)
     val path = this.pickAcquisitionPath(book, start.opdsAcquisitionFeedEntry)
     this.executeSubtasksForPath(book, path)
@@ -288,12 +309,12 @@ class BorrowTask private constructor(
     profileID: ProfileID,
     book: Book
   ): ProfileReadableType {
-    this.taskRecorder.beginNewStep("Locating profile ${profileID.uuid}...")
+    this.taskRecorder.beginNewStep("Locating profile $profileID...")
 
     val profile = this.requirements.profiles.profiles()[profileID]
     return if (profile == null) {
-      this.error("[{}]: failed to find profile: ", profileID.uuid)
-      this.taskRecorder.currentStepFailedAppending(
+      this.error("[{}]: failed to find profile: ", profileID)
+      this.taskRecorder.currentStepFailed(
         message = "Failed to find profile.",
         errorCode = profileNotFound,
         exception = IllegalArgumentException()
@@ -301,6 +322,7 @@ class BorrowTask private constructor(
       this.publishBookFailure(book)
       throw BorrowFailedHandled(null)
     } else {
+      this.taskRecorder.currentStepSucceeded("Located profile.")
       profile
     }
   }
@@ -312,11 +334,11 @@ class BorrowTask private constructor(
   private fun findAccount(
     profile: ProfileReadableType,
     book: Book
-  ) {
+  ): AccountType {
     this.taskRecorder.beginNewStep("Locating account ${book.account.uuid} in the profile...")
     this.taskRecorder.addAttribute("Account ID", book.account.uuid.toString())
 
-    this.account = try {
+    val account = try {
       profile.account(this.request.accountId)
     } catch (e: Throwable) {
       this.error("[{}]: failed to find account: ", book.id.brief(), e)
@@ -330,8 +352,9 @@ class BorrowTask private constructor(
       throw BorrowFailedHandled(e)
     }
 
-    this.taskRecorder.addAttribute("Account", this.account.provider.displayName)
+    this.taskRecorder.addAttribute("Account", account.provider.displayName)
     this.taskRecorder.currentStepSucceeded("Located account.")
+    return account
   }
 
   /**

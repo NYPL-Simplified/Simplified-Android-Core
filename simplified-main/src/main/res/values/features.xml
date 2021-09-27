@@ -13,7 +13,4 @@
   <!-- there will be one always-present unnamed profile and the features to switch profiles will -->
   <!-- be disabled and/or hidden. -->
   <bool name="featureProfilesEnabled">false</bool>
-
-  <!-- If non-empty, the given email address will receive error reports. -->
-  <string name="featureErrorEmail" translatable="false" />
 </resources>

@@ -6,7 +6,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import org.nypl.simplified.profiles.api.ProfileReadableType
 
-class ProfileViewHolder(
+internal class ProfileViewHolder(
   private val parent: View,
   private val icon: ImageView,
   private val modify: ImageView,

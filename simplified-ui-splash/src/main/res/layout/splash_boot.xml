@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent">
+
+  <TextView
+    android:id="@+id/splashVersion"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="16dp"
+    android:layout_marginTop="16dp"
+    android:layout_marginEnd="16dp"
+    android:gravity="end"
+    android:textColor="#ff909090"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent" />
+
+  <ProgressBar
+    android:id="@+id/splashProgress"
+    style="?android:attr/progressBarStyleHorizontal"
+    android:layout_width="128dp"
+    android:layout_height="32dp"
+    android:indeterminate="true"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent" />
+
+  <TextView
+    android:id="@+id/splashText"
+    android:layout_width="256dp"
+    android:layout_height="wrap_content"
+    android:layout_margin="16dp"
+    android:ellipsize="end"
+    android:gravity="center"
+    android:maxLines="3"
+    android:freezesText="true"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/splashProgress" />
+
+  <ImageView
+    android:id="@+id/splashImage"
+    android:layout_width="240dp"
+    android:layout_height="240dp"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent" />
+
+  <ImageView
+    android:id="@+id/splashImageError"
+    android:layout_width="48dp"
+    android:layout_height="48dp"
+    android:layout_marginBottom="16dp"
+    app:layout_constraintBottom_toTopOf="@id/splashProgress"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:srcCompat="@drawable/migration_error" />
+
+  <Button
+    android:id="@+id/splashSendError"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="16dp"
+    android:text="@string/migrationSendReport"
+    android:visibility="invisible"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/splashText" />
+
+  <TextView
+    android:id="@+id/splashException"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="16dp"
+    android:layout_marginEnd="16dp"
+    android:layout_marginBottom="16dp"
+    android:gravity="start"
+    android:maxLines="1"
+    android:minLines="1"
+    android:freezesText="true"
+    android:textColor="#ff909090"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

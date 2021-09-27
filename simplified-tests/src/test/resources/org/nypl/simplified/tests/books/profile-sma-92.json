@@ -1,0 +1,21 @@
+{
+  "@version" : 20200504,
+  "displayName" : "",
+  "preferences" : {
+    "showTestingLibraries" : true,
+    "hasSeenLibrarySelectionScreen" : true,
+    "useExperimentalR2" : true,
+    "showDebugSettings" : true,
+    "mostRecentAccount" : "5310437f-db1a-492e-a09f-1ceaa43303dd",
+    "readerPreferences" : {
+      "font_scale" : 100.0,
+      "font_family" : "READER_FONT_OPEN_DYSLEXIC",
+      "color_scheme" : "SCHEME_WHITE_ON_BLACK"
+    },
+    "dateOfBirth" : {
+      "date" : "2006-08-07",
+      "isSynthesized" : true
+    }
+  },
+  "attributes" : { }
+}

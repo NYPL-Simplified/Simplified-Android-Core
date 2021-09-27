@@ -1,5 +1,8 @@
 dependencies {
   api project(":simplified-accounts-api")
+  implementation project(":simplified-android-ktx")
 
+  implementation libraries.androidx_webkit
   implementation libraries.kotlin_stdlib
+  implementation libraries.kotlin_reflect
 }

@@ -4,6 +4,7 @@ import android.content.Context
 import org.nypl.simplified.accounts.api.AccountProviderDescription
 import org.nypl.simplified.accounts.api.AccountProviderResolutionListenerType
 import org.nypl.simplified.accounts.api.AccountProviderType
+import org.nypl.simplified.accounts.api.AccountSearchQuery
 import org.nypl.simplified.accounts.json.AccountProvidersJSON
 import org.nypl.simplified.accounts.source.spi.AccountProviderSourceType
 import org.nypl.simplified.accounts.source.spi.AccountProviderSourceType.SourceResult
@@ -27,7 +28,10 @@ class AccountProviderSourceFileBased(
   @Volatile
   private var cache: Map<URI, AccountProviderType>? = null
 
-  override fun load(context: Context, includeTestingLibraries: Boolean): SourceResult {
+  override fun load(
+    context: Context,
+    includeTestingLibraries: Boolean
+  ): SourceResult {
     val cached = this.cache
     if (cached != null) {
       this.logger.debug("returning cached providers")
@@ -46,6 +50,16 @@ class AccountProviderSourceFileBased(
       this.logger.error("failed to load providers from file: ", e)
       SourceResult.SourceFailed(mapOf(), e)
     }
+  }
+
+  override fun query(
+    context: Context,
+    query: AccountSearchQuery
+  ): SourceResult {
+    return this.load(
+      context = context,
+      includeTestingLibraries = query.includeTestingLibraries
+    )
   }
 
   override fun clear(context: Context) {

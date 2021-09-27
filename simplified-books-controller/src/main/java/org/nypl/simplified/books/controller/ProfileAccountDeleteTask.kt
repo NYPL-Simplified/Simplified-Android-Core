@@ -5,6 +5,8 @@ import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventDeletion
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.database.api.AccountsDatabaseLastAccountException
+import org.nypl.simplified.metrics.api.MetricEvent
+import org.nypl.simplified.metrics.api.MetricServiceType
 import org.nypl.simplified.profiles.api.ProfileEvent
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType
 import org.nypl.simplified.profiles.controller.api.ProfileAccountDeletionStringResourcesType
@@ -20,7 +22,8 @@ class ProfileAccountDeleteTask(
   private val accountProviderID: URI,
   private val profiles: ProfilesDatabaseType,
   private val profileEvents: Subject<ProfileEvent>,
-  private val strings: ProfileAccountDeletionStringResourcesType
+  private val strings: ProfileAccountDeletionStringResourcesType,
+  private val metrics: MetricServiceType?
 ) : Callable<TaskResult<Unit>> {
 
   private val logger = LoggerFactory.getLogger(ProfileAccountDeleteTask::class.java)
@@ -51,6 +54,7 @@ class ProfileAccountDeleteTask(
       val profile = this.profiles.currentProfileUnsafe()
       val account = profile.deleteAccountByProvider(this.accountProviderID)
 
+      this.metrics?.logMetric(MetricEvent.LibraryRemoved(this.accountProviderID.toString()))
       this.publishSuccessEvent(account)
       this.taskRecorder.finishSuccess(Unit)
     } catch (e: AccountsDatabaseLastAccountException) {

@@ -39,6 +39,8 @@ dependencies {
   api project(":simplified-crashlytics-api")
   api project(":simplified-documents")
   api project(":simplified-files")
+  api project(":simplified-metrics")
+  api project(":simplified-metrics-api")
   api project(":simplified-networkconnectivity")
   api project(":simplified-networkconnectivity-api")
   api project(":simplified-notifications")
@@ -55,27 +57,28 @@ dependencies {
   api project(":simplified-services-api")
   api project(":simplified-threads")
   api project(":simplified-ui-announcements")
-  api project(":simplified-ui-branding")
   api project(":simplified-ui-images")
-  api project(":simplified-ui-navigation-api")
+  api project(':simplified-ui-listeners-api')
   api project(":simplified-ui-navigation-tabs")
   api project(":simplified-ui-profiles")
   api project(":simplified-ui-screen")
   api project(":simplified-ui-splash")
+  api project(":simplified-ui-onboarding")
   api project(":simplified-ui-thread-api")
   api project(":simplified-viewer-api")
   api project(":simplified-viewer-audiobook")
-  api project(":simplified-viewer-epub-readium1")
   api project(":simplified-viewer-epub-readium2")
   api project(":simplified-viewer-pdf")
   api project(":simplified-viewer-spi")
 
-  api libraries.koush_async
   api libraries.androidx_appcompat
   api libraries.kotlin_stdlib
   api libraries.nypl_http_api
   api libraries.nypl_http_bearer_token
   api libraries.nypl_http_vanilla
+  api libraries.rxandroid2
+  api libraries.rxjava2
+  api libraries.rxjava2extensions
   api libraries.slf4j
 
   api libraries.logback_android

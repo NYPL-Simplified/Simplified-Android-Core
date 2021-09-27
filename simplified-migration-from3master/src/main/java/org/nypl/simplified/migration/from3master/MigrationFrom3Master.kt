@@ -297,7 +297,8 @@ class MigrationFrom3Master(
           userName = AccountUsername(accountData.username),
           password = AccountPassword(accountData.password),
           adobeCredentials = null,
-          authenticationDescription = null
+          authenticationDescription = null,
+          annotationsURI = null
         )
 
       when (val taskResult = this.services.loginAccount(createdAccount.account, credentials)) {
@@ -663,11 +664,11 @@ class MigrationFrom3Master(
 
     return try {
       val bookLocation =
-        BookLocation(null, null, "x")
+        BookLocation.BookLocationR1(null, null, "x")
       val kind =
         BookmarkKind.ofMotivation(annotation.motivation)
       val time =
-        formatter.parseLocalDateTime(annotation.body.timestamp)
+        formatter.parseDateTime(annotation.body.timestamp)
       val chapterTitle =
         annotation.body.chapterTitle ?: ""
       val bookProgress =
@@ -677,7 +678,7 @@ class MigrationFrom3Master(
       val uri =
         annotation.id?.let(::URI)
 
-      Bookmark(
+      Bookmark.create(
         opdsId = annotation.target.source,
         location = bookLocation,
         kind = kind,

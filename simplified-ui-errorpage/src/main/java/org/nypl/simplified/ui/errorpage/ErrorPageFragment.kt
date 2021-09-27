@@ -1,14 +1,11 @@
 package org.nypl.simplified.ui.errorpage
 
-import android.app.Activity
 import android.graphics.Typeface
 import android.os.Bundle
 import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.style.StyleSpan
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import androidx.fragment.app.Fragment
@@ -16,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import org.nypl.simplified.android.ktx.supportActionBar
+import org.nypl.simplified.reports.Reports
 import org.slf4j.LoggerFactory
 
 /**
@@ -23,7 +21,7 @@ import org.slf4j.LoggerFactory
  * to technical support.
  */
 
-class ErrorPageFragment : Fragment() {
+class ErrorPageFragment : Fragment(R.layout.error_page) {
 
   private val logger = LoggerFactory.getLogger(ErrorPageFragment::class.java)
 
@@ -50,42 +48,18 @@ class ErrorPageFragment : Fragment() {
 
   private lateinit var errorDetails: TextView
   private lateinit var errorStepsList: RecyclerView
-  private lateinit var listener: ErrorPageListenerType
   private lateinit var parameters: ErrorPageParameters
   private lateinit var sendButton: Button
 
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-
-    this.logger.debug("onCreate")
-
-    run {
-      val className = ErrorPageListenerType::class.java.canonicalName
-      val activity = this.requireActivity()
-      if (activity is ErrorPageListenerType) {
-        this.listener = activity
-      } else {
-        throw IllegalStateException(
-          "The activity hosting this fragment must implement $className"
-        )
-      }
-    }
-  }
-
-  override fun onCreateView(
-    inflater: LayoutInflater,
-    container: ViewGroup?,
-    savedInstanceState: Bundle?
-  ): View? {
-    val viewRoot =
-      inflater.inflate(R.layout.error_page, container, false)
+  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    super.onViewCreated(view, savedInstanceState)
 
     this.errorDetails =
-      viewRoot.findViewById(R.id.errorDetails)
+      view.findViewById(R.id.errorDetails)
     this.errorStepsList =
-      viewRoot.findViewById(R.id.errorSteps)
+      view.findViewById(R.id.errorSteps)
     this.sendButton =
-      viewRoot.findViewById(R.id.errorSendButton)
+      view.findViewById(R.id.errorSendButton)
 
     this.parameters =
       this.arguments!!.getSerializable(PARAMETERS_ID)
@@ -118,27 +92,26 @@ class ErrorPageFragment : Fragment() {
     this.errorStepsList.adapter =
       ErrorPageStepsListAdapter(parameters.taskSteps)
     (this.errorStepsList.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
-
-    return viewRoot
   }
 
   override fun onStart() {
     super.onStart()
-    this.configureToolbar(this.requireActivity())
+    this.configureToolbar()
 
     this.sendButton.isEnabled = true
     this.sendButton.setOnClickListener {
       this.sendButton.isEnabled = false
-      this.listener.onErrorPageSendReport(this.parameters)
+
+      Reports.sendReportsDefault(
+        context = requireContext(),
+        address = parameters.emailAddress,
+        subject = parameters.subject,
+        body = parameters.report
+      )
     }
   }
 
-  override fun onStop() {
-    super.onStop()
-    this.sendButton.setOnClickListener(null)
-  }
-
-  private fun configureToolbar(activity: Activity) {
+  private fun configureToolbar() {
     this.supportActionBar?.apply {
       title = getString(R.string.errorDetailsTitle)
       subtitle = null

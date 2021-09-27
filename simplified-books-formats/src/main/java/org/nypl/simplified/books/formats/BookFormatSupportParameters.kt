@@ -22,6 +22,7 @@ data class BookFormatSupportParameters(
   /**
    * The application has a working AxisNow service.
    */
+
   val supportsAxisNow: Boolean,
 
   /**
@@ -29,5 +30,11 @@ data class BookFormatSupportParameters(
    * registered that supports audio books.
    */
 
-  val supportsAudioBooks: BookFormatAudioSupportParameters?
+  val supportsAudioBooks: BookFormatAudioSupportParameters?,
+
+  /**
+   * The application has a working LCP service.
+   */
+
+  val supportsLCP: Boolean
 )

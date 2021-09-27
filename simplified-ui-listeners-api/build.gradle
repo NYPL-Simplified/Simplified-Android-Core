@@ -1,0 +1,10 @@
+dependencies {
+  api libraries.androidx_appcompat
+  api libraries.androidx_lifecycle
+
+  implementation libraries.rxjava2
+  implementation libraries.rxjava2extensions
+  implementation libraries.kotlin_stdlib
+  implementation libraries.kotlin_reflect
+  implementation libraries.slf4j
+}

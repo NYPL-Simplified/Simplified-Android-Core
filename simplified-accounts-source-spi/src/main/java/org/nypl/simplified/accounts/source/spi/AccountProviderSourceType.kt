@@ -4,6 +4,7 @@ import android.content.Context
 import org.nypl.simplified.accounts.api.AccountProviderDescription
 import org.nypl.simplified.accounts.api.AccountProviderResolutionListenerType
 import org.nypl.simplified.accounts.api.AccountProviderType
+import org.nypl.simplified.accounts.api.AccountSearchQuery
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import java.net.URI
 
@@ -50,6 +51,15 @@ interface AccountProviderSourceType {
    */
 
   fun load(context: Context, includeTestingLibraries: Boolean): SourceResult
+
+  /**
+   * Retrieve everything the source provides.
+   *
+   * @param includeTestingLibraries A hint for the provider indicating whether
+   * testing libraries should be loaded. May be ignored by some providers.
+   */
+
+  fun query(context: Context, query: AccountSearchQuery): SourceResult
 
   /**
    * Clear any cached providers.

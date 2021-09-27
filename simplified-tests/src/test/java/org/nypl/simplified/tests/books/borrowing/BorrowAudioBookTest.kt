@@ -3,11 +3,11 @@ package org.nypl.simplified.tests.books.borrowing
 import android.content.Context
 import io.reactivex.disposables.Disposable
 import org.joda.time.Instant
-import org.junit.Assert
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.librarysimplified.audiobook.manifest_fulfill.spi.ManifestFulfilled
 import org.librarysimplified.audiobook.manifest_parser.api.ManifestParsers
 import org.librarysimplified.audiobook.parser.api.ParseResult
@@ -44,17 +44,19 @@ import org.nypl.simplified.profiles.api.ProfileReadableType
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskRecorderType
 import org.nypl.simplified.taskrecorder.api.TaskResult
-import org.nypl.simplified.tests.MockAccountProviders
-import org.nypl.simplified.tests.MockAudioBookManifestStrategies
-import org.nypl.simplified.tests.MockBookDatabase
-import org.nypl.simplified.tests.MockBookDatabaseEntry
-import org.nypl.simplified.tests.MockBookDatabaseEntryFormatHandleAudioBook
-import org.nypl.simplified.tests.MockBundledContentResolver
-import org.nypl.simplified.tests.MockContentResolver
 import org.nypl.simplified.tests.MutableServiceDirectory
 import org.nypl.simplified.tests.TestDirectories
+import org.nypl.simplified.tests.mocking.MockAccountProviders
+import org.nypl.simplified.tests.mocking.MockAudioBookManifestStrategies
+import org.nypl.simplified.tests.mocking.MockBookDatabase
+import org.nypl.simplified.tests.mocking.MockBookDatabaseEntry
+import org.nypl.simplified.tests.mocking.MockBookDatabaseEntryFormatHandleAudioBook
+import org.nypl.simplified.tests.mocking.MockBorrowContext
+import org.nypl.simplified.tests.mocking.MockBundledContentResolver
+import org.nypl.simplified.tests.mocking.MockContentResolver
 import org.slf4j.LoggerFactory
 import java.net.URI
+import java.util.concurrent.TimeUnit
 
 class BorrowAudioBookTest {
 
@@ -87,7 +89,7 @@ class BorrowAudioBookTest {
     assertEquals(clazz, registryStatus.javaClass)
   }
 
-  @Before
+  @BeforeEach
   fun testSetup() {
     this.taskRecorder =
       TaskRecorder.create()
@@ -125,7 +127,8 @@ class BorrowAudioBookTest {
             userName = AccountUsername("user"),
             password = AccountPassword("password"),
             adobeCredentials = null,
-            authenticationDescription = "Basic"
+            authenticationDescription = "Basic",
+            annotationsURI = URI("https://www.example.com")
           )
         )
       )
@@ -138,8 +141,10 @@ class BorrowAudioBookTest {
         .create(
           context = androidContext,
           configuration = LSHTTPClientConfiguration(
-            "simplified-tests",
-            "999.999.0"
+            applicationName = "simplified-tests",
+            applicationVersion = "999.999.0",
+            tlsOverrides = null,
+            timeout = Pair(5L, TimeUnit.SECONDS)
           )
         )
 
@@ -233,7 +238,7 @@ class BorrowAudioBookTest {
 
     try {
       task.execute(this.context)
-      Assert.fail()
+      Assertions.fail()
     } catch (e: Exception) {
       this.logger.error("exception: ", e)
     }
@@ -267,7 +272,7 @@ class BorrowAudioBookTest {
 
     try {
       task.execute(this.context)
-      Assert.fail()
+      Assertions.fail()
     } catch (e: Exception) {
       this.logger.error("exception: ", e)
     }

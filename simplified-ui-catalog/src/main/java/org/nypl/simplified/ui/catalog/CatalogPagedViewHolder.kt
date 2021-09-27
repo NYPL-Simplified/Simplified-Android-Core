@@ -1,76 +1,41 @@
 package org.nypl.simplified.ui.catalog
 
+import android.content.Context
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
-import androidx.annotation.UiThread
-import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.google.common.base.Preconditions
 import com.google.common.util.concurrent.FluentFuture
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.disposables.Disposable
-import org.librarysimplified.services.api.ServiceDirectoryType
-import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.books.book_database.api.BookFormats.BookFormatDefinition.BOOK_FORMAT_AUDIO
 import org.nypl.simplified.books.book_database.api.BookFormats.BookFormatDefinition.BOOK_FORMAT_EPUB
 import org.nypl.simplified.books.book_database.api.BookFormats.BookFormatDefinition.BOOK_FORMAT_PDF
-import org.nypl.simplified.books.book_registry.BookRegistryReadableType
 import org.nypl.simplified.books.book_registry.BookStatus
-import org.nypl.simplified.books.book_registry.BookStatusEvent
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.covers.BookCoverProviderType
-import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryCorrupt
 import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS
 import org.nypl.simplified.futures.FluentFutureExtensions.map
-import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
-import org.nypl.simplified.taskrecorder.api.TaskResult
-import org.nypl.simplified.ui.accounts.AccountFragmentParameters
-import org.nypl.simplified.ui.catalog.R.string
-import org.nypl.simplified.ui.errorpage.ErrorPageParameters
-import org.nypl.simplified.ui.thread.api.UIThreadServiceType
-import org.slf4j.LoggerFactory
-import java.util.concurrent.atomic.AtomicReference
 
 /**
  * A view holder for a single cell in an infinitely-scrolling feed.
  */
 
 class CatalogPagedViewHolder(
-  private val borrowViewModel: CatalogBorrowViewModel,
-  private val buttonCreator: CatalogButtons,
-  private val context: FragmentActivity,
-  private val navigation: () -> CatalogNavigationControllerType,
-  private val onBookSelected: (FeedEntryOPDS) -> Unit,
+  private val context: Context,
+  private val listener: CatalogPagedViewListener,
   private val parent: View,
-  private val registrySubscriptions: CompositeDisposable,
-  private val services: ServiceDirectoryType,
-  private val ownership: CatalogFeedOwnership
+  private val buttonCreator: CatalogButtons,
+  private val bookCovers: BookCoverProviderType,
 ) : RecyclerView.ViewHolder(parent) {
 
-  private val logger =
-    LoggerFactory.getLogger(CatalogPagedViewHolder::class.java)
-
-  private val bookCovers: BookCoverProviderType =
-    this.services.requireService(BookCoverProviderType::class.java)
-  private val bookRegistry: BookRegistryReadableType =
-    this.services.requireService(BookRegistryReadableType::class.java)
-  private val configurationService: BuildConfigurationServiceType =
-    this.services.requireService(BuildConfigurationServiceType::class.java)
-  private val profilesController: ProfilesControllerType =
-    this.services.requireService(ProfilesControllerType::class.java)
-  private val uiThread: UIThreadServiceType =
-    this.services.requireService(UIThreadServiceType::class.java)
-
   private var thumbnailLoading: FluentFuture<Unit>? = null
-  private val runOnLoginDialogClosed: AtomicReference<() -> Unit> = AtomicReference()
 
   private val idle =
     this.parent.findViewById<ViewGroup>(R.id.bookCellIdle)!!
@@ -108,15 +73,10 @@ class CatalogPagedViewHolder(
   private val errorRetry =
     this.error.findViewById<Button>(R.id.bookCellErrorButtonRetry)
 
-  private var bookSubscription: Disposable? = null
   private var feedEntry: FeedEntry? = null
-  private var loginSubscription: Disposable? = null
-
-  private var isDownloadLoginVisible = false
 
   fun bindTo(item: FeedEntry?) {
     this.feedEntry = item
-    this.unbind()
 
     return when (item) {
       is FeedEntryCorrupt -> {
@@ -125,28 +85,7 @@ class CatalogPagedViewHolder(
       }
 
       is FeedEntryOPDS -> {
-        val newBookSubscription =
-          this.bookRegistry.bookEvents().subscribe { bookEvent ->
-            if (bookEvent.bookId == item.bookID) {
-              this.onBookChanged(bookEvent)
-            }
-          }
-
-        this.bookSubscription = newBookSubscription
-        this.registrySubscriptions.add(newBookSubscription)
-        this.onFeedEntryOPDSUI(item)
-
-        /*
-         * Retrieve the current status of the book, or synthesize a status value based on the
-         * OPDS feed entry if the book is not in the registry. The book will only be in the
-         * registry if the user has ever tried to borrow it (as per the registry spec).
-         */
-
-        val status =
-          this.bookRegistry.bookOrNull(item.bookID)
-            ?: this.synthesizeBookWithStatus(item)
-
-        this.onBookWithStatus(status)
+        this.listener.registerObserver(item, this::onBookChanged)
         this.checkSomethingIsVisible()
       }
 
@@ -159,22 +98,6 @@ class CatalogPagedViewHolder(
     }
   }
 
-  private fun synthesizeBookWithStatus(
-    item: FeedEntryOPDS
-  ): BookWithStatus {
-    val book = Book(
-      id = item.bookID,
-      account = item.accountID,
-      cover = null,
-      thumbnail = null,
-      entry = item.feedEntry,
-      formats = listOf()
-    )
-    val status = BookStatus.fromBook(book)
-    this.logger.debug("Synthesizing {} with status {}", book.id, status)
-    return BookWithStatus(book, status)
-  }
-
   private fun setVisibilityIfNecessary(
     view: View,
     visibility: Int
@@ -184,10 +107,7 @@ class CatalogPagedViewHolder(
     }
   }
 
-  @UiThread
-  private fun onFeedEntryOPDSUI(item: FeedEntryOPDS) {
-    this.uiThread.checkIsUIThread()
-
+  private fun onFeedEntryOPDS(item: FeedEntryOPDS) {
     this.setVisibilityIfNecessary(this.corrupt, View.GONE)
     this.setVisibilityIfNecessary(this.error, View.GONE)
     this.setVisibilityIfNecessary(this.idle, View.VISIBLE)
@@ -205,11 +125,11 @@ class CatalogPagedViewHolder(
 
     this.idleMeta.text = when (item.probableFormat) {
       BOOK_FORMAT_EPUB ->
-        context.getString(string.catalogBookFormatEPUB)
+        context.getString(R.string.catalogBookFormatEPUB)
       BOOK_FORMAT_AUDIO ->
-        context.getString(string.catalogBookFormatAudioBook)
+        context.getString(R.string.catalogBookFormatAudioBook)
       BOOK_FORMAT_PDF ->
-        context.getString(string.catalogBookFormatPDF)
+        context.getString(R.string.catalogBookFormatPDF)
       null -> ""
     }
 
@@ -220,37 +140,20 @@ class CatalogPagedViewHolder(
       this.bookCovers.loadThumbnailInto(
         item, this.idleCover, targetWidth, targetHeight
       ).map {
-        this.uiThread.runOnUIThread {
-          this.setVisibilityIfNecessary(this.idleProgress, View.INVISIBLE)
-          this.setVisibilityIfNecessary(this.idleCover, View.VISIBLE)
-        }
+        this.setVisibilityIfNecessary(this.idleProgress, View.INVISIBLE)
+        this.setVisibilityIfNecessary(this.idleCover, View.VISIBLE)
       }
 
-    val onClick: (View) -> Unit = { this.onBookSelected.invoke(item) }
+    val onClick: (View) -> Unit = { this.listener.openBookDetail(item) }
     this.idle.setOnClickListener(onClick)
     this.idleTitle.setOnClickListener(onClick)
     this.idleCover.setOnClickListener(onClick)
   }
 
-  private fun onBookChanged(event: BookStatusEvent) {
-    val previousEntry =
-      this.feedEntry as FeedEntryOPDS
-
-    val bookWithStatus =
-      this.bookRegistry.bookOrNull(event.bookId)
-        ?: this.synthesizeBookWithStatus(previousEntry)
-
-    // Update the cached parameters with the feed entry. We'll need this later if the availability
-    // has changed but it's been removed from the registry (e.g. when revoking a hold).
-    this.feedEntry = FeedEntryOPDS(
-      accountID = previousEntry.accountID,
-      feedEntry = bookWithStatus.book.entry
-    )
-
-    this.uiThread.runOnUIThread {
-      this.onBookChangedUI(bookWithStatus)
-      this.checkSomethingIsVisible()
-    }
+  private fun onBookChanged(bookWithStatus: BookWithStatus) {
+    this.onFeedEntryOPDS(this.feedEntry as FeedEntryOPDS)
+    this.onBookWithStatus(bookWithStatus)
+    this.checkSomethingIsVisible()
   }
 
   private fun checkSomethingIsVisible() {
@@ -258,21 +161,11 @@ class CatalogPagedViewHolder(
       this.idle.visibility == View.VISIBLE ||
         this.progress.visibility == View.VISIBLE ||
         this.corrupt.visibility == View.VISIBLE ||
-        this.error.visibility == View.VISIBLE ||
-        this.isDownloadLoginVisible,
+        this.error.visibility == View.VISIBLE,
       "Something must be visible!"
     )
   }
 
-  @UiThread
-  private fun onBookChangedUI(book: BookWithStatus) {
-    this.uiThread.checkIsUIThread()
-    this.bindTo(this.feedEntry)
-    this.onFeedEntryOPDSUI(this.feedEntry as FeedEntryOPDS)
-    this.onBookWithStatus(book)
-  }
-
-  @UiThread
   private fun onBookWithStatus(book: BookWithStatus) {
     return when (val status = book.status) {
       is BookStatus.Held.HeldInQueue ->
@@ -311,13 +204,12 @@ class CatalogPagedViewHolder(
       is BookStatus.Downloading ->
         this.onBookStatusDownloading(book, status)
       is BookStatus.DownloadWaitingForExternalAuthentication ->
-        this.onBookStatusDownloadWaitingForExternalAuthentication(status, book.book)
+        this.onBookStatusDownloadWaitingForExternalAuthentication(book.book)
       is BookStatus.DownloadExternalAuthenticationInProgress ->
         this.onBookStatusDownloadExternalAuthenticationInProgress(book.book)
     }
   }
 
-  @UiThread
   private fun onBookStatusFailedRevoke(
     bookStatus: BookStatus.FailedRevoke,
     book: Book
@@ -328,17 +220,16 @@ class CatalogPagedViewHolder(
     this.setVisibilityIfNecessary(this.progress, View.GONE)
 
     this.errorDismiss.setOnClickListener {
-      this.borrowViewModel.tryDismissRevokeError(book.account, book.id)
+      this.listener.dismissRevokeError(this.feedEntry as FeedEntryOPDS)
     }
     this.errorDetails.setOnClickListener {
-      this.tryShowError(book, bookStatus.result)
+      this.listener.showTaskError(book, bookStatus.result)
     }
     this.errorRetry.setOnClickListener {
-      this.borrowViewModel.tryRevokeMaybeAuthenticated(book)
+      this.listener.revokeMaybeAuthenticated(book)
     }
   }
 
-  @UiThread
   private fun onBookStatusFailedDownload(
     bookStatus: BookStatus.FailedDownload,
     book: Book
@@ -349,18 +240,16 @@ class CatalogPagedViewHolder(
     this.setVisibilityIfNecessary(this.progress, View.GONE)
 
     this.errorDismiss.setOnClickListener {
-      this.borrowViewModel.tryDismissBorrowError(book.account, book.id)
+      this.listener.dismissBorrowError(this.feedEntry as FeedEntryOPDS)
     }
     this.errorDetails.setOnClickListener {
-      this.tryShowError(book, bookStatus.result)
+      this.listener.showTaskError(book, bookStatus.result)
     }
     this.errorRetry.setOnClickListener {
-      this.openLoginDialogIfNecessary(book.account)
-      this.borrowViewModel.tryBorrowMaybeAuthenticated(book)
+      this.listener.borrowMaybeAuthenticated(book)
     }
   }
 
-  @UiThread
   private fun onBookStatusFailedLoan(
     bookStatus: BookStatus.FailedLoan,
     book: Book
@@ -371,18 +260,16 @@ class CatalogPagedViewHolder(
     this.setVisibilityIfNecessary(this.progress, View.GONE)
 
     this.errorDismiss.setOnClickListener {
-      this.borrowViewModel.tryDismissBorrowError(book.account, book.id)
+      this.listener.dismissBorrowError(this.feedEntry as FeedEntryOPDS)
     }
     this.errorDetails.setOnClickListener {
-      this.tryShowError(book, bookStatus.result)
+      this.listener.showTaskError(book, bookStatus.result)
     }
     this.errorRetry.setOnClickListener {
-      this.openLoginDialogIfNecessary(book.account)
-      this.borrowViewModel.tryBorrowMaybeAuthenticated(book)
+      this.listener.borrowMaybeAuthenticated(book)
     }
   }
 
-  @UiThread
   private fun onBookStatusLoanedNotDownloaded(book: Book) {
     this.setVisibilityIfNecessary(this.corrupt, View.GONE)
     this.setVisibilityIfNecessary(this.error, View.GONE)
@@ -392,15 +279,13 @@ class CatalogPagedViewHolder(
     this.idleButtons.removeAllViews()
     this.idleButtons.addView(
       this.buttonCreator.createDownloadButton {
-        this.openLoginDialogIfNecessary(book.account)
-        this.borrowViewModel.tryBorrowMaybeAuthenticated(book)
+        this.listener.borrowMaybeAuthenticated(book)
       }
     )
     this.idleButtons.addView(this.buttonCreator.createButtonSizedSpace())
     this.idleButtons.addView(this.buttonCreator.createButtonSizedSpace())
   }
 
-  @UiThread
   private fun onBookStatusLoanable(book: Book) {
     this.setVisibilityIfNecessary(this.corrupt, View.GONE)
     this.setVisibilityIfNecessary(this.error, View.GONE)
@@ -410,15 +295,13 @@ class CatalogPagedViewHolder(
     this.idleButtons.removeAllViews()
     this.idleButtons.addView(
       this.buttonCreator.createGetButton {
-        this.openLoginDialogIfNecessary(book.account)
-        this.borrowViewModel.tryBorrowMaybeAuthenticated(book)
+        this.listener.borrowMaybeAuthenticated(book)
       }
     )
     this.idleButtons.addView(this.buttonCreator.createButtonSizedSpace())
     this.idleButtons.addView(this.buttonCreator.createButtonSizedSpace())
   }
 
-  @UiThread
   private fun onBookStatusHoldable(book: Book) {
     this.setVisibilityIfNecessary(this.corrupt, View.GONE)
     this.setVisibilityIfNecessary(this.error, View.GONE)
@@ -428,15 +311,13 @@ class CatalogPagedViewHolder(
     this.idleButtons.removeAllViews()
     this.idleButtons.addView(
       this.buttonCreator.createReserveButton {
-        this.openLoginDialogIfNecessary(book.account)
-        this.borrowViewModel.tryReserveMaybeAuthenticated(book)
+        this.listener.reserveMaybeAuthenticated(book)
       }
     )
     this.idleButtons.addView(this.buttonCreator.createButtonSizedSpace())
     this.idleButtons.addView(this.buttonCreator.createButtonSizedSpace())
   }
 
-  @UiThread
   private fun onBookStatusHeldReady(
     status: BookStatus.Held.HeldReady,
     book: Book
@@ -450,19 +331,17 @@ class CatalogPagedViewHolder(
     if (status.isRevocable) {
       this.idleButtons.addView(
         this.buttonCreator.createRevokeHoldButton {
-          this.borrowViewModel.tryRevokeMaybeAuthenticated(book)
+          this.listener.revokeMaybeAuthenticated(book)
         }
       )
     }
     this.idleButtons.addView(
       this.buttonCreator.createGetButton {
-        this.openLoginDialogIfNecessary(book.account)
-        this.borrowViewModel.tryBorrowMaybeAuthenticated(book)
+        this.listener.borrowMaybeAuthenticated(book)
       }
     )
   }
 
-  @UiThread
   private fun onBookStatusHeldInQueue(
     status: BookStatus.Held.HeldInQueue,
     book: Book
@@ -476,7 +355,7 @@ class CatalogPagedViewHolder(
     if (status.isRevocable) {
       this.idleButtons.addView(
         this.buttonCreator.createRevokeHoldButton {
-          this.borrowViewModel.tryRevokeMaybeAuthenticated(book)
+          this.listener.revokeMaybeAuthenticated(book)
         }
       )
       this.idleButtons.addView(this.buttonCreator.createButtonSizedSpace())
@@ -488,7 +367,6 @@ class CatalogPagedViewHolder(
     }
   }
 
-  @UiThread
   private fun onBookStatusLoanedDownloaded(book: Book) {
     this.setVisibilityIfNecessary(this.corrupt, View.GONE)
     this.setVisibilityIfNecessary(this.error, View.GONE)
@@ -502,14 +380,14 @@ class CatalogPagedViewHolder(
       is BookFormat.BookFormatEPUB -> {
         this.idleButtons.addView(
           this.buttonCreator.createReadButton {
-            this.navigation().openViewer(this.context, book, format)
+            this.listener.openViewer(book, format)
           }
         )
       }
       is BookFormat.BookFormatAudioBook -> {
         this.idleButtons.addView(
           this.buttonCreator.createListenButton {
-            this.navigation().openViewer(this.context, book, format)
+            this.listener.openViewer(book, format)
           }
         )
       }
@@ -523,7 +401,6 @@ class CatalogPagedViewHolder(
   }
 
   @Suppress("UNUSED_PARAMETER")
-  @UiThread
   private fun onBookStatusRevoked(book: BookWithStatus) {
     this.setVisibilityIfNecessary(this.corrupt, View.GONE)
     this.setVisibilityIfNecessary(this.error, View.GONE)
@@ -533,7 +410,6 @@ class CatalogPagedViewHolder(
     this.idleButtons.removeAllViews()
   }
 
-  @UiThread
   private fun onBookStatusDownloading(
     book: BookWithStatus,
     status: BookStatus.Downloading
@@ -554,9 +430,7 @@ class CatalogPagedViewHolder(
     }
   }
 
-  @UiThread
   private fun onBookStatusDownloadWaitingForExternalAuthentication(
-    status: BookStatus.DownloadWaitingForExternalAuthentication,
     book: Book
   ) {
     this.setVisibilityIfNecessary(this.corrupt, View.GONE)
@@ -566,18 +440,8 @@ class CatalogPagedViewHolder(
 
     this.progressText.text = book.entry.title
     this.progressProgress.isIndeterminate = true
-
-    if (!this.isDownloadLoginVisible) {
-      this.isDownloadLoginVisible = true
-
-      this.navigation().openBookDownloadLogin(
-        bookID = status.id,
-        downloadURI = status.downloadURI
-      )
-    }
   }
 
-  @UiThread
   private fun onBookStatusDownloadExternalAuthenticationInProgress(
     book: Book
   ) {
@@ -590,11 +454,11 @@ class CatalogPagedViewHolder(
     this.progressProgress.isIndeterminate = true
   }
 
-  @UiThread
   fun unbind() {
-    this.runOnLoginDialogClosed.set(null)
-    this.unsubscribeFromBookRegistry()
-    this.unsubscribeFromLogin()
+    val currentFeedEntry = this.feedEntry
+    if (currentFeedEntry is FeedEntryOPDS) {
+      this.listener.unregisterObserver(currentFeedEntry, this::onBookChanged)
+    }
 
     this.setVisibilityIfNecessary(this.corrupt, View.GONE)
     this.setVisibilityIfNecessary(this.error, View.GONE)
@@ -619,51 +483,5 @@ class CatalogPagedViewHolder(
       loading.cancel(true)
       null
     }
-  }
-
-  private fun unsubscribeFromLogin() {
-    this.loginSubscription = this.loginSubscription?.let { disposable ->
-      disposable.dispose()
-      null
-    }
-  }
-
-  private fun unsubscribeFromBookRegistry() {
-    this.bookSubscription = this.bookSubscription?.let { disposable ->
-      disposable.dispose()
-      null
-    }
-  }
-
-  @UiThread
-  private fun openLoginDialogIfNecessary(accountID: AccountID) {
-    this.uiThread.checkIsUIThread()
-
-    if (this.borrowViewModel.isLoginRequired(accountID)) {
-      this.navigation()
-        .openSettingsAccount(
-          AccountFragmentParameters(
-            accountId = accountID,
-            closeOnLoginSuccess = true,
-            showPleaseLogInTitle = true
-          )
-        )
-    }
-  }
-
-  private fun tryShowError(
-    book: Book,
-    result: TaskResult.Failure<*>
-  ) {
-    this.logger.debug("showing error: {}", book.id)
-
-    val errorPageParameters = ErrorPageParameters(
-      emailAddress = this.configurationService.supportErrorReportEmailAddress,
-      body = "",
-      subject = this.configurationService.supportErrorReportSubject,
-      attributes = result.attributes.toSortedMap(),
-      taskSteps = result.steps
-    )
-    this.navigation().openErrorPage(errorPageParameters)
   }
 }

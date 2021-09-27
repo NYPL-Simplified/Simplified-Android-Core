@@ -59,12 +59,24 @@ public final class ReaderPreferencesJSON {
     final ReaderColorScheme color_scheme =
       colorScheme(JSONParserUtilities.getStringDefault(
         obj, "color_scheme", SCHEME_BLACK_ON_WHITE.name()));
+    final ReaderPublisherCSS css =
+      publisherCSS(JSONParserUtilities.getStringDefault(
+        obj, "publisher_css", ReaderPublisherCSS.PUBLISHER_DEFAULT_CSS_DISABLED.name()));
 
     return ReaderPreferences.builder()
       .setFontScale(font_scale)
       .setFontFamily(font_family)
       .setColorScheme(color_scheme)
+      .setPublisherCSS(css)
       .build();
+  }
+
+  private static ReaderPublisherCSS publisherCSS(String publisher_css) throws JSONParseException {
+    try {
+      return ReaderPublisherCSS.valueOf(publisher_css);
+    } catch (final IllegalArgumentException e) {
+      throw new JSONParseException("Unparseable publisher CSS", e);
+    }
   }
 
   private static ReaderColorScheme colorScheme(final String font_family) throws JSONParseException {
@@ -101,6 +113,7 @@ public final class ReaderPreferencesJSON {
     jo.put("font_scale", description.fontScale());
     jo.put("font_family", description.fontFamily().name());
     jo.put("color_scheme", description.colorScheme().name());
+    jo.put("publisher_css", description.publisherCSS().name());
     return jo;
   }
 

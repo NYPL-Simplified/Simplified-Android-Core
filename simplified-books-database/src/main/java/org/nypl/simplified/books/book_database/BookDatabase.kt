@@ -8,6 +8,7 @@ import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
 import org.nypl.simplified.books.book_database.api.BookDatabaseException
 import org.nypl.simplified.books.book_database.api.BookDatabaseType
+import org.nypl.simplified.books.formats.api.BookFormatSupportType
 import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.files.FileUtilities
 import org.nypl.simplified.json.core.JSONSerializerUtilities
@@ -33,7 +34,8 @@ class BookDatabase private constructor(
   private val owner: AccountID,
   private val directory: File,
   private val maps: BookMaps,
-  private val serializer: OPDSJSONSerializerType
+  private val serializer: OPDSJSONSerializerType,
+  private val formats: BookFormatSupportType
 ) : BookDatabaseType {
 
   /**
@@ -140,6 +142,7 @@ class BookDatabase private constructor(
             context = this.context,
             bookDir = bookDir,
             serializer = this.serializer,
+            formats = this.formats,
             bookRef = book,
             onDelete = Runnable { this.maps.delete(id) }
           )
@@ -170,13 +173,24 @@ class BookDatabase private constructor(
       context: Context,
       parser: OPDSJSONParserType,
       serializer: OPDSJSONSerializerType,
+      formats: BookFormatSupportType,
       owner: AccountID,
       directory: File
     ): BookDatabaseType {
       LOG.debug("opening book database: {}", directory)
       val maps = BookMaps()
       val errors = ArrayList<Exception>()
-      openAllBooks(context, parser, serializer, owner, directory, maps, errors)
+
+      openAllBooks(
+        context = context,
+        parser = parser,
+        serializer = serializer,
+        formats = formats,
+        account = owner,
+        directory = directory,
+        maps = maps,
+        errors = errors
+      )
 
       if (errors.isNotEmpty()) {
         errors.forEach { exception -> LOG.error("error opening book database: ", exception) }
@@ -185,13 +199,21 @@ class BookDatabase private constructor(
         )
       }
 
-      return BookDatabase(context, owner, directory, maps, serializer)
+      return BookDatabase(
+        context = context,
+        owner = owner,
+        directory = directory,
+        maps = maps,
+        serializer = serializer,
+        formats = formats
+      )
     }
 
     private fun openAllBooks(
       context: Context,
       parser: OPDSJSONParserType,
       serializer: OPDSJSONSerializerType,
+      formats: BookFormatSupportType,
       account: AccountID,
       directory: File,
       maps: BookMaps,
@@ -214,13 +236,13 @@ class BookDatabase private constructor(
             context = context,
             parser = parser,
             serializer = serializer,
+            formats = formats,
             accountID = account,
             directory = bookDirectory,
             maps = maps,
             errors = errors,
             name = bookID
-          )
-            ?: continue
+          ) ?: continue
           maps.addEntry(entry)
         }
       }
@@ -231,6 +253,7 @@ class BookDatabase private constructor(
       context: Context,
       parser: OPDSJSONParserType,
       serializer: OPDSJSONSerializerType,
+      formats: BookFormatSupportType,
       accountID: AccountID,
       directory: File,
       maps: BookMaps,
@@ -268,6 +291,7 @@ class BookDatabase private constructor(
           context = context,
           bookDir = directory,
           serializer = serializer,
+          formats = formats,
           bookRef = book,
           onDelete = Runnable { maps.delete(bookId) }
         )

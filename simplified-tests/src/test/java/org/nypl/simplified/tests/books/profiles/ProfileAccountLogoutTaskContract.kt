@@ -1,13 +1,16 @@
 package org.nypl.simplified.tests.books.profiles
 
 import android.content.Context
+import com.io7m.jfunctional.Option
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okio.Buffer
-import org.junit.After
-import org.junit.Assert
-import org.junit.Before
-import org.junit.Test
+import one.irradia.mime.vanilla.MIMEParser
+import org.joda.time.DateTime
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.librarysimplified.http.api.LSHTTPClientConfiguration
 import org.librarysimplified.http.api.LSHTTPClientType
 import org.librarysimplified.http.vanilla.LSHTTPClients
@@ -34,17 +37,27 @@ import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.api.AccountUsername
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.api.BookID
-import org.nypl.simplified.books.book_database.api.BookDatabaseType
+import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryType
+import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.controller.ProfileAccountLogoutTask
+import org.nypl.simplified.feeds.api.FeedLoaderType
+import org.nypl.simplified.opds.core.OPDSAcquisition
+import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
+import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess
 import org.nypl.simplified.patron.PatronUserProfileParsers
 import org.nypl.simplified.patron.api.PatronUserProfileParsersType
 import org.nypl.simplified.profiles.api.ProfileID
 import org.nypl.simplified.profiles.api.ProfileReadableType
-import org.nypl.simplified.tests.MockAccountLogoutStringResources
+import org.nypl.simplified.tests.mocking.MockAccountLogoutStringResources
+import org.nypl.simplified.tests.mocking.MockBookDatabase
+import org.nypl.simplified.tests.mocking.MockBookDatabaseEntry
+import org.nypl.simplified.tests.mocking.MockCrashingFeedLoader
 import org.slf4j.Logger
 import java.io.InputStream
+import java.net.URI
 import java.util.UUID
+import java.util.concurrent.TimeUnit
 
 abstract class ProfileAccountLogoutTaskContract {
 
@@ -52,8 +65,9 @@ abstract class ProfileAccountLogoutTaskContract {
   private lateinit var accountID: AccountID
   private lateinit var adeptConnector: AdobeAdeptConnectorType
   private lateinit var adeptExecutor: AdobeAdeptExecutorType
-  private lateinit var bookDatabase: BookDatabaseType
+  private lateinit var bookDatabase: MockBookDatabase
   private lateinit var bookRegistry: BookRegistryType
+  private lateinit var feedLoader: FeedLoaderType
   private lateinit var http: LSHTTPClientType
   private lateinit var logoutStrings: AccountLogoutStringResourcesType
   private lateinit var patronParsers: PatronUserProfileParsersType
@@ -65,14 +79,53 @@ abstract class ProfileAccountLogoutTaskContract {
 
   abstract val logger: Logger
 
-  @Before
+  @BeforeEach
   fun testSetup() {
     this.http =
       LSHTTPClients()
         .create(
           context = Mockito.mock(Context::class.java),
-          configuration = LSHTTPClientConfiguration("simplified-tests", "0.0.1")
+          configuration = LSHTTPClientConfiguration(
+            applicationName = "simplified-tests",
+            applicationVersion = "0.0.1",
+            tlsOverrides = null,
+            timeout = Pair(5L, TimeUnit.SECONDS)
+          )
         )
+    this.feedLoader =
+      MockCrashingFeedLoader()
+
+    this.accountID =
+      AccountID(UUID.randomUUID())
+    this.profileID =
+      ProfileID(UUID.randomUUID())
+
+    this.bookRegistry =
+      BookRegistry.create()
+    this.bookDatabase =
+      MockBookDatabase(this.accountID)
+
+    val acquisition =
+      OPDSAcquisition(
+        OPDSAcquisition.Relation.ACQUISITION_BORROW,
+        URI.create("http://www.example.com/0.feed"),
+        MIMEParser.parseRaisingException("application/epub+zip"),
+        listOf()
+      )
+
+    val opdsEntry =
+      OPDSAcquisitionFeedEntry
+        .newBuilder(
+          "a",
+          "Title",
+          DateTime.now(),
+          OPDSAvailabilityOpenAccess.get(Option.none())
+        )
+        .addAcquisition(acquisition)
+        .build()
+
+    this.bookDatabase.createOrUpdate(BookID.create("a"), opdsEntry)
+    this.bookDatabase.createOrUpdate(BookID.create("b"), opdsEntry)
 
     this.profile =
       Mockito.mock(ProfileReadableType::class.java)
@@ -82,25 +135,16 @@ abstract class ProfileAccountLogoutTaskContract {
       MockAccountLogoutStringResources()
     this.patronParsers =
       Mockito.mock(PatronUserProfileParsersType::class.java)
-    this.bookRegistry =
-      Mockito.mock(BookRegistryType::class.java)
-    this.bookDatabase =
-      Mockito.mock(BookDatabaseType::class.java)
     this.adeptConnector =
       Mockito.mock(AdobeAdeptConnectorType::class.java)
     this.adeptExecutor =
       Mockito.mock(AdobeAdeptExecutorType::class.java)
 
-    this.accountID =
-      AccountID(UUID.randomUUID())
-    this.profileID =
-      ProfileID(UUID.randomUUID())
-
     this.server = MockWebServer()
     this.server.start()
   }
 
-  @After
+  @AfterEach
   fun testTearDown() {
     this.server.close()
   }
@@ -141,6 +185,7 @@ abstract class ProfileAccountLogoutTaskContract {
         account = this.account,
         adeptExecutor = null,
         bookRegistry = this.bookRegistry,
+        feedLoader = this.feedLoader,
         http = this.http,
         patronParsers = PatronUserProfileParsers(),
         profile = this.profile,
@@ -154,8 +199,7 @@ abstract class ProfileAccountLogoutTaskContract {
     val state =
       this.account.loginState as AccountNotLoggedIn
 
-    Mockito.verify(this.bookDatabase, Mockito.times(0))
-      .delete()
+    Assertions.assertFalse(this.bookDatabase.entries.values.any(MockBookDatabaseEntry::deleted))
   }
 
   /**
@@ -187,20 +231,15 @@ abstract class ProfileAccountLogoutTaskContract {
     Mockito.`when`(this.account.loginState)
       .then { this.loginState }
     Mockito.`when`(this.account.bookDatabase)
-      .thenReturn(this.bookDatabase)
-
-    val books =
-      sortedSetOf(BookID.create("a"), BookID.create("b"), BookID.create("c"))
-
-    Mockito.`when`(this.bookDatabase.books())
-      .thenReturn(books)
+      .thenReturn(bookDatabase)
 
     val credentials =
       AccountAuthenticationCredentials.Basic(
         userName = AccountUsername("abcd"),
         password = AccountPassword("1234"),
         adobeCredentials = null,
-        authenticationDescription = null
+        authenticationDescription = null,
+        annotationsURI = URI("https://www.example.com")
       )
 
     this.account.setLoginState(AccountLoggedIn(credentials))
@@ -210,6 +249,7 @@ abstract class ProfileAccountLogoutTaskContract {
         account = this.account,
         adeptExecutor = null,
         bookRegistry = this.bookRegistry,
+        feedLoader = this.feedLoader,
         http = this.http,
         patronParsers = PatronUserProfileParsers(),
         profile = this.profile,
@@ -223,14 +263,12 @@ abstract class ProfileAccountLogoutTaskContract {
     val state =
       this.account.loginState as AccountNotLoggedIn
 
-    Mockito.verify(this.bookDatabase, Mockito.times(1))
-      .delete()
-    Mockito.verify(this.bookRegistry, Mockito.times(1))
-      .clearFor(BookID.create("a"))
-    Mockito.verify(this.bookRegistry, Mockito.times(1))
-      .clearFor(BookID.create("b"))
-    Mockito.verify(this.bookRegistry, Mockito.times(1))
-      .clearFor(BookID.create("c"))
+    Assertions.assertTrue(
+      this.bookDatabase.entries.values.all(MockBookDatabaseEntry::deleted)
+    )
+    Assertions.assertTrue(
+      this.bookRegistry.books().values.all { it.status is BookStatus.Loaned.LoanedNotDownloaded }
+    )
   }
 
   /**
@@ -265,12 +303,6 @@ abstract class ProfileAccountLogoutTaskContract {
     Mockito.`when`(this.account.bookDatabase)
       .thenReturn(this.bookDatabase)
 
-    val books =
-      sortedSetOf(BookID.create("a"), BookID.create("b"), BookID.create("c"))
-
-    Mockito.`when`(this.bookDatabase.books())
-      .thenReturn(books)
-
     val credentials =
       AccountAuthenticationCredentials.Basic(
         userName = AccountUsername("user"),
@@ -284,6 +316,7 @@ abstract class ProfileAccountLogoutTaskContract {
             userID = AdobeUserID("someone")
           )
         ),
+        annotationsURI = URI("https://www.example.com"),
         authenticationDescription = null
       )
 
@@ -294,6 +327,7 @@ abstract class ProfileAccountLogoutTaskContract {
         account = this.account,
         adeptExecutor = null,
         bookRegistry = this.bookRegistry,
+        feedLoader = this.feedLoader,
         http = this.http,
         patronParsers = PatronUserProfileParsers(),
         profile = this.profile,
@@ -307,14 +341,12 @@ abstract class ProfileAccountLogoutTaskContract {
     val state =
       this.account.loginState as AccountNotLoggedIn
 
-    Mockito.verify(this.bookDatabase, Mockito.times(1))
-      .delete()
-    Mockito.verify(this.bookRegistry, Mockito.times(1))
-      .clearFor(BookID.create("a"))
-    Mockito.verify(this.bookRegistry, Mockito.times(1))
-      .clearFor(BookID.create("b"))
-    Mockito.verify(this.bookRegistry, Mockito.times(1))
-      .clearFor(BookID.create("c"))
+    Assertions.assertTrue(
+      this.bookDatabase.entries.values.all(MockBookDatabaseEntry::deleted)
+    )
+    Assertions.assertTrue(
+      this.bookRegistry.books().values.all { it.status is BookStatus.Loaned.LoanedNotDownloaded }
+    )
   }
 
   /**
@@ -348,12 +380,6 @@ abstract class ProfileAccountLogoutTaskContract {
       .then { this.loginState }
     Mockito.`when`(this.account.bookDatabase)
       .thenReturn(this.bookDatabase)
-
-    val books =
-      sortedSetOf(BookID.create("a"), BookID.create("b"), BookID.create("c"))
-
-    Mockito.`when`(this.bookDatabase.books())
-      .thenReturn(books)
 
     /*
      * When the code calls deactivateDevice(), it fails if the connector returns an error.
@@ -391,6 +417,7 @@ abstract class ProfileAccountLogoutTaskContract {
             userID = AdobeUserID("someone")
           )
         ),
+        annotationsURI = URI("https://www.example.com"),
         authenticationDescription = null
       )
 
@@ -401,6 +428,7 @@ abstract class ProfileAccountLogoutTaskContract {
         account = this.account,
         adeptExecutor = this.adeptExecutor,
         bookRegistry = this.bookRegistry,
+        feedLoader = this.feedLoader,
         http = this.http,
         patronParsers = PatronUserProfileParsers(),
         profile = this.profile,
@@ -414,12 +442,9 @@ abstract class ProfileAccountLogoutTaskContract {
     val state =
       this.account.loginState as AccountLogoutFailed
 
-    Assert.assertEquals(credentials, state.credentials)
+    Assertions.assertEquals(credentials, state.credentials)
 
-    Mockito.verify(this.bookDatabase, Mockito.times(0))
-      .delete()
-    Mockito.verify(this.bookRegistry, Mockito.times(0))
-      .clearFor(anyNonNull())
+    Assertions.assertFalse(this.bookDatabase.entries.values.any(MockBookDatabaseEntry::deleted))
   }
 
   /**
@@ -456,12 +481,6 @@ abstract class ProfileAccountLogoutTaskContract {
       .then { this.loginState }
     Mockito.`when`(this.account.bookDatabase)
       .thenReturn(this.bookDatabase)
-
-    val books =
-      sortedSetOf(BookID.create("a"), BookID.create("b"), BookID.create("c"))
-
-    Mockito.`when`(this.bookDatabase.books())
-      .thenReturn(books)
 
     val patron =
       resource("/org/nypl/simplified/tests/patron/example-with-device.json")
@@ -515,6 +534,7 @@ abstract class ProfileAccountLogoutTaskContract {
             userID = AdobeUserID("someone")
           )
         ),
+        annotationsURI = URI("https://www.example.com"),
         authenticationDescription = null
       )
 
@@ -526,6 +546,7 @@ abstract class ProfileAccountLogoutTaskContract {
         adeptExecutor = this.adeptExecutor,
         bookRegistry = this.bookRegistry,
         http = this.http,
+        feedLoader = this.feedLoader,
         profile = this.profile,
         patronParsers = PatronUserProfileParsers(),
         logoutStrings = this.logoutStrings
@@ -538,14 +559,12 @@ abstract class ProfileAccountLogoutTaskContract {
     val state =
       this.account.loginState as AccountNotLoggedIn
 
-    Mockito.verify(this.bookDatabase, Mockito.times(1))
-      .delete()
-    Mockito.verify(this.bookRegistry, Mockito.times(1))
-      .clearFor(BookID.create("a"))
-    Mockito.verify(this.bookRegistry, Mockito.times(1))
-      .clearFor(BookID.create("b"))
-    Mockito.verify(this.bookRegistry, Mockito.times(1))
-      .clearFor(BookID.create("c"))
+    Assertions.assertTrue(
+      this.bookDatabase.entries.values.all(MockBookDatabaseEntry::deleted)
+    )
+    Assertions.assertTrue(
+      this.bookRegistry.books().values.all { it.status is BookStatus.Loaned.LoanedNotDownloaded }
+    )
   }
 
   private fun <T> anyNonNull(): T =

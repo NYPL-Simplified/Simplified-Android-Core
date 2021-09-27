@@ -2,6 +2,7 @@ package org.nypl.simplified.reports
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import androidx.core.content.FileProvider
 import org.nypl.simplified.reports.Reports.Result.NoFiles
 import org.nypl.simplified.reports.Reports.Result.RaisedException
@@ -110,8 +111,8 @@ object Reports {
         val intent = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
           this.type = "text/plain"
           this.putExtra(Intent.EXTRA_EMAIL, arrayOf(address))
-          this.putExtra(Intent.EXTRA_SUBJECT, subject)
-          this.putExtra(Intent.EXTRA_TEXT, body)
+          this.putExtra(Intent.EXTRA_SUBJECT, extendSubject(context, subject))
+          this.putExtra(Intent.EXTRA_TEXT, extendBody(body))
           this.putExtra(Intent.EXTRA_STREAM, ArrayList(contentUris))
           this.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
@@ -123,6 +124,42 @@ object Reports {
     } catch (e: Exception) {
       this.logger.error("failed to send report: ", e)
       return RaisedException(e)
+    }
+  }
+
+  private fun extendBody(
+    body: String
+  ): String {
+    return buildString {
+      this.append(body)
+      this.append("\n")
+      this.append("--")
+      this.append("\n")
+      this.append("Commit: ")
+      this.append(BuildConfig.SIMPLIFIED_GIT_COMMIT)
+      this.append("\n")
+    }
+  }
+
+  private fun extendSubject(
+    context: Context,
+    subject: String
+  ): String {
+    val pkgManager = context.packageManager
+    val pkgInfo = try {
+      pkgManager.getPackageInfo(context.packageName, 0)
+    } catch (e: PackageManager.NameNotFoundException) {
+      this.logger.error("unable to retrieve package information: ", e)
+      return subject
+    }
+
+    return buildString {
+      this.append(subject)
+      this.append(' ')
+      this.append(pkgInfo.versionName)
+      this.append(" (")
+      this.append(pkgInfo.versionCode)
+      this.append(")")
     }
   }
 

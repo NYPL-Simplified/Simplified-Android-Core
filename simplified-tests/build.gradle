@@ -39,11 +39,17 @@ dependencies {
   api project(":simplified-json-core")
   api project(":simplified-migration-from3master")
   api project(":simplified-migration-spi")
+  api project(":simplified-metrics")
+  api project(":simplified-metrics-api")
   api project(":simplified-notifications")
   api project(":simplified-oauth")
   api project(":simplified-opds-auth-document")
   api project(":simplified-opds-auth-document-api")
   api project(":simplified-opds-core")
+  api project(":simplified-opds2")
+  api project(":simplified-opds2-irradia")
+  api project(":simplified-opds2-parser-api")
+  api project(":simplified-opds2-r2")
   api project(":simplified-patron")
   api project(":simplified-patron-api")
   api project(":simplified-profiles")
@@ -76,14 +82,20 @@ dependencies {
   implementation libraries.io7m_jnull
   implementation libraries.jackson_databind
   implementation libraries.junit
+  implementation libraries.junit_jupiter_api
+  implementation libraries.junit_jupiter_engine
   implementation libraries.kotlin_stdlib
-  implementation libraries.okhttp3_mockwebserver
+  implementation libraries.kotlin_reflect
   implementation libraries.mockito_android
+  implementation libraries.mockito_kotlin
   implementation libraries.nypl_drm_core
   implementation libraries.nypl_http_api
-  implementation libraries.nypl_http_vanilla
   implementation libraries.nypl_http_bearer_token
+  implementation libraries.nypl_http_vanilla
+  implementation libraries.okhttp3_mockwebserver
   implementation libraries.slf4j
+  implementation libraries.nypl_readium
+  implementation libraries.nypl_readium_js
 
   testImplementation libraries.logback_classic
   testImplementation libraries.junit

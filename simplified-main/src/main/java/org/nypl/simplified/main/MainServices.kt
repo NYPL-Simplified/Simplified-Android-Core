@@ -6,9 +6,6 @@ import android.content.res.AssetManager
 import android.content.res.Resources
 import android.graphics.Color
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.io7m.jfunctional.Option
-import com.io7m.jfunctional.OptionType
-import com.io7m.jfunctional.Some
 import com.squareup.picasso.Picasso
 import io.reactivex.subjects.PublishSubject
 import org.joda.time.LocalDateTime
@@ -22,6 +19,8 @@ import org.librarysimplified.services.api.Services
 import org.nypl.drm.core.AdobeAdeptExecutorType
 import org.nypl.drm.core.AxisNowServiceFactoryType
 import org.nypl.drm.core.AxisNowServiceType
+import org.nypl.simplified.accessibility.AccessibilityService
+import org.nypl.simplified.accessibility.AccessibilityServiceType
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentialsStoreType
 import org.nypl.simplified.accounts.api.AccountBundledCredentialsType
 import org.nypl.simplified.accounts.api.AccountEvent
@@ -76,6 +75,9 @@ import org.nypl.simplified.feeds.api.FeedHTTPTransport
 import org.nypl.simplified.feeds.api.FeedLoader
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.files.DirectoryUtilities
+import org.nypl.simplified.metrics.api.MetricServiceFactoryType
+import org.nypl.simplified.metrics.api.MetricServiceType
+import org.nypl.simplified.migration.api.MigrationsType
 import org.nypl.simplified.networkconnectivity.NetworkConnectivity
 import org.nypl.simplified.networkconnectivity.api.NetworkConnectivityType
 import org.nypl.simplified.notifications.NotificationsService
@@ -104,27 +106,17 @@ import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceUsableType
 import org.nypl.simplified.tenprint.TenPrintGenerator
 import org.nypl.simplified.tenprint.TenPrintGeneratorType
 import org.nypl.simplified.threads.NamedThreadPools
-import org.nypl.simplified.ui.branding.BrandingThemeOverrideServiceType
 import org.nypl.simplified.ui.catalog.CatalogCoverBadgeImages
 import org.nypl.simplified.ui.images.ImageAccountIconRequestHandler
 import org.nypl.simplified.ui.images.ImageLoaderType
 import org.nypl.simplified.ui.profiles.ProfileModificationFragmentServiceType
 import org.nypl.simplified.ui.screen.ScreenSizeInformation
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
-import org.nypl.simplified.ui.theme.ThemeControl
-import org.nypl.simplified.ui.theme.ThemeServiceType
-import org.nypl.simplified.ui.theme.ThemeValue
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
-import org.nypl.simplified.viewer.epub.readium1.ReaderHTTPMimeMap
-import org.nypl.simplified.viewer.epub.readium1.ReaderHTTPServerAAsync
-import org.nypl.simplified.viewer.epub.readium1.ReaderHTTPServerType
-import org.nypl.simplified.viewer.epub.readium1.ReaderReadiumEPUBLoader
-import org.nypl.simplified.viewer.epub.readium1.ReaderReadiumEPUBLoaderType
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
-import java.net.ServerSocket
 import java.util.ServiceLoader
 
 internal object MainServices {
@@ -206,30 +198,6 @@ internal object MainServices {
     )
   }
 
-  private class ThemeService(
-    private val brandingThemeOverride: OptionType<ThemeValue>
-  ) : ThemeServiceType {
-    override fun findCurrentTheme(): ThemeValue {
-      if (this.brandingThemeOverride.isSome) {
-        return (this.brandingThemeOverride as Some<ThemeValue>).get()
-      }
-      return ThemeControl.themeFallback
-    }
-  }
-
-  private fun loadOptionalBrandingThemeOverride(): OptionType<ThemeValue> {
-    val iter =
-      ServiceLoader.load(BrandingThemeOverrideServiceType::class.java)
-        .iterator()
-
-    if (iter.hasNext()) {
-      val service = iter.next()
-      return Option.some(service.overrideTheme())
-    }
-
-    return Option.none()
-  }
-
   private fun findAdobeConfiguration(
     resources: Resources
   ): AdobeConfigurationServiceType {
@@ -259,6 +227,10 @@ internal object MainServices {
       ?.create(httpClient)
   }
 
+  private fun createMetricService(context: Context): MetricServiceType? {
+    return optionalFromServiceLoader(MetricServiceFactoryType::class.java)?.create(context)
+  }
+
   private fun createLocalImageLoader(context: Context): ImageLoaderType {
     val localImageLoader =
       Picasso.Builder(context)
@@ -271,35 +243,6 @@ internal object MainServices {
       override val loader: Picasso
         get() = localImageLoader
     }
-  }
-
-  private fun createHTTPServer(assets: AssetManager): ReaderHTTPServerType {
-    val mime = ReaderHTTPMimeMap.newMap("application/octet-stream")
-    return ReaderHTTPServerAAsync.newServer(assets, mime, this.fetchUnusedHTTPPort())
-  }
-
-  private fun fetchUnusedHTTPPort(): Int {
-    // Fallback port
-    var port: Int? = 8080
-    try {
-      val socket = ServerSocket(0)
-      port = socket.localPort
-      socket.close()
-    } catch (e: IOException) {
-      // Ignore
-    }
-
-    this.logger.debug("HTTP server will run on port {}", port)
-    return port!!
-  }
-
-  private fun createEPUBLoader(
-    context: Context,
-    adobeConfiguration: AdobeConfigurationServiceType
-  ): ReaderReadiumEPUBLoaderType {
-    val execEPUB =
-      NamedThreadPools.namedThreadPool(1, "epub", 19)
-    return ReaderReadiumEPUBLoader.newLoader(context, adobeConfiguration, execEPUB)
   }
 
   private fun loadDefaultAccountProvider(): AccountProviderType {
@@ -377,6 +320,7 @@ internal object MainServices {
     accountProviders: AccountProviderRegistryType,
     accountBundledCredentials: AccountBundledCredentialsType,
     accountCredentialsStore: AccountAuthenticationCredentialsStoreType,
+    bookFormatSupport: BookFormatSupportType,
     directory: File
   ): ProfilesDatabaseType {
     /*
@@ -387,27 +331,29 @@ internal object MainServices {
     if (anonymous) {
       this.logger.debug("opening profile database with anonymous profile")
       return ProfilesDatabases.openWithAnonymousProfileEnabled(
-        context,
-        analytics,
-        accountEvents,
-        accountProviders,
-        accountBundledCredentials,
-        accountCredentialsStore,
-        AccountsDatabases,
-        directory
+        context = context,
+        analytics = analytics,
+        accountEvents = accountEvents,
+        accountProviders = accountProviders,
+        accountBundledCredentials = accountBundledCredentials,
+        accountCredentialsStore = accountCredentialsStore,
+        accountsDatabases = AccountsDatabases,
+        bookFormatSupport = bookFormatSupport,
+        directory = directory
       )
     }
 
     this.logger.debug("opening profile database without anonymous profile")
     return ProfilesDatabases.openWithAnonymousProfileDisabled(
-      context,
-      analytics,
-      accountEvents,
-      accountProviders,
-      accountBundledCredentials,
-      accountCredentialsStore,
-      AccountsDatabases,
-      directory
+      context = context,
+      analytics = analytics,
+      accountEvents = accountEvents,
+      accountProviders = accountProviders,
+      accountBundledCredentials = accountBundledCredentials,
+      accountCredentialsStore = accountCredentialsStore,
+      accountsDatabases = AccountsDatabases,
+      bookFormatSupport = bookFormatSupport,
+      directory = directory
     )
   }
 
@@ -428,7 +374,6 @@ internal object MainServices {
 
     return FeedLoader.create(
       bookFormatSupport = bookFormatSupport,
-      bookRegistry = bookRegistry,
       bundledContent = bundledContent,
       contentResolver = contentResolver,
       exec = execCatalogFeeds,
@@ -721,6 +666,12 @@ internal object MainServices {
       serviceConstructor = { bookRegistry }
     )
 
+    addService(
+      message = strings.bootingGeneral("accessibility service"),
+      interfaceType = AccessibilityServiceType::class.java,
+      serviceConstructor = { AccessibilityService.create(context, bookRegistry) }
+    )
+
     val tenPrint =
       addService(
         message = strings.bootingGeneral("10Print"),
@@ -739,18 +690,6 @@ internal object MainServices {
       message = strings.bootingGeneral("local image loader"),
       interfaceType = ImageLoaderType::class.java,
       serviceConstructor = { this.createLocalImageLoader(context) }
-    )
-
-    addService(
-      message = strings.bootingGeneral("reader http server"),
-      interfaceType = ReaderHTTPServerType::class.java,
-      serviceConstructor = { this.createHTTPServer(assets) }
-    )
-
-    addService(
-      message = strings.bootingGeneral("EPUB loader"),
-      interfaceType = ReaderReadiumEPUBLoaderType::class.java,
-      serviceConstructor = { this.createEPUBLoader(context, adobeConfiguration) }
     )
 
     addService(
@@ -840,40 +779,6 @@ internal object MainServices {
     val accountEvents =
       PublishSubject.create<AccountEvent>()
 
-    val profilesDatabase =
-      addService(
-        message = strings.bootingGeneral("profiles database"),
-        interfaceType = ProfilesDatabaseType::class.java,
-        serviceConstructor = {
-          this.createProfileDatabase(
-            context,
-            context.resources,
-            analytics,
-            accountEvents,
-            accountProviderRegistry,
-            accountBundledCredentials,
-            accountCredentials,
-            directories.directoryStorageProfiles
-          )
-        }
-      )
-
-    val bundledContent =
-      addService(
-        message = strings.bootingGeneral("bundled content"),
-        interfaceType = BundledContentResolverType::class.java,
-        serviceConstructor = { MainBundledContentResolver.create(context.assets) }
-      )
-
-    val opdsFeedParser =
-      addService(
-        message = strings.bootingGeneral("feed parser"),
-        interfaceType = OPDSFeedParserType::class.java,
-        serviceConstructor = {
-          this.createFeedParser()
-        }
-      )
-
     val feedbooksSecretService =
       addServiceOptionally(
         message = strings.bootingGeneral("Feedbook secret service"),
@@ -899,6 +804,41 @@ internal object MainServices {
             feedbooksSecretService = feedbooksSecretService,
             overdriveSecretService = overdriveSecretService
           )
+        }
+      )
+
+    val profilesDatabase =
+      addService(
+        message = strings.bootingGeneral("profiles database"),
+        interfaceType = ProfilesDatabaseType::class.java,
+        serviceConstructor = {
+          this.createProfileDatabase(
+            context,
+            context.resources,
+            analytics,
+            accountEvents,
+            accountProviderRegistry,
+            accountBundledCredentials,
+            accountCredentials,
+            bookFormatService,
+            directories.directoryStorageProfiles
+          )
+        }
+      )
+
+    val bundledContent =
+      addService(
+        message = strings.bootingGeneral("bundled content"),
+        interfaceType = BundledContentResolverType::class.java,
+        serviceConstructor = { MainBundledContentResolver.create(context.assets) }
+      )
+
+    val opdsFeedParser =
+      addService(
+        message = strings.bootingGeneral("feed parser"),
+        interfaceType = OPDSFeedParserType::class.java,
+        serviceConstructor = {
+          this.createFeedParser()
         }
       )
 
@@ -940,6 +880,12 @@ internal object MainServices {
       message = strings.bootingGeneral("audio book manifest strategies"),
       interfaceType = AudioBookManifestStrategiesType::class.java,
       serviceConstructor = { return@addService AudioBookManifests }
+    )
+
+    addServiceOptionally(
+      message = "metrics service factory",
+      interfaceType = MetricServiceType::class.java,
+      serviceConstructor = { createMetricService(context) }
     )
 
     val bookController = this.run {
@@ -1014,19 +960,6 @@ internal object MainServices {
       serviceConstructor = { NetworkConnectivity.create(context) }
     )
 
-    publishEvent(strings.bootingGeneral("branding service"))
-    val brandingThemeOverride = this.loadOptionalBrandingThemeOverride()
-
-    addService(
-      message = strings.bootingGeneral("theme service"),
-      interfaceType = ThemeServiceType::class.java,
-      serviceConstructor = {
-        ThemeService(
-          brandingThemeOverride = brandingThemeOverride
-        )
-      }
-    )
-
     val idleTimerConfiguration =
       addService(
         message = strings.bootingGeneral("idle timer configuration service"),
@@ -1050,6 +983,12 @@ internal object MainServices {
       message = strings.bootingGeneral("card creator service"),
       interfaceType = CardCreatorServiceType::class.java,
       serviceConstructor = { CardCreatorService.createConditionally(context) }
+    )
+
+    addService(
+      message = strings.bootingGeneral("migrations"),
+      interfaceType = MigrationsType::class.java,
+      serviceConstructor = { MainMigrations.create(context, bookController) }
     )
 
     this.showThreads()

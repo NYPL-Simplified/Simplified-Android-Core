@@ -7,12 +7,8 @@ import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.viewer.spi.ViewerPreferences
 import org.nypl.simplified.viewer.spi.ViewerProviderType
-import org.slf4j.LoggerFactory
 
 class ReaderViewerR2 : ViewerProviderType {
-
-  private val logger =
-    LoggerFactory.getLogger(ReaderViewerR2::class.java)
 
   override val name =
     "org.nypl.simplified.viewer.epub.readium2.ReaderViewerR2"
@@ -22,12 +18,6 @@ class ReaderViewerR2 : ViewerProviderType {
     book: Book,
     format: BookFormat
   ): Boolean {
-    val enabled = preferences.flags["useExperimentalR2"] ?: false
-    if (!enabled) {
-      this.logger.warn("useExperimentalR2 is either false, or not set, so R2 is disabled")
-      return false
-    }
-
     return when (format) {
       is BookFormat.BookFormatPDF,
       is BookFormat.BookFormatAudioBook ->

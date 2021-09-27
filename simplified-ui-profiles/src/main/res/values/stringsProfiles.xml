@@ -5,7 +5,7 @@
   <string name="profileCreate">Create</string>
   <string name="profileCreationError">@string/profileError</string>
   <string name="profileCreationErrorGeneral">An error occurred whilst trying to create your profile: %1$s</string>
-  <string name="profileCreationErrorNameAlreadyUsed">That name has already been used. Please pick another.</string>
+  <string name="profileCreationErrorNameAlreadyUsed">That name has already been used.</string>
   <string name="profileCreationErrorNameBlank">Name cannot be blank!</string>
   <string name="profileDelete">Delete</string>
   <string name="profileDeleteAsk">Delete profile?</string>

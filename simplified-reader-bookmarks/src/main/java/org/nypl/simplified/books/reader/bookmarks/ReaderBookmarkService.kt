@@ -41,15 +41,22 @@ import org.nypl.simplified.reader.bookmarks.api.BookmarkAnnotations
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkEvent
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkEvent.ReaderBookmarkSaved
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkEvent.ReaderBookmarkSyncFinished
+import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkEvent.ReaderBookmarkSyncSettingChanged
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkEvent.ReaderBookmarkSyncStarted
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkHTTPCallsType
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceProviderType
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceProviderType.Requirements
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceType
+import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkSyncEnableResult
+import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkSyncEnableResult.SYNC_DISABLED
+import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkSyncEnableResult.SYNC_ENABLED
+import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkSyncEnableResult.SYNC_ENABLE_NOT_SUPPORTED
+import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkSyncEnableStatus
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarks
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.net.URI
+import java.util.Collections
 import java.util.concurrent.Callable
 import java.util.concurrent.Executors
 
@@ -91,6 +98,7 @@ class ReaderBookmarkService private constructor(
 
   private val logger = LoggerFactory.getLogger(ReaderBookmarkService::class.java)
   private val objectMapper = ObjectMapper()
+  private val accountsSyncChanging = Collections.synchronizedSet(hashSetOf<AccountID>())
 
   @Volatile
   private var policyState: ReaderBookmarkPolicyState
@@ -166,8 +174,7 @@ class ReaderBookmarkService private constructor(
           profile = this.profile,
           syncableAccount = account,
           evaluatePolicyInput = this.evaluatePolicyInput
-        )
-          .call()
+        ).call()
       } else {
       }
     }
@@ -202,6 +209,12 @@ class ReaderBookmarkService private constructor(
       val syncable =
         this.checkSyncingIsEnabledForAccount(this.profile, this.syncableAccount)
 
+      this.syncableAccount.account.setPreferences(
+        this.syncableAccount.account.preferences.copy(
+          bookmarkSyncingPermitted = syncable != null
+        )
+      )
+
       this.evaluatePolicyInput.invoke(
         SyncingEnabled(
           accountID = this.syncableAccount.account.id,
@@ -230,7 +243,7 @@ class ReaderBookmarkService private constructor(
           account
         } else {
           this.logger.debug(
-            "[{}]: account {} has does not have syncing enabled",
+            "[{}]: account {} does not have syncing enabled",
             profile.id.uuid,
             account.account.id
           )
@@ -503,6 +516,68 @@ class ReaderBookmarkService private constructor(
     }
   }
 
+  /**
+   * An operation that enables/disable syncing for an account.
+   */
+
+  private class OpEnableSync(
+    logger: Logger,
+    private val accountsSyncChanging: MutableSet<AccountID>,
+    private val bookmarkEventsOut: Subject<ReaderBookmarkEvent>,
+    private val httpCalls: ReaderBookmarkHTTPCallsType,
+    private val profile: ProfileReadableType,
+    private val syncableAccount: SyncableAccount,
+    private val enable: Boolean
+  ) : ReaderBookmarkControllerOp<ReaderBookmarkSyncEnableResult>(logger) {
+
+    override fun runActual(): ReaderBookmarkSyncEnableResult {
+      val accountId = this.syncableAccount.account.id
+
+      this.logger.debug(
+        "[{}]: {} syncing for account {}",
+        this.profile.id.uuid,
+        if (this.enable) "enabling" else "disabling",
+        accountId.uuid
+      )
+
+      this.accountsSyncChanging.add(accountId)
+
+      try {
+        this.httpCalls.syncingEnable(
+          settingsURI = this.syncableAccount.settingsURI,
+          credentials = this.syncableAccount.credentials,
+          enabled = this.enable
+        )
+
+        this.syncableAccount.account.setPreferences(
+          this.syncableAccount.account.preferences.copy(bookmarkSyncingPermitted = this.enable)
+        )
+
+        val status = when (this.enable) {
+          true -> SYNC_ENABLED
+          false -> SYNC_DISABLED
+        }
+
+        this.accountsSyncChanging.remove(accountId)
+        this.bookmarkEventsOut.onNext(
+          ReaderBookmarkSyncSettingChanged(
+            accountID = accountId,
+            status = ReaderBookmarkSyncEnableStatus.Idle(accountId, status)
+          )
+        )
+
+        return status
+      } finally {
+
+        /*
+         * Redundantly ensure the account has been removed from the changing set.
+         */
+
+        this.accountsSyncChanging.remove(accountId)
+      }
+    }
+  }
+
   private data class SyncableAccount(
     val account: AccountType,
     val settingsURI: URI,
@@ -575,13 +650,12 @@ class ReaderBookmarkService private constructor(
           ReaderBookmarkPolicy.evaluatePolicy(
             ReaderBookmarkPolicy.getAccountState(event.accountID),
             this.policyState
-          )
-            .result
+          ).result
 
         val accountState =
           ReaderBookmarkPolicyAccountState(
             accountID = account.id,
-            syncSupportedByAccount = account.provider.supportsSimplyESynchronization,
+            syncSupportedByAccount = account.loginState.credentials?.annotationsURI != null,
             syncEnabledOnServer = if (accountStateCurrent != null) accountStateCurrent.syncEnabledOnServer else false,
             syncPermittedByUser = account.preferences.bookmarkSyncingPermitted
           )
@@ -609,8 +683,8 @@ class ReaderBookmarkService private constructor(
     val accountState =
       ReaderBookmarkPolicyAccountState(
         accountID = account.id,
-        syncSupportedByAccount = account.provider.supportsSimplyESynchronization,
-        syncEnabledOnServer = if (accountStateCurrent != null) accountStateCurrent.syncEnabledOnServer else false,
+        syncSupportedByAccount = account.loginState.credentials?.annotationsURI != null,
+        syncEnabledOnServer = accountStateCurrent?.syncEnabledOnServer ?: false,
         syncPermittedByUser = account.preferences.bookmarkSyncingPermitted
       )
 
@@ -638,13 +712,17 @@ class ReaderBookmarkService private constructor(
     val accountState =
       ReaderBookmarkPolicyAccountState(
         accountID = account.id,
-        syncSupportedByAccount = account.provider.supportsSimplyESynchronization,
+        syncSupportedByAccount = account.loginState.credentials?.annotationsURI != null,
         syncEnabledOnServer = false,
         syncPermittedByUser = account.preferences.bookmarkSyncingPermitted
       )
 
     this.evaluatePolicyInput(profile, AccountCreated(accountState))
   }
+
+  /**
+   * The main method that evaluates the bookmark policy input and then acts upon the results.
+   */
 
   private fun evaluatePolicyInput(
     profile: ProfileReadableType,
@@ -717,6 +795,100 @@ class ReaderBookmarkService private constructor(
 
       is ReaderBookmarkPolicyOutput.Event.LocalBookmarkAlreadyExists ->
         this.logger.warn("local bookmark already exists: {}", output.bookmark.bookmarkId)
+    }
+  }
+
+  override fun bookmarkSyncStatus(
+    accountID: AccountID
+  ): ReaderBookmarkSyncEnableStatus {
+    val profile =
+      this.profilesController.profileCurrent()
+    val syncable =
+      accountSupportsSyncing(profile.account(accountID))
+
+    if (syncable == null) {
+      this.logger.error("bookmarkSyncEnable: account does not support syncing")
+      return ReaderBookmarkSyncEnableStatus.Idle(accountID, SYNC_ENABLE_NOT_SUPPORTED)
+    }
+
+    val changing = this.accountsSyncChanging.contains(accountID)
+    if (changing) {
+      return ReaderBookmarkSyncEnableStatus.Changing(accountID)
+    }
+
+    return ReaderBookmarkSyncEnableStatus.Idle(
+      accountID = accountID,
+      status = if (syncable.account.preferences.bookmarkSyncingPermitted) {
+        SYNC_ENABLED
+      } else {
+        SYNC_DISABLED
+      }
+    )
+  }
+
+  override fun bookmarkSyncEnable(
+    accountID: AccountID,
+    enabled: Boolean
+  ): FluentFuture<ReaderBookmarkSyncEnableResult> {
+    return try {
+      this.bookmarkEventsOut.onNext(
+        ReaderBookmarkSyncSettingChanged(
+          accountID = accountID,
+          status = ReaderBookmarkSyncEnableStatus.Changing(accountID)
+        )
+      )
+
+      val profile =
+        this.profilesController.profileCurrent()
+      val syncable =
+        accountSupportsSyncing(profile.account(accountID))
+
+      if (syncable == null) {
+        this.logger.error("bookmarkSyncEnable: account does not support syncing")
+        val status = SYNC_ENABLE_NOT_SUPPORTED
+
+        this.bookmarkEventsOut.onNext(
+          ReaderBookmarkSyncSettingChanged(
+            accountID = accountID,
+            status = ReaderBookmarkSyncEnableStatus.Idle(accountID, status)
+          )
+        )
+
+        return FluentFuture.from(Futures.immediateFuture(status))
+      }
+
+      this.accountsSyncChanging.add(accountID)
+
+      val opEnable =
+        OpEnableSync(
+          logger = this.logger,
+          accountsSyncChanging = this.accountsSyncChanging,
+          bookmarkEventsOut = this.bookmarkEventsOut,
+          httpCalls = this.httpCalls,
+          profile = profile,
+          syncableAccount = syncable,
+          enable = enabled
+        )
+
+      val opCheck =
+        OpCheckSyncStatusForProfile(
+          logger = this.logger,
+          httpCalls = this.httpCalls,
+          profile = profile,
+          evaluatePolicyInput = { input -> this.evaluatePolicyInput(profile, input) }
+        )
+
+      FluentFuture.from(this.executor.submit(opEnable))
+        .transform(
+          { result ->
+            opCheck.call()
+            result
+          },
+          this.executor
+        )
+    } catch (e: ProfileNoneCurrentException) {
+      this.logger.error("bookmarkSyncEnable: no profile is current: ", e)
+      FluentFuture.from(Futures.immediateFailedFuture(e))
     }
   }
 
@@ -810,7 +982,7 @@ class ReaderBookmarkService private constructor(
     private fun accountStateForAccount(account: AccountType): ReaderBookmarkPolicyAccountState {
       return ReaderBookmarkPolicyAccountState(
         accountID = account.id,
-        syncSupportedByAccount = account.provider.supportsSimplyESynchronization,
+        syncSupportedByAccount = account.loginState.credentials?.annotationsURI != null,
         syncEnabledOnServer = false,
         syncPermittedByUser = account.preferences.bookmarkSyncingPermitted
       )
@@ -864,15 +1036,16 @@ class ReaderBookmarkService private constructor(
     }
 
     private fun accountSupportsSyncing(account: AccountType): SyncableAccount? {
-      return if (account.provider.supportsSimplyESynchronization) {
+      val annotationsURI = account.loginState.credentials?.annotationsURI
+
+      return if (annotationsURI != null) {
         val settingsOpt = account.provider.patronSettingsURI
-        val annotationsOpt = account.provider.annotationsURI
         val credentials = account.loginState.credentials
-        if (credentials != null && settingsOpt != null && annotationsOpt != null) {
+        if (credentials != null && settingsOpt != null) {
           return SyncableAccount(
             account = account,
             settingsURI = settingsOpt,
-            annotationsURI = annotationsOpt,
+            annotationsURI = annotationsURI,
             credentials = credentials
           )
         } else {

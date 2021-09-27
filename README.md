@@ -25,23 +25,58 @@ amongst others, the NYPL's official [SimplyE](https://www.nypl.org/books-music-m
 application. The framework provides a base application with numerous configuration
 switches, and configurable _branding_. The expectation is that third parties will
 produce final builds of applications by defining _application frontends_ that specify
-dependencies on the framework, custom color schemes, and logos. The repository contains
-an example frontend, [Vanilla](simplified-app-vanilla), that shows how this is achieved.
+dependencies on the framework, custom color schemes, and logos. 
 
-The application frontend for the NYPL
-SimplyE application can be found in its [own module](https://github.com/NYPL-Simplified/Simplified-Android-Core/tree/develop/simplified-app-simplye).
+The repository contains a number of applications that are all built from the
+same core:
 
-### Building
+|Application|Module|Description|
+|-----------|------|-----------|
+|Vanilla|[simplified-app-vanilla](simplified-app-vanilla)|DRM-free generic reading application|
+|SimplyE|[simplified-app-simplye](simplified-app-simplye)|The NYPL's official [SimplyE](https://www.nypl.org/books-music-movies/ebookcentral/simplye) application|
+|Open eBooks|[simplified-app-openebooks](simplified-app-openebooks)|The [Open eBooks](https://openebooks.net/) application|
 
-#### Build!
+## Contents
 
-The short version: Install an [Android SDK](#android-sdk) and run:
+* [Building](#building-the-code)
+  * [The Short Version](#the-short-version)
+  * [The Longer Version](#the-longer-version)
+    * [Android SDK](#android-sdk)
+    * [JDK](#jdk)
+    * [Nexus Credentials](#nexus-credentials)
+    * [APK Signing](#apk-signing)
+    * [Enabling DRM](#enabling-drm)
+    * [Adobe DRM](#adobe-drm-support)
+    * [Findaway DRM](#findaway-audiobook-drm-support)
+* [Development](#development)
+  * [Branching/Merging](#branchingmerging)
+  * [Project Structure](#project-structure--architecture)
+    * [MVC](#mvc)
+    * [MVVM](#mvvm)
+    * [API vs SPI](#api-vs-spi)
+    * [Modules](#modules)
+  * [Binaries](#binaries)
+  * [Ktlint](#ktlint)
+* [Release Process](#release-process)
+* [License](#license)
+
+## Building The Code
+
+#### The Short Version
+
+Install an [Android SDK](#android-sdk) and a [JDK](#jdk) and run:
 
 ~~~
-$ ./gradlew clean assembleDebug test
+$ ./gradlew clean ktlint assembleDebug test
 ~~~
 
-Please read the list of instructions below for specific details on configurations.
+This will build all of the code and run the unit tests, but only the
+[Vanilla](simplified-app-vanilla) application will be built by default. In
+order to build the other applications such as [SimplyE](simplified-app-simplye),
+it's necessary to obtain the correct [credentials](#nexus-credentials) from the
+NYPL and [enable DRM](#enabling-drm).
+
+#### The Longer Version
 
 #### Android SDK
 
@@ -124,6 +159,59 @@ $ ./gradlew clean assembleRelease test
 $ ./gradlew clean assemble test
 ~~~
 
+#### Enabling DRM
+
+The application contains optional support for various DRM systems, and these
+must be enabled explicitly in order to build [SimplyE](simplified-app-simplye).
+
+Firstly, make sure you have your [Nexus](#nexus-credentials) credentials
+correctly configured. Then, add the following property to your
+`$HOME/.gradle/gradle.properties` file:
+
+```
+org.librarysimplified.drm.enabled=true
+```
+
+This will instruct the build system that you want to build with DRM enabled.
+If you were to attempt to build the code right now, you would encounter a
+build failure: When DRM is enabled, the build system will check that you have
+provided various configuration files containing secrets that the DRM systems
+require, and will refuse to build the app if you've failed to do this. The
+build system can copy in the correct secrets for you if tell it the location
+of directories containing those secrets. For example, assuming that you have
+[SimplyE's](simplified-app-simplye) secrets in `/path/to/simplye/secrets` and
+[Open eBook's](simplified-app-openebooks) secrets in `/path/to/openebooks/secrets`,
+you can add the following properties to your `$HOME/.gradle/gradle.properties` file
+and the build system will copy in the required secrets at build time:
+
+```
+org.librarysimplified.app.assets.openebooks=/path/to/openebooks/secrets
+org.librarysimplified.app.assets.simplye=/path/to/simplye/secrets
+```
+
+#### Adobe DRM Support
+
+The project currently makes calls to the NYPL's [Adobe DRM
+API](https://github.com/NYPL-Simplified/DRM-Android-Core). The API
+is structured in a manner that means that enabling actual support
+for Adobe DRM simply entails adding a dependency on the NYPL's Adobe
+DRM _implementation_. This implementation is only available to DRM
+licensees. Please get in touch with us if you have a DRM license and
+want to produce a DRM-enabled build!
+
+#### Findaway Audiobook DRM support
+
+The project currently uses the NYPL's [AudioBook API](https://github.com/NYPL-Simplified/audiobook-android)
+to provide support for playing audio books. The API is structured such
+that adding support for new types of audiobooks and playback engines
+only involves adding those modules to the classpath. By default, the
+application framework only specifies a dependency on the NYPL's DRM-free
+audiobook player module, but there is also an NYPL-developed Findaway
+module for Findaway licensees. Please get in touch with us if you have
+a Findaway license and want to produce a Findaway-enabled build.
+
+## Development
+
 ### Branching/Merging
 
 We use [git flow](https://nvie.com/posts/a-successful-git-branching-model/) as our
@@ -142,6 +230,12 @@ The project, as a whole, roughly follows an [MVC](https://en.wikipedia.org/wiki/
 architecture distributed over the application modules. The _controller_ in the application is
 task-based and executes all tasks on a background thread to avoid any possibility of blocking
 the Android UI thread.
+
+#### MVVM
+
+Newer application modules, roughly follow an [MVVM](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93viewmodel) architecture.
+The _View Model_ in the application exposes reactive properties
+and executes all tasks on a background thread. The _View_ observes those properties and updates on the Android UI thread.
 
 #### API vs SPI
 
@@ -208,6 +302,12 @@ numbers, etc) is defined in the `gradle.properties` file in each module. The [gr
 file in the root of the project defines default values that are overridden as necessary by each
 module.
 
+#### Test suite
+
+We aggregate all unit tests in the [simplified-tests](simplified-tests) module. Tests should
+be written using the JUnit 5 library, although at the time of writing we have [one test](simplified-tests/src/test/java/org/nypl/simplified/tests/webview/CookiesContract.kt)
+that still requires JUnit 4 due to the use of [Roboelectric](http://robolectric.org/).
+
 #### Modules
 
 The project is heavily modularized in order to keep the separate application components as loosely
@@ -215,6 +315,7 @@ coupled as possible. New features should typically be implemented as new modules
 
 |Module|Description|
 |------|-----------|
+|[org.librarysimplified.accessibility](simplified-accessibility)|Accessibility APIs and functionality|
 |[org.librarysimplified.accounts.api](simplified-accounts-api)|Accounts API|
 |[org.librarysimplified.accounts.database](simplified-accounts-database)|Accounts database implementation|
 |[org.librarysimplified.accounts.database.api](simplified-accounts-database-api)|Accounts database API|
@@ -229,6 +330,8 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.analytics.circulation](simplified-analytics-circulation)|Circulation manager analytics implementation|
 |[org.librarysimplified.android.ktx](simplified-android-ktx)|Kotlin Android Extensions|
 |[org.librarysimplified.announcements](simplified-announcements)|Announcements API|
+|[org.nypl.labs.OpenEbooks.app](simplified-app-openebooks)|Open eBooks Application|
+|[org.librarysimplified.simplye.app](simplified-app-simplye)|SimplyE Application|
 |[org.librarysimplified.app.vanilla](simplified-app-vanilla)|Vanilla application|
 |[org.librarysimplified.books.api](simplified-books-api)|Book types|
 |[org.librarysimplified.books.audio](simplified-books-audio)|Audio book support code|
@@ -267,6 +370,10 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.opds.auth_document](simplified-opds-auth-document)|OPDS authentication document parser implementation|
 |[org.librarysimplified.opds.auth_document.api](simplified-opds-auth-document-api)|OPDS authentication document parser API|
 |[org.librarysimplified.opds.core](simplified-opds-core)|OPDS feed parser|
+|[org.librarysimplified.opds2](simplified-opds2)|OPDS 2.0 model definitions|
+|[org.librarysimplified.opds2.irradia](simplified-opds2-irradia)|OPDS 2.0 Parser (Irradia)|
+|[org.librarysimplified.opds2.parser.api](simplified-opds2-parser-api)|OPDS 2.0 parser API|
+|[org.librarysimplified.opds2.r2](simplified-opds2-r2)|OPDS 2.0 Parser (R2)|
 |[org.librarysimplified.parser.api](simplified-parser-api)|Parser API|
 |[org.librarysimplified.patron](simplified-patron)|Patron user profile parser implementation|
 |[org.librarysimplified.patron.api](simplified-patron-api)|Patron user profile parser API|
@@ -290,8 +397,9 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.ui.catalog](simplified-ui-catalog)|Catalog components|
 |[org.librarysimplified.ui.errorpage](simplified-ui-errorpage)|Error details screen|
 |[org.librarysimplified.ui.images](simplified-ui-images)|Image loader API for general image resources|
-|[org.librarysimplified.ui.navigation.api](simplified-ui-navigation-api)|Navigation API|
+|[org.librarysimplified.ui.listeners.api](simplified-ui-listeners-api)|Listeners API|
 |[org.librarysimplified.ui.tabs](simplified-ui-navigation-tabs)|Tabbed UI|
+|[org.librarysimplified.ui.onboarding](simplified-ui-onboarding)|Onboarding|
 |[org.librarysimplified.ui.profiles](simplified-ui-profiles)|Profiles UI|
 |[org.librarysimplified.ui.screen](simplified-ui-screen)|Screen API|
 |[org.librarysimplified.ui.settings](simplified-ui-settings)|Settings screens|
@@ -300,33 +408,12 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.ui.thread.api](simplified-ui-thread-api)|UI thread service|
 |[org.librarysimplified.viewer.api](simplified-viewer-api)|Viewer API|
 |[org.librarysimplified.viewer.audiobook](simplified-viewer-audiobook)|AudioBook viewer|
-|[org.librarysimplified.viewer.epub.readium1](simplified-viewer-epub-readium1)|Readium 1 EPUB reader|
 |[org.librarysimplified.viewer.epub.readium2](simplified-viewer-epub-readium2)|Readium 2 EPUB reader|
 |[org.librarysimplified.viewer.pdf](simplified-viewer-pdf)|PDF reader|
 |[org.librarysimplified.viewer.spi](simplified-viewer-spi)|Viewer SPI|
+|[org.librarysimplified.webview](simplified-webview)|WebView utilities|
 
 _The above table is generated with [ReadMe.java](src/misc/ReadMe.java)._
-
-#### Adobe DRM Support
-
-The project currently makes calls to the NYPL's [Adobe DRM
-API](https://github.com/NYPL-Simplified/DRM-Android-Core). The API
-is structured in a manner that means that enabling actual support
-for Adobe DRM simply entails adding a dependency on the NYPL's Adobe
-DRM _implementation_. This implementation is only available to DRM
-licensees. Please get in touch with us if you have a DRM license and
-want to produce a DRM-enabled build!
-
-### Findaway Audiobook DRM support
-
-The project currently uses the NYPL's [AudioBook API](https://github.com/NYPL-Simplified/audiobook-android)
-to provide support for playing audio books. The API is structured such
-that adding support for new types of audiobooks and playback engines
-only involves adding those modules to the classpath. By default, the
-application framework only specifies a dependency on the NYPL's DRM-free
-audiobook player module, but there is also an NYPL-developed Findaway
-module for Findaway licensees. Please get in touch with us if you have
-a Findaway license and want to produce a Findaway-enabled build.
 
 ### Binaries
 
@@ -336,33 +423,21 @@ undergone little or no testing. Use at your own risk!
 
 ### Ktlint
 
-SimplyE now has Ktlint enabled.
-
-**What does this mean?**
-
-This means you no longer get away with committing less than stellar styled code anymore. Anytime you try to commit, your code will be checked for coolness (good style). If your code is cool then nothing different happens, it's committed like always. If it is not cool (bad style), then you get an angry *commit failed* message that forces you to correct your style issues before the commit is accepted. Ktlint will provide you with the exact line and directions on exactly how to fix your style issue. Example:
-
-**ktlint**
-```
-simplified-app-simplye/src/main/java/org/nypl/simplified/simplye/SimplyEAccountFallback.kt:20:1: Unexpected indentation (6) (it should be 8) (cannot be auto-corrected)
-```
-
- **I'll feel bad if my git yells at me for bad style**
-
- Luckily you can always check your own style before attempting to commit your code. Simply run the following command from project root:
+The codebase uses [ktlint](https://ktlint.github.io/) to enforce a consistent 
+code style. It's possible to ensure that any changes you've made to the code
+continue to pass `ktlint` checks by running the `ktlintFormat` task to reformat
+source code:
 
 ```
-./gradlew ktlint
-```
-```
-./gradlew ktlintFormat // Runs ktlint and attempts to automatically fix things
+$ ./gradlew ktlintFormat
 ```
 
- **What if I want to customize what ktlint checks?**
+## Release Process
 
- You can do that too. Just edit `.editorconfig` file. Currently the only custom property that has been added is `indent_size=2`. The projects used only 2 spaces for indentation, so we are checking that you follow that as well. If you'd like to add more properties to the `.editorconfig` file, read more here: [https://github.com/pinterest/ktlint](https://github.com/pinterest/ktlint)
+Please see [RELEASING.md](RELEASING.md) for documentation on our release
+process.
 
-### License
+## License
 
 ~~~
 Copyright 2015 The New York Public Library, Astor, Lenox, and Tilden Foundations

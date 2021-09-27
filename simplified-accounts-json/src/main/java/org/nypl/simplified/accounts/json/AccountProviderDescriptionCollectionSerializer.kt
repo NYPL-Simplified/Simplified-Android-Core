@@ -41,8 +41,6 @@ class AccountProviderDescriptionCollectionSerializer internal constructor(
 
   private fun serializeMetadata(): ObjectNode {
     val objectNode = this.mapper.createObjectNode()
-    this.document.metadata.adobeVendorID
-      ?.let { id -> objectNode.put("adobe_vendor_id", id.value) }
     objectNode.put("title", this.document.metadata.title)
     return objectNode
   }

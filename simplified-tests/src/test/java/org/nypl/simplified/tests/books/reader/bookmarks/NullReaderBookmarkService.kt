@@ -9,6 +9,8 @@ import org.nypl.simplified.books.api.Bookmark
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkEvent
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceProviderType
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceType
+import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkSyncEnableResult
+import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkSyncEnableStatus
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarks
 
 class NullReaderBookmarkService(
@@ -20,6 +22,14 @@ class NullReaderBookmarkService(
 
   override val bookmarkEvents: Observable<ReaderBookmarkEvent>
     get() = this.events
+
+  override fun bookmarkSyncStatus(accountID: AccountID): ReaderBookmarkSyncEnableStatus {
+    return ReaderBookmarkSyncEnableStatus.Changing(accountID)
+  }
+
+  override fun bookmarkSyncEnable(accountID: AccountID, enabled: Boolean): FluentFuture<ReaderBookmarkSyncEnableResult> {
+    return FluentFuture.from(Futures.immediateFuture(ReaderBookmarkSyncEnableResult.SYNC_ENABLE_NOT_SUPPORTED))
+  }
 
   override fun bookmarkCreate(accountID: AccountID, bookmark: Bookmark): FluentFuture<Unit> {
     return FluentFuture.from(Futures.immediateFuture(Unit))

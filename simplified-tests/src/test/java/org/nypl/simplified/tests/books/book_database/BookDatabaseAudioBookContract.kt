@@ -3,7 +3,7 @@ package org.nypl.simplified.tests.books.book_database
 import android.content.Context
 import com.io7m.jfunctional.Option
 import org.joda.time.DateTime
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.books.api.BookDRMInformation
 import org.nypl.simplified.books.api.BookDRMKind
@@ -21,6 +21,7 @@ import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess
 import org.nypl.simplified.opds.core.OPDSJSONParser
 import org.nypl.simplified.opds.core.OPDSJSONSerializer
+import org.nypl.simplified.tests.books.BookFormatsTesting
 import org.slf4j.LoggerFactory
 import java.net.URI
 import java.util.UUID
@@ -45,7 +46,7 @@ abstract class BookDatabaseAudioBookContract {
     val parser = OPDSJSONParser.newParser()
     val serializer = OPDSJSONSerializer.newSerializer()
     val directory = DirectoryUtilities.directoryCreateTemporary()
-    val database0 = BookDatabase.open(context(), parser, serializer, accountID, directory)
+    val database0 = BookDatabase.open(context(), parser, serializer, BookFormatsTesting.supportsEverything, accountID, directory)
 
     val feedEntry: OPDSAcquisitionFeedEntry = this.acquisitionFeedEntryWithAudioBook()
     val bookID = BookIDs.newFromText("abcd")

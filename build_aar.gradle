@@ -3,6 +3,7 @@ logger.info("Configuring ${project} (${POM_PACKAGING}) as Android library projec
 apply plugin: "com.android.library"
 apply plugin: "kotlin-android"
 apply plugin: "androidx.navigation.safeargs.kotlin"
+apply plugin: "de.mannodermaus.android-junit5"
 
 android {
   compileSdkVersion android_compile_sdk_version
@@ -22,8 +23,22 @@ android {
   kotlinOptions {
     jvmTarget = "1.8"
   }
+
   testOptions {
     execution 'ANDROIDX_TEST_ORCHESTRATOR'
     animationsDisabled = true
+
+    junitPlatform {
+      releaseFilters {
+        excludePattern "**/**"
+      }
+    }
+    unitTests.includeAndroidResources = true
+    unitTests.all {
+      reports {
+        junitXml.enabled = true
+        html.enabled = true
+      }
+    }
   }
 }

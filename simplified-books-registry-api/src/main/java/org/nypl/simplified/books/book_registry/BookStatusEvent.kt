@@ -28,6 +28,18 @@ sealed class BookStatusEvent : BookEvent() {
   abstract val statusNow: BookStatus?
 
   /**
+   * A new book status was added to the registry.
+   */
+
+  data class BookStatusEventAdded(
+    override val bookId: BookID,
+    override val statusNow: BookStatus,
+  ) : BookStatusEvent() {
+    override val statusPrevious: BookStatus? =
+      null
+  }
+
+  /**
    * The book status was removed from the registry.
    */
 

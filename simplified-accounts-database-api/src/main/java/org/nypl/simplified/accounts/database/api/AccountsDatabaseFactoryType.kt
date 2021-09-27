@@ -6,6 +6,7 @@ import org.nypl.simplified.accounts.api.AccountAuthenticationCredentialsStoreTyp
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.books.book_database.api.BookDatabaseFactoryType
+import org.nypl.simplified.books.formats.api.BookFormatSupportType
 import java.io.File
 
 /**
@@ -20,6 +21,7 @@ interface AccountsDatabaseFactoryType {
    * @param accountEvents An observable that will be used to publish account events
    * @param bookDatabases A provider of book databases
    * @param accountProviders The available account providers
+   * @param bookFormatSupport The book format support information
    * @param accountAuthenticationCredentialsStore The credentials store
    * @param directory The directory
    * @return A profile database
@@ -32,6 +34,7 @@ interface AccountsDatabaseFactoryType {
     accountEvents: Subject<AccountEvent>,
     accountProviders: AccountProviderRegistryType,
     bookDatabases: BookDatabaseFactoryType,
+    bookFormatSupport: BookFormatSupportType,
     context: Context,
     directory: File
   ): AccountsDatabaseType
@@ -42,6 +45,7 @@ interface AccountsDatabaseFactoryType {
    * @param accountEvents An observable that will be used to publish account events
    * @param accountProviders The available account providers
    * @param accountAuthenticationCredentialsStore The credentials store
+   * @param bookFormatSupport The book format support information
    * @param directory The directory
    * @return A profile database
    * @throws AccountsDatabaseException If any errors occurred whilst trying to open the database
@@ -52,6 +56,7 @@ interface AccountsDatabaseFactoryType {
     accountAuthenticationCredentialsStore: AccountAuthenticationCredentialsStoreType,
     accountEvents: Subject<AccountEvent>,
     accountProviders: AccountProviderRegistryType,
+    bookFormatSupport: BookFormatSupportType,
     context: Context,
     directory: File
   ): AccountsDatabaseType

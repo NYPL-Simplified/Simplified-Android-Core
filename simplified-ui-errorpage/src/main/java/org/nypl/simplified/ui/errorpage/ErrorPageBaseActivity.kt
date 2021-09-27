@@ -2,13 +2,12 @@ package org.nypl.simplified.ui.errorpage
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import org.nypl.simplified.reports.Reports
 
 /**
  * A convenient base activity used to show error pages.
  */
 
-abstract class ErrorPageBaseActivity : AppCompatActivity(), ErrorPageListenerType {
+abstract class ErrorPageBaseActivity : AppCompatActivity(R.layout.error_host) {
 
   companion object {
     const val PARAMETER_ID =
@@ -20,8 +19,6 @@ abstract class ErrorPageBaseActivity : AppCompatActivity(), ErrorPageListenerTyp
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-
-    this.setContentView(R.layout.error_host)
 
     val currentIntent =
       this.intent
@@ -45,14 +42,5 @@ abstract class ErrorPageBaseActivity : AppCompatActivity(), ErrorPageListenerTyp
     this.supportFragmentManager.beginTransaction()
       .replace(R.id.errorHolder, this.errorFragment, "ERROR_MAIN")
       .commit()
-  }
-
-  override fun onErrorPageSendReport(parameters: ErrorPageParameters) {
-    Reports.sendReportsDefault(
-      context = this,
-      address = parameters.emailAddress,
-      subject = parameters.subject,
-      body = parameters.report
-    )
   }
 }

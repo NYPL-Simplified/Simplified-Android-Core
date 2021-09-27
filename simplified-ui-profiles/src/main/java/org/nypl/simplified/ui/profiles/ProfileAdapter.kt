@@ -4,15 +4,15 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import org.nypl.simplified.profiles.api.ProfileReadableType
 
-class ProfileAdapter(
-  private val profiles: List<ProfileReadableType>,
+internal class ProfileAdapter(
   private val onProfileSelected: (ProfileReadableType) -> Unit,
   private val onProfileModifyRequested: (ProfileReadableType) -> Unit,
   private val onProfileDeleteRequested: (ProfileReadableType) -> Unit
-) : RecyclerView.Adapter<ProfileViewHolder>() {
+) : ListAdapter<ProfileReadableType, ProfileViewHolder>(ProfileDiff) {
 
   override fun onCreateViewHolder(
     parent: ViewGroup,
@@ -40,19 +40,26 @@ class ProfileAdapter(
     )
   }
 
-  override fun getItemCount(): Int {
-    return this.profiles.size
-  }
-
   override fun onBindViewHolder(
     holder: ProfileViewHolder,
     position: Int
   ) {
     holder.bindTo(
-      profile = this.profiles[position],
+      profile = this.getItem(position),
       onProfileSelected = this.onProfileSelected,
       onProfileModifyRequested = this.onProfileModifyRequested,
       onProfileDeleteRequested = this.onProfileDeleteRequested
     )
+  }
+
+  object ProfileDiff : DiffUtil.ItemCallback<ProfileReadableType>() {
+
+    override fun areItemsTheSame(oldItem: ProfileReadableType, newItem: ProfileReadableType): Boolean {
+      return oldItem.id.compareTo(newItem.id) == 0
+    }
+
+    override fun areContentsTheSame(oldItem: ProfileReadableType, newItem: ProfileReadableType): Boolean {
+      return oldItem.displayName == newItem.displayName
+    }
   }
 }

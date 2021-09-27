@@ -117,3 +117,11 @@ android {
     }
   }
 }
+
+/*
+ * Produce an AAB file whenever someone asks for "assemble".
+ */
+
+afterEvaluate {
+  assemble.dependsOn(bundle)
+}

@@ -16,7 +16,6 @@ class VanillaAccountFallback : AccountProviderFallbackType {
   override fun get(): AccountProviderType {
     return AccountProvider(
       addAutomatically = false,
-      annotationsURI = null,
       authenticationDocumentURI = URI.create("https://circulation.librarysimplified.org/CLASSICS/authentication_document"),
       authentication = AccountProviderAuthenticationDescription.COPPAAgeGate(
         greaterEqual13 = URI.create("https://circulation.librarysimplified.org/CLASSICS/groups/1831"),
@@ -39,7 +38,8 @@ class VanillaAccountFallback : AccountProviderFallbackType {
       subtitle = "A selection of classics and modern material available to anyone, with no library card necessary.",
       supportEmail = "mailto:gethelp+simplye-collection@nypl.org",
       supportsReservations = false,
-      updated = DateTime.parse("2019-07-08T16:32:52+00:00")
+      updated = DateTime.parse("2019-07-08T16:32:52+00:00"),
+      location = null
     )
   }
 }

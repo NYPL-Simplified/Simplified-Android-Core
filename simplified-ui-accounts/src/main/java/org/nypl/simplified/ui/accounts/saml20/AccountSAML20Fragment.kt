@@ -1,34 +1,28 @@
 package org.nypl.simplified.ui.accounts.saml20
 
-import android.content.Context
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.webkit.WebView
 import android.widget.ProgressBar
-import androidx.annotation.UiThread
 import androidx.appcompat.app.AlertDialog
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProviders
+import androidx.fragment.app.viewModels
 import io.reactivex.disposables.CompositeDisposable
-import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.database.api.AccountType
-import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
-import org.nypl.simplified.navigation.api.NavigationControllers
-import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
+import org.nypl.simplified.listeners.api.FragmentListenerType
+import org.nypl.simplified.listeners.api.fragmentListeners
 import org.nypl.simplified.taskrecorder.api.TaskRecorder
 import org.nypl.simplified.taskrecorder.api.TaskStep
-import org.nypl.simplified.ui.accounts.AccountNavigationControllerType
 import org.nypl.simplified.ui.accounts.R
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
-import org.nypl.simplified.ui.thread.api.UIThreadServiceType
+import org.nypl.simplified.webview.WebViewUtilities
 
 /**
  * A fragment that performs the SAML 2.0 login workflow.
  */
 
-class AccountSAML20Fragment : Fragment() {
+class AccountSAML20Fragment : Fragment(R.layout.account_saml20) {
 
   companion object {
 
@@ -40,71 +34,43 @@ class AccountSAML20Fragment : Fragment() {
      */
 
     fun create(parameters: AccountSAML20FragmentParameters): AccountSAML20Fragment {
-      val arguments = Bundle()
-      arguments.putSerializable(this.PARAMETERS_ID, parameters)
       val fragment = AccountSAML20Fragment()
-      fragment.arguments = arguments
+      fragment.arguments = bundleOf(this.PARAMETERS_ID to parameters)
       return fragment
     }
   }
 
-  private lateinit var profiles: ProfilesControllerType
-  private lateinit var buildConfig: BuildConfigurationServiceType
-  private lateinit var parameters: AccountSAML20FragmentParameters
-  private lateinit var progress: ProgressBar
-  private lateinit var uiThread: UIThreadServiceType
-  private lateinit var viewModel: AccountSAML20ViewModel
-  private lateinit var webView: WebView
-  private val eventSubscriptions = CompositeDisposable()
+  private val eventSubscriptions: CompositeDisposable =
+    CompositeDisposable()
 
-  private fun constructLoginURI(): String {
-    return buildString {
-      this.append(this@AccountSAML20Fragment.parameters.authenticationDescription.authenticate)
-      this.append("&redirect_uri=")
-      this.append(AccountSAML20.callbackURI)
+  private val listener: FragmentListenerType<AccountSAML20Event> by fragmentListeners()
+
+  private val parameters: AccountSAML20FragmentParameters by lazy {
+    this.requireArguments()[PARAMETERS_ID] as AccountSAML20FragmentParameters
+  }
+
+  private val viewModel: AccountSAML20ViewModel by viewModels(
+    factoryProducer = {
+      AccountSAML20ViewModelFactory(
+        application = this.requireActivity().application,
+        account = this.parameters.accountID,
+        description = this.parameters.authenticationDescription
+      )
     }
-  }
+  )
 
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
+  private lateinit var progress: ProgressBar
+  private lateinit var webView: WebView
 
-    this.parameters = this.requireArguments()[PARAMETERS_ID] as AccountSAML20FragmentParameters
-
-    val services = Services.serviceDirectory()
-
-    this.uiThread =
-      services.requireService(UIThreadServiceType::class.java)
-    this.buildConfig =
-      services.requireService(BuildConfigurationServiceType::class.java)
-    this.profiles =
-      services.requireService(ProfilesControllerType::class.java)
-  }
-
-  override fun onCreateView(
-    inflater: LayoutInflater,
-    container: ViewGroup?,
-    savedInstanceState: Bundle?
-  ): View? {
-    val layout = inflater.inflate(R.layout.account_saml20, container, false)
-    this.webView = layout.findViewById(R.id.saml20WebView)
-    this.progress = layout.findViewById(R.id.saml20progressBar)
-    return layout
+  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    super.onViewCreated(view, savedInstanceState)
+    this.progress = view.findViewById(R.id.saml20progressBar)
+    this.webView = view.findViewById(R.id.saml20WebView)
+    WebViewUtilities.setForcedDark(this.webView.settings, resources.configuration)
   }
 
   override fun onStart() {
     super.onStart()
-
-    this.viewModel =
-      ViewModelProviders.of(
-        this,
-        AccountSAML20ViewModelFactory(
-          profiles = this.profiles,
-          account = this.parameters.accountID,
-          description = this.parameters.authenticationDescription,
-          resources = this.resources,
-          webViewDataDir = this.requireContext().getDir("webview", Context.MODE_PRIVATE)
-        )
-      ).get(AccountSAML20ViewModel::class.java)
 
     this.eventSubscriptions.add(
       this.viewModel.events.subscribe(
@@ -127,13 +93,21 @@ class AccountSAML20Fragment : Fragment() {
     this.webView.loadUrl(this.constructLoginURI())
   }
 
-  private fun onSAMLEvent(event: AccountSAML20Event) {
+  private fun constructLoginURI(): String {
+    return buildString {
+      this.append(this@AccountSAML20Fragment.parameters.authenticationDescription.authenticate)
+      this.append("&redirect_uri=")
+      this.append(AccountSAML20.callbackURI)
+    }
+  }
+
+  private fun onSAMLEvent(event: AccountSAML20InternalEvent) {
     return when (event) {
-      is AccountSAML20Event.WebViewClientReady ->
+      is AccountSAML20InternalEvent.WebViewClientReady ->
         this.onWebViewClientReady()
-      is AccountSAML20Event.Failed ->
+      is AccountSAML20InternalEvent.Failed ->
         this.onSAMLEventFailed(event)
-      is AccountSAML20Event.AccessTokenObtained ->
+      is AccountSAML20InternalEvent.AccessTokenObtained ->
         this.onSAMLEventAccessTokenObtained()
     }
   }
@@ -143,24 +117,19 @@ class AccountSAML20Fragment : Fragment() {
   }
 
   private fun onSAMLEventAccessTokenObtained() {
-    this.uiThread.runOnUIThread {
-      this.findNavigationController().popBackStack()
-      Unit
-    }
+    this.listener.post(AccountSAML20Event.AccessTokenObtained)
   }
 
-  private fun onSAMLEventFailed(event: AccountSAML20Event.Failed) {
-    this.uiThread.runOnUIThread {
-      val newDialog =
-        AlertDialog.Builder(this.requireActivity())
-          .setTitle(R.string.accountCreationFailed)
-          .setMessage(R.string.accountCreationFailedMessage)
-          .setPositiveButton(R.string.accountsDetails) { dialog, _ ->
-            this.showErrorPage(this.makeLoginTaskSteps(event.message))
-            dialog.dismiss()
-          }.create()
-      newDialog.show()
-    }
+  private fun onSAMLEventFailed(event: AccountSAML20InternalEvent.Failed) {
+    val newDialog =
+      AlertDialog.Builder(this.requireActivity())
+        .setTitle(R.string.accountCreationFailed)
+        .setMessage(R.string.accountCreationFailedMessage)
+        .setPositiveButton(R.string.accountsDetails) { dialog, _ ->
+          this.showErrorPage(this.makeLoginTaskSteps(event.message))
+          dialog.dismiss()
+        }.create()
+    newDialog.show()
   }
 
   private fun makeLoginTaskSteps(
@@ -172,37 +141,25 @@ class AccountSAML20Fragment : Fragment() {
     return taskRecorder.finishFailure<AccountType>().steps
   }
 
-  @UiThread
   private fun showErrorPage(taskSteps: List<TaskStep>) {
-    this.uiThread.checkIsUIThread()
-
     val parameters =
       ErrorPageParameters(
-        emailAddress = this.buildConfig.supportErrorReportEmailAddress,
+        emailAddress = this.viewModel.supportEmailAddress,
         body = "",
         subject = "[simplye-error-report]",
         attributes = sortedMapOf(),
         taskSteps = taskSteps
       )
 
-    this.findNavigationController().openErrorPage(parameters)
+    this.listener.post(AccountSAML20Event.OpenErrorPage(parameters))
   }
 
   private fun onSAMLEventException(exception: Throwable) {
-    this.uiThread.runOnUIThread {
-      this.showErrorPage(this.makeLoginTaskSteps(exception.message ?: exception.javaClass.name))
-    }
+    this.showErrorPage(this.makeLoginTaskSteps(exception.message ?: exception.javaClass.name))
   }
 
   private fun onSAMLEventFinished() {
     // Don't care
-  }
-
-  private fun findNavigationController(): AccountNavigationControllerType {
-    return NavigationControllers.find(
-      activity = this.requireActivity(),
-      interfaceType = AccountNavigationControllerType::class.java
-    )
   }
 
   override fun onStop() {

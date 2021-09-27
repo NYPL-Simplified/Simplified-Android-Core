@@ -1,0 +1,25 @@
+{
+  "drm" : [
+    {
+      "drm:clientToken" : "NYNYPL|123|asds|asdasd",
+      "drm:scheme" : "http://librarysimplified.org/terms/drm/scheme/ACS",
+      "drm:vendor" : "NYPL"
+    }
+  ],
+  "links" : [
+    {
+      "href" : "https://example.com/devices",
+      "rel" : "http://librarysimplified.org/terms/drm/rel/devices"
+    },
+    {
+      "href" : "https://circulation.librarysimplified.org/NYNYPL/annotations/",
+      "rel" : "http://www.w3.org/ns/oa#annotationService",
+      "type" : "application/ld+json; profile=\"http://www.w3.org/ns/anno.jsonld\""
+    }
+  ],
+  "settings" : {
+    "simplified:synchronize_annotations" : true
+  },
+  "simplified:authorization_expires" : "2022-08-06T00:00:00Z",
+  "simplified:authorization_identifier" : "123123"
+}

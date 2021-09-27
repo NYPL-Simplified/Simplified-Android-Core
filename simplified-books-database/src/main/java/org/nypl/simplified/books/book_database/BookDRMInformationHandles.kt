@@ -3,6 +3,7 @@ package org.nypl.simplified.books.book_database
 import org.nypl.simplified.books.api.BookDRMKind
 import org.nypl.simplified.books.book_database.api.BookDRMInformationHandle
 import org.nypl.simplified.books.book_database.api.BookFormats
+import org.nypl.simplified.books.formats.api.BookFormatSupportType
 import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.files.FileUtilities
 import org.slf4j.LoggerFactory
@@ -26,8 +27,9 @@ object BookDRMInformationHandles {
   fun open(
     directory: File,
     format: BookFormats.BookFormatDefinition,
+    bookFormats: BookFormatSupportType,
     onUpdate: () -> Unit
-  ): BookDRMInformationHandle {
+  ): BookDRMInformationHandle? {
     val drmInfoFile =
       File(directory, "${format.shortName}-drm.txt")
 
@@ -41,7 +43,31 @@ object BookDRMInformationHandles {
         this.inferDRMKind(directory, format)
       }
 
-    return this.create(directory, format, drmKind, onUpdate)
+    /*
+     * Create an initial DRM handle, and then use it to delete the "unsupported" data.
+     */
+
+    val createInitial = this.create(directory, format, drmKind) { }
+    return if (bookFormats.isDRMSupported(drmKind)) {
+      this.create(directory, format, drmKind, onUpdate)
+    } else {
+      try {
+        FileUtilities.fileDelete(drmInfoFile)
+      } catch (e: Exception) {
+        this.logger.error("unable to delete DRM file: ", e)
+      }
+
+      when (createInitial) {
+        is BookDRMInformationHandle.ACSHandle -> {
+          createInitial.setACSMFile(null)
+          createInitial.setAdobeRightsInformation(null)
+          null
+        }
+        is BookDRMInformationHandle.AxisHandle -> null
+        is BookDRMInformationHandle.LCPHandle -> null
+        is BookDRMInformationHandle.NoneHandle -> null
+      }
+    }
   }
 
   private fun inferDRMKind(

@@ -71,7 +71,7 @@ sealed class Link {
     override val duration: Double? = null,
     override val bitrate: Double? = null
   ) : Link() {
-    override val hrefURI: URI?
+    override val hrefURI: URI
       get() = this.href
   }
 

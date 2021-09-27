@@ -58,6 +58,11 @@ then
   fatal "${OPENEBOOKS_CREDENTIALS} does not exist, or is not a directory"
 fi
 
+cp "${CREDENTIALS_PATH}/PlayStore/play_store_api_key.json" "simplified-app-simplye/play_store_api_key.json" ||
+  fatal "could not copy Play Store key"
+cp "${CREDENTIALS_PATH}/PlayStore/play_store_api_key.json" "simplified-app-openebooks/play_store_api_key.json" ||
+  fatal "could not copy Play Store key"
+
 cat >> "${HOME}/.gradle/gradle.properties" <<EOF
 org.librarysimplified.drm.enabled=true
 
@@ -67,4 +72,12 @@ org.librarysimplified.nexus.password=${NYPL_NEXUS_PASSWORD}
 
 org.librarysimplified.app.assets.openebooks=${OPENEBOOKS_CREDENTIALS}
 org.librarysimplified.app.assets.simplye=${SIMPLYE_CREDENTIALS}
+EOF
+
+#------------------------------------------------------------------------
+# Addding slack webhook to environment
+SLACK_WEBHOOK_URL=$(<.ci/credentials/SimplyE/slack-webhook.url) || 
+  fatal "Slack Webhook url not found."
+cat >> ".env" <<EOF
+SLACK_WEBHOOK_URL="${SLACK_WEBHOOK_URL}"
 EOF

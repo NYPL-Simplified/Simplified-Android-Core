@@ -33,6 +33,7 @@ import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.books.book_database.api.BookDatabaseException
 import org.nypl.simplified.books.book_database.api.BookDatabaseFactoryType
 import org.nypl.simplified.books.book_database.api.BookDatabaseType
+import org.nypl.simplified.books.formats.api.BookFormatSupportType
 import org.nypl.simplified.files.DirectoryUtilities
 import org.nypl.simplified.files.FileLocking
 import org.nypl.simplified.files.FileUtilities
@@ -62,7 +63,8 @@ class AccountsDatabase private constructor(
   @GuardedBy("accountsLock")
   private val accountsByProvider: SortedMap<URI, Account>,
   private val credentials: AccountAuthenticationCredentialsStoreType,
-  private val bookDatabases: BookDatabaseFactoryType
+  private val bookDatabases: BookDatabaseFactoryType,
+  private val bookFormatSupport: BookFormatSupportType,
 ) : AccountsDatabaseType {
 
   private val logger =
@@ -131,7 +133,12 @@ class AccountsDatabase private constructor(
       accountDir.mkdirs()
 
       val bookDatabase =
-        this.bookDatabases.openDatabase(this.context, accountId, booksDir)
+        this.bookDatabases.openDatabase(
+          context = this.context,
+          formats = this.bookFormatSupport,
+          owner = accountId,
+          directory = booksDir
+        )
 
       val preferences =
         AccountPreferences(
@@ -294,17 +301,21 @@ class AccountsDatabase private constructor(
       }
 
     override fun setLoginState(state: AccountLoginState) {
+      val oldState = this.loginStateActual
+
       synchronized(this.descriptionLock) {
         this.loginStateActual = state
       }
 
-      this.accountEvents.onNext(
-        AccountEventLoginStateChanged(
-          message = "",
-          accountID = this.id,
-          state = state
+      if (state != oldState) {
+        this.accountEvents.onNext(
+          AccountEventLoginStateChanged(
+            message = "",
+            accountID = this.id,
+            state = state
+          )
         )
-      )
+      }
 
       val credentials = state.credentials
       if (credentials != null) {
@@ -434,6 +445,7 @@ class AccountsDatabase private constructor(
       context: Context,
       accountEvents: Subject<AccountEvent>,
       bookDatabases: BookDatabaseFactoryType,
+      bookFormatSupport: BookFormatSupportType,
       accountCredentials: AccountAuthenticationCredentialsStoreType,
       accountProviders: AccountProviderRegistryType,
       directory: File
@@ -462,6 +474,7 @@ class AccountsDatabase private constructor(
         accounts = accounts,
         accountsByProvider = accountsByProvider,
         bookDatabases = bookDatabases,
+        bookFormatSupport = bookFormatSupport,
         context = context,
         directory = directory,
         errors = errors,
@@ -485,7 +498,8 @@ class AccountsDatabase private constructor(
         accounts = accounts,
         accountsByProvider = accountsByProvider,
         credentials = accountCredentials,
-        bookDatabases = bookDatabases
+        bookDatabases = bookDatabases,
+        bookFormatSupport = bookFormatSupport
       )
     }
 
@@ -518,6 +532,7 @@ class AccountsDatabase private constructor(
       accountCredentials: AccountAuthenticationCredentialsStoreType,
       accountEvents: Subject<AccountEvent>,
       bookDatabases: BookDatabaseFactoryType,
+      bookFormatSupport: BookFormatSupportType,
       context: Context,
       directory: File,
       errors: MutableList<Exception>,
@@ -535,6 +550,7 @@ class AccountsDatabase private constructor(
               accountIdName = accountIdName,
               accountProviderResolver = accountProviderResolver,
               bookDatabases = bookDatabases,
+              bookFormatSupport = bookFormatSupport,
               context = context,
               credentialsStore = accountCredentials,
               directory = directory,
@@ -655,6 +671,7 @@ class AccountsDatabase private constructor(
       accountIdName: String,
       accountProviderResolver: (String) -> AccountProviderType?,
       bookDatabases: BookDatabaseFactoryType,
+      bookFormatSupport: BookFormatSupportType,
       context: Context,
       credentialsStore: AccountAuthenticationCredentialsStoreType,
       directory: File,
@@ -672,7 +689,13 @@ class AccountsDatabase private constructor(
 
       return try {
         val bookDatabase =
-          bookDatabases.openDatabase(context, accountId, booksDir)
+          bookDatabases.openDatabase(
+            context = context,
+            formats = bookFormatSupport,
+            owner = accountId,
+            directory = booksDir
+          )
+
         val accountDescription =
           AccountDescriptionJSON.deserializeFromFile(
             objectMapper,

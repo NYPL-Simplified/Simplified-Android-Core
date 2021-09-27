@@ -2,7 +2,6 @@ package org.nypl.simplified.ui.catalog
 
 import androidx.lifecycle.ViewModel
 import io.reactivex.disposables.Disposable
-import org.librarysimplified.services.api.ServiceDirectoryType
 import org.nypl.simplified.accounts.api.AccountEventLoginStateChanged
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggedIn
@@ -19,8 +18,6 @@ import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
-import org.nypl.simplified.taskrecorder.api.TaskRecorder
-import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.slf4j.LoggerFactory
 import java.util.concurrent.ConcurrentHashMap
 
@@ -30,18 +27,14 @@ import java.util.concurrent.ConcurrentHashMap
  */
 
 class CatalogBorrowViewModel(
-  private val services: ServiceDirectoryType
+  private val profilesController: ProfilesControllerType,
+  private val booksController: BooksControllerType,
+  private val bookRegistry: BookRegistryType
+
 ) : ViewModel() {
 
   private val logger =
     LoggerFactory.getLogger(CatalogBorrowViewModel::class.java)
-
-  private val booksController: BooksControllerType =
-    this.services.requireService(BooksControllerType::class.java)
-  private val profilesController: ProfilesControllerType =
-    this.services.requireService(ProfilesControllerType::class.java)
-  private val bookRegistry: BookRegistryType =
-    this.services.requireService(BookRegistryType::class.java)
 
   private val bookBorrowAttempts: ConcurrentHashMap<BookTarget, Disposable> =
     ConcurrentHashMap()
@@ -240,66 +233,37 @@ class CatalogBorrowViewModel(
     book: Book
   ) {
     this.logger.debug("reserving: {}", book.id)
-    return try {
-      this.booksController.bookBorrow(
-        accountID = book.account,
-        entry = book.entry
-      )
-      Unit
-    } catch (e: Throwable) {
-      this.logger.error("failed to start borrow task: ", e)
-      this.bookRegistry.updateIfStatusIsMoreImportant(
-        BookWithStatus(book, BookStatus.FailedLoan(book.id, this.failMinimal(e)))
-      )
-    }
+    this.booksController.bookBorrow(
+      accountID = book.account,
+      entry = book.entry
+    )
   }
 
   private fun tryRevokeAuthenticated(
     book: Book
   ) {
     this.logger.debug("revoking: {}", book.id)
-    return try {
-      this.booksController.bookRevoke(
-        accountID = book.account,
-        bookId = book.id
-      )
-      Unit
-    } catch (e: Throwable) {
-      this.logger.error("failed to start revocation task: ", e)
-      this.bookRegistry.updateIfStatusIsMoreImportant(
-        BookWithStatus(book, BookStatus.FailedRevoke(book.id, this.failMinimal(e)))
-      )
-    }
+    this.booksController.bookRevoke(
+      accountID = book.account,
+      bookId = book.id
+    )
   }
 
   private fun tryBorrowAuthenticated(
     book: Book
   ) {
     this.logger.debug("borrowing: {}", book.id)
-    return try {
-      this.booksController.bookBorrow(
-        accountID = book.account,
-        entry = book.entry
-      )
-      Unit
-    } catch (e: Throwable) {
-      this.logger.error("failed to start borrow task: ", e)
-      this.bookRegistry.updateIfStatusIsMoreImportant(
-        BookWithStatus(book, BookStatus.FailedLoan(book.id, this.failMinimal(e)))
-      )
-    }
+    this.booksController.bookBorrow(
+      accountID = book.account,
+      entry = book.entry
+    )
   }
 
   fun tryDismissBorrowError(
     accountID: AccountID,
     bookID: BookID
   ) {
-    this.logger.debug("dismissing borrow error: {}", bookID)
-    try {
-      this.booksController.bookBorrowFailedDismiss(accountID, bookID)
-    } catch (e: Throwable) {
-      this.logger.error("failed to dismiss task error: ", e)
-    }
+    this.booksController.bookBorrowFailedDismiss(accountID, bookID)
   }
 
   fun tryDismissRevokeError(
@@ -307,23 +271,7 @@ class CatalogBorrowViewModel(
     bookID: BookID
   ) {
     this.logger.debug("dismissing revoke error: {}", bookID)
-    try {
-      this.booksController.bookRevokeFailedDismiss(accountID, bookID)
-    } catch (e: Throwable) {
-      this.logger.error("failed to dismiss revoke error: ", e)
-    }
-  }
-
-  fun tryCancelDownload(
-    accountID: AccountID,
-    bookID: BookID
-  ) {
-    this.logger.debug("cancelling: {}", bookID)
-    try {
-      this.booksController.bookDownloadCancel(accountID, bookID)
-    } catch (e: Throwable) {
-      this.logger.error("failed to cancel download: ", e)
-    }
+    this.booksController.bookRevokeFailedDismiss(accountID, bookID)
   }
 
   fun tryDelete(
@@ -331,23 +279,6 @@ class CatalogBorrowViewModel(
     bookID: BookID
   ) {
     this.logger.debug("deleting: {}", bookID)
-    try {
-      this.booksController.bookDelete(accountID, bookID)
-    } catch (e: Throwable) {
-      this.logger.error("failed to start deletion: ", e)
-    }
-  }
-
-  private fun failMinimal(
-    exception: Throwable
-  ): TaskResult.Failure<Unit> {
-    val recorder = TaskRecorder.create()
-    recorder.beginNewStep("Starting revocation task...")
-    recorder.currentStepFailed(
-      message = exception.message ?: exception.javaClass.canonicalName ?: "unknown",
-      errorCode = "revokeFailed",
-      exception = exception
-    )
-    return recorder.finishFailure()
+    this.booksController.bookDelete(accountID, bookID)
   }
 }

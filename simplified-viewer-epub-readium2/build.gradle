@@ -1,16 +1,18 @@
 dependencies {
+  implementation project(":simplified-accessibility")
+  implementation project(":simplified-analytics-api")
   implementation project(":simplified-feeds-api")
   implementation project(":simplified-reader-bookmarks-api")
   implementation project(":simplified-services-api")
   implementation project(":simplified-ui-thread-api")
   implementation project(":simplified-viewer-spi")
-  implementation project(":simplified-analytics-api")
 
   implementation libraries.androidx_activity
   implementation libraries.androidx_appcompat
   implementation libraries.androidx_lifecycle
   implementation libraries.androidx_lifecycle_viewmodel
   implementation libraries.kotlin_stdlib
+  implementation libraries.kotlin_reflect
   implementation libraries.nypl_readium2_api
   implementation libraries.nypl_readium2_vanilla
   implementation libraries.nypl_readium2_views

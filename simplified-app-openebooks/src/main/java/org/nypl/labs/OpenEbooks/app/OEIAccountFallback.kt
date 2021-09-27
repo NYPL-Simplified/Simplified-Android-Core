@@ -34,7 +34,6 @@ class OEIAccountFallback : AccountProviderFallbackType {
   override fun get(): AccountProviderType {
     return AccountProvider(
       addAutomatically = true,
-      annotationsURI = null,
       authenticationDocumentURI = URI.create("https://circulation.openebooks.us/USOEI/authentication_document"),
       authentication = this.basicAuth,
       authenticationAlternatives = listOf(this.cleverAuth),
@@ -54,7 +53,8 @@ class OEIAccountFallback : AccountProviderFallbackType {
       subtitle = "",
       supportEmail = null,
       supportsReservations = false,
-      updated = DateTime.parse("2020-05-10T00:00:00Z")
+      updated = DateTime.parse("2020-05-10T00:00:00Z"),
+      location = null
     )
   }
 }

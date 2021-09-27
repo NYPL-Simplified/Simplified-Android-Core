@@ -27,7 +27,6 @@ import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryEvent
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.books.api.BookID
-import org.nypl.simplified.books.api.BookIDs
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookWithStatus
@@ -36,6 +35,7 @@ import org.nypl.simplified.books.borrowing.BorrowRequirements
 import org.nypl.simplified.books.borrowing.BorrowTask
 import org.nypl.simplified.books.controller.api.BookRevokeStringResourcesType
 import org.nypl.simplified.books.controller.api.BooksControllerType
+import org.nypl.simplified.books.formats.api.BookFormatSupportType
 import org.nypl.simplified.crashlytics.api.CrashlyticsServiceType
 import org.nypl.simplified.feeds.api.Feed
 import org.nypl.simplified.feeds.api.FeedEntry
@@ -43,6 +43,7 @@ import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.futures.FluentFutureExtensions
 import org.nypl.simplified.futures.FluentFutureExtensions.flatMap
 import org.nypl.simplified.futures.FluentFutureExtensions.map
+import org.nypl.simplified.metrics.api.MetricServiceType
 import org.nypl.simplified.opds.auth_document.api.AuthenticationDocumentParsersType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.opds.core.OPDSFeedParserType
@@ -70,7 +71,6 @@ import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.slf4j.LoggerFactory
 import java.io.File
-import java.io.IOException
 import java.net.URI
 import java.util.SortedMap
 import java.util.concurrent.Callable
@@ -108,6 +108,8 @@ class Controller private constructor(
     this.services.requireService(AuthenticationDocumentParsersType::class.java)
   private val bookRegistry =
     this.services.requireService(BookRegistryType::class.java)
+  private val bookFormatSupport =
+    this.services.requireService(BookFormatSupportType::class.java)
   private val feedLoader =
     this.services.requireService(FeedLoaderType::class.java)
   private val feedParser =
@@ -128,6 +130,8 @@ class Controller private constructor(
     this.services.requireService(ProfileIdleTimerType::class.java)
   private val crashlytics =
     this.services.optionalService(CrashlyticsServiceType::class.java)
+  private val metrics =
+    this.services.optionalService(MetricServiceType::class.java)
 
   private val temporaryDirectory =
     File(this.cacheDirectory, "tmp")
@@ -201,7 +205,7 @@ class Controller private constructor(
       this.logger.debug("triggering syncing of all accounts in profile")
       this.profiles.currentProfileUnsafe()
         .accounts()
-        .values
+        .keys
         .forEach { this.booksSync(it) }
     } catch (e: Exception) {
       this.logger.error("failed to trigger book syncing: ", e)
@@ -217,7 +221,6 @@ class Controller private constructor(
       if (crash != null) {
         ControllerCrashlytics.configureCrashlytics(
           profile = profile,
-          accountProviders = accountProviders,
           crashlytics = crash
         )
       }
@@ -319,15 +322,17 @@ class Controller private constructor(
   }
 
   override fun profileCreate(
+    displayName: String,
     accountProvider: AccountProviderType,
-    description: ProfileDescription
+    descriptionUpdate: (ProfileDescription) -> ProfileDescription
   ): FluentFuture<ProfileCreationEvent> {
     return this.submitTask(
       ProfileCreationTask(
+        displayName = displayName,
         profiles = this.profiles,
         profileEvents = this.profileEvents,
         accountProvider = accountProvider,
-        description = description
+        descriptionUpdate = descriptionUpdate
       )
     )
   }
@@ -376,9 +381,7 @@ class Controller private constructor(
     return when (result) {
       is TaskResult.Success -> {
         this.logger.debug("logging in succeeded: syncing account")
-        val profile = this.profileCurrent()
-        val account = profile.account(accountID)
-        this.booksSync(account).map { result }
+        this.booksSync(accountID).map { result }
       }
       is TaskResult.Failure -> {
         this.logger.debug("logging in didn't succeed: not syncing account")
@@ -396,7 +399,8 @@ class Controller private constructor(
         accountProviderID = provider,
         accountProviders = this.accountProviders,
         profiles = this.profiles,
-        strings = this.profileAccountCreationStringResources
+        strings = this.profileAccountCreationStringResources,
+        metrics = this.metrics
       )
     )
   }
@@ -412,7 +416,8 @@ class Controller private constructor(
         opdsURI = opdsFeed,
         opdsFeedParser = this.feedParser,
         profiles = this.profiles,
-        strings = this.profileAccountCreationStringResources
+        strings = this.profileAccountCreationStringResources,
+        metrics = this.metrics
       )
     )
   }
@@ -426,7 +431,8 @@ class Controller private constructor(
         accountProviderID = provider,
         accountProviders = this.accountProviders,
         profiles = this.profiles,
-        strings = this.profileAccountCreationStringResources
+        strings = this.profileAccountCreationStringResources,
+        metrics = this.metrics
       )
     )
   }
@@ -440,7 +446,8 @@ class Controller private constructor(
         accountProviderID = provider,
         profiles = this.profiles,
         profileEvents = this.profileEvents,
-        strings = this.profileAccountDeletionStringResources
+        strings = this.profileAccountDeletionStringResources,
+        metrics = this.metrics
       )
     )
   }
@@ -476,6 +483,7 @@ class Controller private constructor(
         adeptExecutor = this.adobeDrm,
         account = account,
         bookRegistry = this.bookRegistry,
+        feedLoader = this.feedLoader,
         patronParsers = this.patronUserProfileParsers,
         http = this.lsHttp,
         logoutStrings = this.accountLogoutStringResources,
@@ -517,6 +525,7 @@ class Controller private constructor(
   ): FluentFuture<Feed.FeedWithoutGroups> {
     return this.submitTask(
       ProfileFeedTask(
+        bookFormatSupport = this.bookFormatSupport,
         bookRegistry = this.bookRegistry,
         profiles = this,
         request = request
@@ -539,38 +548,16 @@ class Controller private constructor(
     return this.profileIdleTimer
   }
 
-  private fun accountForActual(
-    accountID: AccountID
-  ): AccountType {
-    this.logger.debug("account for: {}", accountID.uuid)
-    return try {
-      val profileCurrent = this.profileCurrent()
-      profileCurrent.account(accountID)
-    } catch (e: Throwable) {
-      this.logger.error("failed to fetch account: ", e)
-      throw IOException(e)
-    }
-  }
-
-  private fun accountFor(
-    accountID: AccountID
-  ): FluentFuture<AccountType> {
-    return this.submitTask {
-      return@submitTask this.accountForActual(accountID)
-    }
-  }
-
   override fun bookBorrow(
     accountID: AccountID,
     entry: OPDSAcquisitionFeedEntry
   ): FluentFuture<TaskResult<*>> {
-    this.publishRequestingDownload(BookIDs.newFromOPDSEntry(entry))
     return this.submitTask(
       Callable<TaskResult<*>> {
         val request =
           BorrowRequest.Start(
             accountId = accountID,
-            profile = this.profileCurrent().id,
+            profileId = this.profileCurrent().id,
             opdsAcquisitionFeedEntry = entry
           )
         BorrowTask.createBorrowTask(this.borrowRequirements, request)
@@ -579,44 +566,19 @@ class Controller private constructor(
     )
   }
 
-  private fun publishRequestingDownload(bookID: BookID) {
-    this.bookRegistry.bookOrNull(bookID)?.let { bookWithStatus ->
-      this.bookRegistry.update(
-        BookWithStatus(
-          book = bookWithStatus.book,
-          status = BookStatus.RequestingDownload(bookID)
-        )
-      )
-    }
-  }
-
-  override fun bookBorrowFailedDismiss(
-    account: AccountType,
-    bookID: BookID
-  ) {
-    this.submitTask(
-      BookBorrowFailedDismissTask(
-        bookDatabase = account.bookDatabase,
-        bookRegistry = this.bookRegistry,
-        id = bookID
-      )
-    )
-  }
-
   override fun bookBorrowFailedDismiss(
     accountID: AccountID,
     bookID: BookID
   ) {
-    this.accountFor(accountID).map { account ->
-      this.bookBorrowFailedDismiss(account, bookID)
-    }
-  }
-
-  override fun bookDownloadCancel(
-    account: AccountType,
-    bookID: BookID
-  ) {
-    this.borrows[bookID]?.cancel()
+    this.submitTask(
+      BookBorrowFailedDismissTask(
+        accountID = accountID,
+        profileID = this.profileCurrent().id,
+        profiles = this.profiles,
+        bookID = bookID,
+        bookRegistry = this.bookRegistry,
+      )
+    )
   }
 
   override fun bookDownloadCancel(
@@ -627,48 +589,28 @@ class Controller private constructor(
   }
 
   override fun bookReport(
-    account: AccountType,
+    accountID: AccountID,
     feedEntry: FeedEntry.FeedEntryOPDS,
     reportType: String
-  ): FluentFuture<Unit> {
-    return this.submitTask(
-      BookReportTask(
-        http = this.lsHttp,
-        account = account,
-        feedEntry = feedEntry,
-        reportType = reportType
-      )
-    )
+  ): FluentFuture<TaskResult<Unit>> {
+    throw NotImplementedError()
   }
 
   override fun booksSync(
-    account: AccountType
-  ): FluentFuture<Unit> {
+    accountID: AccountID
+  ): FluentFuture<TaskResult<Unit>> {
     return this.submitTask(
       BookSyncTask(
-        account = account,
+        accountID = accountID,
+        profileID = this.profileCurrent().id,
+        profiles = this.profiles,
         accountRegistry = this.accountProviders,
         bookRegistry = this.bookRegistry,
         booksController = this,
         feedParser = this.feedParser,
-        http = this.lsHttp
-      )
-    )
-  }
-
-  override fun bookRevoke(
-    account: AccountType,
-    bookId: BookID
-  ): FluentFuture<TaskResult<Unit>> {
-    this.publishRequestingDelete(bookId)
-    return this.submitTask(
-      BookRevokeTask(
-        account = account,
-        adobeDRM = this.adobeDrm,
-        bookID = bookId,
-        bookRegistry = this.bookRegistry,
         feedLoader = this.feedLoader,
-        revokeStrings = this.revokeStrings
+        patronParsers = this.patronUserProfileParsers,
+        http = this.lsHttp
       )
     )
   }
@@ -678,37 +620,32 @@ class Controller private constructor(
     bookId: BookID
   ): FluentFuture<TaskResult<Unit>> {
     this.publishRequestingDelete(bookId)
-    return this.accountFor(accountID).flatMap { account ->
-      this.bookRevoke(account, bookId)
-    }
-  }
-
-  override fun bookDelete(
-    account: AccountID,
-    bookId: BookID
-  ): FluentFuture<Unit> {
-    this.publishRequestingDelete(bookId)
     return this.submitTask(
-      BookDeleteTask(
-        accountId = account,
+      BookRevokeTask(
+        accountID = accountID,
+        profileID = this.profileCurrent().id,
+        profiles = this.profiles,
+        adobeDRM = this.adobeDrm,
+        bookID = bookId,
         bookRegistry = this.bookRegistry,
-        bookId = bookId,
-        profiles = this.profiles
+        feedLoader = this.feedLoader,
+        revokeStrings = this.revokeStrings
       )
     )
   }
 
   override fun bookDelete(
-    account: AccountType,
+    accountID: AccountID,
     bookId: BookID
-  ): FluentFuture<Unit> {
+  ): FluentFuture<TaskResult<Unit>> {
     this.publishRequestingDelete(bookId)
     return this.submitTask(
       BookDeleteTask(
-        accountId = account.id,
+        accountID = accountID,
+        profileID = this.profileCurrent().id,
+        profiles = this.profiles,
+        bookID = bookId,
         bookRegistry = this.bookRegistry,
-        bookId = bookId,
-        profiles = this.profiles
       )
     )
   }
@@ -727,21 +664,14 @@ class Controller private constructor(
   override fun bookRevokeFailedDismiss(
     accountID: AccountID,
     bookID: BookID
-  ): FluentFuture<Unit> {
-    return this.accountFor(accountID).flatMap { account ->
-      this.bookRevokeFailedDismiss(account, bookID)
-    }
-  }
-
-  override fun bookRevokeFailedDismiss(
-    account: AccountType,
-    bookID: BookID
-  ): FluentFuture<Unit> {
+  ): FluentFuture<TaskResult<Unit>> {
     return this.submitTask(
       BookRevokeFailedDismissTask(
-        bookDatabase = account.bookDatabase,
+        accountID = accountID,
+        profileID = this.profileCurrent().id,
+        profiles = this.profiles,
+        bookID = bookID,
         bookRegistry = this.bookRegistry,
-        bookId = bookID
       )
     )
   }

@@ -2,351 +2,51 @@ package org.nypl.simplified.main
 
 import android.app.ActionBar
 import android.content.Intent
-import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
-import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentManager.OnBackStackChangedListener
-import androidx.lifecycle.ViewModelProviders
-import com.google.common.util.concurrent.ListenableFuture
-import com.google.common.util.concurrent.ListeningExecutorService
-import com.google.common.util.concurrent.ListeningScheduledExecutorService
-import com.io7m.junreachable.UnreachableCodeException
-import io.reactivex.Observable
-import org.joda.time.DateTime
-import org.librarysimplified.documents.DocumentStoreType
-import org.librarysimplified.documents.EULAType
+import androidx.fragment.app.commit
+import androidx.lifecycle.ViewModelProvider
 import org.librarysimplified.services.api.Services
-import org.nypl.simplified.accessibility.AccessibilityService
-import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountID
-import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
-import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
-import org.nypl.simplified.books.book_registry.BookRegistryType
-import org.nypl.simplified.boot.api.BootEvent
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
-import org.nypl.simplified.migration.api.Migrations
-import org.nypl.simplified.migration.api.MigrationsType
-import org.nypl.simplified.migration.spi.MigrationReport
-import org.nypl.simplified.migration.spi.MigrationServiceDependencies
-import org.nypl.simplified.navigation.api.NavigationControllerDirectoryType
-import org.nypl.simplified.navigation.api.NavigationControllerType
-import org.nypl.simplified.navigation.api.NavigationControllers
+import org.nypl.simplified.listeners.api.ListenerRepository
+import org.nypl.simplified.listeners.api.listenerRepositories
 import org.nypl.simplified.oauth.OAuthCallbackIntentParsing
 import org.nypl.simplified.oauth.OAuthParseResult
-import org.nypl.simplified.profiles.api.ProfileDateOfBirth
-import org.nypl.simplified.profiles.api.ProfileDescription
-import org.nypl.simplified.profiles.api.ProfilesDatabaseType
+import org.nypl.simplified.profiles.api.ProfileID
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_DISABLED
 import org.nypl.simplified.profiles.api.ProfilesDatabaseType.AnonymousProfileEnabled.ANONYMOUS_PROFILE_ENABLED
-import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest
 import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest.OAuthWithIntermediaryComplete
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
-import org.nypl.simplified.reports.Reports
-import org.nypl.simplified.taskrecorder.api.TaskRecorder
-import org.nypl.simplified.taskrecorder.api.TaskResult
-import org.nypl.simplified.threads.NamedThreadPools
-import org.nypl.simplified.ui.accounts.AccountFragmentParameters
-import org.nypl.simplified.ui.accounts.AccountListRegistryFragment
-import org.nypl.simplified.ui.accounts.AccountNavigationControllerType
-import org.nypl.simplified.ui.announcements.AnnouncementsController
-import org.nypl.simplified.ui.accounts.saml20.AccountSAML20FragmentParameters
 import org.nypl.simplified.ui.branding.BrandingSplashServiceType
-import org.nypl.simplified.ui.catalog.AgeGateDialog
-import org.nypl.simplified.ui.catalog.CatalogNavigationControllerType
-import org.nypl.simplified.ui.errorpage.ErrorPageListenerType
-import org.nypl.simplified.ui.errorpage.ErrorPageParameters
+import org.nypl.simplified.ui.onboarding.OnboardingEvent
+import org.nypl.simplified.ui.onboarding.OnboardingFragment
+import org.nypl.simplified.ui.profiles.ProfileModificationDefaultFragment
+import org.nypl.simplified.ui.profiles.ProfileModificationEvent
+import org.nypl.simplified.ui.profiles.ProfileModificationFragmentParameters
+import org.nypl.simplified.ui.profiles.ProfileModificationFragmentServiceType
+import org.nypl.simplified.ui.profiles.ProfileSelectionEvent
 import org.nypl.simplified.ui.profiles.ProfileSelectionFragment
-import org.nypl.simplified.ui.profiles.ProfilesNavigationControllerType
-import org.nypl.simplified.ui.settings.SettingsNavigationControllerType
+import org.nypl.simplified.ui.splash.SplashEvent
 import org.nypl.simplified.ui.splash.SplashFragment
-import org.nypl.simplified.ui.splash.SplashListenerType
-import org.nypl.simplified.ui.splash.SplashParameters
-import org.nypl.simplified.ui.splash.SplashSelectionFragment
-import org.nypl.simplified.ui.theme.ThemeControl
-import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.slf4j.LoggerFactory
-import java.net.URI
 import java.util.ServiceLoader
-import java.util.concurrent.TimeUnit
 
-class MainActivity :
-  AppCompatActivity(),
-  OnBackStackChangedListener,
-  SplashListenerType,
-  ErrorPageListenerType,
-  AgeGateDialog.BirthYearSelectedListener {
+class MainActivity : AppCompatActivity(R.layout.main_host) {
 
   companion object {
     private const val STATE_ACTION_BAR_IS_SHOWING = "ACTION_BAR_IS_SHOWING"
   }
 
   private val logger = LoggerFactory.getLogger(MainActivity::class.java)
+  private val listenerRepo: ListenerRepository<MainActivityListenedEvent, Unit> by listenerRepositories()
 
-  private val migrationExecutor: ListeningScheduledExecutorService =
-    NamedThreadPools.namedThreadPool(1, "migrations", 19)
-
-  private lateinit var mainViewModel: MainFragmentViewModel
-  private lateinit var navigationControllerDirectory: NavigationControllerDirectoryType
-  private lateinit var profilesNavigationController: ProfilesNavigationController
-  private lateinit var configurationService: BuildConfigurationServiceType
-  private lateinit var profilesController: ProfilesControllerType
-  private lateinit var ageGateDialog: AgeGateDialog
-
-  private val navigationController: NavigationControllerType?
-    get() {
-      val controllers = arrayListOf(
-        this.navigationControllerDirectory.navigationControllerIfAvailable(
-          CatalogNavigationControllerType::class.java
-        ),
-        this.navigationControllerDirectory.navigationControllerIfAvailable(
-          AccountNavigationControllerType::class.java
-        ),
-        this.navigationControllerDirectory.navigationControllerIfAvailable(
-          SettingsNavigationControllerType::class.java
-        ),
-        this.navigationControllerDirectory.navigationControllerIfAvailable(
-          ProfilesNavigationControllerType::class.java
-        )
-      )
-      return controllers.filterNotNull().firstOrNull()
-    }
-
-  private fun getSplashService(): BrandingSplashServiceType {
-    return ServiceLoader
-      .load(BrandingSplashServiceType::class.java)
-      .firstOrNull()
-      ?: throw IllegalStateException(
-        "No available services of type ${BrandingSplashServiceType::class.java.canonicalName}"
-      )
-  }
-
-  private fun getSplashParams(): SplashParameters {
-    val migrationReportEmail =
-      this.resources.getString(R.string.featureErrorEmail)
-        .trim()
-        .ifEmpty { null }
-
-    val splashService = getSplashService()
-    return SplashParameters(
-      textColor = ContextCompat.getColor(this, ThemeControl.themeFallback.color),
-      background = Color.WHITE,
-      splashMigrationReportEmail = migrationReportEmail,
-      splashImageResource = splashService.splashImageResource(),
-      splashImageTitleResource = splashService.splashImageTitleResource(),
-      splashImageSeconds = 2L,
-      showLibrarySelection = splashService.shouldShowLibrarySelectionScreen
-    )
-  }
-
-  private fun getAvailableEULA(): EULAType? {
-    return Services.serviceDirectory()
-      .requireService(DocumentStoreType::class.java)
-      .eula
-  }
-
-  private fun doLoginAccount(
-    profilesController: ProfilesControllerType,
-    account: AccountType,
-    credentials: AccountAuthenticationCredentials
-  ): TaskResult<Unit> {
-    this.logger.debug("doLoginAccount")
-
-    val taskRecorder = TaskRecorder.create()
-    taskRecorder.beginNewStep("Logging in...")
-
-    if (account.provider.authenticationAlternatives.isEmpty()) {
-      when (val description = account.provider.authentication) {
-        is AccountProviderAuthenticationDescription.COPPAAgeGate,
-        AccountProviderAuthenticationDescription.Anonymous -> {
-          return taskRecorder.finishSuccess(Unit)
-        }
-        is AccountProviderAuthenticationDescription.Basic -> {
-          when (credentials) {
-            is AccountAuthenticationCredentials.Basic -> {
-              return profilesController.profileAccountLogin(
-                ProfileAccountLoginRequest.Basic(
-                  account.id,
-                  description,
-                  credentials.userName,
-                  credentials.password
-                )
-              ).get(3L, TimeUnit.MINUTES)
-            }
-            is AccountAuthenticationCredentials.OAuthWithIntermediary -> {
-              val message = "Can't use OAuth authentication during migrations."
-              taskRecorder.currentStepFailed(message, "missingInformation")
-              return taskRecorder.finishFailure()
-            }
-            is AccountAuthenticationCredentials.SAML2_0 -> {
-              val message = "Can't use SAML 2.0 authentication during migrations."
-              taskRecorder.currentStepFailed(message, "missingInformation")
-              return taskRecorder.finishFailure()
-            }
-          }
-        }
-        is AccountProviderAuthenticationDescription.OAuthWithIntermediary -> {
-          val message = "Can't use OAuth authentication during migrations."
-          taskRecorder.currentStepFailed(message, "missingInformation")
-          return taskRecorder.finishFailure()
-        }
-        is AccountProviderAuthenticationDescription.SAML2_0 -> {
-          val message = "Can't use SAML 2.0 authentication during migrations."
-          taskRecorder.currentStepFailed(message, "missingInformation")
-          return taskRecorder.finishFailure()
-        }
-      }
-    } else {
-      val message = "Can't determine which authentication method is required."
-      taskRecorder.currentStepFailed(message, "missingInformation")
-      return taskRecorder.finishFailure()
-    }
-  }
-
-  private fun doCreateAccount(
-    profilesController: ProfilesControllerType,
-    provider: URI
-  ): TaskResult<AccountType> {
-    this.logger.debug("doCreateAccount")
-    return profilesController.profileAccountCreateOrReturnExisting(provider)
-      .get(3L, TimeUnit.MINUTES)
-  }
-
-  private fun applicationVersion(): String {
-    return try {
-      val packageInfo = this.packageManager.getPackageInfo(this.packageName, 0)
-      "${packageInfo.packageName} ${packageInfo.versionName} (${packageInfo.versionCode})"
-    } catch (e: Exception) {
-      this.logger.error("could not get package info: ", e)
-      "unknown"
-    }
-  }
-
-  private fun showSplashScreen() {
-    this.logger.debug("showSplashScreen")
-
-    val splashFragment = SplashFragment.newInstance(getSplashParams())
-    this.supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
-    this.supportFragmentManager.beginTransaction()
-      .replace(R.id.mainFragmentHolder, splashFragment, "SPLASH_MAIN")
-      .commit()
-  }
-
-  private fun onStartupFinished() {
-    this.logger.debug("onStartupFinished")
-
-    val services =
-      Services.serviceDirectory()
-    val profilesController =
-      services.requireService(ProfilesControllerType::class.java)
-    val accountProviders =
-      services.requireService(AccountProviderRegistryType::class.java)
-    val splashService = getSplashService()
-
-    this.navigationControllerDirectory.removeNavigationController(
-      AccountNavigationControllerType::class.java
-    )
-
-    return when (profilesController.profileAnonymousEnabled()) {
-      ANONYMOUS_PROFILE_ENABLED -> {
-        val profile = profilesController.profileCurrent()
-        val defaultProvider = accountProviders.defaultProvider
-
-        val hasNonDefaultAccount =
-          profile.accounts().values.count { it.provider.id != defaultProvider.id } > 0
-        this.logger.debug("hasNonDefaultAccount=$hasNonDefaultAccount")
-
-        val shouldShowLibrarySelectionScreen =
-          splashService.shouldShowLibrarySelectionScreen && !profile.preferences().hasSeenLibrarySelectionScreen
-        this.logger.debug("shouldShowLibrarySelectionScreen=$shouldShowLibrarySelectionScreen")
-
-        if (!hasNonDefaultAccount && shouldShowLibrarySelectionScreen) {
-          this.openLibrarySelectionScreen()
-        } else {
-          this.openCatalog()
-        }
-      }
-      ANONYMOUS_PROFILE_DISABLED -> {
-        this.openProfileScreen()
-      }
-    }
-  }
-
-  private fun openLibrarySelectionScreen() {
-    val fragment =
-      SplashSelectionFragment.newInstance(getSplashParams())
-    this.supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
-    this.supportFragmentManager.beginTransaction()
-      .replace(R.id.mainFragmentHolder, fragment, "SPLASH_MAIN")
-      .commit()
-    this.supportActionBar?.hide()
-  }
-
-  private fun openProfileScreen() {
-    this.mainViewModel.clearHistory = true
-
-    val profilesFragment = ProfileSelectionFragment()
-    this.supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
-    this.supportFragmentManager.beginTransaction()
-      .replace(R.id.mainFragmentHolder, profilesFragment, "MAIN")
-      .commit()
-    this.supportActionBar?.hide()
-  }
-
-  private fun openCatalog() {
-    // Sanity check; we were seeing some crashes on startup when performing a
-    // transaction after the fragment manager had been destroyed.
-    if (this.isFinishing || this.supportFragmentManager.isDestroyed) return
-
-    ViewModelProviders.of(this)
-      .get(MainFragmentViewModel::class.java)
-      .clearHistory = true
-
-    val mainFragment = MainFragment()
-    this.supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
-    this.supportFragmentManager.beginTransaction()
-      .replace(R.id.mainFragmentHolder, mainFragment, "MAIN")
-      .commit()
-
-    /*
-     * Register an announcements controller.
-     */
-
-    val services = Services.serviceDirectory()
-    this.lifecycle.addObserver(
-      AnnouncementsController(
-        context = this,
-        uiThread = services.requireService(UIThreadServiceType::class.java),
-        profileController = services.requireService(ProfilesControllerType::class.java)
-      )
-    )
-
-    /*
-     * Register an accessibility controller.
-     */
-
-    this.lifecycle.addObserver(
-      AccessibilityService.create(
-        context = this,
-        bookRegistry = services.requireService(BookRegistryType::class.java),
-        uiThread = services.requireService(UIThreadServiceType::class.java)
-      )
-    )
-
-    this.configurationService =
-      services.requireService(BuildConfigurationServiceType::class.java)
-    this.profilesController =
-      services.requireService(ProfilesControllerType::class.java)
-    if (configurationService.showAgeGateUi &&
-      this.profilesController.profileCurrent().preferences().dateOfBirth == null
-    ) {
-      this.showAgeGate()
-    }
+  private val defaultViewModelFactory: ViewModelProvider.Factory by lazy {
+    MainActivityDefaultViewModelFactory(super.getDefaultViewModelProviderFactory())
   }
 
   override fun onCreate(savedInstanceState: Bundle?) {
@@ -354,31 +54,14 @@ class MainActivity :
     super.onCreate(savedInstanceState)
     this.logger.debug("onCreate (super completed)")
 
-    this.navigationControllerDirectory = NavigationControllers.findDirectory(this)
-    this.setContentView(R.layout.main_host)
-
     val toolbar = this.findViewById(R.id.mainToolbar) as Toolbar
     this.setSupportActionBar(toolbar)
     this.supportActionBar?.setDisplayHomeAsUpEnabled(true)
     this.supportActionBar?.setDisplayShowHomeEnabled(true)
     this.supportActionBar?.hide() // Hide toolbar until requested
 
-    this.supportFragmentManager
-      .addOnBackStackChangedListener(this)
-
-    this.mainViewModel =
-      ViewModelProviders.of(this)
-        .get(MainFragmentViewModel::class.java)
-
-    this.profilesNavigationController =
-      ProfilesNavigationController(this.supportFragmentManager, this.mainViewModel)
-    this.navigationControllerDirectory.updateNavigationController(
-      ProfilesNavigationControllerType::class.java, this.profilesNavigationController
-    )
-
     if (savedInstanceState == null) {
-      this.mainViewModel.clearHistory = true
-      this.showSplashScreen()
+      this.openSplashScreen()
     } else {
       if (savedInstanceState.getBoolean(STATE_ACTION_BAR_IS_SHOWING)) {
         this.supportActionBar?.show()
@@ -386,6 +69,10 @@ class MainActivity :
         this.supportActionBar?.hide()
       }
     }
+  }
+
+  override fun getDefaultViewModelProviderFactory(): ViewModelProvider.Factory {
+    return this.defaultViewModelFactory
   }
 
   override fun onSaveInstanceState(outState: Bundle) {
@@ -396,203 +83,6 @@ class MainActivity :
   override fun getActionBar(): ActionBar? {
     this.logger.warn("Use 'getSupportActionBar' instead")
     return super.getActionBar()
-  }
-
-  override fun onBackPressed() {
-    this.navigationController?.let { controller ->
-      this.logger.debug("delivering back press to {}", controller::class.simpleName)
-      if (!controller.popBackStack()) {
-        super.onBackPressed()
-      }
-      return
-    }
-
-    this.logger.debug("delivering back press to activity")
-    super.onBackPressed()
-  }
-
-  override fun onOptionsItemSelected(item: MenuItem): Boolean {
-    return when (item.itemId) {
-      android.R.id.home -> {
-        this.navigationController?.let { controller ->
-          this.logger.debug("delivering home press to {}", controller::class.simpleName)
-          controller.popToRoot()
-        } ?: false
-      }
-      else -> super.onOptionsItemSelected(item)
-    }
-  }
-
-  override fun onBackStackChanged() {
-    this.navigationController?.let { controller ->
-      val isRoot = (1 == controller.backStackSize())
-      this.logger.debug(
-        "controller stack size changed [{}, isRoot={}]", controller.backStackSize(), isRoot
-      )
-      this.supportActionBar?.apply {
-        setHomeAsUpIndicator(null)
-        setHomeActionContentDescription(null)
-        setDisplayHomeAsUpEnabled(!isRoot)
-      }
-    }
-  }
-
-  override fun onSplashWantBootFuture(): ListenableFuture<*> {
-    this.logger.debug("onSplashWantBootFuture")
-    return MainApplication.application.servicesBooting
-  }
-
-  override fun onSplashWantBootEvents(): Observable<BootEvent> {
-    this.logger.debug("onSplashWantBootEvents")
-    return MainApplication.application.servicesBootEvents
-  }
-
-  override fun onSplashEULAIsProvided(): Boolean {
-    this.logger.debug("onSplashEULAIsProvided")
-    return this.getAvailableEULA() != null
-  }
-
-  override fun onSplashEULARequested(): EULAType {
-    this.logger.debug("onSplashEULARequested")
-    return this.getAvailableEULA()!!
-  }
-
-  override fun onSplashDone() {
-    this.logger.debug("onSplashDone")
-    return this.onStartupFinished()
-  }
-
-  override fun onSplashOpenProfileAnonymous() {
-    this.logger.debug("onSplashOpenProfileAnonymous")
-
-    val profilesController =
-      Services.serviceDirectory()
-        .requireService(ProfilesControllerType::class.java)
-
-    profilesController.profileSelect(profilesController.profileCurrent().id)
-  }
-
-  override fun onSplashWantProfilesMode(): ProfilesDatabaseType.AnonymousProfileEnabled {
-    this.logger.debug("onSplashWantProfilesMode")
-
-    return Services.serviceDirectory()
-      .requireService(ProfilesControllerType::class.java)
-      .profileAnonymousEnabled()
-  }
-
-  override fun onSplashWantMigrations(): MigrationsType {
-    val profilesController =
-      Services.serviceDirectory()
-        .requireService(ProfilesControllerType::class.java)
-
-    val isAnonymous =
-      profilesController.profileAnonymousEnabled() == ANONYMOUS_PROFILE_ENABLED
-
-    val migrationServiceDependencies =
-      MigrationServiceDependencies(
-        createAccount = { uri ->
-          this.doCreateAccount(profilesController, uri)
-        },
-        loginAccount = { account, credentials ->
-          this.doLoginAccount(profilesController, account, credentials)
-        },
-        accountEvents = profilesController.accountEvents(),
-        applicationProfileIsAnonymous = isAnonymous,
-        applicationVersion = this.applicationVersion(),
-        context = this
-      )
-
-    return Migrations.create(migrationServiceDependencies)
-  }
-
-  override fun onSplashWantMigrationExecutor(): ListeningExecutorService {
-    return this.migrationExecutor
-  }
-
-  override fun onSplashMigrationReport(report: MigrationReport) {
-    // No longer used
-  }
-
-  override fun onSplashLibrarySelectionWanted() {
-    val fm = this.supportFragmentManager
-
-    /*
-     * Set up a custom navigation controller used by the settings library registry screen. It's
-     * only capable of moving to the error page, or popping the back stack.
-     */
-
-    this.navigationControllerDirectory.updateNavigationController(
-      AccountNavigationControllerType::class.java,
-      object : AccountNavigationControllerType {
-        override fun popBackStack(): Boolean {
-          this@MainActivity.onStartupFinished()
-          return true
-        }
-
-        override fun popToRoot(): Boolean {
-          this@MainActivity.onStartupFinished()
-          return true
-        }
-
-        override fun backStackSize(): Int {
-          // Note: Little hack to get the Toolbar to display correctly.
-          return fm.backStackEntryCount + 1
-        }
-
-        override fun openSettingsAccount(parameters: AccountFragmentParameters) {
-          throw UnreachableCodeException()
-        }
-
-        override fun openErrorPage(parameters: ErrorPageParameters) {
-          throw UnreachableCodeException()
-        }
-
-        override fun openSAML20Login(parameters: AccountSAML20FragmentParameters) {
-          throw UnreachableCodeException()
-        }
-
-        override fun openSettingsAccountRegistry() {
-          throw UnreachableCodeException()
-        }
-
-        override fun openCatalogAfterAuthentication() {
-          throw UnreachableCodeException()
-        }
-      }
-    )
-
-    val fragment = AccountListRegistryFragment()
-    fm.beginTransaction()
-      .replace(R.id.mainFragmentHolder, fragment, "MAIN")
-      .addToBackStack(null)
-      .commit()
-    this.supportActionBar?.show()
-  }
-
-  override fun onSplashLibrarySelectionNotWanted() {
-    val profilesController =
-      Services.serviceDirectory()
-        .requireService(ProfilesControllerType::class.java)
-
-    /*
-     * Store the fact that we've seen the selection screen.
-     */
-
-    profilesController.profileUpdate { profileDescription ->
-      profileDescription.copy(
-        preferences = profileDescription.preferences.copy(hasSeenLibrarySelectionScreen = true)
-      )
-    }
-    this.openCatalog()
-  }
-
-  override fun onErrorPageSendReport(parameters: ErrorPageParameters) {
-    Reports.sendReportsDefault(
-      context = this,
-      address = parameters.emailAddress,
-      subject = parameters.subject,
-      body = parameters.report
-    )
   }
 
   override fun onNewIntent(intent: Intent) {
@@ -656,42 +146,213 @@ class MainActivity :
     }
   }
 
-  /**
-   * Shows age gate for verification
-   */
-  private fun showAgeGate() {
-    ageGateDialog = AgeGateDialog()
-    ageGateDialog.show(supportFragmentManager, AgeGateDialog.TAG)
+  override fun onStart() {
+    super.onStart()
+    this.listenerRepo.registerHandler(this::handleEvent)
   }
 
-  /**
-   * Handle birth year sent back from Age Gate dialog
-   */
-  override fun onBirthYearSelected(isOver13: Boolean) {
-    if (isOver13) {
-      this.profilesController.profileUpdate { description ->
-        this.synthesizeDateOfBirthDescription(description, 14)
+  override fun onStop() {
+    super.onStop()
+    this.listenerRepo.unregisterHandler()
+  }
+
+  @Suppress("UNUSED_PARAMETER")
+  private fun handleEvent(event: MainActivityListenedEvent, state: Unit) {
+    return when (event) {
+      is MainActivityListenedEvent.SplashEvent ->
+        this.handleSplashEvent(event.event)
+      is MainActivityListenedEvent.OnboardingEvent ->
+        this.handleOnboardingEvent(event.event)
+      is MainActivityListenedEvent.MainFragmentEvent ->
+        this.handleMainFragmentEvent(event.event)
+      is MainActivityListenedEvent.ProfileSelectionEvent ->
+        this.handleProfileSelectionEvent(event.event)
+      is MainActivityListenedEvent.ProfileModificationEvent ->
+        this.handleProfileModificationEvent(event.event)
+    }
+  }
+
+  private fun handleSplashEvent(event: SplashEvent) {
+    return when (event) {
+      SplashEvent.SplashCompleted ->
+        this.onSplashFinished()
+    }
+  }
+
+  private fun onSplashFinished() {
+    this.logger.debug("onSplashFinished")
+
+    val services =
+      Services.serviceDirectory()
+    val profilesController =
+      services.requireService(ProfilesControllerType::class.java)
+    val accountProviders =
+      services.requireService(AccountProviderRegistryType::class.java)
+    val splashService = getSplashService()
+
+    when (profilesController.profileAnonymousEnabled()) {
+      ANONYMOUS_PROFILE_ENABLED -> {
+        val profile = profilesController.profileCurrent()
+        val defaultProvider = accountProviders.defaultProvider
+
+        val hasNonDefaultAccount =
+          profile.accounts().values.count { it.provider.id != defaultProvider.id } > 0
+        this.logger.debug("hasNonDefaultAccount=$hasNonDefaultAccount")
+
+        val shouldShowLibrarySelectionScreen =
+          splashService.shouldShowLibrarySelectionScreen && !profile.preferences().hasSeenLibrarySelectionScreen
+        this.logger.debug("shouldShowLibrarySelectionScreen=$shouldShowLibrarySelectionScreen")
+
+        if (!hasNonDefaultAccount && shouldShowLibrarySelectionScreen) {
+          this.openOnboarding()
+        } else {
+          this.onOnboardingFinished()
+        }
       }
-    } else {
-      this.profilesController.profileUpdate { description ->
-        this.synthesizeDateOfBirthDescription(description, 0)
+      ANONYMOUS_PROFILE_DISABLED -> {
+        this.openProfileSelection()
       }
     }
   }
 
-  private fun synthesizeDateOfBirthDescription(
-    description: ProfileDescription,
-    years: Int
-  ): ProfileDescription {
-    val newPreferences =
-      description.preferences.copy(dateOfBirth = this.synthesizeDateOfBirth(years))
-    return description.copy(preferences = newPreferences)
+  private fun handleOnboardingEvent(event: OnboardingEvent) {
+    return when (event) {
+      OnboardingEvent.OnboardingCompleted ->
+        this.onOnboardingFinished()
+    }
   }
 
-  private fun synthesizeDateOfBirth(years: Int): ProfileDateOfBirth {
-    return ProfileDateOfBirth(
-      date = DateTime.now().minusYears(years),
-      isSynthesized = true
-    )
+  private fun onOnboardingFinished() {
+    this.openMainFragment()
+  }
+
+  private fun handleMainFragmentEvent(event: MainFragmentEvent) {
+    return when (event) {
+      MainFragmentEvent.ProfileIdleTimedOut, MainFragmentEvent.SwitchProfileSelected ->
+        this.openProfileSelect()
+    }
+  }
+
+  private fun handleProfileSelectionEvent(event: ProfileSelectionEvent) {
+    return when (event) {
+      ProfileSelectionEvent.OpenProfileCreation ->
+        this.openProfileCreate()
+      is ProfileSelectionEvent.OpenProfileModification ->
+        this.openProfileModify(event.profile)
+      ProfileSelectionEvent.ProfileSelected ->
+        this.openMainBackStack()
+    }
+  }
+
+  private fun handleProfileModificationEvent(event: ProfileModificationEvent) {
+    return when (event) {
+      ProfileModificationEvent.Cancelled ->
+        this.onProfileModificationCancelled()
+      ProfileModificationEvent.Succeeded ->
+        this.onProfileModificationSucceeded()
+    }
+  }
+
+  private fun openModificationFragment(
+    parameters: ProfileModificationFragmentParameters
+  ) {
+    val fragmentService =
+      Services.serviceDirectory()
+        .optionalService(ProfileModificationFragmentServiceType::class.java)
+
+    val fragment =
+      if (fragmentService != null) {
+        this.logger.debug("found a profile modification fragment service: {}", fragmentService)
+        fragmentService.createModificationFragment(parameters)
+      } else {
+        ProfileModificationDefaultFragment.create(parameters)
+      }
+
+    this.supportFragmentManager.beginTransaction()
+      .replace(R.id.mainFragmentHolder, fragment, "MAIN")
+      .addToBackStack(null)
+      .commit()
+  }
+
+  private fun openMainBackStack() {
+    this.logger.debug("openMain")
+    val mainFragment = MainFragment()
+    this.supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+    this.supportFragmentManager.beginTransaction()
+      .replace(R.id.mainFragmentHolder, mainFragment, "MAIN")
+      .addToBackStack(null)
+      .commit()
+  }
+
+  private fun openProfileSelect() {
+    this.logger.debug("openProfileSelect")
+    val newFragment = ProfileSelectionFragment()
+    this.supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+    this.supportFragmentManager.beginTransaction()
+      .replace(R.id.mainFragmentHolder, newFragment, "MAIN")
+      .commit()
+  }
+
+  private fun openProfileModify(id: ProfileID) {
+    this.logger.debug("openProfileModify: ${id.uuid}")
+    this.openModificationFragment(ProfileModificationFragmentParameters(id))
+  }
+
+  private fun openProfileCreate() {
+    this.logger.debug("openProfileCreate")
+    this.openModificationFragment(ProfileModificationFragmentParameters(null))
+  }
+
+  private fun onProfileModificationSucceeded() {
+    this.supportFragmentManager.popBackStack()
+  }
+
+  private fun onProfileModificationCancelled() {
+    this.supportFragmentManager.popBackStack()
+  }
+
+  private fun getSplashService(): BrandingSplashServiceType {
+    return ServiceLoader
+      .load(BrandingSplashServiceType::class.java)
+      .firstOrNull()
+      ?: throw IllegalStateException(
+        "No available services of type ${BrandingSplashServiceType::class.java.canonicalName}"
+      )
+  }
+
+  private fun openSplashScreen() {
+    this.logger.debug("openSplashScreen")
+    val splashFragment = SplashFragment()
+    this.supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+    this.supportFragmentManager.commit {
+      replace(R.id.mainFragmentHolder, splashFragment, "SPLASH_MAIN")
+    }
+  }
+
+  private fun openOnboarding() {
+    this.logger.debug("openOnboarding")
+    val onboardingFragment = OnboardingFragment()
+    this.supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+    this.supportFragmentManager.commit {
+      replace(R.id.mainFragmentHolder, onboardingFragment)
+    }
+  }
+
+  private fun openProfileSelection() {
+    this.logger.debug("openProfileSelection")
+    val profilesFragment = ProfileSelectionFragment()
+    this.supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+    this.supportFragmentManager.commit {
+      replace(R.id.mainFragmentHolder, profilesFragment)
+    }
+  }
+
+  private fun openMainFragment() {
+    this.logger.debug("openMainFragment")
+    val mainFragment = MainFragment()
+    this.supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+    this.supportFragmentManager.commit {
+      replace(R.id.mainFragmentHolder, mainFragment, "MAIN")
+    }
   }
 }
