@@ -38,18 +38,18 @@ dependencies {
   implementation project(":simplified-viewer-pdf")
   implementation project(':simplified-ui-navigation-tabs')
 
-  implementation libraries.androidx_appcompat
-  implementation libraries.androidx_constraintlayout
-  implementation libraries.androidx_legacy_support_v4
-  implementation libraries.androidx_lifecycle
-  implementation libraries.pandora_bottom_navigator
-  implementation libraries.google_material
-  implementation libraries.io7m_jfunctional
-  implementation libraries.io7m_junreachable
-  implementation libraries.kotlin_stdlib
-  implementation libraries.kotlin_reflect
-  implementation libraries.leak_canary
-  implementation libraries.logback_android
-  implementation libraries.mockito_android
-  implementation libraries.slf4j
+  implementation libs.androidx.appcompat
+  implementation libs.androidx.constraintlayout
+  implementation libs.androidx.legacy.support.v4
+  implementation libs.androidx.lifecycle
+  implementation libs.pandora.bottom.navigator
+  implementation libs.google.material
+  implementation libs.io7m.jfunctional
+  implementation libs.io7m.junreachable
+  implementation libs.kotlin.stdlib
+  implementation libs.kotlin.reflect
+  implementation libs.leak.canary
+  implementation libs.logback.android
+  implementation libs.mockito.android
+  implementation libs.slf4j
 }

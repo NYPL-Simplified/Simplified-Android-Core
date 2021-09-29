@@ -2,10 +2,10 @@ dependencies {
   api project(":simplified-accounts-api")
   api project(":simplified-opds-core")
 
-  api libraries.joda_time
-  api libraries.nypl_http_api
+  api libs.joda.time
+  api libs.nypl.http.api
 
-  implementation libraries.kotlin_stdlib
-  implementation libraries.kotlin_reflect
-  implementation libraries.slf4j
+  implementation libs.kotlin.stdlib
+  implementation libs.kotlin.reflect
+  implementation libs.slf4j
 }

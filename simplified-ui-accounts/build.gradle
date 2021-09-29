@@ -15,16 +15,16 @@ dependencies {
   implementation project(':simplified-ui-listeners-api')
   implementation project(':simplified-ui-theme')
 
-  implementation libraries.androidx_appcompat
-  implementation libraries.androidx_constraintlayout
-  implementation libraries.androidx_lifecycle
-  implementation libraries.androidx_fragment
-  implementation libraries.androidx_recyclerview
-  implementation libraries.google_material
-  implementation libraries.kotlin_stdlib
-  implementation libraries.kotlin_reflect
-  implementation libraries.rxjava2
-  implementation libraries.rxjava2extensions
-  implementation libraries.rxandroid2
-  implementation libraries.slf4j
+  implementation libs.androidx.appcompat
+  implementation libs.androidx.constraintlayout
+  implementation libs.androidx.lifecycle
+  implementation libs.androidx.fragment
+  implementation libs.androidx.recyclerview
+  implementation libs.google.material
+  implementation libs.kotlin.stdlib
+  implementation libs.kotlin.reflect
+  implementation libs.rxjava2
+  implementation libs.rxjava2.extensions
+  implementation libs.rxandroid2
+  implementation libs.slf4j
 }

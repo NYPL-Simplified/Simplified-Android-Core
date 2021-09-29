@@ -3,17 +3,17 @@ dependencies {
 
   implementation project(":simplified-json-core")
 
-  implementation libraries.google_guava
-  implementation libraries.io7m_jfunctional
-  implementation libraries.io7m_jnull
-  implementation libraries.io7m_junreachable
-  implementation libraries.irradia_mime_api
-  implementation libraries.irradia_mime_vanilla
-  implementation libraries.jackson_core
-  implementation libraries.jackson_databind
-  implementation libraries.javax_annotation_api
-  implementation libraries.joda_time
-  implementation libraries.kotlin_stdlib
-  implementation libraries.kotlin_reflect
-  implementation libraries.slf4j
+  implementation libs.google.guava
+  implementation libs.io7m.jfunctional
+  implementation libs.io7m.jnull
+  implementation libs.io7m.junreachable
+  implementation libs.irradia.mime.api
+  implementation libs.irradia.mime.vanilla
+  implementation libs.jackson.core
+  implementation libs.jackson.databind
+  implementation libs.javax.annotation.api
+  implementation libs.joda.time
+  implementation libs.kotlin.stdlib
+  implementation libs.kotlin.reflect
+  implementation libs.slf4j
 }

@@ -11,18 +11,18 @@ dependencies {
   api project(":simplified-ui-accounts")
   implementation project(":simplified-webview")
 
-  implementation libraries.androidx_appcompat
-  implementation libraries.androidx_constraintlayout
-  implementation libraries.androidx_legacy_support_v4
-  implementation libraries.androidx_lifecycle
-  implementation libraries.androidx_fragment
-  implementation libraries.google_material
-  implementation libraries.io7m_jfunctional
-  implementation libraries.io7m_junreachable
-  implementation libraries.kotlin_stdlib
-  implementation libraries.kotlin_reflect
-  implementation libraries.rxjava2
-  implementation libraries.rxjava2extensions
-  implementation libraries.rxandroid2
-  implementation libraries.slf4j
+  implementation libs.androidx.appcompat
+  implementation libs.androidx.constraintlayout
+  implementation libs.androidx.legacy.support.v4
+  implementation libs.androidx.lifecycle
+  implementation libs.androidx.fragment
+  implementation libs.google.material
+  implementation libs.io7m.jfunctional
+  implementation libs.io7m.junreachable
+  implementation libs.kotlin.stdlib
+  implementation libs.kotlin.reflect
+  implementation libs.rxjava2
+  implementation libs.rxjava2.extensions
+  implementation libs.rxandroid2
+  implementation libs.slf4j
 }

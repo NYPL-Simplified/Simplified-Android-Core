@@ -7,8 +7,8 @@ dependencies {
   implementation project(':simplified-json-core')
   implementation project(':simplified-links-json')
 
-  implementation libraries.jackson_databind
-  implementation libraries.kotlin_stdlib
-  implementation libraries.kotlin_reflect
-  implementation libraries.slf4j
+  implementation libs.jackson.databind
+  implementation libs.kotlin.stdlib
+  implementation libs.kotlin.reflect
+  implementation libs.slf4j
 }

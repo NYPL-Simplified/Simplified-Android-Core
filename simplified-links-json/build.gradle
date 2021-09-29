@@ -2,13 +2,13 @@ dependencies {
   api project(":simplified-links")
   api project(":simplified-parser-api")
 
-  api libraries.irradia_mime_api
-  api libraries.irradia_mime_vanilla
-  api libraries.jackson_databind
+  api libs.irradia.mime.api
+  api libs.irradia.mime.vanilla
+  api libs.jackson.databind
 
   implementation project(":simplified-json-core")
 
-  implementation libraries.kotlin_stdlib
-  implementation libraries.kotlin_reflect
-  implementation libraries.slf4j
+  implementation libs.kotlin.stdlib
+  implementation libs.kotlin.reflect
+  implementation libs.slf4j
 }
