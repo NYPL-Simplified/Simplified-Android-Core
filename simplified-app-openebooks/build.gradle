@@ -45,5 +45,5 @@ dependencies {
     // implementation libs.nypl.drm.adobe
     implementation libs.nypl.drm.axis
   }
-  annotationProcessor libs.google.autovalue.processor
+  annotationProcessor libs.google.auto.value.processor
 }

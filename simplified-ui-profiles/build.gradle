@@ -1,7 +1,7 @@
 dependencies {
-  api libs.androidx.appcompat
-  api libs.androidx.constraintlayout
-  api libs.androidx.recyclerview
+  api libs.androidx.app.compat
+  api libs.androidx.constraint.layout
+  api libs.androidx.recycler.view
   api libs.androidx.fragment
 
   implementation project(":simplified-android-ktx")

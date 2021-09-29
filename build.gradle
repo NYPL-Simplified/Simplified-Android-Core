@@ -11,7 +11,7 @@ buildscript {
     google()
   }
 
-  ext.kotlin_version = "1.4.20"
+  ext.kotlin_version = "1.5.30"
 
   dependencies {
     classpath 'com.android.tools.build:gradle:7.0.2'

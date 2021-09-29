@@ -27,7 +27,7 @@ dependencies {
   api libs.nypl.audiobook.views
 
   implementation libs.androidx.activity
-  implementation libs.androidx.appcompat
+  implementation libs.androidx.app.compat
   implementation libs.kotlin.stdlib
   implementation libs.kotlin.reflect
 }

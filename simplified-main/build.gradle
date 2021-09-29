@@ -71,8 +71,9 @@ dependencies {
   api project(":simplified-viewer-pdf")
   api project(":simplified-viewer-spi")
 
-  api libs.androidx.appcompat
+  api libs.androidx.app.compat
   api libs.kotlin.stdlib
+  api libs.logback.android
   api libs.nypl.http.api
   api libs.nypl.http.bearer.token
   api libs.nypl.http.vanilla
@@ -80,6 +81,4 @@ dependencies {
   api libs.rxjava2
   api libs.rxjava2.extensions
   api libs.slf4j
-
-  api libs.logback.android
 }
