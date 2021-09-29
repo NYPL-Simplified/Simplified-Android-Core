@@ -48,5 +48,5 @@ dependencies {
   if (nyplNexusDepend) {
     implementation libs.nypl.drm.adobe
   }
-  annotationProcessor libs.google.autovalue.processor
+  annotationProcessor libs.google.auto.value.processor
 }

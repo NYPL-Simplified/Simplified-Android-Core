@@ -11,8 +11,8 @@ dependencies {
   api project(":simplified-ui-accounts")
   implementation project(":simplified-webview")
 
-  implementation libs.androidx.appcompat
-  implementation libs.androidx.constraintlayout
+  implementation libs.androidx.app.compat
+  implementation libs.androidx.constraint.layout
   implementation libs.androidx.legacy.support.v4
   implementation libs.androidx.lifecycle
   implementation libs.androidx.fragment

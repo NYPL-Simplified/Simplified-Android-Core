@@ -4,3 +4,6 @@
 [submodule "simplified-tests/src/test/resources/org/nypl/simplified/tests/bookmark_annotations/spec"]
 	path = simplified-tests/src/test/resources/org/nypl/simplified/tests/bookmark_annotations/spec
 	url = https://github.com/NYPL-Simplified/Simplified-Bookmarks-Spec
+[submodule "org.librarysimplified.android.platform"]
+	path = org.librarysimplified.android.platform
+	url = https://github.com/NYPL-Simplified/Simplified-Android-Platform

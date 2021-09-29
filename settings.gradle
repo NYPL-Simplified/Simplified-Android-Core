@@ -3,7 +3,7 @@ enableFeaturePreview('VERSION_CATALOGS')
 dependencyResolutionManagement {
   versionCatalogs {
     libs {
-      from(files("build_libraries.toml"))
+      from(files("org.librarysimplified.android.platform/build_libraries.toml"))
     }
   }
 }

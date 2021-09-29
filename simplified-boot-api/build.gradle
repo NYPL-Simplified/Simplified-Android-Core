@@ -8,6 +8,6 @@ dependencies {
   implementation libs.kotlin.reflect
   implementation libs.slf4j
 
-  compileOnly libs.google.autovalue
-  annotationProcessor libs.google.autovalue.processor
+  compileOnly libs.google.auto.value
+  annotationProcessor libs.google.auto.value.processor
 }

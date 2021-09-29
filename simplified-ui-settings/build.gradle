@@ -24,9 +24,9 @@ dependencies {
   implementation libs.kotlin.stdlib
   implementation libs.kotlin.reflect
   implementation libs.slf4j
-  implementation libs.androidx.appcompat
-  implementation libs.androidx.constraintlayout
-  implementation libs.androidx.recyclerview
+  implementation libs.androidx.app.compat
+  implementation libs.androidx.constraint.layout
+  implementation libs.androidx.recycler.view
 
   api libs.androidx.preference
 }
