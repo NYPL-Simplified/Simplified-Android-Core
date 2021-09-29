@@ -3,15 +3,15 @@ dependencies {
   api project(":simplified-opds-core")
   api project(":simplified-json-core")
 
-  api libraries.io7m_jfunctional
-  api libraries.nypl_audiobook_api
+  api libs.io7m.jfunctional
+  api libs.nypl.audiobook.api
 
-  implementation libraries.jackson_databind
-  implementation libraries.jcip_annotations
-  implementation libraries.kotlin_stdlib
-  implementation libraries.kotlin_reflect
-  implementation libraries.slf4j
+  implementation libs.jackson.databind
+  implementation libs.jcip.annotations
+  implementation libs.kotlin.stdlib
+  implementation libs.kotlin.reflect
+  implementation libs.slf4j
 
-  compileOnly libraries.google_autovalue
-  annotationProcessor libraries.google_autovalue_processor
+  compileOnly libs.google.autovalue
+  annotationProcessor libs.google.autovalue.processor
 }

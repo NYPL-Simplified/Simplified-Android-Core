@@ -10,7 +10,7 @@ dependencies {
   implementation project(":simplified-viewer-api")
   implementation project(":simplified-viewer-spi")
 
-  api libraries.pandora_bottom_navigator
-  implementation libraries.kotlin_stdlib
-  implementation libraries.kotlin_reflect
+  api libs.pandora.bottom.navigator
+  implementation libs.kotlin.stdlib
+  implementation libs.kotlin.reflect
 }
