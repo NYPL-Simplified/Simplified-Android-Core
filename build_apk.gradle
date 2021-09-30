@@ -125,3 +125,17 @@ android {
 afterEvaluate {
   assemble.dependsOn(bundle)
 }
+
+/*
+ * We currently have transitive dependencies that specify dependencies on newer versions
+ * of SLF4J. These are subtly incompatible with Logback-Android, and it will be a while before
+ * new versions appear of both artifacts. Remove this when both are updated!
+ */
+
+configurations.all {
+  final MinimalExternalModuleDependency dependency = libs.slf4j.get()
+  final String module = dependency.module.toString()
+  final String version = dependency.versionConstraint.requiredVersion
+  final String dependencyString = "$module:$version"
+  resolutionStrategy.force dependencyString
+}
