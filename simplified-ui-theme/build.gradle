@@ -1,7 +1,7 @@
 dependencies {
-  implementation libraries.androidx_appcompat
-  implementation libraries.androidx_legacy_preference_v14
-  implementation libraries.google_material
-  implementation libraries.kotlin_stdlib
-  implementation libraries.kotlin_reflect
+  implementation libs.androidx.app.compat
+  implementation libs.androidx.legacy.preference.v14
+  implementation libs.google.material
+  implementation libs.kotlin.stdlib
+  implementation libs.kotlin.reflect
 }

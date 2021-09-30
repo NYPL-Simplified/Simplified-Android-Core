@@ -2,11 +2,11 @@ dependencies {
   api project(":simplified-accounts-api")
   api project(":simplified-files")
 
-  api libraries.nypl_drm_core
+  api libs.nypl.drm.core
 
   implementation project(":simplified-json-core")
 
-  implementation libraries.kotlin_stdlib
-  implementation libraries.kotlin_reflect
-  implementation libraries.slf4j
+  implementation libs.kotlin.stdlib
+  implementation libs.kotlin.reflect
+  implementation libs.slf4j
 }

@@ -6,10 +6,10 @@ dependencies {
   implementation project(":simplified-services-api")
   implementation project(":simplified-viewer-spi")
 
-  implementation libraries.androidx_appcompat
-  implementation libraries.kotlin_stdlib
-  implementation libraries.kotlin_reflect
-  implementation libraries.nypl_pdf_api
-  implementation libraries.nypl_pdf_viewer
-  implementation libraries.androidx_activity
+  implementation libs.androidx.app.compat
+  implementation libs.kotlin.stdlib
+  implementation libs.kotlin.reflect
+  implementation libs.nypl.pdf.api
+  implementation libs.nypl.pdf.viewer
+  implementation libs.androidx.activity
 }

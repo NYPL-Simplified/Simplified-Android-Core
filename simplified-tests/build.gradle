@@ -67,37 +67,37 @@ dependencies {
   api project(":simplified-ui-theme")
   api project(":simplified-webview")
 
-  api libraries.nypl_audiobook_api
-  api libraries.nypl_audiobook_downloads
-  api libraries.nypl_audiobook_feedbooks
-  api libraries.nypl_audiobook_manifest_license_check_api
-  api libraries.nypl_audiobook_manifest_fulfill_api
-  api libraries.nypl_audiobook_manifest_fulfill_basic
-  api libraries.nypl_audiobook_manifest_parser_webpub
-  api libraries.nypl_audiobook_open_access
-  api libraries.nypl_audiobook_rbdigital
-  api libraries.nypl_audiobook_views
+  api libs.nypl.audiobook.api
+  api libs.nypl.audiobook.downloads
+  api libs.nypl.audiobook.feedbooks
+  api libs.nypl.audiobook.manifest.license.check.api
+  api libs.nypl.audiobook.manifest.fulfill.api
+  api libs.nypl.audiobook.manifest.fulfill.basic
+  api libs.nypl.audiobook.manifest.parser.webpub
+  api libs.nypl.audiobook.open.access
+  api libs.nypl.audiobook.rbdigital
+  api libs.nypl.audiobook.views
 
-  implementation libraries.io7m_jfunctional
-  implementation libraries.io7m_jnull
-  implementation libraries.jackson_databind
-  implementation libraries.junit
-  implementation libraries.junit_jupiter_api
-  implementation libraries.junit_jupiter_engine
-  implementation libraries.kotlin_stdlib
-  implementation libraries.kotlin_reflect
-  implementation libraries.mockito_android
-  implementation libraries.mockito_kotlin
-  implementation libraries.nypl_drm_core
-  implementation libraries.nypl_http_api
-  implementation libraries.nypl_http_bearer_token
-  implementation libraries.nypl_http_vanilla
-  implementation libraries.okhttp3_mockwebserver
-  implementation libraries.slf4j
-  implementation libraries.nypl_readium
-  implementation libraries.nypl_readium_js
+  implementation libs.io7m.jfunctional
+  implementation libs.io7m.jnull
+  implementation libs.jackson.databind
+  implementation libs.junit
+  implementation libs.junit.jupiter.api
+  implementation libs.junit.jupiter.engine
+  implementation libs.kotlin.stdlib
+  implementation libs.kotlin.reflect
+  implementation libs.mockito.android
+  implementation libs.mockito.kotlin
+  implementation libs.nypl.drm.core
+  implementation libs.nypl.http.api
+  implementation libs.nypl.http.bearer.token
+  implementation libs.nypl.http.vanilla
+  implementation libs.okhttp3.mockwebserver
+  implementation libs.slf4j
+  implementation libs.nypl.readium
+  implementation libs.nypl.readium.js
 
-  testImplementation libraries.logback_classic
-  testImplementation libraries.junit
-  testImplementation libraries.robolectric
+  testImplementation libs.logback.android
+  testImplementation libs.junit
+  testImplementation libs.robolectric
 }

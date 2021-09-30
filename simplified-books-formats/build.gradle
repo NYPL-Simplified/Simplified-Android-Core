@@ -1,9 +1,9 @@
 dependencies {
   api project(":simplified-books-formats-api")
-  api libraries.irradia_mime_api
-  api libraries.irradia_mime_vanilla
+  api libs.irradia.mime.api
+  api libs.irradia.mime.vanilla
 
-  implementation libraries.kotlin_stdlib
-  implementation libraries.kotlin_reflect
-  implementation libraries.slf4j
+  implementation libs.kotlin.stdlib
+  implementation libs.kotlin.reflect
+  implementation libs.slf4j
 }

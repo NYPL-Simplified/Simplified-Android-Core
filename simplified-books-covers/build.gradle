@@ -4,11 +4,11 @@ dependencies {
   api project(':simplified-opds-core')
   api project(':simplified-tenprint')
 
-  api libraries.picasso
+  api libs.picasso
 
-  implementation libraries.io7m_jfunctional
-  implementation libraries.kotlin_stdlib
-  implementation libraries.kotlin_reflect
-  implementation libraries.nypl_http_uri
-  implementation libraries.slf4j
+  implementation libs.io7m.jfunctional
+  implementation libs.kotlin.stdlib
+  implementation libs.kotlin.reflect
+  implementation libs.nypl.http.uri
+  implementation libs.slf4j
 }

@@ -5,17 +5,18 @@ import java.time.ZoneOffset
 buildscript {
   // Load in our list of dependencies.
   //
-  apply from: file("$rootDir/build_libraries.gradle")
 
   repositories {
     mavenCentral()
     google()
   }
 
+  ext.kotlin_version = "1.5.30"
+
   dependencies {
     classpath 'com.android.tools.build:gradle:7.0.2'
     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-    classpath "androidx.navigation:navigation-safe-args-gradle-plugin:${versions.androidx_navigation}"
+    classpath "androidx.navigation:navigation-safe-args-gradle-plugin:2.3.4"
     classpath "biz.aQute.bnd:biz.aQute.bnd.gradle:5.3.0"
     classpath "com.nabilhachicha:android-native-dependencies:0.1.2"
     classpath 'com.google.gms:google-services:4.3.4'
@@ -30,6 +31,11 @@ plugins {
 }
 
 ext {
+  android_build_tools_version = "30.0.2"
+  android_compile_sdk_version = 29
+  android_min_sdk_version = 21
+  android_target_sdk_version = 29
+
   // Required for some dependencies only available from our private nexus
   //
   nyplNexusDepend =
@@ -70,12 +76,18 @@ ext {
   // Check that non -SNAPSHOT builds don't use -SNAPSHOT dependencies.
   //
 
-  final String versionName = project.ext["VERSION_NAME"];
+  final String versionName = project.ext["VERSION_NAME"]
+  final Set<String> snapshots = new HashSet<>()
+
   if (!versionName.endsWith("-SNAPSHOT")) {
-    final Set<String> snapshots = new HashSet<>();
-    ext.libraries.each { name, version ->
-      if (version.toString().endsWith("-SNAPSHOT")) {
-        snapshots.add(version.toString())
+    final List<String> versionAliases = libs.getVersionAliases()
+    versionAliases.each { name ->
+      final java.util.Optional<VersionConstraint> versionConstraintOpt = libs.findVersion(name)
+      if (versionConstraintOpt.isPresent()) {
+        final VersionConstraint versionConstraint = versionConstraintOpt.get()
+        if (versionConstraint.requiredVersion.endsWith("-SNAPSHOT")) {
+          snapshots.add("$name ${versionConstraint.requiredVersion}")
+        }
       }
     }
 
@@ -94,17 +106,6 @@ ext {
       logger.error("{}", text)
       throw new GradleException(text);
     }
-  }
-}
-
-subprojects {
-  /*
-   * We currently have transitive dependencies that specify dependencies on newer versions
-   * of SLF4J. These are subtly incompatible with Logback-Android, and it will be a while before
-   * new versions appear of both artifacts. Remove this when both are updated!
-   */
-  configurations.all {
-    resolutionStrategy.force libraries.slf4j
   }
 }
 

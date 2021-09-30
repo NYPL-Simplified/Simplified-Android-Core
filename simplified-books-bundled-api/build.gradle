@@ -1,6 +1,6 @@
 dependencies {
-  implementation libraries.kotlin_stdlib
-  implementation libraries.kotlin_reflect
+  implementation libs.kotlin.stdlib
+  implementation libs.kotlin.reflect
 
-  implementation libraries.nypl_http_api
+  implementation libs.nypl.http.api
 }

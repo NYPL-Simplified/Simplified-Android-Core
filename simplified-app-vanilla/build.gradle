@@ -31,7 +31,7 @@ dependencies {
   implementation project(":simplified-ui-theme")
   implementation project(":simplified-accounts-source-nyplregistry")
   implementation project(":simplified-analytics-circulation")
-  annotationProcessor libraries.google_autovalue_processor
+  annotationProcessor libs.google.auto.value.processor
 
   vanillaWithProfilesImplementation project(":simplified-accounts-source-filebased")
 }

@@ -1,4 +1,4 @@
 dependencies {
-  implementation libraries.google_guava
-  implementation libraries.io7m_jnull
+  implementation libs.google.guava
+  implementation libs.io7m.jnull
 }

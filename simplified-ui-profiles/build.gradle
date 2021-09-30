@@ -1,18 +1,18 @@
 dependencies {
-  api libraries.androidx_appcompat
-  api libraries.androidx_constraintlayout
-  api libraries.androidx_recyclerview
-  api libraries.androidx_fragment
+  api libs.androidx.app.compat
+  api libs.androidx.constraint.layout
+  api libs.androidx.recycler.view
+  api libs.androidx.fragment
 
   implementation project(":simplified-android-ktx")
   implementation project(":simplified-profiles-controller-api")
   implementation project(":simplified-services-api")
   implementation project(':simplified-ui-listeners-api')
 
-  implementation libraries.kotlin_stdlib
-  implementation libraries.kotlin_reflect
-  implementation libraries.rxjava2
-  implementation libraries.rxjava2extensions
-  implementation libraries.rxandroid2
-  implementation libraries.slf4j
+  implementation libs.kotlin.stdlib
+  implementation libs.kotlin.reflect
+  implementation libs.rxjava2
+  implementation libs.rxjava2.extensions
+  implementation libs.rxandroid2
+  implementation libs.slf4j
 }

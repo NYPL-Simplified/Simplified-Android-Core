@@ -6,10 +6,10 @@ dependencies {
 
   implementation project(":simplified-links-json")
 
-  implementation libraries.jackson_databind
-  implementation libraries.kotlin_stdlib
-  implementation libraries.kotlin_reflect
+  implementation libs.jackson.databind
+  implementation libs.kotlin.stdlib
+  implementation libs.kotlin.reflect
 
-  compileOnly libraries.google_autovalue
-  annotationProcessor libraries.google_autovalue_processor
+  compileOnly libs.google.auto.value
+  annotationProcessor libs.google.auto.value.processor
 }

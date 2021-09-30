@@ -4,9 +4,9 @@ dependencies {
   implementation project(":simplified-ui-thread-api")
   implementation project(":simplified-services-api")
 
-  implementation libraries.androidx_appcompat
-  implementation libraries.androidx_constraintlayout
-  implementation libraries.androidx_lifecycle
-  implementation libraries.androidx_core_ktx
-  implementation libraries.androidx_fragment
+  implementation libs.androidx.app.compat
+  implementation libs.androidx.constraint.layout
+  implementation libs.androidx.lifecycle
+  implementation libs.androidx.core.ktx
+  implementation libs.androidx.fragment
 }

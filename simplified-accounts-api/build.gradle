@@ -5,18 +5,18 @@ dependencies {
   api project(":simplified-presentableerror-api")
   api project(":simplified-taskrecorder-api")
 
-  api libraries.google_guava
-  api libraries.io7m_jfunctional
-  api libraries.jackson_databind
-  api libraries.joda_time
-  api libraries.nypl_drm_core
-  api libraries.nypl_http_api
+  api libs.google.guava
+  api libs.io7m.jfunctional
+  api libs.jackson.databind
+  api libs.joda.time
+  api libs.nypl.drm.core
+  api libs.nypl.http.api
 
   implementation project(':simplified-opds-core')
 
-  implementation libraries.kotlin_stdlib
-  implementation libraries.kotlin_reflect
+  implementation libs.kotlin.stdlib
+  implementation libs.kotlin.reflect
 
-  compileOnly libraries.google_autovalue
-  annotationProcessor libraries.google_autovalue_processor
+  compileOnly libs.google.auto.value
+  annotationProcessor libs.google.auto.value.processor
 }

@@ -1,8 +1,8 @@
 dependencies {
-  api libraries.google_guava
+  api libs.google.guava
 
-  implementation libraries.nypl_http_api
-  implementation libraries.kotlin_stdlib
-  implementation libraries.kotlin_reflect
-  implementation libraries.slf4j
+  implementation libs.nypl.http.api
+  implementation libs.kotlin.stdlib
+  implementation libs.kotlin.reflect
+  implementation libs.slf4j
 }

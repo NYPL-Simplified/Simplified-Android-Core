@@ -7,15 +7,15 @@ dependencies {
   api project(":simplified-ui-accounts")
   api project(":simplified-ui-errorpage")
 
-  implementation libraries.androidx_appcompat
-  implementation libraries.androidx_lifecycle
-  implementation libraries.androidx_fragment
-  implementation libraries.google_material
-  implementation libraries.io7m_jfunctional
-  implementation libraries.io7m_junreachable
-  implementation libraries.kotlin_stdlib
-  implementation libraries.kotlin_reflect
-  implementation libraries.rxjava2
-  implementation libraries.rxjava2extensions
-  implementation libraries.slf4j
+  implementation libs.androidx.app.compat
+  implementation libs.androidx.lifecycle
+  implementation libs.androidx.fragment
+  implementation libs.google.material
+  implementation libs.io7m.jfunctional
+  implementation libs.io7m.junreachable
+  implementation libs.kotlin.stdlib
+  implementation libs.kotlin.reflect
+  implementation libs.rxjava2
+  implementation libs.rxjava2.extensions
+  implementation libs.slf4j
 }

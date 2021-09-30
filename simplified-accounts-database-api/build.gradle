@@ -4,13 +4,13 @@ dependencies {
   api project(':simplified-accounts-source-spi')
   api project(':simplified-books-database')
 
-  api libraries.io7m_jfunctional
-  api libraries.nypl_drm_core
-  api libraries.rxjava2
+  api libs.io7m.jfunctional
+  api libs.nypl.drm.core
+  api libs.rxjava2
 
-  implementation libraries.kotlin_stdlib
-  implementation libraries.kotlin_reflect
+  implementation libs.kotlin.stdlib
+  implementation libs.kotlin.reflect
 
-  compileOnly libraries.google_autovalue
-  annotationProcessor libraries.google_autovalue_processor
+  compileOnly libs.google.auto.value
+  annotationProcessor libs.google.auto.value.processor
 }

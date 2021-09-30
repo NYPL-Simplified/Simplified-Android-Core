@@ -8,13 +8,13 @@ dependencies {
   api project(":simplified-content-api")
   api project(":simplified-json-core")
 
-  api libraries.io7m_jfunctional
+  api libs.io7m.jfunctional
 
-  implementation libraries.kotlin_stdlib
-  implementation libraries.kotlin_reflect
-  implementation libraries.nypl_http_api
-  implementation libraries.slf4j
+  implementation libs.kotlin.stdlib
+  implementation libs.kotlin.reflect
+  implementation libs.nypl.http.api
+  implementation libs.slf4j
 
-  compileOnly libraries.google_autovalue
-  annotationProcessor libraries.google_autovalue_processor
+  compileOnly libs.google.auto.value
+  annotationProcessor libs.google.auto.value.processor
 }

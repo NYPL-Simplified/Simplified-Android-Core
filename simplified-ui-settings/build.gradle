@@ -18,15 +18,15 @@ dependencies {
   implementation project(':simplified-ui-listeners-api')
   implementation project(":simplified-ui-errorpage")
 
-  implementation libraries.rxjava2
-  implementation libraries.rxjava2extensions
-  implementation libraries.rxandroid2
-  implementation libraries.kotlin_stdlib
-  implementation libraries.kotlin_reflect
-  implementation libraries.slf4j
-  implementation libraries.androidx_appcompat
-  implementation libraries.androidx_constraintlayout
-  implementation libraries.androidx_recyclerview
+  implementation libs.rxjava2
+  implementation libs.rxjava2.extensions
+  implementation libs.rxandroid2
+  implementation libs.kotlin.stdlib
+  implementation libs.kotlin.reflect
+  implementation libs.slf4j
+  implementation libs.androidx.app.compat
+  implementation libs.androidx.constraint.layout
+  implementation libs.androidx.recycler.view
 
-  api libraries.androidx_preference
+  api libs.androidx.preference
 }

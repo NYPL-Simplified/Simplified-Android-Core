@@ -7,18 +7,18 @@ android {
 dependencies {
   implementation project(':simplified-webview')
 
-  implementation libraries.slf4j
-  implementation libraries.androidx_legacy_support_v4
-  implementation libraries.androidx_activity
-  implementation libraries.androidx_appcompat
-  implementation libraries.androidx_constraintlayout
-  implementation libraries.androidx_navigation_fragment
-  implementation libraries.androidx_navigation_ui
-  implementation libraries.kotlin_stdlib
-  implementation libraries.kotlin_reflect
-  implementation libraries.joda_time
-  implementation libraries.moshi
-  implementation libraries.retrofit2
-  implementation libraries.retrofit2_moshi
-  implementation libraries.okhttp3_logging_interceptor
+  implementation libs.slf4j
+  implementation libs.androidx.legacy.support.v4
+  implementation libs.androidx.activity
+  implementation libs.androidx.app.compat
+  implementation libs.androidx.constraint.layout
+  implementation libs.androidx.navigation.fragment
+  implementation libs.androidx.navigation.ui
+  implementation libs.kotlin.stdlib
+  implementation libs.kotlin.reflect
+  implementation libs.joda.time
+  implementation libs.moshi
+  implementation libs.retrofit2
+  implementation libs.retrofit2.moshi
+  implementation libs.okhttp3.logging.interceptor
 }

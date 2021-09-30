@@ -1,18 +1,18 @@
 dependencies {
   api project(":simplified-profiles-api")
 
-  api libraries.io7m_jfunctional
-  api libraries.nypl_drm_core
+  api libs.io7m.jfunctional
+  api libs.nypl.drm.core
 
   implementation project(":simplified-accounts-source-spi")
   implementation project(":simplified-analytics-api")
   implementation project(":simplified-files")
   implementation project(":simplified-json-core")
 
-  implementation libraries.kotlin_stdlib
-  implementation libraries.kotlin_reflect
-  implementation libraries.slf4j
+  implementation libs.kotlin.stdlib
+  implementation libs.kotlin.reflect
+  implementation libs.slf4j
 
-  compileOnly libraries.google_autovalue
-  annotationProcessor libraries.google_autovalue_processor
+  compileOnly libs.google.auto.value
+  annotationProcessor libs.google.auto.value.processor
 }

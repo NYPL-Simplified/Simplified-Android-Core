@@ -64,6 +64,14 @@ same core:
 
 #### The Short Version
 
+Make sure you clone this repository with `git clone --recursive`. 
+If you forgot to use `--recursive`, then execute:
+
+```
+$ git submodule init
+$ git submodule update --remote --recursive
+```
+
 Install an [Android SDK](#android-sdk) and a [JDK](#jdk) and run:
 
 ~~~

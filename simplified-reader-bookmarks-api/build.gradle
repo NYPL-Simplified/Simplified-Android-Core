@@ -3,11 +3,11 @@ dependencies {
   api project(":simplified-books-api")
   api project(":simplified-profiles-controller-api")
 
-  api libraries.rxjava2
+  api libs.rxjava2
 
-  implementation libraries.kotlin_stdlib
-  implementation libraries.kotlin_reflect
+  implementation libs.kotlin.stdlib
+  implementation libs.kotlin.reflect
 
-  compileOnly libraries.google_autovalue
-  annotationProcessor libraries.google_autovalue_processor
+  compileOnly libs.google.auto.value
+  annotationProcessor libs.google.auto.value.processor
 }
