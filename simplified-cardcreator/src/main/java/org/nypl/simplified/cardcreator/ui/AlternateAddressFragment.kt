@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory
 class AlternateAddressFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
   private val logger = LoggerFactory.getLogger(AlternateAddressFragment::class.java)
+  private val bundle by lazy { AlternateAddressFragmentArgs.fromBundle(requireArguments()) }
 
   private var _binding: FragmentAlternateAddressBinding? = null
   private val binding get() = _binding!!
@@ -39,7 +40,6 @@ class AlternateAddressFragment : Fragment(), AdapterView.OnItemSelectedListener 
 
   private val addressCharsMin = 5
   private val nyState = "NY"
-  private lateinit var addressType: AddressType
 
   private val viewModel: AddressViewModel by activityViewModels()
 
@@ -59,15 +59,11 @@ class AlternateAddressFragment : Fragment(), AdapterView.OnItemSelectedListener 
 
     navController = Navigation.findNavController(requireActivity(), R.id.card_creator_nav_host_fragment)
 
-    arguments?.let {
-      addressType = AlternateAddressFragmentArgs.fromBundle(it).addressType
-      if (addressType == AddressType.WORK) {
-        binding.headerTv.text = getString(R.string.work_address)
-      } else {
-        binding.headerTv.text = getString(R.string.school_address)
-      }
+    if (bundle.addressType == AddressType.WORK) {
+      binding.headerTv.text = getString(R.string.work_address)
+    } else {
+      binding.headerTv.text = getString(R.string.school_address)
     }
-
     binding.spState.onItemSelectedListener = this
     ArrayAdapter.createFromResource(
       requireContext(),
@@ -115,15 +111,6 @@ class AlternateAddressFragment : Fragment(), AdapterView.OnItemSelectedListener 
       navController.popBackStack()
     }
 
-    restoreViewData()
-  }
-
-  /**
-   * Validates entered address
-   */
-  private fun validateAddress() {
-    showLoading(true)
-
     viewModel.validateAddressResponse.observe(
       viewLifecycleOwner,
       Observer { response ->
@@ -154,6 +141,15 @@ class AlternateAddressFragment : Fragment(), AdapterView.OnItemSelectedListener 
       }
     )
 
+    restoreViewData()
+  }
+
+  /**
+   * Validates entered address
+   */
+  private fun validateAddress() {
+    showLoading(true)
+
     viewModel.validateAddress(
       Address(
         line1 = binding.etStreet1.text.toString(),
@@ -183,7 +179,7 @@ class AlternateAddressFragment : Fragment(), AdapterView.OnItemSelectedListener 
   }
 
   private fun goNextIfInNewYork(address: Address) {
-    if (addressType == AddressType.WORK) {
+    if (bundle.addressType == AddressType.WORK) {
       Cache(requireContext()).setWorkAddress(address)
     } else {
       Cache(requireContext()).setSchoolAddress(address)
@@ -191,7 +187,7 @@ class AlternateAddressFragment : Fragment(), AdapterView.OnItemSelectedListener 
     if (address.state != nyState) {
       binding.headerStatusDescTv.text = getString(R.string.create_card_forbidden_not_in_new_york)
     } else {
-      nextAction = AlternateAddressFragmentDirections.actionNext(addressType)
+      nextAction = AlternateAddressFragmentDirections.actionNext(bundle.addressType)
       navController.navigate(nextAction)
     }
   }
@@ -250,7 +246,7 @@ class AlternateAddressFragment : Fragment(), AdapterView.OnItemSelectedListener 
    * Restores cached data
    */
   private fun restoreViewData() {
-    if (addressType == AddressType.WORK) {
+    if (bundle.addressType == AddressType.WORK) {
       val alternateAddress = Cache(requireContext()).getWorkAddress()
       binding.etZip.setText(alternateAddress.zip, TextView.BufferType.EDITABLE)
       binding.etStreet1.setText(alternateAddress.line1, TextView.BufferType.EDITABLE)

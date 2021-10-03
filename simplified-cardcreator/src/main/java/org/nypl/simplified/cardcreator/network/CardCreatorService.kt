@@ -1,6 +1,7 @@
 package org.nypl.simplified.cardcreator.network
 
 import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import okhttp3.MultipartBody
 import org.nypl.simplified.cardcreator.model.Address
 import org.nypl.simplified.cardcreator.model.CreatePatronResponse
@@ -24,7 +25,9 @@ class CardCreatorService(
 
   private var timedPlatformToken: Pair<ISSOTokenData, Long>? = null
 
-  private val moshi: Moshi = Moshi.Builder().build()
+  private val moshi: Moshi = Moshi.Builder()
+    .add(KotlinJsonAdapterFactory())
+    .build()
 
   /**
    * Returns whether the token is (very likely to be) still valid.

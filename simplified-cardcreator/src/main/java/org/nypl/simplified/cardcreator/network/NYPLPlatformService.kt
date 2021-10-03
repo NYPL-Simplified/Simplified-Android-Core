@@ -1,5 +1,7 @@
 package org.nypl.simplified.cardcreator.network
 
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -111,10 +113,14 @@ internal interface NYPLPlatformService {
         .addInterceptor(logging)
         .build()
 
+      val moshi = Moshi.Builder()
+        .add(KotlinJsonAdapterFactory())
+        .build()
+
       return Retrofit.Builder()
         .client(client)
         .baseUrl(Constants.NYPL_PROD_PLATFORM_BASE_URL)
-        .addConverterFactory(MoshiConverterFactory.create())
+        .addConverterFactory(MoshiConverterFactory.create(moshi))
         .build()
         .create(NYPLPlatformService::class.java)
     }

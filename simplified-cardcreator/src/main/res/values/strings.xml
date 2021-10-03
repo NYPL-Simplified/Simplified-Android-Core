@@ -13,7 +13,7 @@
     <string name="name">Name</string>
     <string name="username">Username</string>
     <string name="email">Email</string>
-    <string name="pin">Pin</string>
+    <string name="password">Password</string>
     <string name="review">Review</string>
     <string name="valid_address_subheader">This valid address will result in a temporary </string>
     <string name="creating_card">Creating card&#8230;</string>
@@ -39,12 +39,12 @@
     <string name="confirmation">Confirmation</string>
     <string name="card_saved">Card saved</string>
     <string name="user_card_number">Card Number: %1$s</string>
-    <string name="user_pin">PIN: %1$s</string>
+    <string name="user_password">Password: %1$s</string>
     <string name="issued_date">Issued: %1$s</string>
 
     <!-- Account Information -->
     <string name="account_information">Account Information</string>
-    <string name="username_desc">Usernames must be 5–25 letters or numbers only. PINs must be 4–32 characters.</string>
+    <string name="username_desc">Usernames must be 5–25 letters or numbers only. Passwords must be 8–32 characters.</string>
     <string name="validating_username">Validating username&#8230;</string>
 
     <!-- Home Address -->

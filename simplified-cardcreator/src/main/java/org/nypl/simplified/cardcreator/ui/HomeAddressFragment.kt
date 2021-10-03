@@ -100,14 +100,6 @@ class HomeAddressFragment : Fragment(), AdapterView.OnItemSelectedListener {
     binding.prevBtn.setOnClickListener {
       navController.popBackStack()
     }
-    restoreViewData()
-  }
-
-  /**
-   * Validates entered address
-   */
-  private fun validateAddress() {
-    showLoading(true)
 
     viewModel.validateAddressResponse.observe(
       viewLifecycleOwner,
@@ -122,7 +114,7 @@ class HomeAddressFragment : Fragment(), AdapterView.OnItemSelectedListener {
             navController.navigate(nextAction)
           }
           is ValidateAddressResponse.AlternateAddressesError -> {
-            logger.debug("Using first alternate address valid")
+            logger.debug("Using first alternate address")
             Cache(requireContext()).setHomeAddress(response.addresses.first())
             nextAction = HomeAddressFragmentDirections.actionNext()
             navController.navigate(nextAction)
@@ -143,6 +135,15 @@ class HomeAddressFragment : Fragment(), AdapterView.OnItemSelectedListener {
         }
       }
     )
+
+    restoreViewData()
+  }
+
+  /**
+   * Validates entered address
+   */
+  private fun validateAddress() {
+    showLoading(true)
 
     viewModel.validateAddress(
       Address(
@@ -230,6 +231,9 @@ class HomeAddressFragment : Fragment(), AdapterView.OnItemSelectedListener {
     binding.etZip.setText(homeAddress.zip, TextView.BufferType.EDITABLE)
     binding.etStreet1.setText(homeAddress.line1, TextView.BufferType.EDITABLE)
     binding.etCity.setText(homeAddress.city, TextView.BufferType.EDITABLE)
+    resources.getStringArray(R.array.states_array)
+      .indexOfFirst { it.endsWith("(${homeAddress.state})") }.takeUnless { it == -1 }
+      ?.let { binding.spState.setSelection(it) }
   }
 
   override fun onPause() {

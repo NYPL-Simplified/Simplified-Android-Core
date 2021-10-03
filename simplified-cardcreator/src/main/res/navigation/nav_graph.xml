@@ -182,7 +182,7 @@
             app:argType="string"
             android:defaultValue='""' />
         <argument
-            android:name="pin"
+            android:name="password"
             app:argType="string" />
         <argument
             android:name="message"

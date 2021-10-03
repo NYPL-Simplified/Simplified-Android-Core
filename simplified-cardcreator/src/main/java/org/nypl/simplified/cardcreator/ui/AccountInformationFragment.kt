@@ -34,7 +34,7 @@ class AccountInformationFragment : Fragment() {
   private lateinit var nextAction: NavDirections
   private var back = false
 
-  private val minPinChars = 4
+  private val minPinChars = 8
   private val maxPinChars = 32
   private val usernameMinChars = 5
   private val usernameMaxChars = 25
@@ -61,7 +61,7 @@ class AccountInformationFragment : Fragment() {
 
     navController = Navigation.findNavController(requireActivity(), R.id.card_creator_nav_host_fragment)
 
-    binding.pinEt.addTextChangedListener(object : TextWatcher {
+    binding.passwordEt.addTextChangedListener(object : TextWatcher {
       override fun afterTextChanged(s: Editable?) {
         validateForm()
       }
@@ -91,12 +91,6 @@ class AccountInformationFragment : Fragment() {
       navController.popBackStack()
     }
 
-    restoreViewData()
-  }
-
-  private fun validateUsername() {
-    showLoading(true)
-
     viewModel.validateUsernameResponse.observe(
       viewLifecycleOwner,
       Observer { response ->
@@ -110,7 +104,7 @@ class AccountInformationFragment : Fragment() {
             logger.debug("Username is valid")
             Cache(requireContext()).setAccountInformation(
               binding.usernameEt.text.toString(),
-              binding.pinEt.text.toString()
+              binding.passwordEt.text.toString()
             )
             nextAction = AccountInformationFragmentDirections.actionNext()
             navController.navigate(nextAction)
@@ -131,6 +125,12 @@ class AccountInformationFragment : Fragment() {
         }
       }
     )
+
+    restoreViewData()
+  }
+
+  private fun validateUsername() {
+    showLoading(true)
 
     viewModel.validateUsername(
       binding.usernameEt.text.toString()
@@ -155,7 +155,7 @@ class AccountInformationFragment : Fragment() {
 
   private fun validateForm() {
     binding.nextBtn.isEnabled =
-      binding.pinEt.text.length in minPinChars..maxPinChars &&
+      binding.passwordEt.text.length in minPinChars..maxPinChars &&
       binding.usernameEt.text.length in usernameMinChars..usernameMaxChars
   }
 
@@ -181,7 +181,7 @@ class AccountInformationFragment : Fragment() {
    */
   private fun restoreViewData() {
     val accountInformation = Cache(requireContext()).getAccountInformation()
-    binding.pinEt.setText(accountInformation.pin, TextView.BufferType.EDITABLE)
+    binding.passwordEt.setText(accountInformation.pin, TextView.BufferType.EDITABLE)
     binding.usernameEt.setText(accountInformation.username, TextView.BufferType.EDITABLE)
   }
 

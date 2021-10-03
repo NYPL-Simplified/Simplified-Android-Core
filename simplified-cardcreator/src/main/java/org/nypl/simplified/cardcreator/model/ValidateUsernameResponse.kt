@@ -23,8 +23,8 @@ sealed class ValidateUsernameResponse {
   }
 
   data class ValidateUsernameError(
-    val status: Int,
-    val type: String
+    @field:Json(name = "status") val status: Int,
+    @field:Json(name = "type") val type: String
   ) : ValidateUsernameResponse() {
 
     val isInvalidUsername: Boolean

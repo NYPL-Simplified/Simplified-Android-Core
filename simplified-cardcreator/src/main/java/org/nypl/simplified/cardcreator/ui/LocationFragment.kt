@@ -63,7 +63,7 @@ class LocationFragment : Fragment(), LocationListener {
     inflater: LayoutInflater,
     container: ViewGroup?,
     savedInstanceState: Bundle?
-  ): View? {
+  ): View {
     _binding = FragmentLocationBinding.inflate(inflater, container, false)
     return binding.root
   }
@@ -304,7 +304,7 @@ class LocationFragment : Fragment(), LocationListener {
   /**
    * Enables the next button and update header status
    */
-  fun enableNext(enable: Boolean) {
+  private fun enableNext(enable: Boolean) {
     isNewYork = enable || locationMock
     binding.nextBtn.isEnabled = enable || locationMock
     if (enable) {

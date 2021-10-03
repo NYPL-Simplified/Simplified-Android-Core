@@ -159,7 +159,7 @@
                     style="@style/WizardFormLabel"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/pin" />
+                    android:text="@string/password" />
 
                 <TextView
                     android:id="@+id/pin_tv"

@@ -10,7 +10,7 @@ data class Address(
   @field:Json(name = "state") val state: String,
   @field:Json(name = "zip") val zip: String,
   @field:Json(name = "isResidential") val isResidential: Boolean,
-  @field:Json(name = "hasBeenValidated") val hasBeenValidated: Boolean
+  @field:Json(name = "hasBeenValidated") val hasBeenValidated: Boolean = true
 ) {
 
   /**
