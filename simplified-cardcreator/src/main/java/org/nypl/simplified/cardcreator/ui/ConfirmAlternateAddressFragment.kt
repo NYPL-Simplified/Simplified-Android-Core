@@ -43,15 +43,15 @@ class ConfirmAlternateAddressFragment : Fragment() {
       if (bundle.addressType == AddressType.SCHOOL) {
         binding.headerErrorTv.text = getString(R.string.confirm_school_address)
         Cache(requireContext()).getSchoolAddress()
-    } else {
+      } else {
         Cache(requireContext()).getWorkAddress()
-    }
+      }
 
     binding.addressRb.text = """
       ${address.line1}
       ${address.city}
       ${address.state} ${address.zip}
-      """.trimIndent()
+    """.trimIndent()
 
     nextAction = ConfirmAlternateAddressFragmentDirections.actionNext()
 

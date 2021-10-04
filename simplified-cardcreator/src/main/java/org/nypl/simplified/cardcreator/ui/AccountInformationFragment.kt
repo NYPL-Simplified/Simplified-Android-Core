@@ -11,7 +11,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Observer
 import androidx.navigation.NavController
 import androidx.navigation.NavDirections
 import androidx.navigation.Navigation
@@ -32,7 +31,6 @@ class AccountInformationFragment : Fragment() {
 
   private lateinit var navController: NavController
   private lateinit var nextAction: NavDirections
-  private var back = false
 
   private val minPinChars = 8
   private val maxPinChars = 32
@@ -54,10 +52,6 @@ class AccountInformationFragment : Fragment() {
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
-
-    arguments?.let {
-      back = AccountInformationFragmentArgs.fromBundle(it).back
-    }
 
     navController = Navigation.findNavController(requireActivity(), R.id.card_creator_nav_host_fragment)
 
@@ -82,7 +76,6 @@ class AccountInformationFragment : Fragment() {
     // Go to next screen
     binding.nextBtn.setOnClickListener {
       hideKeyboard()
-      back = false
       validateUsername()
     }
 
@@ -91,50 +84,45 @@ class AccountInformationFragment : Fragment() {
       navController.popBackStack()
     }
 
-    viewModel.validateUsernameResponse.observe(
-      viewLifecycleOwner,
-      Observer { response ->
-        if (back) {
-          return@Observer
-        }
+    viewModel.validateUsernameResponse
+      .receive(viewLifecycleOwner, this::handleValidateUsernameResponse)
 
-        showLoading(false)
-        when (response) {
-          is ValidateUsernameResponse.ValidateUsernameData -> {
-            logger.debug("Username is valid")
-            Cache(requireContext()).setAccountInformation(
-              binding.usernameEt.text.toString(),
-              binding.passwordEt.text.toString()
-            )
-            nextAction = AccountInformationFragmentDirections.actionNext()
-            navController.navigate(nextAction)
-          }
-          is ValidateUsernameResponse.ValidateUsernameError -> {
-            if (response.isUnavailableUsername) {
-              val message = getString(R.string.unavailable_username)
-              Toast.makeText(activity, message, Toast.LENGTH_SHORT).show()
-            } else {
-              val message = getString(R.string.validate_username_error, response.status)
-              showTryAgainDialog(message)
-            }
-          }
-          is ValidateUsernameResponse.ValidateUsernameException -> {
-            val message = getString(R.string.validate_username_general_error)
-            showTryAgainDialog(message)
-          }
-        }
-      }
-    )
+    viewModel.pendingRequest.observe(viewLifecycleOwner, this::showLoading)
 
     restoreViewData()
   }
 
   private fun validateUsername() {
-    showLoading(true)
-
     viewModel.validateUsername(
       binding.usernameEt.text.toString()
     )
+  }
+
+  private fun handleValidateUsernameResponse(response: ValidateUsernameResponse) {
+    when (response) {
+      is ValidateUsernameResponse.ValidateUsernameData -> {
+        logger.debug("Username is valid")
+        Cache(requireContext()).setAccountInformation(
+          binding.usernameEt.text.toString(),
+          binding.passwordEt.text.toString()
+        )
+        nextAction = AccountInformationFragmentDirections.actionNext()
+        navController.navigate(nextAction)
+      }
+      is ValidateUsernameResponse.ValidateUsernameError -> {
+        if (response.isUnavailableUsername) {
+          val message = getString(R.string.unavailable_username)
+          Toast.makeText(activity, message, Toast.LENGTH_SHORT).show()
+        } else {
+          val message = getString(R.string.validate_username_error, response.status)
+          showTryAgainDialog(message)
+        }
+      }
+      is ValidateUsernameResponse.ValidateUsernameException -> {
+        val message = getString(R.string.validate_username_general_error)
+        showTryAgainDialog(message)
+      }
+    }
   }
 
   private fun showTryAgainDialog(message: String) {

@@ -15,7 +15,6 @@ import androidx.activity.addCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Observer
 import androidx.navigation.NavController
 import androidx.navigation.NavDirections
 import androidx.navigation.Navigation
@@ -23,7 +22,7 @@ import org.nypl.simplified.cardcreator.R
 import org.nypl.simplified.cardcreator.databinding.FragmentJuvenilePolicyBinding
 import org.nypl.simplified.cardcreator.model.DependentEligibilityResponse
 import org.nypl.simplified.cardcreator.utils.Constants
-import org.nypl.simplified.cardcreator.viewmodel.JuvenileViewModel
+import org.nypl.simplified.cardcreator.viewmodel.DependentEligibilityViewModel
 import org.slf4j.LoggerFactory
 
 /**
@@ -39,7 +38,7 @@ class JuvenilePolicyFragment : Fragment() {
   private lateinit var navController: NavController
   private lateinit var nextAction: NavDirections
 
-  private val juvenileViewModel: JuvenileViewModel by activityViewModels()
+  private val viewModel: DependentEligibilityViewModel by activityViewModels()
 
   private var dialog: AlertDialog? = null
 
@@ -93,7 +92,6 @@ class JuvenilePolicyFragment : Fragment() {
     // Go to next screen
     binding.nextBtn.setOnClickListener {
       if (validateForm()) {
-        binding.progress.visibility = View.VISIBLE
         getEligibility()
       } else {
         requireActivity().setResult(Activity.RESULT_CANCELED)
@@ -101,38 +99,46 @@ class JuvenilePolicyFragment : Fragment() {
       }
     }
 
-    juvenileViewModel.dependentEligibilityResponse.observe(
-      viewLifecycleOwner,
-      Observer { response ->
-        binding.progress.visibility = View.GONE
-
-        when (response) {
-          is DependentEligibilityResponse.DependentEligibilityData -> {
-            nextAction = JuvenilePolicyFragmentDirections.actionLocation()
-            navController.navigate(nextAction)
-          }
-          is DependentEligibilityResponse.DependentEligibilityError -> {
-            if (response.isNotEligible) {
-              val message = getString(R.string.juvenile_not_eligible)
-              showNotEligibleDialog(message)
-            } else {
-              val message = getString(R.string.juvenile_eligibility_error)
-              showTryAgainDialog(message)
-            }
-          }
-          is DependentEligibilityResponse.DependentEligibilityException -> {
-            val message = getString(R.string.juvenile_eligibility_error)
-            showTryAgainDialog(message)
-          }
-        }
-      }
-    )
-
     val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
       requireActivity().setResult(Activity.RESULT_CANCELED)
       requireActivity().finish()
     }
     callback.isEnabled = true
+
+    viewModel.dependentEligibilityResponse
+      .receive(viewLifecycleOwner, this::handleDependentEligibilityResponse)
+
+    viewModel.pendingRequest.observe(viewLifecycleOwner, this::showLoading)
+  }
+
+  private fun showLoading(loading: Boolean) {
+    if (loading) {
+      binding.progress.visibility = View.VISIBLE
+    } else {
+      binding.progress.visibility = View.GONE
+    }
+  }
+
+  private fun handleDependentEligibilityResponse(response: DependentEligibilityResponse) {
+    when (response) {
+      is DependentEligibilityResponse.DependentEligibilityData -> {
+        nextAction = JuvenilePolicyFragmentDirections.actionLocation()
+        navController.navigate(nextAction)
+      }
+      is DependentEligibilityResponse.DependentEligibilityError -> {
+        if (response.isNotEligible) {
+          val message = getString(R.string.juvenile_not_eligible)
+          showNotEligibleDialog(message)
+        } else {
+          val message = getString(R.string.juvenile_eligibility_error)
+          showTryAgainDialog(message)
+        }
+      }
+      is DependentEligibilityResponse.DependentEligibilityException -> {
+        val message = getString(R.string.juvenile_eligibility_error)
+        showTryAgainDialog(message)
+      }
+    }
   }
 
   private fun showNotEligibleDialog(message: String) {
@@ -169,7 +175,7 @@ class JuvenilePolicyFragment : Fragment() {
    * Check to see if the user is eligible to create child cards
    */
   private fun getEligibility() {
-    juvenileViewModel.getDependentEligibility(
+    viewModel.getDependentEligibility(
       requireActivity().intent.getStringExtra("userIdentifier")!!
     )
   }

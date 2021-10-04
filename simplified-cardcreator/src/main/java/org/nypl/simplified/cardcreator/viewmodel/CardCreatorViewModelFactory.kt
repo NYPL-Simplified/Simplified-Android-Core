@@ -13,7 +13,7 @@ class CardCreatorViewModelFactory(
     return when (modelClass) {
       CardCreatorViewModel::class.java -> CardCreatorViewModel(cardCreatorService) as T
       AddressViewModel::class.java -> AddressViewModel(cardCreatorService) as T
-      JuvenileViewModel::class.java -> JuvenileViewModel(cardCreatorService) as T
+      DependentEligibilityViewModel::class.java -> DependentEligibilityViewModel(cardCreatorService) as T
       PatronViewModel::class.java -> PatronViewModel(cardCreatorService) as T
       UsernameViewModel::class.java -> UsernameViewModel(cardCreatorService) as T
       else -> throw IllegalStateException("Can't create values of $modelClass")

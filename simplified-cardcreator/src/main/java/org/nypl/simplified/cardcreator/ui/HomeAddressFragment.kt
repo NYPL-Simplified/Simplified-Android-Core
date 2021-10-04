@@ -13,7 +13,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Observer
 import androidx.navigation.NavController
 import androidx.navigation.NavDirections
 import androidx.navigation.Navigation
@@ -101,40 +100,10 @@ class HomeAddressFragment : Fragment(), AdapterView.OnItemSelectedListener {
       navController.popBackStack()
     }
 
-    viewModel.validateAddressResponse.observe(
-      viewLifecycleOwner,
-      Observer { response ->
-        showLoading(false)
+    viewModel.validateAddressResponse
+      .receive(viewLifecycleOwner, this::handleValidateAddressResponse)
 
-        when (response) {
-          is ValidateAddressResponse.ValidateAddressData -> {
-            logger.debug("Address is valid")
-            Cache(requireContext()).setHomeAddress(response.address)
-            nextAction = HomeAddressFragmentDirections.actionNext()
-            navController.navigate(nextAction)
-          }
-          is ValidateAddressResponse.AlternateAddressesError -> {
-            logger.debug("Using first alternate address")
-            Cache(requireContext()).setHomeAddress(response.addresses.first())
-            nextAction = HomeAddressFragmentDirections.actionNext()
-            navController.navigate(nextAction)
-          }
-          is ValidateAddressResponse.ValidateAddressError -> {
-            if (response.isUnrecognizedAddress) {
-              val message = getString(R.string.unrecognized_address)
-              Toast.makeText(activity, message, Toast.LENGTH_SHORT).show()
-            } else {
-              val message = getString(R.string.validate_address_error, response.status)
-              showTryAgainDialog(message)
-            }
-          }
-          is ValidateAddressResponse.ValidateAddressException -> {
-            val message = getString(R.string.validate_address_general_error)
-            showTryAgainDialog(message)
-          }
-        }
-      }
-    )
+    viewModel.pendingRequest.observe(viewLifecycleOwner, this::showLoading)
 
     restoreViewData()
   }
@@ -143,8 +112,6 @@ class HomeAddressFragment : Fragment(), AdapterView.OnItemSelectedListener {
    * Validates entered address
    */
   private fun validateAddress() {
-    showLoading(true)
-
     viewModel.validateAddress(
       Address(
         line1 = binding.etStreet1.text.toString(),
@@ -155,6 +122,36 @@ class HomeAddressFragment : Fragment(), AdapterView.OnItemSelectedListener {
         hasBeenValidated = false
       )
     )
+  }
+
+  private fun handleValidateAddressResponse(response: ValidateAddressResponse) {
+    when (response) {
+      is ValidateAddressResponse.ValidateAddressData -> {
+        logger.debug("Address is valid")
+        Cache(requireContext()).setHomeAddress(response.address)
+        nextAction = HomeAddressFragmentDirections.actionNext()
+        navController.navigate(nextAction)
+      }
+      is ValidateAddressResponse.AlternateAddressesError -> {
+        logger.debug("Using first alternate address")
+        Cache(requireContext()).setHomeAddress(response.addresses.first())
+        nextAction = HomeAddressFragmentDirections.actionNext()
+        navController.navigate(nextAction)
+      }
+      is ValidateAddressResponse.ValidateAddressError -> {
+        if (response.isUnrecognizedAddress) {
+          val message = getString(R.string.unrecognized_address)
+          Toast.makeText(activity, message, Toast.LENGTH_SHORT).show()
+        } else {
+          val message = getString(R.string.validate_address_error, response.status)
+          showTryAgainDialog(message)
+        }
+      }
+      is ValidateAddressResponse.ValidateAddressException -> {
+        val message = getString(R.string.validate_address_general_error)
+        showTryAgainDialog(message)
+      }
+    }
   }
 
   private fun showTryAgainDialog(message: String) {
