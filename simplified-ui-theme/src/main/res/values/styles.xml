@@ -5,6 +5,7 @@
   <color name="simplifiedColorPrimary">#0d47a1</color>
   <color name="simplifiedColorPrimaryDark">#002171</color>
   <color name="simplifiedColorDisabled">#dddddd</color>
+  <color name="simplifiedColorDisabledAccessibility">#D3D3D3</color>
   <color name="simplifiedColorBackground">#ffffff</color>
   <dimen name="simplifiedButtonCornerRadius">6dp</dimen>
   <dimen name="simplifiedButtonVerticalPadding">8dp</dimen>
