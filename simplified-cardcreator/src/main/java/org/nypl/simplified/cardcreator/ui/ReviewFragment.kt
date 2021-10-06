@@ -22,7 +22,6 @@ import org.nypl.simplified.cardcreator.model.Patron
 import org.nypl.simplified.cardcreator.utils.Cache
 import org.nypl.simplified.cardcreator.utils.getCache
 import org.nypl.simplified.cardcreator.utils.isBarcode
-import org.nypl.simplified.cardcreator.viewmodel.DependentEligibilityViewModel
 import org.nypl.simplified.cardcreator.viewmodel.PatronViewModel
 import org.slf4j.LoggerFactory
 
