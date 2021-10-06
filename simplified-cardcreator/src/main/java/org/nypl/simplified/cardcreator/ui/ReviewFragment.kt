@@ -285,9 +285,11 @@ class ReviewFragment : Fragment() {
   }
 
   private fun setJuvenileReviewData() {
+    binding.emailLabelTv.visibility = View.GONE
     binding.emailTv.visibility = View.GONE
     binding.schoolAddressData.visibility = View.GONE
     binding.workAddressData.visibility = View.GONE
+    binding.addressHomeLabelTv.visibility = View.GONE
     binding.addressHomeTv1.visibility = View.GONE
     binding.addressHomeTv2.visibility = View.GONE
     setAccountInfo()

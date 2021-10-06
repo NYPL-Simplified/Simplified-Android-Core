@@ -28,6 +28,9 @@ sealed class DependentEligibilityResponse {
     val isNotEligible: Boolean
       get() = type == "not-eligible-card"
 
+    val isLimitReached: Boolean
+      get() = type == "limit-reached"
+
     /**
      * Moshi might have set some missing fields to null instead of throwing an exception,
      * so we need to manually check every field is not null to prevent NullPointerExceptions where

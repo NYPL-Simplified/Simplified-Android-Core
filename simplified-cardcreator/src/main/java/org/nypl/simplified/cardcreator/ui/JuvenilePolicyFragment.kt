@@ -126,12 +126,19 @@ class JuvenilePolicyFragment : Fragment() {
         navController.navigate(nextAction)
       }
       is DependentEligibilityResponse.DependentEligibilityError -> {
-        if (response.isNotEligible) {
-          val message = getString(R.string.juvenile_not_eligible)
-          showNotEligibleDialog(message)
-        } else {
-          val message = getString(R.string.juvenile_eligibility_error)
-          showTryAgainDialog(message)
+        when {
+          response.isNotEligible -> {
+            val message = getString(R.string.juvenile_not_eligible)
+            showNegativeResponseDialog(message)
+          }
+          response.isLimitReached -> {
+            val message = getString(R.string.juvenile_limit_reached)
+            showNegativeResponseDialog(message)
+          }
+          else -> {
+            val message = getString(R.string.juvenile_eligibility_error)
+            showTryAgainDialog(message)
+          }
         }
       }
       is DependentEligibilityResponse.DependentEligibilityException -> {
@@ -141,7 +148,7 @@ class JuvenilePolicyFragment : Fragment() {
     }
   }
 
-  private fun showNotEligibleDialog(message: String) {
+  private fun showNegativeResponseDialog(message: String) {
     val dialogBuilder = AlertDialog.Builder(requireContext())
     dialogBuilder.setMessage(message)
       .setCancelable(false)
