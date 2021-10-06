@@ -128,15 +128,11 @@ class HomeAddressFragment : Fragment(), AdapterView.OnItemSelectedListener {
     when (response) {
       is ValidateAddressResponse.ValidateAddressData -> {
         logger.debug("Address is valid")
-        Cache(requireContext()).setHomeAddress(response.address)
-        nextAction = HomeAddressFragmentDirections.actionNext()
-        navController.navigate(nextAction)
+        goNextIfResidential(response.address)
       }
       is ValidateAddressResponse.AlternateAddressesError -> {
         logger.debug("Using first alternate address")
-        Cache(requireContext()).setHomeAddress(response.addresses.first())
-        nextAction = HomeAddressFragmentDirections.actionNext()
-        navController.navigate(nextAction)
+        goNextIfResidential(response.addresses.first())
       }
       is ValidateAddressResponse.ValidateAddressError -> {
         if (response.isUnrecognizedAddress) {
@@ -151,6 +147,19 @@ class HomeAddressFragment : Fragment(), AdapterView.OnItemSelectedListener {
         val message = getString(R.string.validate_address_general_error)
         showTryAgainDialog(message)
       }
+    }
+  }
+
+  private fun goNextIfResidential(address: Address) {
+    if (address.isResidential) {
+      logger.debug("Address is residential")
+      Cache(requireContext()).setHomeAddress(address)
+      nextAction = HomeAddressFragmentDirections.actionNext()
+      navController.navigate(nextAction)
+    } else {
+      logger.debug("Address is not residential")
+      val message = getString(R.string.non_residential_address)
+      Toast.makeText(activity, message, Toast.LENGTH_SHORT).show()
     }
   }
 

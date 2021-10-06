@@ -165,6 +165,7 @@
     <string name="create_card_general_error">There was an error creating your card.</string>
     <string name="juvenile_not_eligible">You don\'t have the rights to make child accounts.</string>
     <string name="juvenile_eligibility_error">We were not able to determine if you can make child cards.</string>
+    <string name="non_residential_address">This address is not residential.</string>
     <string name="unrecognized_address">Unrecognized address.</string>
     <string name="create_card_forbidden_not_in_new_york">Library cards are only available for residents of New York State or students and commuters working in New York City.</string>
     <string name="validate_address_general_error">There was an error validating your address.</string>
