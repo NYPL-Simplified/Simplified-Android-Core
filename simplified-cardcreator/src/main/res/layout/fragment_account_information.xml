@@ -59,22 +59,23 @@
                     style="@style/WizardFormEditText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/required" />
+                    android:hint="@string/required"
+                    android:maxLength="25" />
 
                 <TextView
                     style="@style/WizardFormLabel"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/pin" />
+                    android:text="@string/password" />
 
                 <EditText
-                    android:id="@+id/pin_et"
+                    android:id="@+id/password_et"
                     style="@style/WizardFormEditText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/required"
-                    android:inputType="number"
-                    android:maxLength="4" />
+                    android:maxLength="32"
+                    tools:ignore="TextFields" />
 
             </LinearLayout>
 

@@ -12,15 +12,14 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.NavController
 import androidx.navigation.NavDirections
 import androidx.navigation.Navigation
 import org.nypl.simplified.cardcreator.R
 import org.nypl.simplified.cardcreator.databinding.FragmentHomeAddressBinding
 import org.nypl.simplified.cardcreator.model.Address
-import org.nypl.simplified.cardcreator.model.AddressDetails
+import org.nypl.simplified.cardcreator.model.ValidateAddressResponse
 import org.nypl.simplified.cardcreator.utils.Cache
 import org.nypl.simplified.cardcreator.utils.hideKeyboard
 import org.nypl.simplified.cardcreator.viewmodel.AddressViewModel
@@ -36,17 +35,15 @@ class HomeAddressFragment : Fragment(), AdapterView.OnItemSelectedListener {
   private lateinit var navController: NavController
   private lateinit var nextAction: NavDirections
   private val addressCharsMin = 5
-  private val validAddress = "valid-address"
-  private val alternateAddress = "alternate-addresses"
   private var dialog: AlertDialog? = null
 
-  private val viewModel: AddressViewModel by viewModels()
+  private val viewModel: AddressViewModel by activityViewModels()
 
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
     savedInstanceState: Bundle?
-  ): View? {
+  ): View {
     _binding = FragmentHomeAddressBinding.inflate(inflater, container, false)
     return binding.root
   }
@@ -102,6 +99,12 @@ class HomeAddressFragment : Fragment(), AdapterView.OnItemSelectedListener {
     binding.prevBtn.setOnClickListener {
       navController.popBackStack()
     }
+
+    viewModel.validateAddressResponse
+      .receive(viewLifecycleOwner, this::handleValidateAddressResponse)
+
+    viewModel.pendingRequest.observe(viewLifecycleOwner, this::showLoading)
+
     restoreViewData()
   }
 
@@ -109,66 +112,71 @@ class HomeAddressFragment : Fragment(), AdapterView.OnItemSelectedListener {
    * Validates entered address
    */
   private fun validateAddress() {
-    showLoading(true)
-    viewModel.validateAddressResponse.observe(
-      viewLifecycleOwner,
-      Observer { response ->
-        showLoading(false)
-        if (response.type == validAddress || response.type == alternateAddress) {
-          logger.debug("Address is valid")
-          Cache(requireContext()).setHomeAddress(
-            AddressDetails(
-              response.address.line_1,
-              response.address.city,
-              response.address.state,
-              response.address.zip
-            )
-          )
-          nextAction = HomeAddressFragmentDirections.actionNext()
-
-          navController.navigate(nextAction)
-        } else {
-          Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
-        }
-      }
-    )
-
-    viewModel.apiError.observe(
-      viewLifecycleOwner,
-      Observer {
-        showLoading(false)
-        var error = getString(R.string.validate_address_general_error)
-        if (it != null) {
-          error = getString(R.string.validate_address_error, it)
-        }
-        val dialogBuilder = AlertDialog.Builder(requireContext())
-        dialogBuilder.setMessage(error)
-          .setCancelable(false)
-          .setPositiveButton(getString(R.string.try_again)) { _, _ ->
-            validateAddress()
-          }
-          .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
-            dialog.cancel()
-          }
-        if (dialog == null) {
-          dialog = dialogBuilder.create()
-        }
-        dialog?.show()
-      }
-    )
     viewModel.validateAddress(
       Address(
-        AddressDetails(
-          binding.etCity.text.toString(),
-          binding.etStreet1.text.toString(),
-          getStateAbbreviation(binding.spState.selectedItem.toString()),
-          binding.etZip.text.toString()
-        ),
-        false
-      ),
-      requireActivity().intent.getStringExtra("username")!!,
-      requireActivity().intent.getStringExtra("password")!!
+        line1 = binding.etStreet1.text.toString(),
+        city = binding.etCity.text.toString(),
+        state = getStateAbbreviation(binding.spState.selectedItem.toString()),
+        zip = binding.etZip.text.toString(),
+        isResidential = true,
+        hasBeenValidated = false
+      )
     )
+  }
+
+  private fun handleValidateAddressResponse(response: ValidateAddressResponse) {
+    when (response) {
+      is ValidateAddressResponse.ValidateAddressData -> {
+        logger.debug("Address is valid")
+        goNextIfResidential(response.address)
+      }
+      is ValidateAddressResponse.AlternateAddressesError -> {
+        logger.debug("Using first alternate address")
+        goNextIfResidential(response.addresses.first())
+      }
+      is ValidateAddressResponse.ValidateAddressError -> {
+        if (response.isUnrecognizedAddress) {
+          val message = getString(R.string.unrecognized_address)
+          Toast.makeText(activity, message, Toast.LENGTH_SHORT).show()
+        } else {
+          val message = getString(R.string.validate_address_error, response.status)
+          showTryAgainDialog(message)
+        }
+      }
+      is ValidateAddressResponse.ValidateAddressException -> {
+        val message = getString(R.string.validate_address_general_error)
+        showTryAgainDialog(message)
+      }
+    }
+  }
+
+  private fun goNextIfResidential(address: Address) {
+    if (address.isResidential) {
+      logger.debug("Address is residential")
+      Cache(requireContext()).setHomeAddress(address)
+      nextAction = HomeAddressFragmentDirections.actionNext()
+      navController.navigate(nextAction)
+    } else {
+      logger.debug("Address is not residential")
+      val message = getString(R.string.non_residential_address)
+      Toast.makeText(activity, message, Toast.LENGTH_SHORT).show()
+    }
+  }
+
+  private fun showTryAgainDialog(message: String) {
+    val dialogBuilder = AlertDialog.Builder(requireContext())
+    dialogBuilder.setMessage(message)
+      .setCancelable(false)
+      .setPositiveButton(getString(R.string.try_again)) { _, _ ->
+        validateAddress()
+      }
+      .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
+        dialog.cancel()
+      }
+    if (dialog == null) {
+      dialog = dialogBuilder.create()
+    }
+    dialog?.show()
   }
 
   /**
@@ -227,8 +235,11 @@ class HomeAddressFragment : Fragment(), AdapterView.OnItemSelectedListener {
   private fun restoreViewData() {
     val homeAddress = Cache(requireContext()).getHomeAddress()
     binding.etZip.setText(homeAddress.zip, TextView.BufferType.EDITABLE)
-    binding.etStreet1.setText(homeAddress.line_1, TextView.BufferType.EDITABLE)
+    binding.etStreet1.setText(homeAddress.line1, TextView.BufferType.EDITABLE)
     binding.etCity.setText(homeAddress.city, TextView.BufferType.EDITABLE)
+    resources.getStringArray(R.array.states_array)
+      .indexOfFirst { it.endsWith("(${homeAddress.state})") }.takeUnless { it == -1 }
+      ?.let { binding.spState.setSelection(it) }
   }
 
   override fun onPause() {

@@ -18,6 +18,7 @@ dependencies {
   implementation libs.kotlin.reflect
   implementation libs.joda.time
   implementation libs.moshi
+  implementation libs.moshi.kotlin
   implementation libs.retrofit2
   implementation libs.retrofit2.moshi
   implementation libs.okhttp3.logging.interceptor

@@ -146,10 +146,6 @@
             app:destination="@id/destination_review"
             app:enterAnim="@anim/enter_right"
             app:exitAnim="@anim/exit_left" />
-        <argument
-            android:name="back"
-            app:argType="boolean"
-            android:defaultValue="false" />
 
     </fragment>
 
@@ -182,14 +178,8 @@
             app:argType="string"
             android:defaultValue='""' />
         <argument
-            android:name="pin"
+            android:name="password"
             app:argType="string" />
-        <argument
-            android:name="type"
-            app:argType="string" />
-        <argument
-            android:name="temporary"
-            app:argType="boolean" />
         <argument
             android:name="message"
             app:argType="string" />

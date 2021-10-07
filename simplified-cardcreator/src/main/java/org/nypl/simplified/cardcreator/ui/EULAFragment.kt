@@ -29,9 +29,8 @@ class EULAFragment : Fragment() {
     super.onViewCreated(view, savedInstanceState)
     WebViewUtilities.setForcedDark(binding.webview.settings, resources.configuration)
 
-    arguments?.let {
-      binding.webview.loadUrl(EULAFragmentArgs.fromBundle(it).url)
-    }
+    val url = EULAFragmentArgs.fromBundle(requireArguments()).url
+    binding.webview.loadUrl(url)
   }
 
   override fun onDestroyView() {

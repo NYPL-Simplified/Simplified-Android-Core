@@ -31,7 +31,7 @@ class JuvenileInformationFragment : Fragment() {
     inflater: LayoutInflater,
     container: ViewGroup?,
     savedInstanceState: Bundle?
-  ): View? {
+  ): View {
     _binding = FragmentJuvenileInformationBinding.inflate(inflater, container, false)
     return binding.root
   }

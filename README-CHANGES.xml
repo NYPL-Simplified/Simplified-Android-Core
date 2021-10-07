@@ -200,7 +200,7 @@
         </c:change>
       </c:changes>
     </c:release>
-    <c:release date="2021-09-22T07:44:18+00:00" is-open="true" ticket-system="org.nypl.jira" version="7.0.2">
+    <c:release date="2021-09-22T08:26:45+00:00" is-open="true" ticket-system="org.nypl.jira" version="7.0.2">
       <c:changes>
         <c:change date="2021-08-31T00:00:00+00:00" summary="Switch to a global byte-based page numbering">
           <c:tickets>
@@ -222,12 +222,17 @@
             <c:ticket id="SMA-237"/>
           </c:tickets>
         </c:change>
-        <c:change date="2021-09-22T07:44:18+00:00" summary="Implement the dark mode">
+        <c:change date="2021-09-22T00:00:00+00:00" summary="Implement the dark mode">
           <c:tickets>
             <c:ticket id="SMA-220"/>
             <c:ticket id="SMA-221"/>
             <c:ticket id="SMA-222"/>
             <c:ticket id="SMA-223"/>
+          </c:tickets>
+        </c:change>
+        <c:change date="2021-09-22T08:26:45+00:00" summary="Update Card Creator to accept nonnumeric long passwords">
+          <c:tickets>
+            <c:ticket id="SMA-210"/>
           </c:tickets>
         </c:change>
       </c:changes>

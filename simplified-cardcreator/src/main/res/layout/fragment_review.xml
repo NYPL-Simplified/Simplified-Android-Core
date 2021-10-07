@@ -49,6 +49,7 @@
 
                 <TextView
                     style="@style/WizardFormLabel"
+                    android:id="@+id/address_home_label_tv"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/home_address" />
@@ -133,6 +134,7 @@
 
                 <TextView
                     style="@style/WizardFormLabel"
+                    android:id="@+id/email_label_tv"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/email" />
@@ -159,7 +161,7 @@
                     style="@style/WizardFormLabel"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/pin" />
+                    android:text="@string/password" />
 
                 <TextView
                     android:id="@+id/pin_tv"

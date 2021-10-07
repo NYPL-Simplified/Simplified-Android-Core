@@ -10,13 +10,13 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.NavController
 import androidx.navigation.NavDirections
 import androidx.navigation.Navigation
 import org.nypl.simplified.cardcreator.R
 import org.nypl.simplified.cardcreator.databinding.FragmentAccountInformationBinding
+import org.nypl.simplified.cardcreator.model.ValidateUsernameResponse
 import org.nypl.simplified.cardcreator.utils.Cache
 import org.nypl.simplified.cardcreator.utils.hideKeyboard
 import org.nypl.simplified.cardcreator.viewmodel.UsernameViewModel
@@ -31,14 +31,13 @@ class AccountInformationFragment : Fragment() {
 
   private lateinit var navController: NavController
   private lateinit var nextAction: NavDirections
-  private var back = false
 
-  private val minPinChars = 4
+  private val minPinChars = 8
+  private val maxPinChars = 32
   private val usernameMinChars = 5
   private val usernameMaxChars = 25
-  private val usernameAvailable = "available-username"
 
-  private val viewModel: UsernameViewModel by viewModels()
+  private val viewModel: UsernameViewModel by activityViewModels()
 
   private var dialog: AlertDialog? = null
 
@@ -46,7 +45,7 @@ class AccountInformationFragment : Fragment() {
     inflater: LayoutInflater,
     container: ViewGroup?,
     savedInstanceState: Bundle?
-  ): View? {
+  ): View {
     _binding = FragmentAccountInformationBinding.inflate(inflater, container, false)
     return binding.root
   }
@@ -54,13 +53,9 @@ class AccountInformationFragment : Fragment() {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
 
-    arguments?.let {
-      back = AccountInformationFragmentArgs.fromBundle(it).back
-    }
-
     navController = Navigation.findNavController(requireActivity(), R.id.card_creator_nav_host_fragment)
 
-    binding.pinEt.addTextChangedListener(object : TextWatcher {
+    binding.passwordEt.addTextChangedListener(object : TextWatcher {
       override fun afterTextChanged(s: Editable?) {
         validateForm()
       }
@@ -81,7 +76,6 @@ class AccountInformationFragment : Fragment() {
     // Go to next screen
     binding.nextBtn.setOnClickListener {
       hideKeyboard()
-      back = false
       validateUsername()
     }
 
@@ -90,64 +84,66 @@ class AccountInformationFragment : Fragment() {
       navController.popBackStack()
     }
 
+    viewModel.validateUsernameResponse
+      .receive(viewLifecycleOwner, this::handleValidateUsernameResponse)
+
+    viewModel.pendingRequest.observe(viewLifecycleOwner, this::showLoading)
+
     restoreViewData()
   }
 
   private fun validateUsername() {
-    showLoading(true)
-    viewModel.validateUsernameResponse.observe(
-      viewLifecycleOwner,
-      Observer { response ->
-        if (!back) {
-          showLoading(false)
-          if (response.type == usernameAvailable) {
-            logger.debug("Username is valid")
-            Cache(requireContext()).setAccountInformation(
-              binding.usernameEt.text.toString(),
-              binding.pinEt.text.toString()
-            )
-            nextAction = AccountInformationFragmentDirections.actionNext()
-            navController.navigate(nextAction)
-          } else {
-            Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
-          }
-        }
-      }
-    )
-
-    viewModel.apiError.observe(
-      viewLifecycleOwner,
-      Observer {
-        showLoading(false)
-        var error = getString(R.string.validate_username_general_error)
-        if (it != null) {
-          error = getString(R.string.validate_username_error, it)
-        }
-        val dialogBuilder = AlertDialog.Builder(requireContext())
-        dialogBuilder.setMessage(error)
-          .setCancelable(false)
-          .setPositiveButton(getString(R.string.try_again)) { _, _ ->
-            validateUsername()
-          }
-          .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
-            dialog.cancel()
-          }
-        if (dialog == null) {
-          dialog = dialogBuilder.create()
-        }
-        dialog?.show()
-      }
-    )
     viewModel.validateUsername(
-      binding.usernameEt.text.toString(),
-      requireActivity().intent.getStringExtra("username")!!,
-      requireActivity().intent.getStringExtra("password")!!
+      binding.usernameEt.text.toString()
     )
   }
 
+  private fun handleValidateUsernameResponse(response: ValidateUsernameResponse) {
+    when (response) {
+      is ValidateUsernameResponse.ValidateUsernameData -> {
+        logger.debug("Username is valid")
+        Cache(requireContext()).setAccountInformation(
+          binding.usernameEt.text.toString(),
+          binding.passwordEt.text.toString()
+        )
+        nextAction = AccountInformationFragmentDirections.actionNext()
+        navController.navigate(nextAction)
+      }
+      is ValidateUsernameResponse.ValidateUsernameError -> {
+        if (response.isUnavailableUsername) {
+          val message = getString(R.string.unavailable_username)
+          Toast.makeText(activity, message, Toast.LENGTH_SHORT).show()
+        } else {
+          val message = getString(R.string.validate_username_error, response.status)
+          showTryAgainDialog(message)
+        }
+      }
+      is ValidateUsernameResponse.ValidateUsernameException -> {
+        val message = getString(R.string.validate_username_general_error)
+        showTryAgainDialog(message)
+      }
+    }
+  }
+
+  private fun showTryAgainDialog(message: String) {
+    val dialogBuilder = AlertDialog.Builder(requireContext())
+    dialogBuilder.setMessage(message)
+      .setCancelable(false)
+      .setPositiveButton(getString(R.string.try_again)) { _, _ ->
+        validateUsername()
+      }
+      .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
+        dialog.cancel()
+      }
+    if (dialog == null) {
+      dialog = dialogBuilder.create()
+    }
+    dialog?.show()
+  }
+
   private fun validateForm() {
-    binding.nextBtn.isEnabled = binding.pinEt.text.length ==
-      minPinChars &&
+    binding.nextBtn.isEnabled =
+      binding.passwordEt.text.length in minPinChars..maxPinChars &&
       binding.usernameEt.text.length in usernameMinChars..usernameMaxChars
   }
 
@@ -173,7 +169,7 @@ class AccountInformationFragment : Fragment() {
    */
   private fun restoreViewData() {
     val accountInformation = Cache(requireContext()).getAccountInformation()
-    binding.pinEt.setText(accountInformation.pin, TextView.BufferType.EDITABLE)
+    binding.passwordEt.setText(accountInformation.pin, TextView.BufferType.EDITABLE)
     binding.usernameEt.setText(accountInformation.username, TextView.BufferType.EDITABLE)
   }
 

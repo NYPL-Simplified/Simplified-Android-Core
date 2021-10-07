@@ -27,7 +27,7 @@ class OutOfStateFragment : Fragment() {
     inflater: LayoutInflater,
     container: ViewGroup?,
     savedInstanceState: Bundle?
-  ): View? {
+  ): View {
     _binding = FragmentOutOfStateBinding.inflate(inflater, container, false)
     return binding.root
   }

@@ -9,21 +9,20 @@ import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.NavController
 import androidx.navigation.NavDirections
 import androidx.navigation.Navigation
 import org.nypl.simplified.cardcreator.R
 import org.nypl.simplified.cardcreator.databinding.FragmentReviewBinding
-import org.nypl.simplified.cardcreator.model.BarcodeParent
+import org.nypl.simplified.cardcreator.model.CreatePatronResponse
+import org.nypl.simplified.cardcreator.model.IdentifierParent
+import org.nypl.simplified.cardcreator.model.JuvenilePatronResponse
 import org.nypl.simplified.cardcreator.model.Patron
-import org.nypl.simplified.cardcreator.model.UsernameParent
 import org.nypl.simplified.cardcreator.utils.Cache
 import org.nypl.simplified.cardcreator.utils.getCache
 import org.nypl.simplified.cardcreator.utils.isBarcode
 import org.nypl.simplified.cardcreator.viewmodel.PatronViewModel
-import org.nypl.simplified.cardcreator.viewmodel.PlatformViewModel
 import org.slf4j.LoggerFactory
 
 class ReviewFragment : Fragment() {
@@ -39,11 +38,9 @@ class ReviewFragment : Fragment() {
   private lateinit var cache: Cache
 
   private val nyState = "NY"
-  private val cardGranted = "card-granted"
   private val policyTypeDefault = "simplye"
 
-  private val viewModel: PatronViewModel by viewModels()
-  private val platformViewModel: PlatformViewModel by viewModels()
+  private val viewModel: PatronViewModel by activityViewModels()
 
   private var dialog: AlertDialog? = null
 
@@ -51,7 +48,7 @@ class ReviewFragment : Fragment() {
     inflater: LayoutInflater,
     container: ViewGroup?,
     savedInstanceState: Bundle?
-  ): View? {
+  ): View {
     _binding = FragmentReviewBinding.inflate(inflater, container, false)
     return binding.root
   }
@@ -82,106 +79,64 @@ class ReviewFragment : Fragment() {
       goBack()
     }
 
-    viewModel.createPatronResponse.observe(
-      viewLifecycleOwner,
-      Observer { response ->
-        showLoading(false)
-        Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
-        if (response.type == cardGranted) {
-          logger.debug("User navigated to the next screen")
-          logger.debug("Card granted")
-          nextAction = ReviewFragmentDirections.actionNext(
-            response.username,
-            response.barcode,
-            response.pin,
-            response.type,
-            response.temporary,
-            response.message,
-            "${cache.getPersonalInformation().firstName} ${cache.getPersonalInformation().lastName}"
-          )
-          navController.navigate(nextAction)
-        }
-      }
-    )
+    viewModel.createPatronResponse
+      .receive(viewLifecycleOwner, this::handleCreatePatronResponse)
 
-    platformViewModel.juvenilePatronResponse.observe(
-      viewLifecycleOwner,
-      Observer { response ->
-        showLoading(false)
-        Toast.makeText(activity, "Card created", Toast.LENGTH_SHORT).show()
-        if (response.status == 200) {
-          logger.debug("User navigated to the next screen")
-          logger.debug("Card granted")
-          nextAction = ReviewFragmentDirections.actionNext(
-            response.data.dependent.username,
-            response.data.dependent.barcode,
-            response.data.dependent.pin,
-            "dependent",
-            false,
-            "Card created",
-            "${cache.getPersonalInformation().firstName} ${cache.getPersonalInformation().lastName}"
-          )
-          navController.navigate(nextAction)
-        }
-      }
-    )
-
-    viewModel.apiError.observe(
-      viewLifecycleOwner,
-      Observer {
-        showLoading(false)
-        var error = getString(R.string.create_card_general_error)
-        if (it != null) {
-          error = getString(R.string.create_card_error, it)
-        }
-        val dialogBuilder = AlertDialog.Builder(requireContext())
-        dialogBuilder.setMessage(error)
-          .setCancelable(false)
-          .setPositiveButton(getString(R.string.try_again)) { _, _ ->
-            createPatron()
-          }
-          .setNegativeButton(getString(R.string.quit)) { _, _ ->
-            Cache(requireContext()).clear()
-            requireActivity().setResult(Activity.RESULT_CANCELED)
-            requireActivity().finish()
-          }
-        if (dialog == null) {
-          dialog = dialogBuilder.create()
-        }
-        dialog?.show()
-      }
-    )
-
-    platformViewModel.apiError.observe(
-      viewLifecycleOwner,
-      Observer {
-        showLoading(false)
-        var error = getString(R.string.create_card_general_error)
-        if (it != null) {
-          error = getString(R.string.create_card_error, it)
-        }
-        val dialogBuilder = AlertDialog.Builder(requireContext())
-        dialogBuilder.setMessage(error)
-          .setCancelable(false)
-          .setPositiveButton(getString(R.string.try_again)) { _, _ ->
-            createJuvenilePatron()
-          }
-          .setNegativeButton(getString(R.string.quit)) { _, _ ->
-            Cache(requireContext()).clear()
-            requireActivity().setResult(Activity.RESULT_CANCELED)
-            requireActivity().finish()
-          }
-        if (dialog == null) {
-          dialog = dialogBuilder.create()
-        }
-        dialog?.show()
-      }
-    )
+    viewModel.juvenilePatronResponse
+      .receive(viewLifecycleOwner, this::handleJuvenilePatronResponse)
 
     val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
       goBack()
     }
     callback.isEnabled = true
+
+    viewModel.pendingRequest.observe(viewLifecycleOwner, this::showLoading)
+  }
+
+  private fun handleCreatePatronResponse(response: CreatePatronResponse) {
+    when (response) {
+      is CreatePatronResponse.CreatePatronData -> {
+        logger.debug("User navigated to the next screen")
+        logger.debug("Card granted")
+        Toast.makeText(activity, getString(R.string.card_granted), Toast.LENGTH_SHORT).show()
+        nextAction = ReviewFragmentDirections.actionNext(
+          response.username,
+          response.barcode,
+          response.password,
+          getString(R.string.card_created),
+          "${cache.getPersonalInformation().firstName} ${cache.getPersonalInformation().lastName}"
+        )
+        navController.navigate(nextAction)
+      }
+      is CreatePatronResponse.CreatePatronHttpError -> {
+        val error = getString(R.string.create_card_error, response.status)
+        showCreatePatronErrorDialog(error)
+      }
+      is CreatePatronResponse.CreatePatronException -> {
+        val error = response.exception.message
+          ?.takeUnless(String::isBlank)
+          ?: getString(R.string.create_card_general_error)
+        showCreatePatronErrorDialog(error)
+      }
+    }
+  }
+
+  private fun showCreatePatronErrorDialog(error: String) {
+    val dialogBuilder = AlertDialog.Builder(requireContext())
+    dialogBuilder.setMessage(error)
+      .setCancelable(false)
+      .setPositiveButton(getString(R.string.try_again)) { _, _ ->
+        createPatron()
+      }
+      .setNegativeButton(getString(R.string.quit)) { _, _ ->
+        Cache(requireContext()).clear()
+        requireActivity().setResult(Activity.RESULT_CANCELED)
+        requireActivity().finish()
+      }
+    if (dialog == null) {
+      dialog = dialogBuilder.create()
+    }
+    dialog?.show()
   }
 
   private fun goBack() {
@@ -189,36 +144,52 @@ class ReviewFragment : Fragment() {
   }
 
   private fun createPatron() {
-    showLoading(true)
-    viewModel.createPatron(
-      getPatron(),
-      requireActivity().intent.getStringExtra("username")!!,
-      requireActivity().intent.getStringExtra("password")!!
-    )
+    viewModel.createPatron(getPatron())
   }
 
   private fun createJuvenilePatron() {
-    showLoading(true)
-    if (isBarcode(requireActivity().intent.getStringExtra("userIdentifier")!!)) {
-      platformViewModel.createJuvenileCardWithBarcodeParent(
-        BarcodeParent(
+    val identifierParent =
+      if (isBarcode(requireActivity().intent.getStringExtra("userIdentifier")!!)) {
+        IdentifierParent.BarcodeParent(
           requireActivity().intent.getStringExtra("userIdentifier")!!,
           getCache().getPersonalInformation().firstName,
           getCache().getAccountInformation().username,
           getCache().getAccountInformation().pin
-        ),
-        getCache().token!!
-      )
-    } else {
-      platformViewModel.createJuvenileCardWithUsernameParent(
-        UsernameParent(
+        )
+      } else {
+        IdentifierParent.UsernameParent(
           getCache().getPersonalInformation().firstName,
           requireActivity().intent.getStringExtra("userIdentifier")!!,
           getCache().getAccountInformation().username,
           getCache().getAccountInformation().pin
-        ),
-        getCache().token!!
-      )
+        )
+      }
+    viewModel.createJuvenileCard(identifierParent)
+  }
+
+  private fun handleJuvenilePatronResponse(response: JuvenilePatronResponse) {
+    when (response) {
+      is JuvenilePatronResponse.JuvenilePatronData -> {
+        Toast.makeText(activity, R.string.card_created, Toast.LENGTH_SHORT).show()
+        logger.debug("User navigated to the next screen")
+        logger.debug("Card granted")
+        nextAction = ReviewFragmentDirections.actionNext(
+          response.data.dependent.username,
+          response.data.dependent.barcode,
+          response.data.dependent.password,
+          getString(R.string.card_created),
+          "${cache.getPersonalInformation().firstName} ${cache.getPersonalInformation().lastName}"
+        )
+        navController.navigate(nextAction)
+      }
+      is JuvenilePatronResponse.JuvenilePatronError -> {
+        val message = getString(R.string.create_card_error, response.status)
+        showCreatePatronErrorDialog(message)
+      }
+      is JuvenilePatronResponse.JuvenilePatronException -> {
+        val message = getString(R.string.create_card_general_error)
+        showCreatePatronErrorDialog(message)
+      }
     }
   }
 
@@ -239,10 +210,12 @@ class ReviewFragment : Fragment() {
           personalInformation.birthDate,
           accountInformation.pin,
           accountInformation.username,
-          null
+          usernameHasBeenValidated = true,
+          acceptTerms = true,
+          work_or_school_address = null
         )
       }
-      cache.getSchoolAddress().line_1.isEmpty() -> {
+      cache.getSchoolAddress().line1.isEmpty() -> {
         return Patron(
           policyTypeDefault,
           homeAddress,
@@ -251,7 +224,9 @@ class ReviewFragment : Fragment() {
           personalInformation.birthDate,
           accountInformation.pin,
           accountInformation.username,
-          workAddress
+          usernameHasBeenValidated = true,
+          acceptTerms = true,
+          work_or_school_address = workAddress
         )
       }
       else -> {
@@ -263,7 +238,9 @@ class ReviewFragment : Fragment() {
           personalInformation.birthDate,
           accountInformation.pin,
           accountInformation.username,
-          schoolAddress
+          usernameHasBeenValidated = true,
+          acceptTerms = true,
+          work_or_school_address = schoolAddress
         )
       }
     }
@@ -286,18 +263,18 @@ class ReviewFragment : Fragment() {
    */
   private fun setReviewData() {
     val homeAddress = cache.getHomeAddress()
-    binding.addressHomeTv1.text = homeAddress.line_1
+    binding.addressHomeTv1.text = homeAddress.line1
     binding.addressHomeTv2.text = "${homeAddress.city}, ${homeAddress.state} ${homeAddress.zip}"
     if (homeAddress.state != nyState) {
       val workAddress = cache.getWorkAddress()
-      if (workAddress.line_1.isNotEmpty()) {
+      if (workAddress.line1.isNotEmpty()) {
         binding.workAddressData.visibility = View.VISIBLE
-        binding.workAddressTv1.text = workAddress.line_1
+        binding.workAddressTv1.text = workAddress.line1
         binding.workAddressTv2.text = "${workAddress.city}, ${workAddress.state} ${workAddress.zip}"
       } else {
         val schoolAddress = cache.getSchoolAddress()
         binding.schoolAddressData.visibility = View.VISIBLE
-        binding.schoolAddressTv1.text = schoolAddress.line_1
+        binding.schoolAddressTv1.text = schoolAddress.line1
         binding.schoolAddressTv1.text = "${schoolAddress.city}, ${schoolAddress.state} ${schoolAddress.zip}"
       }
     }
@@ -307,9 +284,11 @@ class ReviewFragment : Fragment() {
   }
 
   private fun setJuvenileReviewData() {
+    binding.emailLabelTv.visibility = View.GONE
     binding.emailTv.visibility = View.GONE
     binding.schoolAddressData.visibility = View.GONE
     binding.workAddressData.visibility = View.GONE
+    binding.addressHomeLabelTv.visibility = View.GONE
     binding.addressHomeTv1.visibility = View.GONE
     binding.addressHomeTv2.visibility = View.GONE
     setAccountInfo()

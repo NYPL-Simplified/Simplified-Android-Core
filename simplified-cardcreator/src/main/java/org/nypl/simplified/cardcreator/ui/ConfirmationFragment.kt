@@ -32,16 +32,10 @@ import java.util.Date
 class ConfirmationFragment : Fragment() {
 
   private val logger = LoggerFactory.getLogger(ConfirmationFragment::class.java)
+  private val bundle by lazy { ConfirmationFragmentArgs.fromBundle(requireArguments()) }
 
   private var _binding: FragmentConfirmationBinding? = null
   private val binding get() = _binding!!
-
-  private lateinit var type: String
-  private lateinit var username: String
-  private lateinit var barcode: String
-  private lateinit var pin: String
-  private var temporary: Boolean = true
-  private lateinit var message: String
 
   private val storageRequestCode = 203
   private val dateFormat = "dd-MM-yyyy"
@@ -50,7 +44,7 @@ class ConfirmationFragment : Fragment() {
     inflater: LayoutInflater,
     container: ViewGroup?,
     savedInstanceState: Bundle?
-  ): View? {
+  ): View {
     _binding = FragmentConfirmationBinding.inflate(inflater, container, false)
     return binding.root
   }
@@ -58,23 +52,13 @@ class ConfirmationFragment : Fragment() {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
 
-    arguments?.let {
-      val bundle = ConfirmationFragmentArgs.fromBundle(it)
-      type = bundle.type
-      username = bundle.username
-      barcode = bundle.barcode
-      pin = bundle.pin
-      temporary = bundle.temporary
-      message = bundle.message
+    binding.nameCard.text = bundle.name
+    binding.cardBarcode.text = getString(R.string.user_card_number, bundle.barcode)
+    binding.cardPin.text = getString(R.string.user_password, bundle.password)
+    binding.headerStatusDescTv.text = bundle.message
 
-      binding.nameCard.text = bundle.name
-      binding.cardBarcode.text = getString(R.string.user_card_number, bundle.barcode)
-      binding.cardPin.text = getString(R.string.user_pin, bundle.pin)
-      binding.headerStatusDescTv.text = bundle.message
-
-      val currentDate: String = SimpleDateFormat(dateFormat, Locale.getDefault()).format(Date())
-      binding.issued.text = getString(R.string.issued_date, currentDate)
-    }
+    val currentDate: String = SimpleDateFormat(dateFormat, Locale.getDefault()).format(Date())
+    binding.issued.text = getString(R.string.issued_date, currentDate)
 
     // Go to next screen
     binding.nextBtn.setOnClickListener {
@@ -169,13 +153,11 @@ class ConfirmationFragment : Fragment() {
    * Returns result to caller with card details
    */
   private fun returnResult() {
-    val bundle = CardCreatorContract.createResult(barcode, pin)
-    bundle.apply {
-      putString("type", type)
-      putString("username", username)
-      putBoolean("temporary", temporary)
-      putString("message", message)
-    }
+    val bundle = CardCreatorContract.createResult(bundle.barcode, bundle.password)
+      .apply {
+        putString("username", bundle.username)
+        putString("message", bundle.message)
+      }
     val data = Intent().apply {
       putExtras(bundle)
     }

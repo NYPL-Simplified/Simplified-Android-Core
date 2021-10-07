@@ -1,90 +1,170 @@
 package org.nypl.simplified.cardcreator.network
 
-import okhttp3.Credentials
-import okhttp3.Interceptor
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import okhttp3.MultipartBody
 import org.nypl.simplified.cardcreator.model.Address
-import org.nypl.simplified.cardcreator.model.ValidateAddressResponse
-import org.nypl.simplified.cardcreator.model.Username
-import org.nypl.simplified.cardcreator.model.ValidateUsernameResponse
-import org.nypl.simplified.cardcreator.model.Patron
 import org.nypl.simplified.cardcreator.model.CreatePatronResponse
-import org.nypl.simplified.cardcreator.utils.Constants
-import retrofit2.Retrofit
-import retrofit2.converter.moshi.MoshiConverterFactory
-import retrofit2.http.Body
-import retrofit2.http.POST
-import java.util.concurrent.TimeUnit
+import org.nypl.simplified.cardcreator.model.DependentEligibilityResponse
+import org.nypl.simplified.cardcreator.model.ISSOTokenData
+import org.nypl.simplified.cardcreator.model.IdentifierParent
+import org.nypl.simplified.cardcreator.model.JuvenilePatronResponse
+import org.nypl.simplified.cardcreator.model.Patron
+import org.nypl.simplified.cardcreator.model.Username
+import org.nypl.simplified.cardcreator.model.ValidateAddressRequest
+import org.nypl.simplified.cardcreator.model.ValidateAddressResponse
+import org.nypl.simplified.cardcreator.model.ValidateUsernameResponse
+import org.slf4j.LoggerFactory
 
-internal interface CardCreatorService {
+class CardCreatorService(
+  private val clientId: String,
+  private val clientSecret: String
+) {
 
-  /**
-   * Validates the patron's address. Only 'valid-address' and 'non-residential-address'
-   * validations will result in a library card. Patrons with addresses that result in a
-   * 'non-residential-address' validation will receive 30-day temporary cards if a residential
-   * NYS address is not provided.
-   *
-   * Docs: https://github.com/NYPL-Simplified/card-creator/wiki/API---V2#post-v2validateaddress
-   */
-  @POST("v2/validate/address")
-  suspend fun validateAddress(
-    @Body address: Address
-  ): ValidateAddressResponse
+  private val logger = LoggerFactory.getLogger(CardCreatorService::class.java)
 
-  /**
-   * Validates the patron's username, confirming both its format and its availability.
-   *
-   * https://github.com/NYPL-Simplified/card-creator/wiki/API---V2#post-v2validateusername
-   */
-  @POST("v2/validate/username")
-  suspend fun validateUsername(
-    @Body username: Username
-  ): ValidateUsernameResponse
+  private var timedPlatformToken: Pair<ISSOTokenData, Long>? = null
+
+  private val moshi: Moshi = Moshi.Builder()
+    .add(KotlinJsonAdapterFactory())
+    .build()
 
   /**
-   * Creates a library card for a patron.
-   *
-   * https://github.com/NYPL-Simplified/card-creator/wiki/API---V2#post-v2create_patron
+   * Returns whether the token is (very likely to be) still valid.
    */
-  @POST("v2/create_patron")
-  suspend fun createPatron(
-    @Body patron: Patron
-  ): CreatePatronResponse
+  private val Pair<ISSOTokenData, Long>.isValid
+    get() = System.currentTimeMillis() - this.second < this.first.expires_in * 1000 - 6000
 
-  companion object {
-    operator fun invoke(authUsername: String, authPassword: String): CardCreatorService {
-      val logging = HttpLoggingInterceptor().apply {
-        level = HttpLoggingInterceptor.Level.HEADERS
+  private suspend fun getToken(): String {
+    if (timedPlatformToken?.isValid != true) {
+      val response = NYPLISSOService().getToken(
+        MultipartBody.Part.createFormData("grant_type", "client_credentials"),
+        MultipartBody.Part.createFormData("client_id", clientId),
+        MultipartBody.Part.createFormData("client_secret", clientSecret)
+      )
+      timedPlatformToken = response.body()!! to response.raw().receivedResponseAtMillis
+    }
+    return timedPlatformToken!!.first.access_token
+  }
+
+  suspend fun validateUsername(username: Username): ValidateUsernameResponse {
+    return try {
+      val token = getToken()
+      val nyplPlatformService = NYPLPlatformService(token)
+      val response = nyplPlatformService.validateUsername(username)
+      if (response.isSuccessful) {
+        response.body()!!.validate()
+      } else {
+        val errorBody = response.errorBody()!!.string()
+        logger.error("validateUsername call returned an error!\n$errorBody")
+        val adapter = moshi.adapter(ValidateUsernameResponse.ValidateUsernameError::class.java)
+        adapter.fromJson(errorBody)!!.validate()
       }
+    } catch (e: Exception) {
+      logger.error("an unexpected exception occurred while trying to validate username", e)
+      ValidateUsernameResponse.ValidateUsernameException(e)
+    }
+  }
 
-      val auth = Interceptor {
-        val request = it.request().newBuilder()
-          .addHeader(
-            "Authorization",
-            Credentials.basic(
-              authUsername,
-              authPassword
-            )
-          )
-          .build()
-        it.proceed(request)
+  suspend fun validateAddress(address: Address): ValidateAddressResponse {
+    return try {
+      val token = getToken()
+      val nyplPlatformService = NYPLPlatformService(token)
+      val response = nyplPlatformService.validateAddress(ValidateAddressRequest(address))
+      return if (response.isSuccessful) {
+        response.body()!!.validate()
+      } else try {
+        val errorBody = response.errorBody()!!.string()
+        logger.error("validateAddress call returned an error!\n$errorBody")
+        val adapter = moshi.adapter(ValidateAddressResponse.AlternateAddressesError::class.java)
+        adapter.fromJson(errorBody)!!.validate()
+      } catch (e: Exception) {
+        val errorBody = response.errorBody()!!.string()
+        val adapter = moshi.adapter(ValidateAddressResponse.ValidateAddressError::class.java)
+        adapter.fromJson(errorBody)!!.validate()
       }
+    } catch (e: Exception) {
+      logger.error("an unexpected exception occurred while trying to validate address", e)
+      ValidateAddressResponse.ValidateAddressException(e)
+    }
+  }
 
-      val client = OkHttpClient.Builder()
-        .connectTimeout(30, TimeUnit.SECONDS)
-        .readTimeout(30, TimeUnit.SECONDS)
-        .writeTimeout(30, TimeUnit.SECONDS)
-        .addInterceptor(logging)
-        .addInterceptor(auth)
-        .build()
+  suspend fun createPatron(patron: Patron): CreatePatronResponse {
+    return try {
+      val token = getToken()
+      val nyplPlatformService = NYPLPlatformService(token)
+      val response = nyplPlatformService.createPatron(patron)
+      if (response.isSuccessful) {
+        response.body()!!.validate()
+      } else {
+        val errorBody = response.errorBody()!!.string()
+        logger.error("createPatron call returned an error!\n$errorBody")
+        val adapter = moshi.adapter(CreatePatronResponse.CreatePatronHttpError::class.java)
+        adapter.fromJson(errorBody)!!.validate()
+      }
+    } catch (e: Exception) {
+      logger.error("an unexpected exception occurred while trying to create a patron", e)
+      CreatePatronResponse.CreatePatronException(e)
+    }
+  }
 
-      return Retrofit.Builder()
-        .client(client)
-        .baseUrl(Constants.LIBRARY_SIMPLIFIED_BASE_URL)
-        .addConverterFactory(MoshiConverterFactory.create())
-        .build()
-        .create(CardCreatorService::class.java)
+  suspend fun getDependentEligibility(
+    identifier: String
+  ): DependentEligibilityResponse {
+
+    /**
+     * Determines whether or not the user identifier is a barcode or username
+     */
+    fun String.isBarcode(): Boolean {
+      return this.toDoubleOrNull() != null
+    }
+
+    return try {
+      val token = getToken()
+      val nyplPlatformService = NYPLPlatformService(token)
+      val response =
+        if (identifier.isBarcode()) {
+          nyplPlatformService.getDependentEligibilityWithBarcode(identifier)
+        } else {
+          nyplPlatformService.getDependentEligibilityWithUsername(identifier)
+        }
+      if (response.isSuccessful) {
+        response.body()!!.validate()
+      } else {
+        val errorBody = response.errorBody()!!.string()
+        logger.error("getDependentEligibility call returned an error!\n$errorBody")
+        val adapter = moshi.adapter(DependentEligibilityResponse.DependentEligibilityError::class.java)
+        adapter.fromJson(errorBody)!!.validate()
+      }
+    } catch (e: Exception) {
+      logger.error("an unexpected exception occurred while trying to create a patron", e)
+      DependentEligibilityResponse.DependentEligibilityException(e)
+    }
+  }
+
+  suspend fun createJuvenileCard(
+    juvenileParent: IdentifierParent
+  ): JuvenilePatronResponse {
+    return try {
+      val token = getToken()
+      val nyplPlatformService = NYPLPlatformService(token)
+      val response = when (juvenileParent) {
+        is IdentifierParent.BarcodeParent ->
+          nyplPlatformService.createJuvenilePatronWithBarcodeParent(juvenileParent)
+        is IdentifierParent.UsernameParent ->
+          nyplPlatformService.createJuvenilePatronWithUsernameParent(juvenileParent)
+      }
+      if (response.isSuccessful) {
+        response.body()!!.validate()
+      } else {
+        val errorBody = response.errorBody()!!.string()
+        logger.error("createJuvenileCard call returned an error!\n$errorBody")
+        val adapter = moshi.adapter(JuvenilePatronResponse.JuvenilePatronError::class.java)
+        adapter.fromJson(errorBody)!!.validate()
+      }
+    } catch (e: Exception) {
+      logger.error("an unexpected exception occurred while trying to create a dependent patron", e)
+      JuvenilePatronResponse.JuvenilePatronException(e)
     }
   }
 }

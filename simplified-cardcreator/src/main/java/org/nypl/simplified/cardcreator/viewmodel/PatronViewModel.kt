@@ -5,31 +5,37 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import org.nypl.simplified.cardcreator.model.CreatePatronResponse
+import org.nypl.simplified.cardcreator.model.IdentifierParent
+import org.nypl.simplified.cardcreator.model.JuvenilePatronResponse
 import org.nypl.simplified.cardcreator.model.Patron
 import org.nypl.simplified.cardcreator.network.CardCreatorService
-import org.slf4j.LoggerFactory
-import retrofit2.HttpException
+import org.nypl.simplified.cardcreator.utils.Channel
 
-class PatronViewModel : ViewModel() {
+class PatronViewModel(
+  private val cardCreatorService: CardCreatorService
+) : ViewModel() {
 
-  private val logger = LoggerFactory.getLogger(PatronViewModel::class.java)
+  val pendingRequest = MutableLiveData(false)
 
-  val createPatronResponse = MutableLiveData<CreatePatronResponse>()
-  val apiError = MutableLiveData<Int?>()
+  val createPatronResponse = Channel<CreatePatronResponse>()
 
-  fun createPatron(patron: Patron, username: String, password: String) {
+  fun createPatron(patron: Patron) {
     viewModelScope.launch {
-      try {
-        val cardCreatorService = CardCreatorService(username, password)
-        val response = cardCreatorService.createPatron(patron)
-        createPatronResponse.postValue(response)
-      } catch (e: Exception) {
-        logger.error("createPatron call failed!", e)
-        when (e) {
-          is HttpException -> { apiError.postValue(e.code()) }
-          else -> { apiError.postValue(null) }
-        }
-      }
+      pendingRequest.value = true
+      val response = cardCreatorService.createPatron(patron)
+      createPatronResponse.send(response)
+      pendingRequest.value = false
+    }
+  }
+
+  val juvenilePatronResponse = Channel<JuvenilePatronResponse>()
+
+  fun createJuvenileCard(juvenilePatron: IdentifierParent) {
+    viewModelScope.launch {
+      pendingRequest.value = true
+      val response = cardCreatorService.createJuvenileCard(juvenilePatron)
+      juvenilePatronResponse.send(response)
+      pendingRequest.value = false
     }
   }
 }

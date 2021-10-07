@@ -1,10 +1,13 @@
 package org.nypl.simplified.cardcreator.network
 
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.nypl.simplified.cardcreator.model.ISSOTokenData
 import org.nypl.simplified.cardcreator.utils.Constants
+import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.http.Multipart
@@ -25,7 +28,7 @@ internal interface NYPLISSOService {
     @Part grant_type: MultipartBody.Part,
     @Part client_id: MultipartBody.Part,
     @Part client_secret: MultipartBody.Part
-  ): ISSOTokenData
+  ): Response<ISSOTokenData>
 
   companion object {
     operator fun invoke(): NYPLISSOService {
@@ -40,10 +43,14 @@ internal interface NYPLISSOService {
         .addInterceptor(logging)
         .build()
 
+      val moshi = Moshi.Builder()
+        .add(KotlinJsonAdapterFactory())
+        .build()
+
       return Retrofit.Builder()
         .client(client)
         .baseUrl(Constants.NYPL_ISSO_BASE_URL)
-        .addConverterFactory(MoshiConverterFactory.create())
+        .addConverterFactory(MoshiConverterFactory.create(moshi))
         .build()
         .create(NYPLISSOService::class.java)
     }

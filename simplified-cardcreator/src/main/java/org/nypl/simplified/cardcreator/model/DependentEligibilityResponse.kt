@@ -1,14 +1,12 @@
 package org.nypl.simplified.cardcreator.model
 
-import com.squareup.moshi.Json
 import org.nypl.simplified.cardcreator.utils.checkFieldNotNull
-import java.lang.Exception
 
-sealed class ValidateUsernameResponse {
+sealed class DependentEligibilityResponse {
 
-  data class ValidateUsernameData(
-    @field:Json(name = "type") val type: String,
-  ) : ValidateUsernameResponse() {
+  data class DependentEligibilityData(
+    val eligible: Boolean,
+  ) : DependentEligibilityResponse() {
 
     /**
      * Moshi might have set some missing fields to null instead of throwing an exception,
@@ -16,22 +14,22 @@ sealed class ValidateUsernameResponse {
      * no-one would expect them.
      */
 
-    fun validate(): ValidateUsernameData =
+    fun validate(): DependentEligibilityData =
       this.apply {
-        checkFieldNotNull(type, "type")
+        checkFieldNotNull(eligible, "eligible")
       }
   }
 
-  data class ValidateUsernameError(
-    @field:Json(name = "status") val status: Int,
-    @field:Json(name = "type") val type: String
-  ) : ValidateUsernameResponse() {
+  data class DependentEligibilityError(
+    val status: Int,
+    val type: String
+  ) : DependentEligibilityResponse() {
 
-    val isInvalidUsername: Boolean
-      get() = type == "invalid-username"
+    val isNotEligible: Boolean
+      get() = type == "not-eligible-card"
 
-    val isUnavailableUsername: Boolean
-      get() = type == "unavailable-username"
+    val isLimitReached: Boolean
+      get() = type == "limit-reached"
 
     /**
      * Moshi might have set some missing fields to null instead of throwing an exception,
@@ -39,14 +37,14 @@ sealed class ValidateUsernameResponse {
      * no-one would expect them.
      */
 
-    fun validate(): ValidateUsernameError =
+    fun validate(): DependentEligibilityError =
       this.apply {
         checkFieldNotNull(status, "status")
         checkFieldNotNull(type, "type")
       }
   }
 
-  data class ValidateUsernameException(
+  data class DependentEligibilityException(
     val exception: Exception
-  ) : ValidateUsernameResponse()
+  ) : DependentEligibilityResponse()
 }

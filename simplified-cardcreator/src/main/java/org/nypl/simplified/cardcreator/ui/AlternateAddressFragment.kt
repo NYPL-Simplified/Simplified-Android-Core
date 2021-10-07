@@ -12,16 +12,15 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.NavController
 import androidx.navigation.NavDirections
 import androidx.navigation.Navigation
 import org.nypl.simplified.cardcreator.R
 import org.nypl.simplified.cardcreator.databinding.FragmentAlternateAddressBinding
 import org.nypl.simplified.cardcreator.model.Address
-import org.nypl.simplified.cardcreator.model.AddressDetails
 import org.nypl.simplified.cardcreator.model.AddressType
+import org.nypl.simplified.cardcreator.model.ValidateAddressResponse
 import org.nypl.simplified.cardcreator.utils.Cache
 import org.nypl.simplified.cardcreator.utils.hideKeyboard
 import org.nypl.simplified.cardcreator.viewmodel.AddressViewModel
@@ -30,6 +29,7 @@ import org.slf4j.LoggerFactory
 class AlternateAddressFragment : Fragment(), AdapterView.OnItemSelectedListener {
 
   private val logger = LoggerFactory.getLogger(AlternateAddressFragment::class.java)
+  private val bundle by lazy { AlternateAddressFragmentArgs.fromBundle(requireArguments()) }
 
   private var _binding: FragmentAlternateAddressBinding? = null
   private val binding get() = _binding!!
@@ -38,12 +38,9 @@ class AlternateAddressFragment : Fragment(), AdapterView.OnItemSelectedListener 
   private lateinit var nextAction: NavDirections
 
   private val addressCharsMin = 5
-  private val validAddress = "valid-address"
-  private val alternateAddress = "alternate-addresses"
   private val nyState = "NY"
-  private lateinit var addressType: AddressType
 
-  private val viewModel: AddressViewModel by viewModels()
+  private val viewModel: AddressViewModel by activityViewModels()
 
   private var dialog: AlertDialog? = null
 
@@ -51,7 +48,7 @@ class AlternateAddressFragment : Fragment(), AdapterView.OnItemSelectedListener 
     inflater: LayoutInflater,
     container: ViewGroup?,
     savedInstanceState: Bundle?
-  ): View? {
+  ): View {
     _binding = FragmentAlternateAddressBinding.inflate(inflater, container, false)
     return binding.root
   }
@@ -61,15 +58,11 @@ class AlternateAddressFragment : Fragment(), AdapterView.OnItemSelectedListener 
 
     navController = Navigation.findNavController(requireActivity(), R.id.card_creator_nav_host_fragment)
 
-    arguments?.let {
-      addressType = AlternateAddressFragmentArgs.fromBundle(it).addressType
-      if (addressType == AddressType.WORK) {
-        binding.headerTv.text = getString(R.string.work_address)
-      } else {
-        binding.headerTv.text = getString(R.string.school_address)
-      }
+    if (bundle.addressType == AddressType.WORK) {
+      binding.headerTv.text = getString(R.string.work_address)
+    } else {
+      binding.headerTv.text = getString(R.string.school_address)
     }
-
     binding.spState.onItemSelectedListener = this
     ArrayAdapter.createFromResource(
       requireContext(),
@@ -117,6 +110,11 @@ class AlternateAddressFragment : Fragment(), AdapterView.OnItemSelectedListener 
       navController.popBackStack()
     }
 
+    viewModel.validateAddressResponse
+      .receive(viewLifecycleOwner, this::handleValidateAddressResponse)
+
+    viewModel.pendingRequest.observe(viewLifecycleOwner, this::showLoading)
+
     restoreViewData()
   }
 
@@ -124,82 +122,72 @@ class AlternateAddressFragment : Fragment(), AdapterView.OnItemSelectedListener 
    * Validates entered address
    */
   private fun validateAddress() {
-    showLoading(true)
-    viewModel.validateAddressResponse.observe(
-      viewLifecycleOwner,
-      Observer { response ->
-        showLoading(false)
-        if (response.type == validAddress || response.type == alternateAddress) {
-          logger.debug("Address is valid")
-
-          if (addressType == AddressType.WORK) {
-            Cache(requireContext()).setWorkAddress(
-              AddressDetails(
-                response.address.line_1,
-                response.address.city,
-                response.address.state,
-                response.address.zip
-              )
-            )
-          } else {
-            Cache(requireContext()).setSchoolAddress(
-              AddressDetails(
-                response.address.line_1,
-                response.address.city,
-                response.address.state,
-                response.address.zip
-              )
-            )
-          }
-
-          if (response.original_address.state != nyState) {
-            binding.headerStatusDescTv.text = response.message
-          } else {
-            nextAction = AlternateAddressFragmentDirections.actionNext(addressType)
-            navController.navigate(nextAction)
-          }
-        } else {
-          Toast.makeText(activity, response.message, Toast.LENGTH_SHORT).show()
-        }
-      }
-    )
-
-    viewModel.apiError.observe(
-      viewLifecycleOwner,
-      Observer {
-        showLoading(false)
-        var error = getString(R.string.validate_address_general_error)
-        if (it != null) {
-          error = getString(R.string.validate_address_error, it)
-        }
-        val dialogBuilder = AlertDialog.Builder(requireContext())
-        dialogBuilder.setMessage(error)
-          .setCancelable(false)
-          .setPositiveButton(getString(R.string.try_again)) { _, _ ->
-            validateAddress()
-          }
-          .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
-            dialog.cancel()
-          }
-        if (dialog == null) {
-          dialog = dialogBuilder.create()
-        }
-        dialog?.show()
-      }
-    )
     viewModel.validateAddress(
       Address(
-        AddressDetails(
-          binding.etCity.text.toString(),
-          binding.etStreet1.text.toString(),
-          getStateAbbreviation(binding.spState.selectedItem.toString()),
-          binding.etZip.text.toString()
-        ),
-        false
-      ),
-      requireActivity().intent.getStringExtra("username")!!,
-      requireActivity().intent.getStringExtra("password")!!
+        line1 = binding.etStreet1.text.toString(),
+        city = binding.etCity.text.toString(),
+        state = getStateAbbreviation(binding.spState.selectedItem.toString()),
+        zip = binding.etZip.text.toString(),
+        isResidential = false,
+        hasBeenValidated = false
+      )
     )
+  }
+
+  private fun handleValidateAddressResponse(response: ValidateAddressResponse) {
+    when (response) {
+      is ValidateAddressResponse.ValidateAddressData -> {
+        logger.debug("Address is valid")
+        goNextIfInNewYork(response.address)
+      }
+      is ValidateAddressResponse.AlternateAddressesError -> {
+        logger.debug("Using first alternate address valid")
+        goNextIfInNewYork(response.addresses.first())
+      }
+      is ValidateAddressResponse.ValidateAddressError -> {
+        if (response.isUnrecognizedAddress) {
+          val message = getString(R.string.validate_address_error, response.status)
+          Toast.makeText(activity, message, Toast.LENGTH_SHORT).show()
+        } else {
+          val message = getString(R.string.validate_address_error, response.status)
+          showTryAgainDialog(message)
+        }
+      }
+      is ValidateAddressResponse.ValidateAddressException -> {
+        val message = getString(R.string.validate_address_general_error)
+        showTryAgainDialog(message)
+      }
+    }
+  }
+
+  private fun showTryAgainDialog(message: String) {
+    val dialogBuilder = AlertDialog.Builder(requireContext())
+    dialogBuilder.setMessage(message)
+      .setCancelable(false)
+      .setPositiveButton(getString(R.string.try_again)) { _, _ ->
+        validateAddress()
+      }
+      .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
+        dialog.cancel()
+      }
+    if (dialog == null) {
+      dialog = dialogBuilder.create()
+    }
+    dialog?.show()
+  }
+
+  private fun goNextIfInNewYork(address: Address) {
+    if (bundle.addressType == AddressType.WORK) {
+      Cache(requireContext()).setWorkAddress(address)
+    } else {
+      Cache(requireContext()).setSchoolAddress(address)
+    }
+    if (address.state != nyState) {
+      binding.headerStatusDescTv.text = getString(R.string.create_card_forbidden_not_in_new_york)
+    } else {
+      nextAction = AlternateAddressFragmentDirections.actionNext(bundle.addressType)
+      navController.navigate(nextAction)
+    }
   }
 
   /**
@@ -256,15 +244,15 @@ class AlternateAddressFragment : Fragment(), AdapterView.OnItemSelectedListener 
    * Restores cached data
    */
   private fun restoreViewData() {
-    if (addressType == AddressType.WORK) {
+    if (bundle.addressType == AddressType.WORK) {
       val alternateAddress = Cache(requireContext()).getWorkAddress()
       binding.etZip.setText(alternateAddress.zip, TextView.BufferType.EDITABLE)
-      binding.etStreet1.setText(alternateAddress.line_1, TextView.BufferType.EDITABLE)
+      binding.etStreet1.setText(alternateAddress.line1, TextView.BufferType.EDITABLE)
       binding.etCity.setText(alternateAddress.city, TextView.BufferType.EDITABLE)
     } else {
       val alternateAddress = Cache(requireContext()).getSchoolAddress()
       binding.etZip.setText(alternateAddress.zip, TextView.BufferType.EDITABLE)
-      binding.etStreet1.setText(alternateAddress.line_1, TextView.BufferType.EDITABLE)
+      binding.etStreet1.setText(alternateAddress.line1, TextView.BufferType.EDITABLE)
       binding.etCity.setText(alternateAddress.city, TextView.BufferType.EDITABLE)
     }
   }

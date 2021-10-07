@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
 import org.nypl.simplified.cardcreator.model.AccountInformation
-import org.nypl.simplified.cardcreator.model.AddressDetails
+import org.nypl.simplified.cardcreator.model.Address
 import org.nypl.simplified.cardcreator.model.PersonalInformation
 
 /**
@@ -26,18 +26,21 @@ class Cache internal constructor(private val sharedPreferences: SharedPreference
     private const val KEY_HOME_CITY = "home_city"
     private const val KEY_HOME_STATE = "home_state"
     private const val KEY_HOME_ZIP = "home_zip"
+    private const val KEY_HOME_HAS_BEEN_VALIDATED = "home_validated"
 
     private const val KEY_SCHOOL_ADDRESS_LINE_1 = "school_line_1"
     private const val KEY_SCHOOL_ADDRESS_LINE_2 = "school_line_2"
     private const val KEY_SCHOOL_CITY = "school_city"
     private const val KEY_SCHOOL_STATE = "school_state"
     private const val KEY_SCHOOL_ZIP = "school_zip"
+    private const val KEY_SCHOOL_HAS_BEEN_VALIDATED = "school_validated"
 
     private const val KEY_WORK_ADDRESS_LINE_1 = "work_line_1"
     private const val KEY_WORK_ADDRESS_LINE_2 = "work_line_2"
     private const val KEY_WORK_CITY = "work_city"
     private const val KEY_WORK_STATE = "work_state"
     private const val KEY_WORK_ZIP = "work_zip"
+    private const val KEY_WORK_HAS_BEEN_VALIDATED = "work_validated"
 
     private const val KEY_FIRST_NAME = "first_name"
     private const val KEY_MIDDLE_NAME = "middle_name"
@@ -48,7 +51,6 @@ class Cache internal constructor(private val sharedPreferences: SharedPreference
     private const val KEY_USERNAME = "username"
     private const val KEY_PIN = "pin"
     private const val KEY_JUVENILE_CARD = "juvenile_card"
-    private const val KEY_TOKEN = "token"
 
     private const val EMPTY = ""
   }
@@ -63,72 +65,87 @@ class Cache internal constructor(private val sharedPreferences: SharedPreference
   /**
    * Saves current home address data
    */
-  fun setHomeAddress(address: AddressDetails) {
+  fun setHomeAddress(address: Address) {
     sharedPreferences.edit {
-      putString(KEY_HOME_ADDRESS_LINE_1, address.line_1)
+      putString(KEY_HOME_ADDRESS_LINE_1, address.line1)
+      putString(KEY_HOME_ADDRESS_LINE_2, address.line2)
       putString(KEY_HOME_CITY, address.city)
       putString(KEY_HOME_STATE, address.state)
       putString(KEY_HOME_ZIP, address.zip)
+      putBoolean(KEY_HOME_HAS_BEEN_VALIDATED, address.hasBeenValidated)
     }
   }
 
   /**
    * Gets cached home address data
    */
-  fun getHomeAddress(): AddressDetails {
-    return AddressDetails(
+  fun getHomeAddress(): Address {
+    return Address(
       sharedPreferences.getString(KEY_HOME_ADDRESS_LINE_1, EMPTY)!!,
+      sharedPreferences.getString(KEY_HOME_ADDRESS_LINE_2, EMPTY)!!,
       sharedPreferences.getString(KEY_HOME_CITY, EMPTY)!!,
       sharedPreferences.getString(KEY_HOME_STATE, EMPTY)!!,
-      sharedPreferences.getString(KEY_HOME_ZIP, EMPTY)!!
+      sharedPreferences.getString(KEY_HOME_ZIP, EMPTY)!!,
+      true,
+      sharedPreferences.getBoolean(KEY_HOME_HAS_BEEN_VALIDATED, false),
     )
   }
 
   /**
    * Saves current alternate address data
    */
-  fun setSchoolAddress(address: AddressDetails) {
+  fun setSchoolAddress(address: Address) {
     sharedPreferences.edit {
-      putString(KEY_SCHOOL_ADDRESS_LINE_1, address.line_1)
+      putString(KEY_SCHOOL_ADDRESS_LINE_1, address.line1)
+      putString(KEY_SCHOOL_ADDRESS_LINE_2, address.line2)
       putString(KEY_SCHOOL_CITY, address.city)
       putString(KEY_SCHOOL_STATE, address.state)
       putString(KEY_SCHOOL_ZIP, address.zip)
+      putBoolean(KEY_SCHOOL_HAS_BEEN_VALIDATED, address.hasBeenValidated)
     }
   }
 
   /**
    * Gets cached alternate address data
    */
-  fun getSchoolAddress(): AddressDetails {
-    return AddressDetails(
+  fun getSchoolAddress(): Address {
+    return Address(
       sharedPreferences.getString(KEY_SCHOOL_ADDRESS_LINE_1, EMPTY)!!,
+      sharedPreferences.getString(KEY_SCHOOL_ADDRESS_LINE_2, EMPTY)!!,
       sharedPreferences.getString(KEY_SCHOOL_CITY, EMPTY)!!,
       sharedPreferences.getString(KEY_SCHOOL_STATE, EMPTY)!!,
-      sharedPreferences.getString(KEY_SCHOOL_ZIP, EMPTY)!!
+      sharedPreferences.getString(KEY_SCHOOL_ZIP, EMPTY)!!,
+      false,
+      sharedPreferences.getBoolean(KEY_SCHOOL_HAS_BEEN_VALIDATED, false),
     )
   }
 
   /**
    * Saves current alternate address data
    */
-  fun setWorkAddress(address: AddressDetails) {
+  fun setWorkAddress(address: Address) {
     sharedPreferences.edit {
-      putString(KEY_WORK_ADDRESS_LINE_1, address.line_1)
+      putString(KEY_WORK_ADDRESS_LINE_1, address.line1)
+      putString(KEY_WORK_ADDRESS_LINE_2, address.line2)
       putString(KEY_WORK_CITY, address.city)
       putString(KEY_WORK_STATE, address.state)
       putString(KEY_WORK_ZIP, address.zip)
+      putBoolean(KEY_WORK_HAS_BEEN_VALIDATED, address.hasBeenValidated)
     }
   }
 
   /**
    * Gets cached alternate address data
    */
-  fun getWorkAddress(): AddressDetails {
-    return AddressDetails(
+  fun getWorkAddress(): Address {
+    return Address(
       sharedPreferences.getString(KEY_WORK_ADDRESS_LINE_1, EMPTY)!!,
+      sharedPreferences.getString(KEY_WORK_ADDRESS_LINE_2, EMPTY)!!,
       sharedPreferences.getString(KEY_WORK_CITY, EMPTY)!!,
       sharedPreferences.getString(KEY_WORK_STATE, EMPTY)!!,
-      sharedPreferences.getString(KEY_WORK_ZIP, EMPTY)!!
+      sharedPreferences.getString(KEY_WORK_ZIP, EMPTY)!!,
+      false,
+      sharedPreferences.getBoolean(KEY_WORK_HAS_BEEN_VALIDATED, false),
     )
   }
 
@@ -191,20 +208,5 @@ class Cache internal constructor(private val sharedPreferences: SharedPreference
     set(value) {
       field = value
       sharedPreferences.edit { putBoolean(KEY_JUVENILE_CARD, value ?: false) }
-    }
-
-  /**
-   * Getter/Setter for ISSO token
-   */
-  var token: String? = null
-    get() {
-      if (field == null) {
-        field = sharedPreferences.getString(KEY_TOKEN, "")
-      }
-      return field
-    }
-    set(value) {
-      field = value
-      sharedPreferences.edit { putString(KEY_TOKEN, value) }
     }
 }

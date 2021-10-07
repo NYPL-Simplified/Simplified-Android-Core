@@ -40,7 +40,7 @@ class PersonalInformationFragment : Fragment(), DatePickerDialog.OnDateSetListen
     inflater: LayoutInflater,
     container: ViewGroup?,
     savedInstanceState: Bundle?
-  ): View? {
+  ): View {
     _binding = FragmentPersonalInformationBinding.inflate(inflater, container, false)
     return binding.root
   }
@@ -50,6 +50,7 @@ class PersonalInformationFragment : Fragment(), DatePickerDialog.OnDateSetListen
 
     navController = Navigation.findNavController(requireActivity(), R.id.card_creator_nav_host_fragment)
     nextAction = PersonalInformationFragmentDirections.actionNext()
+    birthDate = Cache(requireContext()).getPersonalInformation().birthDate
 
     binding.firstNameEt.addTextChangedListener(object : TextWatcher {
       override fun afterTextChanged(s: Editable?) {

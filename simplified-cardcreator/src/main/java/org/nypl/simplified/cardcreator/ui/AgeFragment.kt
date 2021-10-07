@@ -34,7 +34,7 @@ class AgeFragment : Fragment() {
     inflater: LayoutInflater,
     container: ViewGroup?,
     savedInstanceState: Bundle?
-  ): View? {
+  ): View {
     _binding = FragmentAgeBinding.inflate(inflater, container, false)
     return binding.root
   }
@@ -94,7 +94,7 @@ class AgeFragment : Fragment() {
     if (binding.older13Rb.isChecked) {
       isOver13 = true
       binding.nextBtn.text = getString(R.string.next)
-      binding.error.visibility = View.GONE
+      binding.error.visibility = View.INVISIBLE
       if (binding.eulaCheckbox.isChecked) {
         logger.debug("Age form valid")
         binding.nextBtn.isEnabled = true

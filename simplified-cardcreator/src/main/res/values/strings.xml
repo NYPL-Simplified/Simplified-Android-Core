@@ -13,7 +13,7 @@
     <string name="name">Name</string>
     <string name="username">Username</string>
     <string name="email">Email</string>
-    <string name="pin">Pin</string>
+    <string name="password">Password</string>
     <string name="review">Review</string>
     <string name="valid_address_subheader">This valid address will result in a temporary </string>
     <string name="creating_card">Creating card&#8230;</string>
@@ -37,14 +37,14 @@
     <string name="create_card">Create Card</string>
     <string name="save_card">Save Card</string>
     <string name="confirmation">Confirmation</string>
-    <string name="card_saved">card saved</string>
+    <string name="card_saved">Card saved</string>
     <string name="user_card_number">Card Number: %1$s</string>
-    <string name="user_pin">PIN: %1$s</string>
+    <string name="user_password">Password: %1$s</string>
     <string name="issued_date">Issued: %1$s</string>
 
     <!-- Account Information -->
     <string name="account_information">Account Information</string>
-    <string name="username_desc">Usernames must be 5–25 letters or numbers only. PINs must be four digits.</string>
+    <string name="username_desc">Usernames must be 5–25 letters or numbers only. Passwords must be 8–32 characters and not contain any of the following characters: \&lt;, \&gt;, \\, /.</string>
     <string name="validating_username">Validating username&#8230;</string>
 
     <!-- Home Address -->
@@ -158,10 +158,19 @@
     <string name="nypl_logo">NYPL Logo</string>
 
     <!-- Errors -->
+    <string name="card_granted">Card granted</string>
+    <string name="card_created">Card created</string>
     <string name="create_card_error">There was an error creating your card\n<b>Error code: %1$d</b></string>
     <string name="validate_address_error">There was an error validating your address\n<b>Error code: %1$d</b></string>
     <string name="validate_username_error">There was an error validating your username\n<b>Error code: %1$d</b></string>
+    <string name="unavailable_username">This username is unavailable. Please try another.</string>
     <string name="create_card_general_error">There was an error creating your card.</string>
+    <string name="juvenile_not_eligible">You don’t have the correct card type to make child accounts. Please contact gethelp@nypl.org if you believe this is in error.</string>
+    <string name="juvenile_limit_reached">You have reached the limit of dependent cards you can receive via online application.</string>
+    <string name="juvenile_eligibility_error">We were not able to determine if you can make child cards.</string>
+    <string name="non_residential_address">This address is not residential.</string>
+    <string name="unrecognized_address">Unrecognized address.</string>
+    <string name="create_card_forbidden_not_in_new_york">Library cards are only available for residents of New York State or students and commuters working in New York City.</string>
     <string name="validate_address_general_error">There was an error validating your address.</string>
     <string name="validate_username_general_error">There was an error validating your username.</string>
     <string name="try_again">Try again</string>
