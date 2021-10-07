@@ -98,12 +98,12 @@ class ReviewFragment : Fragment() {
       is CreatePatronResponse.CreatePatronData -> {
         logger.debug("User navigated to the next screen")
         logger.debug("Card granted")
-        Toast.makeText(activity, "Card granted", Toast.LENGTH_SHORT).show()
+        Toast.makeText(activity, getString(R.string.card_granted), Toast.LENGTH_SHORT).show()
         nextAction = ReviewFragmentDirections.actionNext(
           response.username,
           response.barcode,
           response.password,
-          "Card created",
+          getString(R.string.card_created),
           "${cache.getPersonalInformation().firstName} ${cache.getPersonalInformation().lastName}"
         )
         navController.navigate(nextAction)
@@ -170,14 +170,14 @@ class ReviewFragment : Fragment() {
   private fun handleJuvenilePatronResponse(response: JuvenilePatronResponse) {
     when (response) {
       is JuvenilePatronResponse.JuvenilePatronData -> {
-        Toast.makeText(activity, "Card created", Toast.LENGTH_SHORT).show()
+        Toast.makeText(activity, R.string.card_created, Toast.LENGTH_SHORT).show()
         logger.debug("User navigated to the next screen")
         logger.debug("Card granted")
         nextAction = ReviewFragmentDirections.actionNext(
           response.data.dependent.username,
           response.data.dependent.barcode,
           response.data.dependent.password,
-          "Card created",
+          getString(R.string.card_created),
           "${cache.getPersonalInformation().firstName} ${cache.getPersonalInformation().lastName}"
         )
         navController.navigate(nextAction)

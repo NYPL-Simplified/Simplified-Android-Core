@@ -158,6 +158,8 @@
     <string name="nypl_logo">NYPL Logo</string>
 
     <!-- Errors -->
+    <string name="card_granted">Card granted</string>
+    <string name="card_created">Card created</string>
     <string name="create_card_error">There was an error creating your card\n<b>Error code: %1$d</b></string>
     <string name="validate_address_error">There was an error validating your address\n<b>Error code: %1$d</b></string>
     <string name="validate_username_error">There was an error validating your username\n<b>Error code: %1$d</b></string>
