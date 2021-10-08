@@ -34,12 +34,12 @@ dependencies {
   implementation project(":simplified-accounts-source-nyplregistry")
   implementation project(":simplified-analytics-circulation")
   implementation project(":simplified-crashlytics")
-  implementation project(":simplified-ui-theme")
   implementation libs.firebase.analytics
   implementation libs.firebase.crashlytics
   implementation libs.nypl.readium
   implementation libs.nypl.drm.core
   implementation libs.nypl.findaway
+  implementation libs.nypl.theme
 
   if (nyplNexusDepend) {
     // implementation libs.nypl.drm.adobe
