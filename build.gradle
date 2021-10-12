@@ -3,9 +3,6 @@ import java.time.ZoneId
 import java.time.ZoneOffset
 
 buildscript {
-  // Load in our list of dependencies.
-  //
-
   repositories {
     mavenCentral()
     google()
@@ -228,4 +225,11 @@ static Integer calculateVersionCode(Project project) {
   // Seconds since 2021-03-15 09:20:00 UTC
   def nowReduced = nowSeconds - 1615800000
   return nowReduced
+}
+
+task listrepos {
+    doLast {
+        println "Repositories:"
+        project.repositories.each { println "Name: " + it.name + "; url: " + it.url }
+   }
 }

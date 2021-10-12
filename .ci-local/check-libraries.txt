@@ -1,0 +1,136 @@
+#
+# Non-empty lines that do not start with '#' are treated as colon-separated
+# group and artifacts, eg. "one.irradia.mime:one.irradia.mime.api"
+#
+
+# androidx.activity:activity
+# androidx.annotation:annotation
+# androidx.appcompat:appcompat
+# androidx.cardview:cardview
+# androidx.constraintlayout:constraintlayout
+# androidx.core:core
+# androidx.core:core-ktx
+# androidx.fragment:fragment-ktx
+# androidx.fragment:fragment-testing
+# androidx.legacy:legacy-preference-v14
+# androidx.legacy:legacy-support-v4
+# androidx.lifecycle:lifecycle-extensions
+# androidx.lifecycle:lifecycle-viewmodel
+# androidx.multidex:multidex
+# androidx.navigation:navigation-fragment-ktx
+# androidx.navigation:navigation-ui-ktx
+# androidx.paging:paging-runtime-ktx
+# androidx.preference:preference-ktx
+# androidx.recyclerview:recyclerview
+# androidx.test.espresso:espresso-core
+# androidx.test.espresso:espresso-core
+# androidx.test.ext:junit
+# androidx.test.ext:junit
+# androidx.test:orchestrator
+# androidx.test:rules
+# androidx.test:runner
+# androidx.viewpager2:viewpager2
+# androidx.webkit:webkit
+# ch.qos.logback:logback-classic
+# com.fasterxml.jackson.core:jackson-core
+# com.fasterxml.jackson.core:jackson-databind
+# com.fasterxml.jackson.module:jackson-module-kotlin
+# com.github.ChuckerTeam.Chucker:library
+# com.github.akarnokd:rxjava2-extensions
+# com.github.edrlab.nanohttpd:nanohttpd
+# com.github.edrlab.nanohttpd:nanohttpd-nanolets
+# com.github.qnga:BottomNavigator
+# com.github.readium:r2-opds-kotlin
+# com.github.readium:r2-shared-kotlin
+# com.github.readium:r2-streamer-kotlin
+# com.github.stephenc.jcip:jcip-annotations
+# com.github.tony19:logback-android
+# com.google.android.exoplayer:exoplayer
+# com.google.android.material:material
+# com.google.auto.value:auto-value
+# com.google.auto.value:auto-value-annotations
+# com.google.firebase:firebase-analytics
+# com.google.firebase:firebase-crashlytics
+# com.google.guava:guava
+# com.io7m.jcip:jcip-annotations
+# com.io7m.jfunctional:io7m-jfunctional-core
+# com.io7m.jnull:io7m-jnull-core
+# com.io7m.junreachable:io7m-junreachable-core
+# com.nhaarman.mockitokotlin2:mockito-kotlin
+# com.nimbusds:nimbus-jose-jwt
+# com.squareup.leakcanary:leakcanary-android
+# com.squareup.moshi:moshi
+# com.squareup.moshi:moshi-kotlin
+# com.squareup.okhttp3:logging-interceptor
+# com.squareup.okhttp3:mockwebserver
+# com.squareup.okhttp3:mockwebserver
+# com.squareup.okhttp3:okhttp
+# com.squareup.picasso:picasso
+# com.squareup.retrofit2:converter-moshi
+# com.squareup.retrofit2:retrofit
+edu.umn.minitex.pdf:edu.umn.minitex.pdf.api
+edu.umn.minitex.pdf:edu.umn.minitex.pdf.pdfviewer
+# io.audioengine.mobile:all-android
+# io.reactivex.rxjava2:rxandroid
+# io.reactivex.rxjava2:rxjava
+# io.reactivex:rxjava
+# javax.annotation:javax.annotation-api
+# joda-time:joda-time
+# junit:junit
+# net.sf.kxml:kxml2
+# one.irradia.fieldrush:one.irradia.fieldrush.api
+# one.irradia.fieldrush:one.irradia.fieldrush.vanilla
+# one.irradia.mime:one.irradia.mime.api
+# one.irradia.mime:one.irradia.mime.vanilla
+# one.irradia.opds2_0:one.irradia.opds2_0.api
+# one.irradia.opds2_0:one.irradia.opds2_0.library_simplified.api
+# one.irradia.opds2_0:one.irradia.opds2_0.parser.api
+# one.irradia.opds2_0:one.irradia.opds2_0.parser.extension.library_simplified
+# one.irradia.opds2_0:one.irradia.opds2_0.parser.vanilla
+# org.bouncycastle:bcpg-jdk15on
+# org.bouncycastle:bcpkix-jdk15on
+# org.bouncycastle:bctls-jdk15on
+# org.jetbrains.kotlin:kotlin-reflect
+# org.jetbrains.kotlin:kotlin-stdlib-jdk7
+# org.jetbrains.kotlinx:kotlinx-coroutines-android
+# org.jetbrains.kotlinx:kotlinx-coroutines-core
+# org.json:json
+# org.junit.jupiter:junit-jupiter-api
+# org.junit.jupiter:junit-jupiter-engine
+org.librarysimplified.audiobook.audioengine:org.librarysimplified.audiobook.audioengine.core
+org.librarysimplified.audiobook.overdrive:org.librarysimplified.audiobook.overdrive.main
+org.librarysimplified.audiobook:org.librarysimplified.audiobook.api
+org.librarysimplified.audiobook:org.librarysimplified.audiobook.downloads
+org.librarysimplified.audiobook:org.librarysimplified.audiobook.feedbooks
+org.librarysimplified.audiobook:org.librarysimplified.audiobook.http
+org.librarysimplified.audiobook:org.librarysimplified.audiobook.license_check.api
+org.librarysimplified.audiobook:org.librarysimplified.audiobook.manifest_fulfill.api
+org.librarysimplified.audiobook:org.librarysimplified.audiobook.manifest_fulfill.basic
+org.librarysimplified.audiobook:org.librarysimplified.audiobook.manifest_fulfill.opa
+org.librarysimplified.audiobook:org.librarysimplified.audiobook.manifest_fulfill.spi
+org.librarysimplified.audiobook:org.librarysimplified.audiobook.manifest_parser.api
+org.librarysimplified.audiobook:org.librarysimplified.audiobook.manifest_parser.webpub
+org.librarysimplified.audiobook:org.librarysimplified.audiobook.open_access
+org.librarysimplified.audiobook:org.librarysimplified.audiobook.parser.api
+org.librarysimplified.audiobook:org.librarysimplified.audiobook.rbdigital
+org.librarysimplified.audiobook:org.librarysimplified.audiobook.views
+org.librarysimplified.drm.axis:org.librarysimplified.drm.axis.provider
+org.librarysimplified.drm:org.librarysimplified.drm.core
+org.librarysimplified.http:org.librarysimplified.http.api
+org.librarysimplified.http:org.librarysimplified.http.bearer_token
+org.librarysimplified.http:org.librarysimplified.http.downloads
+org.librarysimplified.http:org.librarysimplified.http.uri_builder
+org.librarysimplified.http:org.librarysimplified.http.vanilla
+org.librarysimplified.r2:org.librarysimplified.r2.api
+org.librarysimplified.r2:org.librarysimplified.r2.vanilla
+org.librarysimplified.r2:org.librarysimplified.r2.views
+org.librarysimplified:org.librarysimplified.readium
+org.librarysimplified:org.librarysimplified.readium.shared_js
+# org.mockito:mockito-android
+# org.mockito:mockito-core
+# org.osgi:org.osgi.annotation.bundle
+# org.osgi:org.osgi.annotation.versioning
+# org.quicktheories:quicktheories
+# org.robolectric:robolectric
+# org.slf4j:slf4j-api
+# xmlpull:xmlpull
