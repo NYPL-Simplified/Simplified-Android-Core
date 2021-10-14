@@ -222,13 +222,8 @@ a Findaway license and want to produce a Findaway-enabled build.
 
 ### Branching/Merging
 
-We use [git flow](https://nvie.com/posts/a-successful-git-branching-model/) as our
-basis for branching and creating releases. We highly recommend installing
-[Git Flow AVH Edition](https://github.com/petervanderdoes/gitflow-avh) to
-automate some of the work of branching and tagging. Using `gitflow-avh`
-is not required, but by automating the underlying repository operations,
-it eliminates the possibility of making mistakes, and keeps the various
-branches consistent.
+All new features should be created on feature branches and merged to `develop` once
+completed.
 
 ### Project Structure / Architecture
 
