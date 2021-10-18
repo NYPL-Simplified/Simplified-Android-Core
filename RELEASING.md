@@ -24,6 +24,14 @@ $ git submodule init
 $ git submodule update --remote --recursive
 ```
 
+#### SimplyE Or Open eBooks?
+
+Currently, this project contains two published applications: SimplyE and Open eBooks.
+The instructions here are written in a manner that allows for both applications
+to follow independent release cycles. The only parts that change in each case
+are the `gradle.properties` file that must be edited, and the names of the `git`
+tags.
+
 #### Prepare To Create A Release Branch
 
 The first step required is to set the project version numbers to the values
@@ -75,7 +83,14 @@ a separate release branch.
 ##### Update Version Numbers
 
 So, firstly, set the application version numbers to the _next_ release, `99.1.0-SNAPSHOT`, 
-as described above:
+as described above.
+
+  * If you're releasing SimplyE, edit `simplified-app-simplye/gradle.properties`
+  * If you're releasing Open eBooks, edit `simplified-app-openebooks/gradle.properties`
+
+In order to avoid writing the same instructions twice, we'll refer to whichever
+properties file you're using as `$app/gradle.properties`. You'll obviously need
+to substitute in the correct file yourself.
 
 ```
 # Make sure we're on the develop branch
@@ -83,20 +98,15 @@ $ git branch
 develop
 
 # Make sure the version numbers are what we expect to see.
-$ grep VERSION_NAME gradle.properties
-VERSION_NAME=98.0.0
-$ grep VERSION_NAME simplified-app-openebooks/gradle.properties
+$ grep VERSION_NAME $app/gradle.properties
 VERSION_NAME=98.0.0
 
 # Update the version numbers.
-$ $EDITOR gradle.properties
-<... edit VERSION_NAME to 99.1.0-SNAPSHOT ...>
-$ $EDITOR simplified-app-openebooks/gradle.properties
+$ $EDITOR $app/gradle.properties
 <... edit VERSION_NAME to 99.1.0-SNAPSHOT ...>
 
 # Add the version files to be staged for the next commit.
-$ git add gradle.properties
-$ git add simplified-app-openebooks/gradle.properties
+$ git add $app/gradle.properties
 ```
 
 Don't commit yet: There's more work to do!
@@ -139,8 +149,7 @@ Commit all of your changes and push:
 ```
 $ git status
 Changes staged for commit:
-  gradle.properties
-  simplified-app-openebooks/gradle.properties
+  $app/gradle.properties
   README-CHANGES.xml
 
 $ git commit -m 'Mark version 99.1.0-SNAPSHOT'
@@ -149,39 +158,48 @@ $ git push
 
 #### Create A Release Branch
 
-Now, create a release branch for the `99.0.0` release:
+Now, create a release branch for the `99.0.0` release.
+
+  * If you're releasing SimplyE, use `release/simplye-99.0.0` as the branch name.
+  * If you're releasing Open eBooks, use `release/openebooks-99.0.0` as the branch name.
+
+In order to avoid writing the same instructions twice, we'll refer to whichever
+branch you're using as `release/$app-99.0.0`. You'll obviously need to substitute in the 
+correct branch name yourself.
 
 ```
-$ git checkout -b release/99.0.0
+$ git checkout -b release/$app-99.0.0
 ```
 
-This creates a new `release/99.0.0` branch to which various commits
+This creates a new `release/$app-99.0.0` branch to which various commits
 may be made to increment version numbers, update change logs, run
 any last test builds, etc.
 
 #### Set The Release Version
 
-Set the app versions to `99.0.0`:
+Set the app versions to `99.0.0`
+
+  * If you're releasing SimplyE, edit `simplified-app-simplye/gradle.properties`
+  * If you're releasing Open eBooks, edit `simplified-app-openebooks/gradle.properties`
+
+In order to avoid writing the same instructions twice, we'll refer to whichever
+properties file you're using as `$app/gradle.properties`. You'll obviously need
+to substitute in the correct file yourself.
 
 ```
 # Make sure we're on the release branch
 $ git branch
-release/99.0.0
+release/$app-99.0.0
 
 # Make sure the version numbers are what we expect to see.
-$ grep VERSION_NAME gradle.properties
-VERSION_NAME=99.1.0-SNAPSHOT
-$ grep VERSION_NAME simplified-app-openebooks/gradle.properties
+$ grep VERSION_NAME $app/gradle.properties
 VERSION_NAME=99.1.0-SNAPSHOT
 
 # Update the version numbers.
-$ $EDITOR gradle.properties
-<... edit VERSION_NAME to 99.0.0 ...>
-$ $EDITOR simplified-app-openebooks/gradle.properties
+$ $EDITOR $app/gradle.properties
 <... edit VERSION_NAME to 99.0.0 ...>
 
-$ git add gradle.properties
-$ git add simplified-app-openebooks/gradle.properties
+$ git add $app/gradle.properties
 ```
 
 #### Verify Library Dependencies
@@ -200,8 +218,7 @@ All of the checked libraries are up-to-date.
 ```
 $ git status
 Changes staged for commit:
-  gradle.properties
-  simplified-app-openebooks/gradle.properties
+  $app/gradle.properties
 
 $ git commit -m 'Start 0.99.0 release'
 $ git push --all
@@ -211,12 +228,12 @@ $ git push --all
 
 At this point, the CI process will produce a release candidate build of `0.99.0`.
 If there are issues with the build, then fixes _MUST_ be commited to the `develop`
-branch and _NOT_ the `release/0.99.0` branch. Individual fixes should then be merged
-from `develop` into `release/0.99.0` and _NEVER_ in the opposite direction:
+branch and _NOT_ the `release/$app-0.99.0` branch. Individual fixes should then be merged
+from `develop` into `release/$app-0.99.0` and _NEVER_ in the opposite direction:
 
 ```
 $ git branch
-release/99.0.0
+release/$app-99.0.0
 
 $ git merge develop --no-ff
 
@@ -232,10 +249,17 @@ Each time new commits are pushed, a new release candidate will be built by the C
 #### Tag The Final Release
 
 When QA are satisfied that a build is working, it's time to create the final
-tag:
+tag.
+
+* If you're releasing SimplyE, use `simplye-99.0.0` as the tag name.
+* If you're releasing Open eBooks, use `openebooks-99.0.0` as the tag name.
+
+In order to avoid writing the same instructions twice, we'll refer to whichever
+tag you're using as `$app-99.0.0`. You'll obviously need to substitute in the
+correct tag name yourself.
 
 ```
-$ git tag -s 'v99.0.0'
+$ git tag -s '$app-99.0.0'
 $ git push --tags
 ```
 

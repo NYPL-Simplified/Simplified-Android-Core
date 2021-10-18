@@ -3,7 +3,7 @@ name: Android CI (Authenticated)
 on:
   push:
     branches: [ develop, master, release/* ]
-    tags: v[0-9]+.[0-9]+.[0-9]+
+    tags: [ 'openebooks-*', 'simplye-*' ]
 
 jobs:
   build:

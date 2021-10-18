@@ -2,8 +2,6 @@ Library Simplified
 ===
 
 [![Build Status](https://img.shields.io/github/workflow/status/NYPL-Simplified/Simplified-Android-Core/Android%20CI%20(Authenticated)?style=flat-square)](https://github.com/NYPL-Simplified/Simplified-Android-Core/actions?query=workflow%3A%22Android+CI+%28Authenticated%29%22)
-[![Maven Central](https://img.shields.io/maven-central/v/org.librarysimplified/org.librarysimplified.main?style=flat-square)](https://repo1.maven.org/maven2/org/librarysimplified/)
-[![Maven Central (snapshot)](https://img.shields.io/nexus/s/https/oss.sonatype.org/org.librarysimplified/org.librarysimplified.main.svg?style=flat-square)](https://oss.sonatype.org/content/repositories/snapshots/org.librarysimplified/)
 
 The NYPL's [Library Simplified](http://www.librarysimplified.org/) Android client.
 
@@ -417,12 +415,6 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.webview](simplified-webview)|WebView utilities|
 
 _The above table is generated with [ReadMe.java](src/misc/ReadMe.java)._
-
-### Binaries
-
-Binaries for every commit are built and published in the [binaries](https://github.com/NYPL-Simplified/android-binaries)
-repository. Note that these binaries are _not_ to be considered production ready and may have
-undergone little or no testing. Use at your own risk!
 
 ### Ktlint
 
