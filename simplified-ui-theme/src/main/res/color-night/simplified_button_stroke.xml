@@ -6,7 +6,7 @@
 
   <item
     android:state_enabled="false"
-    android:color="?attr/simplifiedColorDisabled" />
+    android:color="?attr/simplifiedColorDisabledAccessibility" />
 
   <item
     android:state_pressed="true"

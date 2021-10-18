@@ -14,6 +14,7 @@
     <item name="simplifiedColorItemBackground">@color/white</item>
     <item name="simplifiedColorItemStroke">@color/yet_another_gray</item>
     <item name="simplifiedColorDisabled">@color/platinum</item>
+    <item name="simplifiedColorDisabledAccessibility">@color/accessibility_grey</item>
 
     <item name="simplifiedColorNavigationSelected">?attr/simplifiedColorPrimary</item>
     <item name="simplifiedColorNavigationUnselected">@color/dkgray</item>
@@ -41,6 +42,7 @@
     <item name="simplifiedColorItemBackground">@color/white</item>
     <item name="simplifiedColorItemStroke">@color/yet_another_gray</item>
     <item name="simplifiedColorDisabled">@color/platinum</item>
+    <item name="simplifiedColorDisabledAccessibility">@color/accessibility_grey</item>
 
     <item name="simplifiedColorNavigationSelected">?attr/simplifiedColorPrimary</item>
     <item name="simplifiedColorNavigationUnselected">@color/dkgray</item>
