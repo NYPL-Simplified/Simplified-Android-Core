@@ -11,5 +11,5 @@ object CardCreatorDebugging {
    */
 
   @Volatile
-  var fakeNewYorkLocation: Boolean = true
+  var fakeNewYorkLocation: Boolean = false
 }
