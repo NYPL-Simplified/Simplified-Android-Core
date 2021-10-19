@@ -13,7 +13,6 @@
     <item name="simplifiedColorBackground">@color/almost_black</item>
     <item name="simplifiedColorItemBackground">@color/lighter_black</item>
     <item name="simplifiedColorItemStroke">@color/morado_gray</item>
-    <item name="simplifiedColorDisabled">@color/santas_gray</item>
     <item name="simplifiedColorDisabledAccessibility">@color/accessibility_grey</item>
 
     <item name="simplifiedColorNavigationSelected">?attr/simplifiedColorText</item>"
@@ -41,7 +40,6 @@
     <item name="simplifiedColorBackground">@color/almost_black</item>
     <item name="simplifiedColorItemBackground">@color/lighter_black</item>
     <item name="simplifiedColorItemStroke">@color/morado_gray</item>
-    <item name="simplifiedColorDisabled">@color/santas_gray</item>
     <item name="simplifiedColorDisabledAccessibility">@color/accessibility_grey</item>
 
     <item name="simplifiedColorNavigationSelected">?attr/simplifiedColorText</item>"
