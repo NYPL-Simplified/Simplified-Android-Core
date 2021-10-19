@@ -42,6 +42,6 @@ class OEIBuildConfigurationService : BuildConfigurationServiceType {
     get() = false
 
   override fun allowReturns(): Boolean {
-    return false
+    return true
   }
 }

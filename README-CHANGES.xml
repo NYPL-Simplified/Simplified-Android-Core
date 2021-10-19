@@ -235,6 +235,11 @@
             <c:ticket id="SMA-210"/>
           </c:tickets>
         </c:change>
+        <c:change date="2021-10-18T08:26:45+00:00" summary="Restore return button in Open eBooks">
+          <c:tickets>
+            <c:ticket id="OE-217"/>
+          </c:tickets>
+        </c:change>
       </c:changes>
     </c:release>
   </c:releases>

@@ -12,7 +12,7 @@
     <attr name="simplifiedColorBackground" format="color" />
     <attr name="simplifiedColorItemBackground" format="color" />
     <attr name="simplifiedColorItemStroke" format="color" />
-    <attr name="simplifiedColorDisabled" format="color" />
+    <attr name="simplifiedColorDisabledAccessibility" format="color"/>
     <attr name="simplifiedColorText" format="color" />
     <attr name="simplifiedColorPreferenceCategory" format="color" />
     <attr name="simplifiedColorControlActionBar" format="color" />
