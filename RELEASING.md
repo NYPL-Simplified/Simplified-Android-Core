@@ -1,139 +1,137 @@
 ### Releasing
 
 We currently push releases to [Maven Central](https://search.maven.org)
-and [Firebase](https://firebase.google.com).
+and [Firebase](https://firebase.google.com), with tagged release builds
+being pushed directly to the [Play Store](https://play.google.com) using
+[Fastlane](https://fastlane.tools/).
 
-We use the `git flow` model for development and that includes making
-releases. The release process essentially involves creating a temporary
-release branch from `develop`, incrementing version numbers, merging that
-release branch into `main`, and then setting the version number for the next 
-development cycle.
+The vast majority of the process is automated by our 
+[CI scripts](https://github.com/NYPL-Simplified/Simplified-Android-CI), but
+some manual steps are still required in order to trigger CI builds.
 
 The instructions in this file detail the process for producing a
-hypothetical version `99.0.0` release. The instructions assume that
-you will be using the [Git Flow AVH Edition](https://github.com/petervanderdoes/gitflow-avh)
-command-line tool. It's possible to perform all of these steps without
-it, but there is essentially no benefit to doing so (and many more
-opportunities to get things wrong). The instructions also assume that
-all Maven Central repository operations will be performed from the
-command-line. It is also possible to perform some of them via the
-[Sonatype Web Interface](https://oss.sonatype.org), but that is not
-covered here.
+hypothetical version `99.0.0` release.
 
-#### Testing Repository
+#### Make Sure Submodules Are Up-To-Date
 
-New developers can try out the process detailed here by cloning the
-[Maven-Central-Testing](https://github.com/NYPL-Simplified/Maven-Central-Testing)
-project and performing the release instructions below. The `Maven-Central-Testing`
-project is configured identically to the `Simplified-Android-Core`
-repository, but contains only a single module and can be built and
-deployed/released very quickly. This allows developers unfamiliar with
-Maven Central to run through the release process without actually having
-to do a real release of the application.
-
-#### PGP
-
-Maven Central requires that all deployed artifacts are signed using
-[PGP](https://en.wikipedia.org/wiki/Pretty_Good_Privacy). As part of
-the quality checks performed on uploaded packages, the Maven Central
-repository will attempt to fetch the public key of the package signer
-from the [OpenPGP public keyservers](https://sks-keyservers.net/) in
-order to verify package signatures. Therefore, the person doing the
-signing needs to ensure that their key is accessible on those key
-servers.
-
-Generating PGP keys and uploading those keys is outside of the scope of
-this documentation. The guide written by [Curtis Wallen](http://curtiswallen.com/pgp/)
-may be helpful.
-
-#### Ensure Git Flow Is Configured
-
-If you have not previously run `git flow init` on the repository, do
-so now:
+The app requires a couple of submodules to build correctly. If you
+cloned the repository with `--recursive`, then you likely already have
+those submodules. However, it's best to run the following commands just
+to make sure:
 
 ```
-$ git flow init
-
-Which branch should be used for bringing forth production releases?
-   - develop
-   - master
-Branch name for production releases: [master] 
-
-Which branch should be used for integration of the "next release"?
-   - develop
-Branch name for "next release" development: [develop] 
-
-How to name your supporting branch prefixes?
-Feature branches? [] feature/
-Bugfix branches? [] bugfix/
-Release branches? [] release/
-Hotfix branches? [] hotfix/
-Support branches? [] support/
-Version tag prefix? [] v
+$ git submodule init
+$ git submodule update --remote --recursive
 ```
 
-#### Create A Release Branch
+#### SimplyE Or Open eBooks?
+
+Currently, this project contains two published applications: SimplyE and Open eBooks.
+The instructions here are written in a manner that allows for both applications
+to follow independent release cycles. The only parts that change in each case
+are the `gradle.properties` file that must be edited, and the names of the `git`
+tags.
+
+#### Prepare To Create A Release Branch
+
+The first step required is to set the project version numbers to the values
+that they should be _after_ the current release. Why is this necessary? Well,
+consider the following diagram of what _NOT_ to do:
+
+![Bad Commits](./src/site/resources/commitsBad.png?raw=true)
+
+In commit `a`, the app version number is `99.0.0-SNAPSHOT`. The developer then
+creates a release branch in commit `b` and sets the version number to
+`99.0.0`. Meanwhile, a developer commits `c` to the `develop` branch.
+This sequence commits mean the following CI builds are produced in this
+order:
+
+  1. A build marked as `99.0.0-SNAPSHOT` from commit `a`.
+  2. A build marked as `99.0.0` from commit `b`.
+  3. A build marked as `99.0.0-SNAPSHOT` from commit `c`.
+
+This has the effect of confusing people who are trying to test the builds:
+_"Why have I just gotten a new build of `99.0.0-SNAPSHOT` when we're about
+to test `99.0.0`?"_.
+
+Instead, this is what _should_ have happened:
+
+![Good Commits](./src/site/resources/commits.png?raw=true)
+
+In commit `a`, the app version number is `99.0.0-SNAPSHOT`. The developer then
+creates a commit `b` on the `develop` branch that sets the version number
+to the expected _next_ release version `99.1.0-SNAPSHOT`. It doesn't matter
+if the next release will actually be called `99.1.0-SNAPSHOT` or something
+else; it just matters that it isn't called `99.0.0-SNAPSHOT` and isn't
+called `99.0.0`. The developer _then_ creates a release branch in commit `c`
+that sets the version number to `99.0.0`. At any point, another developer
+working on the `develop` branch can safely create a commit `d` that
+will have the correct version number already set thanks to the commit `c`.
+
+This sequence commits mean the following CI builds are produced in this
+order:
+
+  1. A build marked as `99.0.0-SNAPSHOT` from commit `a`.
+  2. A build marked as `99.1.0-SNAPSHOT` from commit `b`.
+  3. A build marked as `99.0.0` from commit `c`.
+  4. A build marked as `99.1.0-SNAPSHOT` from commit `d`.
+
+Essentially, we need to leave things things set up so that developers can 
+keep working on `develop` whilst we go on to make changes afterwards on
+a separate release branch.
+
+##### Update Version Numbers
+
+So, firstly, set the application version numbers to the _next_ release, `99.1.0-SNAPSHOT`, 
+as described above.
+
+  * If you're releasing SimplyE, edit `simplified-app-simplye/gradle.properties`
+  * If you're releasing Open eBooks, edit `simplified-app-openebooks/gradle.properties`
+
+In order to avoid writing the same instructions twice, we'll refer to whichever
+properties file you're using as `$app/gradle.properties`. You'll obviously need
+to substitute in the correct file yourself.
 
 ```
-$ git flow release start 99.0.0
-```
+# Make sure we're on the develop branch
+$ git branch
+develop
 
-This creates a new `release/99.0.0` branch to which various commits
-may be made to increment version numbers, update change logs, run
-any last test builds, etc.
-
-#### Verify Library Dependencies
-
-SimplyE uses several remote repositories as library dependencies published to Maven Central. Verify that each library dependency is referencing the latest version in the `build_libraries.gradle` file or, if not, check with Product to see if exclusion is approved. The main libraries to focus on here are:  
-[nypl_audiobook_api](https://github.com/NYPL-Simplified/audiobook-android)  
-[nypl_drm_adobe](https://github.com/NYPL-Simplified/DRM-Android-Adobe)  
-[nypl_drm_axis](https://github.com/NYPL-Simplified/DRM-Android-Axis)  
-[nypl_drm_core](https://github.com/NYPL-Simplified/DRM-Android-Core)  
-[nypl_findaway](https://github.com/NYPL-Simplified/audiobook-audioengine-android)  
-[nypl_http](https://github.com/NYPL-Simplified/Simplified-Android-HTTP)  
-[nypl_overdrive](https://github.com/NYPL-Simplified/audiobook-android-overdrive)  
-[nypl_pdf](https://github.com/NYPL-Simplified/pdfreader-android)  
-[nypl_readium2](https://github.com/NYPL-Simplified/Simplified-R2-Android)
-
-*Note: In some cases, there will be unreleased work in the above library dependencies. In that case it may require doing a Maven Central release for that library dependency order to get that back in the main project. Currently CI will not automatically check for this.*
-
-#### Update Version Numbers
-
-The `gradle.properties` file for the project defines the version number
-for all modules. The version number used cannot match any version number
-used for any existing release on Maven Central. We attempt to follow
-[semantic versioning](https://www.semver.org) as much as we can.
-
-```
-$ grep VERSION_NAME gradle.properties
+# Make sure the version numbers are what we expect to see.
+$ grep VERSION_NAME $app/gradle.properties
 VERSION_NAME=98.0.0
 
-$ $EDITOR gradle.properties
-<... edit VERSION_NAME ...>
+# Update the version numbers.
+$ $EDITOR $app/gradle.properties
+<... edit VERSION_NAME to 99.1.0-SNAPSHOT ...>
 
-$ grep VERSION_NAME gradle.properties
-VERSION_NAME=99.0.0
-
-$ git add gradle.properties
-$ git commit -m 'Mark version 99.0.0'
+# Add the version files to be staged for the next commit.
+$ git add $app/gradle.properties
 ```
 
-Optionally, you can `git push` here to give continuous integration
-systems a chance to build the code and make sure everything is alright.
+Don't commit yet: There's more work to do!
 
-#### Close The Changelog
+##### Close The Changelog
 
 We currently use [changelog](https://www.io7m.com/software/changelog/) to
 maintain a humanly-readable list of changes made between releases. The
 [changelog manual](https://www.io7m.com/software/changelog/documentation/index.xhtml#d2e143)
 has a detailed usage guide, but the release process only involves a couple
-of commands.
+of commands. The CI builds generate release notes by looking at the contents
+of the `README-CHANGES.xml` file in the root of the repository.
 
 First, [set the release version](https://www.io7m.com/software/changelog/documentation/index.xhtml#id_f79aa94b-4dc7-44ee-823e-f6d1e3e8f155)
-to the version being released now. In our case, that's `99.0.0`:
+to the version we're trying to release now. In our case, that's `99.0.0`:
 
 ```
 $ changelog release-set-version --version 99.0.0
+```
+
+Take a look at the current changelog and make sure it has all the entries you
+expect to see:
+
+```
+$ changelog write-plain
 ```
 
 Then, [close the current release](https://www.io7m.com/software/changelog/documentation/index.xhtml#id_31fe1fbf-62b9-4811-93dd-252a9ebfb222).
@@ -141,95 +139,138 @@ This marks the changelog as being finalized for the current release:
 
 ```
 $ changelog release-finish
-```
-
-```
-$ git add README-CHANGES.xml
-$ git commit -m 'Close changelog'
-```
-
-#### Finish And Merge The Release Branch
-
-```
-$ git flow release finish
-```
-
-You will be prompted to add a commit message for the commit that
-merges all of the changes back to the `master` branch, and you will
-also be prompted to add a message to the new `v99.0.0` tag that `git flow`
-will create in the repository. We recommend adding changelog entries
-here. You can get a plain-text version of the changelog for the current
-release that you can copy and paste into the merge message using the
-following command:
-
-```
-$ changelog write-plain
-Release: LibrarySimplified 99.0.0
-Change: Enable ACS DRM for Readium 2 (Ticket: #SIMPLY-3138)
-Change: Add a neutral age gate for the Play Store (Ticket: #SIMPLY-3493)
-Change: Correct an issue related to multiple accounts and Adobe DRM (thanks @ray-lee!) (Ticket: #SIMPLY-2979)
-...
-```
-
-The `git flow` tool will also make sure to clean up any `release`
-branch that you may have pushed in the previous step.
-
-#### Push Branches And Tags
-
-```
-$ git push --tags
-$ git push --all
-```
-
-This updates the remote Git repository with the new branches.
-
-The release is now complete! Our [CI](https://github.com/NYPL-Simplified/Simplified-Android-CI)
-system takes care of pushing all of the pieces of the build to the right places.
-If you're morbidly curious as to what happens there, see the [epilogue](#epilogue).
-To leave things in a pleasant state for the next developer, you should now
-[prepare for the next development cycle](#prepare-for-the-next-development-cycle).
-
-#### Prepare For The Next Development Cycle
-
-Make sure you're back on the `develop` branch. The `git flow` tool should have
-switched branches for you automatically, but it's always worth being certain:
-
-```
-$ git branch
-develop
-```
-
-Update the `gradle.properties` file to set a new `-SNAPSHOT` version
-for the next development cycle:
-
-```
-$ $EDITOR gradle.properties
-<... edit VERSION_NAME ...>
-
-$ grep VERSION_NAME gradle.properties
-VERSION_NAME=99.0.1-SNAPSHOT
-
-$ git add gradle.properties
-```
-
-Start a [new changelog release](https://www.io7m.com/software/changelog/documentation/d2e143.xhtml#id_3be05f7b-b312-45f8-ae0c-00a0528a6273)
-(assuming the next release will be `99.0.1` - it doesn't matter if you don't
-know what the exact version number will be, because this can always be changed
-later):
-
-```
-$ changelog release-begin 99.0.1
 $ git add README-CHANGES.xml
 ```
 
-Commit:
+##### Commit!
+
+Commit all of your changes and push:
 
 ```
-$ git commit -m 'Start new development cycle; mark version 99.0.1-SNAPSHOT'
+$ git status
+Changes staged for commit:
+  $app/gradle.properties
+  README-CHANGES.xml
+
+$ git commit -m 'Mark version 99.1.0-SNAPSHOT'
 $ git push
 ```
 
+#### Create A Release Branch
+
+Now, create a release branch for the `99.0.0` release.
+
+  * If you're releasing SimplyE, use `release/simplye-99.0.0` as the branch name.
+  * If you're releasing Open eBooks, use `release/openebooks-99.0.0` as the branch name.
+
+In order to avoid writing the same instructions twice, we'll refer to whichever
+branch you're using as `release/$app-99.0.0`. You'll obviously need to substitute in the 
+correct branch name yourself.
+
+```
+$ git checkout -b release/$app-99.0.0
+```
+
+This creates a new `release/$app-99.0.0` branch to which various commits
+may be made to increment version numbers, update change logs, run
+any last test builds, etc.
+
+#### Set The Release Version
+
+Set the app versions to `99.0.0`
+
+  * If you're releasing SimplyE, edit `simplified-app-simplye/gradle.properties`
+  * If you're releasing Open eBooks, edit `simplified-app-openebooks/gradle.properties`
+
+In order to avoid writing the same instructions twice, we'll refer to whichever
+properties file you're using as `$app/gradle.properties`. You'll obviously need
+to substitute in the correct file yourself.
+
+```
+# Make sure we're on the release branch
+$ git branch
+release/$app-99.0.0
+
+# Make sure the version numbers are what we expect to see.
+$ grep VERSION_NAME $app/gradle.properties
+VERSION_NAME=99.1.0-SNAPSHOT
+
+# Update the version numbers.
+$ $EDITOR $app/gradle.properties
+<... edit VERSION_NAME to 99.0.0 ...>
+
+$ git add $app/gradle.properties
+```
+
+#### Verify Library Dependencies
+
+Run `.ci/ci-check-versions.sh` to check if all library dependencies are
+referencing the latest versions:
+
+```
+$ .ci/ci-check-versions.sh
+All of the checked libraries are up-to-date.
+31 libraries were checked. 101 libraries were ignored.
+```
+
+#### Commit And Push
+
+```
+$ git status
+Changes staged for commit:
+  $app/gradle.properties
+
+$ git commit -m 'Start 0.99.0 release'
+$ git push --all
+```
+
+#### Wait For QA To Test
+
+At this point, the CI process will produce a release candidate build of `0.99.0`.
+If there are issues with the build, then fixes _MUST_ be commited to the `develop`
+branch and _NOT_ the `release/$app-0.99.0` branch. Individual fixes should then be merged
+from `develop` into `release/$app-0.99.0` and _NEVER_ in the opposite direction:
+
+```
+$ git branch
+release/$app-99.0.0
+
+$ git merge develop --no-ff
+
+$ changelog change-add --summary 'Something was fixed' --ticket 'SMA-18238'
+$ git add README-CHANGES.xml
+$ git commit -m 'Update changelog'
+
+$ git push
+```
+
+Each time new commits are pushed, a new release candidate will be built by the CI.
+
+#### Tag The Final Release
+
+When QA are satisfied that a build is working, it's time to create the final
+tag.
+
+* If you're releasing SimplyE, use `simplye-99.0.0` as the tag name.
+* If you're releasing Open eBooks, use `openebooks-99.0.0` as the tag name.
+
+In order to avoid writing the same instructions twice, we'll refer to whichever
+tag you're using as `$app-99.0.0`. You'll obviously need to substitute in the
+correct tag name yourself.
+
+```
+$ git tag -s '$app-99.0.0'
+$ git push --tags
+```
+
+When the CI encounters a tagged commit, it will push the build it produces to
+the Play Store, and will push various components to Maven Central.
+
 ## Epilogue
+
+If you've followed all of the steps above, then the release is completed. You don't
+need to continue reading unless you want to know how the release process works behind
+the scenes.
 
 #### How Does Pushing To Maven Central Work?
 

@@ -1,0 +1,10 @@
+#
+# Non-empty lines that do not start with '#' are treated as the base URIs of
+# repositories holding Maven packages.
+#
+
+https://repo1.maven.org/maven2/
+http://maven.findawayworld.com/artifactory/libs-release/
+https://jcenter.bintray.com/
+https://jitpack.io/
+https://dl.google.com/dl/android/maven2/
