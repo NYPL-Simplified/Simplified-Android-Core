@@ -31,7 +31,6 @@ dependencies {
   implementation project(":simplified-ui-screen")
   implementation project(":simplified-ui-settings")
   implementation project(":simplified-ui-splash")
-  implementation project(":simplified-ui-theme")
   implementation project(":simplified-ui-thread-api")
   implementation project(":simplified-viewer-api")
   implementation project(":simplified-viewer-audiobook")
@@ -50,6 +49,7 @@ dependencies {
   implementation libs.leak.canary
   implementation libs.logback.android
   implementation libs.mockito.android
+  implementation libs.nypl.theme
   implementation libs.pandora.bottom.navigator
   implementation libs.slf4j
 }

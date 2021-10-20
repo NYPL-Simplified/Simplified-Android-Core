@@ -13,7 +13,6 @@ dependencies {
   implementation project(":simplified-ui-images")
   implementation project(":simplified-webview")
   implementation project(':simplified-ui-listeners-api')
-  implementation project(':simplified-ui-theme')
 
   implementation libs.androidx.app.compat
   implementation libs.androidx.constraint.layout
@@ -23,6 +22,7 @@ dependencies {
   implementation libs.google.material
   implementation libs.kotlin.stdlib
   implementation libs.kotlin.reflect
+  implementation libs.nypl.theme
   implementation libs.rxjava2
   implementation libs.rxjava2.extensions
   implementation libs.rxandroid2

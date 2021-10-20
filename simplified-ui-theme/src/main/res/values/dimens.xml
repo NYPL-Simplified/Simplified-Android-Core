@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-  <dimen name="simplifiedButtonCornerRadius">6dp</dimen>
-  <dimen name="simplifiedButtonVerticalPadding">8dp</dimen>
-  <dimen name="simplifiedButtonHorizontalPadding">16dp</dimen>
-</resources>

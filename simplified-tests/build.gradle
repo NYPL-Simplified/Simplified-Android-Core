@@ -64,7 +64,6 @@ dependencies {
   api project(":simplified-ui-branding")
   api project(":simplified-ui-errorpage")
   api project(":simplified-ui-splash")
-  api project(":simplified-ui-theme")
   api project(":simplified-webview")
 
   api libs.nypl.audiobook.api
@@ -96,6 +95,7 @@ dependencies {
   implementation libs.slf4j
   implementation libs.nypl.readium
   implementation libs.nypl.readium.js
+  implementation libs.nypl.theme
 
   testImplementation libs.logback.android
   testImplementation libs.junit

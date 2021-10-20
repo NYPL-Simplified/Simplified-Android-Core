@@ -405,7 +405,6 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.ui.screen](simplified-ui-screen)|Screen API|
 |[org.librarysimplified.ui.settings](simplified-ui-settings)|Settings screens|
 |[org.librarysimplified.ui.splash](simplified-ui-splash)|Splash screen|
-|[org.librarysimplified.ui.theme](simplified-ui-theme)|Application theme functionality|
 |[org.librarysimplified.ui.thread.api](simplified-ui-thread-api)|UI thread service|
 |[org.librarysimplified.viewer.api](simplified-viewer-api)|Viewer API|
 |[org.librarysimplified.viewer.audiobook](simplified-viewer-audiobook)|AudioBook viewer|

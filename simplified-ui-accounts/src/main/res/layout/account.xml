@@ -37,7 +37,7 @@
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:layout_marginBottom="1dp"
-        android:background="@color/accessibility_grey"
+        android:background="?attr/simplifiedColorDisabledAccessibility"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
@@ -49,7 +49,7 @@
     <View
       android:layout_width="match_parent"
       android:layout_height="1dp"
-      android:background="@color/accessibility_grey" />
+      android:background="?attr/simplifiedColorDisabledAccessibility" />
 
     <Space
       android:layout_width="match_parent"
@@ -154,7 +154,7 @@
       <View
         android:layout_width="0dp"
         android:layout_height="1dp"
-        android:background="@color/accessibility_grey"
+        android:background="?attr/simplifiedColorDisabledAccessibility"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -197,7 +197,7 @@
       <View
         android:layout_width="0dp"
         android:layout_height="1dp"
-        android:background="@color/accessibility_grey"
+        android:background="?attr/simplifiedColorDisabledAccessibility"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -254,7 +254,7 @@
       <View
         android:layout_width="0dp"
         android:layout_height="1dp"
-        android:background="@color/accessibility_grey"
+        android:background="?attr/simplifiedColorDisabledAccessibility"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -298,7 +298,7 @@
       <View
         android:layout_width="0dp"
         android:layout_height="1dp"
-        android:background="@color/accessibility_grey"
+        android:background="?attr/simplifiedColorDisabledAccessibility"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

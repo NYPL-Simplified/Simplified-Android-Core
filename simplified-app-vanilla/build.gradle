@@ -28,10 +28,11 @@ android {
 
 dependencies {
   implementation project(":simplified-main")
-  implementation project(":simplified-ui-theme")
   implementation project(":simplified-accounts-source-nyplregistry")
   implementation project(":simplified-analytics-circulation")
   annotationProcessor libs.google.auto.value.processor
+
+  implementation libs.nypl.theme
 
   vanillaWithProfilesImplementation project(":simplified-accounts-source-filebased")
 }
