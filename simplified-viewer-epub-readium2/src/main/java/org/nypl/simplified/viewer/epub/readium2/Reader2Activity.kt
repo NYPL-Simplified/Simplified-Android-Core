@@ -228,14 +228,6 @@ class Reader2Activity : AppCompatActivity(R.layout.reader2) {
         provider.create(this)
       }
 
-    val streamer =
-      Streamer(
-        context = this,
-        parsers = listOf(EpubParser()),
-        contentProtections = contentProtections,
-        ignoreDefaultParsers = true
-      )
-
     /*
      * Load the most recently configured theme from the profile's preferences.
      */
@@ -264,7 +256,7 @@ class Reader2Activity : AppCompatActivity(R.layout.reader2) {
       }
 
     return SR2ReaderParameters(
-      streamer = streamer,
+      contentProtections = contentProtections,
       bookFile = bookFile,
       bookId = this.parameters.entry.feedEntry.id,
       theme = initialTheme,
