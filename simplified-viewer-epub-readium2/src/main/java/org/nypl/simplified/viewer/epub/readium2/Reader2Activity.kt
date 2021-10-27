@@ -15,9 +15,6 @@ import org.librarysimplified.r2.api.SR2Bookmark
 import org.librarysimplified.r2.api.SR2Command
 import org.librarysimplified.r2.api.SR2ControllerType
 import org.librarysimplified.r2.api.SR2Event
-import org.librarysimplified.r2.api.SR2Event.SR2BookmarkEvent.SR2BookmarkCreated
-import org.librarysimplified.r2.api.SR2Event.SR2BookmarkEvent.SR2BookmarkDeleted
-import org.librarysimplified.r2.api.SR2Event.SR2BookmarkEvent.SR2BookmarksLoaded
 import org.librarysimplified.r2.api.SR2Event.SR2CommandEvent.SR2CommandEventCompleted.SR2CommandExecutionFailed
 import org.librarysimplified.r2.api.SR2Event.SR2CommandEvent.SR2CommandEventCompleted.SR2CommandExecutionSucceeded
 import org.librarysimplified.r2.api.SR2Event.SR2CommandEvent.SR2CommandExecutionRunningLong
@@ -54,8 +51,6 @@ import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkServiceType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.readium.r2.shared.publication.asset.FileAsset
-import org.readium.r2.streamer.Streamer
-import org.readium.r2.streamer.parser.epub.EpubParser
 import org.slf4j.LoggerFactory
 import java.util.ServiceLoader
 import java.util.concurrent.ExecutionException
@@ -334,7 +329,7 @@ class Reader2Activity : AppCompatActivity(R.layout.reader2) {
     event: SR2Event
   ) {
     return when (event) {
-      is SR2BookmarkCreated -> {
+      is SR2Event.SR2BookmarkEvent.SR2BookmarkCreated -> {
         val bookmark =
           Reader2Bookmarks.fromSR2Bookmark(
             bookEntry = this.parameters.entry,
@@ -350,7 +345,7 @@ class Reader2Activity : AppCompatActivity(R.layout.reader2) {
         Unit
       }
 
-      is SR2BookmarkDeleted -> {
+      is SR2Event.SR2BookmarkEvent.SR2BookmarkDeleted -> {
         val bookmark =
           Reader2Bookmarks.fromSR2Bookmark(
             bookEntry = this.parameters.entry,
@@ -379,7 +374,7 @@ class Reader2Activity : AppCompatActivity(R.layout.reader2) {
 
       is SR2Event.SR2OnCenterTapped,
       is SR2Event.SR2ReadingPositionChanged,
-      SR2BookmarksLoaded,
+      SR2Event.SR2BookmarkEvent.SR2BookmarksLoaded,
       is SR2ChapterNonexistent,
       is SR2WebViewInaccessible,
       is SR2ExternalLinkSelected,
