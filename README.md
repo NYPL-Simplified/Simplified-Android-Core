@@ -41,7 +41,7 @@ same core:
   * [The Longer Version](#the-longer-version)
     * [Android SDK](#android-sdk)
     * [JDK](#jdk)
-    * [Nexus Credentials](#nexus-credentials)
+    * [S3 Credentials](#s3-credentials)
     * [APK Signing](#apk-signing)
     * [Enabling DRM](#enabling-drm)
     * [Adobe DRM](#adobe-drm-support)
