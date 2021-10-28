@@ -33,27 +33,27 @@ ext {
   android_min_sdk_version = 21
   android_target_sdk_version = 29
 
-  // Required for some dependencies only available from our private nexus
+  // Required for some dependencies only available from our private S3
   //
-  nyplNexusDepend =
-    project.findProperty('org.librarysimplified.nexus.depend') as Boolean
-  nyplNexusUsername =
-    project.findProperty('org.librarysimplified.nexus.username') ?: ''
-  nyplNexusPassword =
-    project.findProperty('org.librarysimplified.nexus.password') ?: ''
+  nyplS3Depend =
+    project.findProperty('org.librarysimplified.s3.depend') as Boolean
+  nyplS3AccessKey =
+    project.findProperty('org.librarysimplified.s3.access_key_id') ?: ''
+  nyplS3SecretKey =
+    project.findProperty('org.librarysimplified.s3.secret_access_key') ?: ''
 
-  if (nyplNexusDepend && !nyplNexusUsername) {
+  if (nyplS3Depend && !nyplS3AccessKey) {
     throw new GradleException(
       """\
-      'org.librarysimplified.nexus.username' is undefined!
-        ^ required by 'org.librarysimplified.nexus.depend'\
+      'org.librarysimplified.s3.access_key_id' is undefined!
+        ^ required by 'org.librarysimplified.s3.access_key_id'\
       """.stripIndent())
   }
-  if (nyplNexusDepend && !nyplNexusPassword) {
+  if (nyplS3Depend && !nyplS3SecretKey) {
     throw new GradleException(
       """\
-      'org.librarysimplified.nexus.password' is undefined!
-        ^ required by 'org.librarysimplified.nexus.depend'\
+      'org.librarysimplified.s3.secret_access_key' is undefined!
+        ^ required by 'org.librarysimplified.s3.depend'\
       """.stripIndent())
   }
 
@@ -61,10 +61,10 @@ ext {
   //
   nyplDrmEnabled =
     project.findProperty('org.librarysimplified.drm.enabled') as Boolean
-  if (nyplDrmEnabled && !nyplNexusDepend) {
+  if (nyplDrmEnabled && !nyplS3Depend) {
     throw new GradleException(
       """\
-      'org.librarysimplified.nexus.depend' is undefined!
+      'org.librarysimplified.s3.depend' is undefined!
         ^ required by 'org.librarysimplified.drm.enabled'\
       """.stripIndent())
   }
@@ -148,13 +148,33 @@ subprojects { project ->
     mavenCentral()
     google()
 
-    if (nyplNexusDepend) {
+    /*
+     * S3 repositories for restricted DRM artifacts.
+     */
+
+    if (nyplDrmEnabled) {
       maven {
-        credentials {
-          username nyplNexusUsername
-          password nyplNexusPassword
+        name = "S3 Snapshots"
+        url = "s3://simplye-maven-builds/snapshots/"
+        credentials(AwsCredentials) {
+          accessKey = nyplS3AccessKey
+          secretKey = nyplS3SecretKey
         }
-        url 'https://nexus.librarysimplified.org:8443/nexus/content/groups/external/'
+        mavenContent {
+          snapshotsOnly()
+        }
+      }
+
+      maven {
+        name = "S3 Releases"
+        url = "s3://simplye-maven-builds/releases/"
+        credentials(AwsCredentials) {
+          accessKey = nyplS3AccessKey
+          secretKey = nyplS3SecretKey
+        }
+        mavenContent {
+          releasesOnly()
+        }
       }
     }
 

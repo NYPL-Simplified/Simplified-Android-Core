@@ -15,13 +15,13 @@ info()
   echo "credentials-local.sh: info: $1" 1>&2
 }
 
-if [ -z "${NYPL_NEXUS_USER}" ]
+if [ -z "${NYPL_S3_ACCESS_KEY}" ]
 then
-  fatal "NYPL_NEXUS_USER is not defined"
+  fatal "NYPL_S3_ACCESS_KEY is not defined"
 fi
-if [ -z "${NYPL_NEXUS_PASSWORD}" ]
+if [ -z "${NYPL_S3_SECRET_ACCESS_KEY}" ]
 then
-  fatal "NYPL_NEXUS_PASSWORD is not defined"
+  fatal "NYPL_S3_SECRET_ACCESS_KEY is not defined"
 fi
 
 #------------------------------------------------------------------------
@@ -66,9 +66,9 @@ cp "${CREDENTIALS_PATH}/PlayStore/play_store_api_key.json" "simplified-app-opene
 cat >> "${HOME}/.gradle/gradle.properties" <<EOF
 org.librarysimplified.drm.enabled=true
 
-org.librarysimplified.nexus.depend=true
-org.librarysimplified.nexus.username=${NYPL_NEXUS_USER}
-org.librarysimplified.nexus.password=${NYPL_NEXUS_PASSWORD}
+org.librarysimplified.s3.depend=true
+org.librarysimplified.s3.access_key_id=${NYPL_S3_ACCESS_KEY}
+org.librarysimplified.s3.secret_access_key=${NYPL_S3_SECRET_ACCESS_KEY}
 
 org.librarysimplified.app.assets.openebooks=${OPENEBOOKS_CREDENTIALS}
 org.librarysimplified.app.assets.simplye=${SIMPLYE_CREDENTIALS}
