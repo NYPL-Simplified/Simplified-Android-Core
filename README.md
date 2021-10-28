@@ -41,7 +41,7 @@ same core:
   * [The Longer Version](#the-longer-version)
     * [Android SDK](#android-sdk)
     * [JDK](#jdk)
-    * [Nexus Credentials](#nexus-credentials)
+    * [S3 Credentials](#s3-credentials)
     * [APK Signing](#apk-signing)
     * [Enabling DRM](#enabling-drm)
     * [Adobe DRM](#adobe-drm-support)
@@ -123,24 +123,25 @@ OpenJDK Runtime Environment (build 11.0.8+10)
 OpenJDK 64-Bit Server VM (build 11.0.8+10, mixed mode)
 ~~~
 
-#### Nexus Credentials
+#### S3 Credentials
 
 Our application can use packages that are only available from our
-Nexus server. If you wish to use these packages, you need to obtain
-Nexus credentials and then tell Gradle to use them.
+S3 bucket. If you wish to use these packages, you need to obtain
+S3 credentials and then tell Gradle to use them.
 
-Nexus credentials can be obtained by emailing `malcolmwoods@nypl.org`
+S3 credentials can be obtained by emailing `malcolmwoods@nypl.org`
 or by asking in the `#mobile-development` channel of
 [librarysimplified.slack.com](https://librarysimplified.slack.com).
 
-Once you have your credentials, the following lines must be added to `$HOME/.gradle/gradle.properties`:
+Once you have your credentials, the following lines must be added to 
+`$HOME/.gradle/gradle.properties`:
 
 ~~~
-# Replace USERNAME and PASSWORD appropriately.
+# Replace ACCESS_KEY and SECRET_ACCESS_KEY appropriately.
 # Do NOT use quotes around either value.
-org.librarysimplified.nexus.username=USERNAME
-org.librarysimplified.nexus.password=PASSWORD
-org.librarysimplified.nexus.depend=true
+org.librarysimplified.s3.access_key_id=ACCESS_KEY
+org.librarysimplified.s3.secret_access_key=SECRET_ACCESS_KEY
+org.librarysimplified.s3.depend=true
 ~~~
 
 #### APK signing
@@ -170,7 +171,7 @@ $ ./gradlew clean assemble test
 The application contains optional support for various DRM systems, and these
 must be enabled explicitly in order to build [SimplyE](simplified-app-simplye).
 
-Firstly, make sure you have your [Nexus](#nexus-credentials) credentials
+Firstly, make sure you have your [S3](#s3-credentials) credentials
 correctly configured. Then, add the following property to your
 `$HOME/.gradle/gradle.properties` file:
 

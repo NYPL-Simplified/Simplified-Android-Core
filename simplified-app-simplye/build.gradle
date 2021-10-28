@@ -45,7 +45,7 @@ dependencies {
   implementation libs.nypl.overdrive
   implementation libs.nypl.theme
 
-  if (nyplNexusDepend) {
+  if (nyplS3Depend) {
     implementation libs.nypl.drm.adobe
   }
   annotationProcessor libs.google.auto.value.processor

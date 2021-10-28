@@ -41,8 +41,7 @@ dependencies {
   implementation libs.nypl.findaway
   implementation libs.nypl.theme
 
-  if (nyplNexusDepend) {
-    // implementation libs.nypl.drm.adobe
+  if (nyplS3Depend) {
     implementation libs.nypl.drm.axis
   }
   annotationProcessor libs.google.auto.value.processor
