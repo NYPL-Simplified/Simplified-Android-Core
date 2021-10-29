@@ -200,7 +200,7 @@
         </c:change>
       </c:changes>
     </c:release>
-    <c:release date="2021-10-21T18:06:50+00:00" is-open="true" ticket-system="org.nypl.jira" version="2.2.0">
+    <c:release date="2021-10-21T00:00:00+00:00" is-open="false" ticket-system="org.nypl.jira" version="2.2.0">
       <c:changes>
         <c:change date="2021-08-31T00:00:00+00:00" summary="Switch to a global byte-based page numbering">
           <c:tickets>
@@ -241,6 +241,9 @@
           </c:tickets>
         </c:change>
       </c:changes>
+    </c:release>
+    <c:release date="2021-10-29T08:46:42+00:00" is-open="false" ticket-system="org.nypl.jira" version="7.1.0">
+      <c:changes/>
     </c:release>
   </c:releases>
   <c:ticket-systems>
