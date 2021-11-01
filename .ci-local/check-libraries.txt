@@ -69,7 +69,7 @@
 # com.squareup.retrofit2:converter-moshi
 # com.squareup.retrofit2:retrofit
 # edu.umn.minitex.pdf:edu.umn.minitex.pdf.api
-# edu.umn.minitex.pdf:edu.umn.minitex.pdf.pdfviewer
+ edu.umn.minitex.pdf:edu.umn.minitex.pdf.pdfviewer
 # io.audioengine.mobile:all-android
 # io.reactivex.rxjava2:rxandroid
 # io.reactivex.rxjava2:rxjava
@@ -94,7 +94,7 @@
 # org.jetbrains.kotlin:kotlin-stdlib-jdk7
 # org.jetbrains.kotlinx:kotlinx-coroutines-android
 # org.jetbrains.kotlinx:kotlinx-coroutines-core
- org.json:json
+# org.json:json
 # org.junit.jupiter:junit-jupiter-api
 # org.junit.jupiter:junit-jupiter-engine
 # org.librarysimplified.audiobook.audioengine:org.librarysimplified.audiobook.audioengine.core
