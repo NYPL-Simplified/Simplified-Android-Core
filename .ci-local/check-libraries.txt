@@ -68,8 +68,8 @@
 # com.squareup.picasso:picasso
 # com.squareup.retrofit2:converter-moshi
 # com.squareup.retrofit2:retrofit
-edu.umn.minitex.pdf:edu.umn.minitex.pdf.api
-edu.umn.minitex.pdf:edu.umn.minitex.pdf.pdfviewer
+# edu.umn.minitex.pdf:edu.umn.minitex.pdf.api
+# edu.umn.minitex.pdf:edu.umn.minitex.pdf.pdfviewer
 # io.audioengine.mobile:all-android
 # io.reactivex.rxjava2:rxandroid
 # io.reactivex.rxjava2:rxjava
@@ -97,35 +97,35 @@ edu.umn.minitex.pdf:edu.umn.minitex.pdf.pdfviewer
 # org.json:json
 # org.junit.jupiter:junit-jupiter-api
 # org.junit.jupiter:junit-jupiter-engine
-org.librarysimplified.audiobook.audioengine:org.librarysimplified.audiobook.audioengine.core
-org.librarysimplified.audiobook.overdrive:org.librarysimplified.audiobook.overdrive.main
-org.librarysimplified.audiobook:org.librarysimplified.audiobook.api
-org.librarysimplified.audiobook:org.librarysimplified.audiobook.downloads
-org.librarysimplified.audiobook:org.librarysimplified.audiobook.feedbooks
-org.librarysimplified.audiobook:org.librarysimplified.audiobook.http
-org.librarysimplified.audiobook:org.librarysimplified.audiobook.license_check.api
-org.librarysimplified.audiobook:org.librarysimplified.audiobook.manifest_fulfill.api
-org.librarysimplified.audiobook:org.librarysimplified.audiobook.manifest_fulfill.basic
-org.librarysimplified.audiobook:org.librarysimplified.audiobook.manifest_fulfill.opa
-org.librarysimplified.audiobook:org.librarysimplified.audiobook.manifest_fulfill.spi
-org.librarysimplified.audiobook:org.librarysimplified.audiobook.manifest_parser.api
-org.librarysimplified.audiobook:org.librarysimplified.audiobook.manifest_parser.webpub
-org.librarysimplified.audiobook:org.librarysimplified.audiobook.open_access
-org.librarysimplified.audiobook:org.librarysimplified.audiobook.parser.api
-org.librarysimplified.audiobook:org.librarysimplified.audiobook.rbdigital
-org.librarysimplified.audiobook:org.librarysimplified.audiobook.views
-org.librarysimplified.drm.axis:org.librarysimplified.drm.axis.provider
-org.librarysimplified.drm:org.librarysimplified.drm.core
-org.librarysimplified.http:org.librarysimplified.http.api
-org.librarysimplified.http:org.librarysimplified.http.bearer_token
-org.librarysimplified.http:org.librarysimplified.http.downloads
-org.librarysimplified.http:org.librarysimplified.http.uri_builder
-org.librarysimplified.http:org.librarysimplified.http.vanilla
-org.librarysimplified.r2:org.librarysimplified.r2.api
-org.librarysimplified.r2:org.librarysimplified.r2.vanilla
-org.librarysimplified.r2:org.librarysimplified.r2.views
-org.librarysimplified:org.librarysimplified.readium
-org.librarysimplified:org.librarysimplified.readium.shared_js
+# org.librarysimplified.audiobook.audioengine:org.librarysimplified.audiobook.audioengine.core
+# org.librarysimplified.audiobook.overdrive:org.librarysimplified.audiobook.overdrive.main
+# org.librarysimplified.audiobook:org.librarysimplified.audiobook.api
+# org.librarysimplified.audiobook:org.librarysimplified.audiobook.downloads
+# org.librarysimplified.audiobook:org.librarysimplified.audiobook.feedbooks
+# org.librarysimplified.audiobook:org.librarysimplified.audiobook.http
+# org.librarysimplified.audiobook:org.librarysimplified.audiobook.license_check.api
+# org.librarysimplified.audiobook:org.librarysimplified.audiobook.manifest_fulfill.api
+# org.librarysimplified.audiobook:org.librarysimplified.audiobook.manifest_fulfill.basic
+# org.librarysimplified.audiobook:org.librarysimplified.audiobook.manifest_fulfill.opa
+# org.librarysimplified.audiobook:org.librarysimplified.audiobook.manifest_fulfill.spi
+# org.librarysimplified.audiobook:org.librarysimplified.audiobook.manifest_parser.api
+# org.librarysimplified.audiobook:org.librarysimplified.audiobook.manifest_parser.webpub
+# org.librarysimplified.audiobook:org.librarysimplified.audiobook.open_access
+# org.librarysimplified.audiobook:org.librarysimplified.audiobook.parser.api
+# org.librarysimplified.audiobook:org.librarysimplified.audiobook.rbdigital
+# org.librarysimplified.audiobook:org.librarysimplified.audiobook.views
+# org.librarysimplified.drm.axis:org.librarysimplified.drm.axis.provider
+# org.librarysimplified.drm:org.librarysimplified.drm.core
+# org.librarysimplified.http:org.librarysimplified.http.api
+# org.librarysimplified.http:org.librarysimplified.http.bearer_token
+# org.librarysimplified.http:org.librarysimplified.http.downloads
+# org.librarysimplified.http:org.librarysimplified.http.uri_builder
+# org.librarysimplified.http:org.librarysimplified.http.vanilla
+# org.librarysimplified.r2:org.librarysimplified.r2.api
+# org.librarysimplified.r2:org.librarysimplified.r2.vanilla
+# org.librarysimplified.r2:org.librarysimplified.r2.views
+# org.librarysimplified:org.librarysimplified.readium
+# org.librarysimplified:org.librarysimplified.readium.shared_js
 # org.mockito:mockito-android
 # org.mockito:mockito-core
 # org.osgi:org.osgi.annotation.bundle
