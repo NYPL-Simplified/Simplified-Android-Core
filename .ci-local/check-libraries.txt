@@ -94,7 +94,7 @@
 # org.jetbrains.kotlin:kotlin-stdlib-jdk7
 # org.jetbrains.kotlinx:kotlinx-coroutines-android
 # org.jetbrains.kotlinx:kotlinx-coroutines-core
-# org.json:json
+ org.json:json
 # org.junit.jupiter:junit-jupiter-api
 # org.junit.jupiter:junit-jupiter-engine
 # org.librarysimplified.audiobook.audioengine:org.librarysimplified.audiobook.audioengine.core
@@ -132,5 +132,5 @@
 # org.osgi:org.osgi.annotation.versioning
 # org.quicktheories:quicktheories
 # org.robolectric:robolectric
- org.slf4j:slf4j-api
+# org.slf4j:slf4j-api
 # xmlpull:xmlpull
