@@ -132,5 +132,5 @@
 # org.osgi:org.osgi.annotation.versioning
 # org.quicktheories:quicktheories
 # org.robolectric:robolectric
-# org.slf4j:slf4j-api
+ org.slf4j:slf4j-api
 # xmlpull:xmlpull
