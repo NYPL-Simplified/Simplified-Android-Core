@@ -363,7 +363,6 @@ coupled as possible. New features should typically be implemented as new modules
 |[org.librarysimplified.main](simplified-main)|Main application module|
 |[org.librarysimplified.migration.api](simplified-migration-api)|Data migration API|
 |[org.librarysimplified.migration.fake](simplified-migration-fake)|Fake data migration for testing purposes|
-|[org.librarysimplified.migration.from3master](simplified-migration-from3master)|Data migration from 3.0.0 master branch data|
 |[org.librarysimplified.migration.spi](simplified-migration-spi)|Data migration SPI|
 |[org.librarysimplified.networkconnectivity](simplified-networkconnectivity)|Network connectivity|
 |[org.librarysimplified.networkconnectivity.api](simplified-networkconnectivity-api)|Network connectivity API|
