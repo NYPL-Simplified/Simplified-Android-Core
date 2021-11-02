@@ -267,37 +267,35 @@ class LocationFragment : Fragment(), LocationListener {
     }
   }
 
-  override fun onLocationChanged(location: Location?) {
+  override fun onLocationChanged(location: Location) {
     logger.debug("Location has changed")
     val activity = this.activity ?: return
 
-    if (location != null) {
-      logger.debug("Checking to see if user is in New York")
-      binding.nextBtn.isEnabled = false || locationMock
-      val maxResults = 1
-      val geocoder = Geocoder(activity, Locale.getDefault())
+    logger.debug("Checking to see if user is in New York")
+    binding.nextBtn.isEnabled = false || locationMock
+    val maxResults = 1
+    val geocoder = Geocoder(activity, Locale.getDefault())
 
-      // Address found using the Geocoder.
-      val address: Address?
+    // Address found using the Geocoder.
+    val address: Address?
 
-      try {
-        address = geocoder.getFromLocation(location.latitude, location.longitude, maxResults)[0]
-        logger.debug("Region is: ${address.adminArea} ${address.countryCode} ")
-        binding.regionEt.setText("${address.adminArea} ${address.countryCode}", TextView.BufferType.EDITABLE)
+    try {
+      address = geocoder.getFromLocation(location.latitude, location.longitude, maxResults)[0]
+      logger.debug("Region is: ${address.adminArea} ${address.countryCode} ")
+      binding.regionEt.setText("${address.adminArea} ${address.countryCode}", TextView.BufferType.EDITABLE)
 
-        if (address.countryCode == "US" && (address.adminArea == "New York" || address.adminArea == "NY")) {
-          logger.debug("User is in New York")
-          logger.debug("Stopping location updates")
-          locationManager.removeUpdates(this)
-          enableNext(true)
-        } else {
-          enableNext(false)
-        }
-      } catch (e: Exception) {
-        logger.error("Error checking to see if user is in New York", e)
+      if (address.countryCode == "US" && (address.adminArea == "New York" || address.adminArea == "NY")) {
+        logger.debug("User is in New York")
+        logger.debug("Stopping location updates")
+        locationManager.removeUpdates(this)
+        enableNext(true)
+      } else {
         enableNext(false)
-        showLocationSettingsPrompt()
       }
+    } catch (e: Exception) {
+      logger.error("Error checking to see if user is in New York", e)
+      enableNext(false)
+      showLocationSettingsPrompt()
     }
   }
 
@@ -324,11 +322,11 @@ class LocationFragment : Fragment(), LocationListener {
     logger.debug("location status changed")
   }
 
-  override fun onProviderEnabled(provider: String?) {
+  override fun onProviderEnabled(provider: String) {
     logger.debug("location provider enabled")
   }
 
-  override fun onProviderDisabled(provider: String?) {
+  override fun onProviderDisabled(provider: String) {
     logger.debug("location provider disabled")
   }
 

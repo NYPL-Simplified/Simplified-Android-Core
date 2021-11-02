@@ -1,7 +1,6 @@
 package org.nypl.simplified.ui.settings
 
 import android.os.Bundle
-import android.view.Gravity
 import android.widget.Toast
 import androidx.fragment.app.viewModels
 import androidx.preference.Preference
@@ -190,16 +189,9 @@ class SettingsMainFragment : PreferenceFragmentCompat() {
         val message =
           context.getString(R.string.settingsTapToDebug, this.tapToDebugSettings)
 
-        val toast =
-          this.toast ?: Toast.makeText(context, message, Toast.LENGTH_LONG)
-
-        this.toast = toast.apply {
-          this.setText(message)
-          if (!this.view.isShown) {
-            this.setGravity(Gravity.CENTER_HORIZONTAL or Gravity.CENTER_VERTICAL, 0, 0)
-            this.show()
-          }
-        }
+        this.toast?.cancel()
+        this.toast = Toast.makeText(context, message, Toast.LENGTH_LONG)
+        this.toast?.show()
       }
       this.tapToDebugSettings -= 1
     }
