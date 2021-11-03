@@ -116,9 +116,83 @@ abstract class BookDatabaseContract {
     Assertions.assertTrue(database1.books().contains(id0))
     Assertions.assertTrue(database1.books().contains(id1))
     Assertions.assertTrue(database1.books().contains(id2))
-    Assertions.assertEquals(database1.entry(id0).book.id.value(), entry0.id)
-    Assertions.assertEquals(database1.entry(id1).book.id.value(), entry1.id)
-    Assertions.assertEquals(database1.entry(id2).book.id.value(), entry2.id)
+    Assertions.assertEquals(database1.entry(id0).book.entry.id, entry0.id)
+    Assertions.assertEquals(database1.entry(id1).book.entry.id, entry1.id)
+    Assertions.assertEquals(database1.entry(id2).book.entry.id, entry2.id)
+    Assertions.assertEquals(database1.entry(id0).book.id, id0)
+    Assertions.assertEquals(database1.entry(id1).book.id, id1)
+    Assertions.assertEquals(database1.entry(id2).book.id, id2)
+  }
+
+  /**
+   * Old-fashion IDs are properly migrated to account-specific IDs.
+   */
+
+  @Test
+  fun testMigrateOldIds() {
+    val parser = OPDSJSONParser.newParser()
+    val serializer = OPDSJSONSerializer.newSerializer()
+    val directory = DirectoryUtilities.directoryCreateTemporary()
+    val database0 =
+      BookDatabase.open(context(), parser, serializer, BookFormatsTesting.supportsEverything, accountID, directory)
+
+    val entry0 =
+      OPDSAcquisitionFeedEntry.newBuilder(
+        "a",
+        "Title",
+        DateTime.now(),
+        OPDSAvailabilityOpenAccess.get(Option.none<URI>())
+      )
+        .build()
+
+    val entry1 =
+      OPDSAcquisitionFeedEntry.newBuilder(
+        "b",
+        "Title",
+        DateTime.now(),
+        OPDSAvailabilityOpenAccess.get(Option.none<URI>())
+      )
+        .build()
+
+    val entry2 =
+      OPDSAcquisitionFeedEntry.newBuilder(
+        "c",
+        "Title",
+        DateTime.now(),
+        OPDSAvailabilityOpenAccess.get(Option.none<URI>())
+      )
+        .build()
+
+    // Create an entry with new ID.
+    val id0 = BookID.newFromOPDSAndAccount(entry0.id, accountID)
+    database0.createOrUpdate(id0, entry0)
+
+    // Create entries with old-fashion IDs.
+    val id1 = BookID.newFromOPDSEntry(entry1)
+    database0.createOrUpdate(id1, entry1)
+    val id2 = BookID.newFromOPDSEntry(entry2)
+    database0.createOrUpdate(id2, entry2)
+
+    // Open the database again. The IDs should have been migrated.
+
+    val database1 =
+      BookDatabase.open(context(), parser, serializer, BookFormatsTesting.supportsEverything, accountID, directory)
+
+    val newId1 = BookID.newFromOPDSAndAccount("b", accountID)
+    val newId2 = BookID.newFromOPDSAndAccount("c", accountID)
+
+    Assertions.assertEquals(3, database1.books().size.toLong())
+    Assertions.assertTrue(database1.books().contains(id0))
+    Assertions.assertFalse(database1.books().contains(id1))
+    Assertions.assertTrue(database1.books().contains(newId1))
+    Assertions.assertFalse(database1.books().contains(id2))
+    Assertions.assertTrue(database1.books().contains(newId2))
+    Assertions.assertEquals(database1.entry(id0).book.entry.id, entry0.id)
+    Assertions.assertEquals(database1.entry(newId1).book.entry.id, entry1.id)
+    Assertions.assertEquals(database1.entry(newId2).book.entry.id, entry2.id)
+    Assertions.assertEquals(database1.entry(id0).book.id, id0)
+    Assertions.assertEquals(database1.entry(newId1).book.id, newId1)
+    Assertions.assertEquals(database1.entry(newId2).book.id, newId2)
   }
 
   /**

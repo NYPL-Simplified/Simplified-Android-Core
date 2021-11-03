@@ -427,8 +427,9 @@ class ReaderBookmarkService private constructor(
         )
 
         val account = this.profile.account(this.accountID)
+        val bookId = BookID.newFromOPDSAndAccount(this.bookmark.opdsId, this.accountID)
         val books = account.bookDatabase
-        val entry = books.entry(this.bookmark.book)
+        val entry = books.entry(bookId)
         val handle =
           entry.findFormatHandle(BookDatabaseEntryFormatHandleEPUB::class.java)
 

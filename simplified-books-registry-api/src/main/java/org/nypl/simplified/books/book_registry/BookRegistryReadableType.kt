@@ -81,7 +81,7 @@ interface BookRegistryReadableType {
   fun bookOrException(id: BookID): BookWithStatus {
     return book(id).accept(object : OptionVisitorType<BookWithStatus, BookWithStatus> {
       override fun none(none: None<BookWithStatus>): BookWithStatus {
-        throw NoSuchElementException("No such book: " + id.value())
+        throw NoSuchElementException("No such book: $id")
       }
 
       override fun some(some: Some<BookWithStatus>): BookWithStatus {

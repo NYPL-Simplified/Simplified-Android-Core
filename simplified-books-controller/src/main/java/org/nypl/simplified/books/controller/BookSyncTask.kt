@@ -12,7 +12,6 @@ import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.books.api.BookID
-import org.nypl.simplified.books.api.BookIDs
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
 import org.nypl.simplified.books.book_database.api.BookDatabaseException
 import org.nypl.simplified.books.book_registry.BookRegistryType
@@ -226,7 +225,7 @@ class BookSyncTask(
     val received = HashSet<BookID>(64)
     val entries = feed.feedEntries
     for (opdsEntry in entries) {
-      val bookId = BookIDs.newFromOPDSEntry(opdsEntry)
+      val bookId = BookID.newFromOPDSAndAccount(opdsEntry.id, accountID)
       received.add(bookId)
       this.logger.debug("[{}] updating", bookId.brief())
 
@@ -263,7 +262,7 @@ class BookSyncTask(
           this.logger.debug("[{}] keeping", existingId.brief())
         }
       } catch (x: Throwable) {
-        this.logger.error("[{}]: unable to delete entry: ", existingId.value(), x)
+        this.logger.error("[{}]: unable to delete entry: ", existingId, x)
       }
     }
 

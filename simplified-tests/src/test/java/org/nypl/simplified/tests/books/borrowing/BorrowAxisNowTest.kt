@@ -26,7 +26,6 @@ import org.nypl.simplified.accounts.api.AccountUsername
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookID
-import org.nypl.simplified.books.api.BookIDs
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatus
@@ -132,8 +131,10 @@ class BorrowAxisNowTest {
       Mockito.mock(ProfileReadableType::class.java)
     val initialFeedEntry =
       BorrowTestFeeds.opdsLoanedFeedEntryOfType(this.webServer, genericEPUBFiles.fullType)
+    this.accountId =
+      AccountID.generate()
     this.bookID =
-      BookIDs.newFromOPDSEntry(initialFeedEntry)
+      BookID.newFromOPDSAndAccount(initialFeedEntry.id, accountId)
     this.account =
       Mockito.mock(AccountType::class.java)
     this.accountProvider =
@@ -164,9 +165,6 @@ class BorrowAxisNowTest {
             "999.999.0"
           )
         )
-
-    this.accountId =
-      AccountID.generate()
 
     val bookInitial =
       Book(

@@ -2,7 +2,6 @@ package org.nypl.simplified.books.controller
 
 import com.io7m.jfunctional.Some
 import com.io7m.junreachable.UnreachableCodeException
-import org.joda.time.DateTime
 import org.joda.time.Duration
 import org.nypl.drm.core.AdobeAdeptExecutorType
 import org.nypl.drm.core.AdobeAdeptLoan
@@ -10,13 +9,13 @@ import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePostActivation
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions
-import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_database.api.BookDRMInformationHandle
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandlePDF
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
+import org.nypl.simplified.books.book_database.api.BookDatabaseException
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookWithStatus
@@ -79,7 +78,6 @@ class BookRevokeTask(
   override fun execute(account: AccountType): TaskResult.Success<Unit> {
     this.debug("revoke")
     this.taskRecorder.beginNewStep(this.revokeStrings.revokeStarted)
-    this.publishRequestingRevokeStatus()
     this.setupBookDatabaseEntry(account)
     this.revokeFormatHandle(account)
     this.revokeNotifyServer(account)
@@ -101,47 +99,14 @@ class BookRevokeTask(
     this.logger.warn("[{}] $message", this.bookID.brief(), *arguments)
 
   private fun publishBookStatus(status: BookStatus) {
-    val book = this.bookFromDatabaseOrFallback()
+    val book = this.databaseEntry.book
     this.bookRegistry.update(BookWithStatus(book, status))
   }
 
   private fun publishStatusFromDatabase() {
-    val book = this.bookFromDatabaseOrFallback()
+    val book = this.databaseEntry.book
     val status = BookStatus.fromBook(book)
     this.bookRegistry.update(BookWithStatus(book, status))
-  }
-
-  private fun bookFromDatabaseOrFallback(): Book {
-    return if (this::databaseEntry.isInitialized) {
-      this.databaseEntry.book
-    } else {
-      this.warn("publishing book status with fake book!")
-
-      /**
-       * Note that this is a synthesized value because we need to be able to open the book
-       * database to get a real book value, and that database call might fail. If the call fails,
-       * we have no "book" that we can refer to in order to publish a "book revoke has failed"
-       * status for the book, so we use this fake book in that (rare) situation.
-       */
-
-      val entry =
-        OPDSAcquisitionFeedEntry.newBuilder(
-          this.bookID.value(),
-          "",
-          DateTime.now(),
-          OPDSAvailabilityLoanable.get()
-        )
-          .build()
-
-      Book(
-        this.bookID,
-        this.accountID,
-        null,
-        null,
-        entry,
-        listOf()
-      )
-    }
   }
 
   private fun publishRequestingRevokeStatus() {
@@ -282,7 +247,14 @@ class BookRevokeTask(
     this.taskRecorder.beginNewStep(this.revokeStrings.revokeDeleteBook)
     this.publishRevokedStatus()
     this.publishStatusFromDatabase()
-    this.databaseEntry.delete()
+    try {
+      this.databaseEntry.delete()
+    } catch (e: Exception) {
+      this.taskRecorder.currentStepFailed(
+        this.revokeStrings.revokeDeleteBookFailed, "databaseEntryDeleteFailed", e
+      )
+      throw TaskFailedHandled(e)
+    }
   }
 
   /*
@@ -571,20 +543,11 @@ class BookRevokeTask(
 
   private fun setupBookDatabaseEntry(account: AccountType) {
     this.taskRecorder.beginNewStep(this.revokeStrings.revokeBookDatabaseLookup)
-
-    try {
-      this.debug("setting up book database entry")
-      val database = account.bookDatabase
-      this.databaseEntry = database.entry(this.bookID)
-      this.publishRequestingRevokeStatus()
-      this.taskRecorder.currentStepSucceeded(this.revokeStrings.revokeBookDatabaseLookupOK)
-    } catch (e: Exception) {
-      this.error("failed to set up book database entry: ", e)
-      this.taskRecorder.currentStepFailed(
-        this.revokeStrings.revokeBookDatabaseLookupFailed, "unexpectedException", e
-      )
-      throw TaskFailedHandled(e)
-    }
+    this.debug("setting up book database entry")
+    val database = account.bookDatabase
+    this.databaseEntry = database.entry(this.bookID)
+    this.publishRequestingRevokeStatus()
+    this.taskRecorder.currentStepSucceeded(this.revokeStrings.revokeBookDatabaseLookupOK)
   }
 
   private enum class RevokeType {

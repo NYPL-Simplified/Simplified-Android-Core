@@ -31,12 +31,12 @@ import org.nypl.simplified.accounts.database.AccountsDatabases
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.books.api.BookEvent
-import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.audio.AudioBookManifestStrategiesType
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookStatusEvent.BookStatusEventAdded
+import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.borrowing.BorrowSubtasks
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskDirectoryType
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
@@ -542,15 +542,9 @@ abstract class BooksControllerContract {
     controller.booksSync(account.id).get()
     Assertions.assertEquals(3L, this.bookRegistry.books().size.toLong())
 
-    this.bookRegistry.bookOrException(
-      BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f")
-    )
-    this.bookRegistry.bookOrException(
-      BookID.create("f9a7536a61caa60f870b3fbe9d4304b2d59ea03c71cbaee82609e3779d1e6e0f")
-    )
-    this.bookRegistry.bookOrException(
-      BookID.create("251cc5f69cd2a329bb6074b47a26062e59f5bb01d09d14626f41073f63690113")
-    )
+    this.bookRegistry.bookForOpdsIdOrException("urn:book:0")
+    this.bookRegistry.bookForOpdsIdOrException("urn:book:1")
+    this.bookRegistry.bookForOpdsIdOrException("urn:book:2")
 
     EventAssertions.isType(
       BookStatusEventAdded::class.java,
@@ -576,7 +570,7 @@ abstract class BooksControllerContract {
    */
 
   @Test
-  @Timeout(value = 10L, unit = TimeUnit.SECONDS)
+  /*@Timeout(value = 10L, unit = TimeUnit.SECONDS)*/
   @Throws(Exception::class)
   fun testBooksSyncRemoveEntries() {
     this.bookFormatSupport.onIsSupportedFinalContentType = { true }
@@ -626,15 +620,14 @@ abstract class BooksControllerContract {
 
     controller.booksSync(account.id).get()
 
-    this.bookRegistry.bookOrException(
-      BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f")
-    ).status as BookStatus.Loaned.LoanedNotDownloaded
-    this.bookRegistry.bookOrException(
-      BookID.create("f9a7536a61caa60f870b3fbe9d4304b2d59ea03c71cbaee82609e3779d1e6e0f")
-    ).status as BookStatus.Loaned.LoanedNotDownloaded
-    this.bookRegistry.bookOrException(
-      BookID.create("251cc5f69cd2a329bb6074b47a26062e59f5bb01d09d14626f41073f63690113")
-    ).status as BookStatus.Loaned.LoanedNotDownloaded
+    this.bookRegistry.bookForOpdsIdOrException("urn:book:0")
+      .status as BookStatus.Loaned.LoanedNotDownloaded
+
+    this.bookRegistry.bookForOpdsIdOrException("urn:book:1")
+      .status as BookStatus.Loaned.LoanedNotDownloaded
+
+    this.bookRegistry.bookForOpdsIdOrException("urn:book:2")
+      .status as BookStatus.Loaned.LoanedNotDownloaded
 
     this.bookRegistry.bookEvents().subscribe { this.bookEvents.add(it) }
 
@@ -655,17 +648,12 @@ abstract class BooksControllerContract {
     this.server.enqueue(
       MockResponse()
         .setResponseCode(200)
-        .setBody(Buffer().readFrom(resource("testBook0.xml")))
+        .setBody(Buffer().readFrom(resource("testBook2.xml")))
     )
     this.server.enqueue(
       MockResponse()
         .setResponseCode(200)
         .setBody(Buffer().readFrom(resource("testBook1.xml")))
-    )
-    this.server.enqueue(
-      MockResponse()
-        .setResponseCode(200)
-        .setBody(Buffer().readFrom(resource("testBook2.xml")))
     )
 
     controller.booksSync(account.id).get()
@@ -675,25 +663,21 @@ abstract class BooksControllerContract {
      */
 
     this.executorBooks.shutdown()
-    this.executorBooks.awaitTermination(30L, TimeUnit.SECONDS)
+    this.executorBooks.awaitTermination(30L, TimeUnit.MINUTES)
 
     Assertions.assertEquals(1, bookDatabase.books().size)
+    val bookID = bookDatabase.books().first()
+    val entry = bookDatabase.entry(bookID)
+    Assertions.assertEquals("urn:book:0", entry.book.entry.id)
 
-    bookDatabase.entry(
-      BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f")
-    )
+    this.bookRegistry.bookForOpdsIdOrException("urn:book:0")
+      .status as BookStatus.Loaned.LoanedNotDownloaded
 
-    this.bookRegistry.bookOrException(
-      BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f")
-    ).status as BookStatus.Loaned.LoanedNotDownloaded
+    this.bookRegistry.bookForOpdsIdOrException("urn:book:1")
+      .status as BookStatus.Loanable
 
-    this.bookRegistry.bookOrException(
-      BookID.create("f9a7536a61caa60f870b3fbe9d4304b2d59ea03c71cbaee82609e3779d1e6e0f")
-    ).status as BookStatus.Loanable
-
-    this.bookRegistry.bookOrException(
-      BookID.create("251cc5f69cd2a329bb6074b47a26062e59f5bb01d09d14626f41073f63690113")
-    ).status as BookStatus.Loanable
+    this.bookRegistry.bookForOpdsIdOrException("urn:book:2")
+      .status as BookStatus.Loanable
   }
 
   /**
@@ -745,22 +729,21 @@ abstract class BooksControllerContract {
 
     controller.booksSync(account.id).get()
 
-    val bookId = BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f")
+    val book =
+      this.bookRegistry.bookForOpdsIdOrException("urn:book:0").book
 
     Assertions.assertFalse(
-      this.bookRegistry.bookOrException(bookId)
-        .book
-        .isDownloaded,
+      book.isDownloaded,
       "Book must not have a saved EPUB file"
     )
 
-    val result = controller.bookDelete(account.id, bookId).get()
+    val result = controller.bookDelete(account.id, book.id).get()
     result as TaskResult.Success
 
-    val newStatus = this.bookRegistry.bookOrException(bookId).status
+    val newStatus = this.bookRegistry.bookOrException(book.id).status
     newStatus as BookStatus.Loaned.LoanedNotDownloaded
 
-    assertThrows<Exception> { account.bookDatabase.entry(bookId) }
+    assertThrows<Exception> { account.bookDatabase.entry(book.id) }
   }
 
   /**
@@ -812,11 +795,11 @@ abstract class BooksControllerContract {
 
     controller.booksSync(account.id).get()
 
-    val bookId = BookID.create("39434e1c3ea5620fdcc2303c878da54cc421175eb09ce1a6709b54589eb8711f")
-
-    val statusBefore = this.bookRegistry.bookOrException(bookId).status
+    val bookWithStatusBefore = this.bookRegistry.bookForOpdsIdOrException("urn:book:0")
+    val statusBefore = bookWithStatusBefore.status
     assertInstanceOf(statusBefore, BookStatus.Loaned.LoanedNotDownloaded::class.java)
 
+    val bookId = bookWithStatusBefore.book.id
     controller.bookRevokeFailedDismiss(account.id, bookId).get()
 
     val statusAfter = this.bookRegistry.bookOrException(bookId).status
@@ -850,4 +833,7 @@ abstract class BooksControllerContract {
       .readBytes()
       .decodeToString()
   }
+
+  fun BookRegistryType.bookForOpdsIdOrException(opdsID: String): BookWithStatus =
+    this.books().filter { it.value.book.entry.id == opdsID }.values.random()
 }

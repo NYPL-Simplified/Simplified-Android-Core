@@ -33,7 +33,6 @@ import org.nypl.simplified.accounts.api.AccountUsername
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookID
-import org.nypl.simplified.books.api.BookIDs
 import org.nypl.simplified.books.audio.AudioBookManifestData
 import org.nypl.simplified.books.book_database.BookDRMInformationHandleACS
 import org.nypl.simplified.books.book_database.BookDatabase
@@ -145,7 +144,7 @@ class BorrowTaskTest {
   private fun createTask(request: BorrowRequest): BorrowTaskType {
     this.book =
       Book(
-        id = BookIDs.newFromOPDSEntry(request.opdsAcquisitionFeedEntry),
+        id = BookID.newFromOPDSAndAccount(request.opdsAcquisitionFeedEntry.id, accountId),
         account = request.accountId,
         cover = null,
         thumbnail = null,
@@ -208,7 +207,7 @@ class BorrowTaskTest {
     this.accountId =
       AccountID.generate()
     this.bookID =
-      BookIDs.newFromOPDSEntry(this.opdsOpenEPUBFeedEntry)
+      BookID.newFromOPDSAndAccount(this.opdsOpenEPUBFeedEntry.id, accountId)
 
     val androidContext =
       Mockito.mock(Context::class.java)

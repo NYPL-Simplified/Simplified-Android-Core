@@ -8,7 +8,6 @@ import org.joda.time.DateTime;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.nypl.simplified.books.api.BookID;
-import org.nypl.simplified.books.api.BookIDs;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryBuilderType;
 import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess;
@@ -18,7 +17,7 @@ import java.net.URI;
 public final class BookIDTest {
 
   @Test
-  public void testBookIDNew() {
+  public void testBookIDNewFromOPDSEntry() {
     final OptionType<URI> revoke = Option.none();
     final OPDSAcquisitionFeedEntryBuilderType eb =
       OPDSAcquisitionFeedEntry.newBuilder(
@@ -30,7 +29,7 @@ public final class BookIDTest {
         NullCheck.notNull(DateTime.now()),
         OPDSAvailabilityOpenAccess.get(revoke));
     final OPDSAcquisitionFeedEntry e = eb.build();
-    final BookID b = BookIDs.newFromOPDSEntry(e);
+    final BookID b = BookID.Companion.newFromOPDSEntry(e);
     System.out.println("book: " + b);
     Assertions.assertEquals(
       "7a99601f479c30f66f0949c51bbed2adac0e12eb79ad1319db638e16604400bf",
@@ -39,7 +38,7 @@ public final class BookIDTest {
 
   @Test
   public void testBookID_0() {
-    final BookID b = BookIDs.newFromText(
+    final BookID b = BookID.Companion.newFromText(
       "http://circulation.alpha.librarysimplified.org/loans/Gutenberg/18405");
     System.out.println(b);
   }
@@ -47,21 +46,21 @@ public final class BookIDTest {
   @Test
   public void testBookIDNotValid0() {
     Assertions.assertThrows(IllegalArgumentException.class, () -> {
-      BookID.create("");
+      BookID.Companion.create("");
     });
   }
 
   @Test
   public void testBookIDNotValid1() {
     Assertions.assertThrows(IllegalArgumentException.class, () -> {
-      BookID.create("_");
+      BookID.Companion.create("_");
     });
   }
 
   @Test
   public void testBookIDNotValid2() {
     Assertions.assertThrows(IllegalArgumentException.class, () -> {
-      BookID.create(" ");
+      BookID.Companion.create(" ");
     });
   }
 
@@ -69,6 +68,6 @@ public final class BookIDTest {
   public void testBookIDValid0() {
     Assertions.assertEquals(
       "abcdefghijklmnopqrstuvwxyz1234567890",
-      BookID.create("abcdefghijklmnopqrstuvwxyz1234567890").value());
+      BookID.Companion.create("abcdefghijklmnopqrstuvwxyz1234567890").toString());
   }
 }

@@ -1148,7 +1148,7 @@ class BookRevokeTaskTest {
       feedLoader.fetchURI(
         account = this.anyNonNull(),
         uri = this.anyNonNull(),
-        auth = this.anyNonNull(),
+        auth = Mockito.any(),
         method = this.anyNonNull()
       )
     ).thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
@@ -1637,7 +1637,7 @@ class BookRevokeTaskTest {
       feedLoader.fetchURI(
         account = this.anyNonNull(),
         uri = this.anyNonNull(),
-        auth = this.anyNonNull(),
+        auth = Mockito.any(),
         method = this.anyNonNull()
       )
     ).thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
@@ -1754,7 +1754,7 @@ class BookRevokeTaskTest {
       feedLoader.fetchURI(
         account = this.anyNonNull(),
         uri = this.anyNonNull(),
-        auth = this.anyNonNull(),
+        auth = Mockito.any(),
         method = this.anyNonNull()
       )
     ).thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
@@ -1863,7 +1863,7 @@ class BookRevokeTaskTest {
       feedLoader.fetchURI(
         account = this.anyNonNull(),
         uri = this.anyNonNull(),
-        auth = this.anyNonNull(),
+        auth = Mockito.any(),
         method = this.anyNonNull()
       )
     ).thenReturn(FluentFuture.from(SettableFuture.create()))
@@ -2186,7 +2186,7 @@ class BookRevokeTaskTest {
       feedLoader.fetchURI(
         account = this.anyNonNull(),
         uri = this.anyNonNull(),
-        auth = this.anyNonNull(),
+        auth = Mockito.any(),
         method = this.anyNonNull()
       )
     ).thenReturn(FluentFuture.from(Futures.immediateFailedFuture(UniqueException())))
@@ -2298,7 +2298,7 @@ class BookRevokeTaskTest {
       feedLoader.fetchURI(
         account = this.anyNonNull(),
         uri = this.anyNonNull(),
-        auth = this.anyNonNull(),
+        auth = Mockito.any(),
         method = this.anyNonNull()
       )
     ).thenReturn(FluentFuture.from(Futures.immediateFailedFuture(UniqueException())))

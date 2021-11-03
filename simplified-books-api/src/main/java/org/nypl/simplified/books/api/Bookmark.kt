@@ -85,16 +85,10 @@ data class Bookmark private constructor(
     }
 
   /**
-   * The ID of the book to which the bookmark belongs.
-   */
-
-  val book: BookID = BookIDs.newFromText(this.opdsId)
-
-  /**
    * The unique ID of the bookmark.
    */
 
-  val bookmarkId: BookmarkID = createBookmarkID(this.book, this.location, this.kind)
+  val bookmarkId: BookmarkID = createBookmarkID(this.opdsId, this.location, this.kind)
 
   /**
    * Convenience function to convert a bookmark to a last-read-location kind.
@@ -155,14 +149,15 @@ data class Bookmark private constructor(
      */
 
     fun createBookmarkID(
-      book: BookID,
+      opdsId: String,
       location: BookLocation,
       kind: BookmarkKind
     ): BookmarkID {
       try {
+
         val messageDigest = MessageDigest.getInstance("SHA-256")
         val utf8 = Charset.forName("UTF-8")
-        messageDigest.update(book.value().toByteArray(utf8))
+        messageDigest.update(opdsId.sha256().toByteArray(utf8))
 
         when (location) {
           is BookLocation.BookLocationR2 -> {

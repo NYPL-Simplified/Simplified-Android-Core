@@ -327,7 +327,10 @@ abstract class ReaderBookmarkServiceContract {
       EventLogging.create<AccountEvent>(this.logger, 1)
 
     val bookID =
-      BookID.create("fab6e4ebeb3240676b3f7585f8ee4faecccbe1f9243a652153f3071e90599325")
+      BookID.newFromOPDSAndAccount(
+        "urn:example.com/terms/id/c083c0a6-54c6-4cc5-9d3a-425317da662a",
+        fakeAccountID
+      )
 
     val receivedBookmarks =
       mutableListOf<Bookmark>()
@@ -518,7 +521,10 @@ abstract class ReaderBookmarkServiceContract {
       EventLogging.create<AccountEvent>(this.logger, 1)
 
     val bookID =
-      BookID.create("fab6e4ebeb3240676b3f7585f8ee4faecccbe1f9243a652153f3071e90599325")
+      BookID.newFromOPDSAndAccount(
+        "urn:example.com/terms/id/c083c0a6-54c6-4cc5-9d3a-425317da662a",
+        fakeAccountID
+      )
 
     val receivedBookmarks =
       mutableListOf<Bookmark>()

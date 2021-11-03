@@ -24,7 +24,6 @@ import org.nypl.simplified.accounts.api.AccountUsername
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookID
-import org.nypl.simplified.books.api.BookIDs
 import org.nypl.simplified.books.audio.AudioBookManifestData
 import org.nypl.simplified.books.book_database.api.BookDatabaseType
 import org.nypl.simplified.books.book_registry.BookRegistry
@@ -154,7 +153,7 @@ class BorrowAudioBookTest {
     val initialFeedEntry =
       BorrowTestFeeds.opdsContentURILoanedFeedEntryOfType(genericAudioBooks.first().fullType)
     this.bookID =
-      BookIDs.newFromOPDSEntry(initialFeedEntry)
+      BookID.newFromOPDSAndAccount(initialFeedEntry.id, accountId)
 
     val bookInitial =
       Book(
