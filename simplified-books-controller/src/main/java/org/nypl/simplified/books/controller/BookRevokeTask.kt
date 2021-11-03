@@ -15,7 +15,6 @@ import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandlePDF
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
-import org.nypl.simplified.books.book_database.api.BookDatabaseException
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookWithStatus
