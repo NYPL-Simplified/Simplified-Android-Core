@@ -36,18 +36,19 @@ class BookID private constructor(
     return id.hashCode()
   }
 
-  /**
-   * @return If this ID is a new one or an old one.
-   */
-
-  val isOldFashion: Boolean
-    get() = id.length == 64
-
   companion object {
+
     /**
      * The regular expression that defines a valid book ID.
      */
-    private val VALID_BOOK_ID: Pattern = Pattern.compile("[a-z0-9]+")
+    private val VALID_BOOK_ID: Pattern = Pattern.compile("x[a-z0-9]{64}")
+
+    /**
+     * @return If this string is a valid ID.
+     */
+
+    fun isBookID(text: String): Boolean =
+      VALID_BOOK_ID.matcher(text).matches()
 
     /**
      * Construct a book ID.
@@ -70,7 +71,7 @@ class BookID private constructor(
      */
 
     fun newFromText(text: String): BookID =
-      create(text.sha256())
+      create("x" + text.sha256())
 
     /**
      * Calculate an old-fashion book ID from the given acquisition feed entry.
@@ -79,10 +80,11 @@ class BookID private constructor(
      *
      * @return A new book ID
      */
+    @Deprecated("This method should be used only to test book IDs migration.")
     fun newFromOPDSEntry(
       e: OPDSAcquisitionFeedEntry
     ): BookID {
-      return create(e.id.sha256())
+      return BookID(e.id.sha256())
     }
 
     /**

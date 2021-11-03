@@ -112,7 +112,7 @@ class NotificationsServiceTest {
       opdsEntryBuilder2.build()
 
     val bookId =
-      BookID.create("a")
+      BookID.newFromText("a")
 
     val book =
       Book(
@@ -125,7 +125,7 @@ class NotificationsServiceTest {
       )
 
     val bookId2 =
-      BookID.create("b")
+      BookID.newFromText("b")
 
     val book2 =
       Book(

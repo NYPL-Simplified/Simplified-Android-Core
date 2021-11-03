@@ -14,6 +14,8 @@ import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess;
 
 import java.net.URI;
 
+import kotlin.Suppress;
+
 public final class BookIDTest {
 
   @Test
@@ -67,7 +69,7 @@ public final class BookIDTest {
   @Test
   public void testBookIDValid0() {
     Assertions.assertEquals(
-      "abcdefghijklmnopqrstuvwxyz1234567890",
-      BookID.Companion.create("abcdefghijklmnopqrstuvwxyz1234567890").toString());
+      "x577ed4e5ebb4c40e2f4a42ed1c268153624d7e03c09f9b54137518e82a078c1d",
+      BookID.Companion.create("x577ed4e5ebb4c40e2f4a42ed1c268153624d7e03c09f9b54137518e82a078c1d").toString());
   }
 }

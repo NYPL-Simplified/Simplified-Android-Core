@@ -260,9 +260,9 @@ class BookDatabase private constructor(
         LOG.debug("migrating old book IDs")
         val bookDirs = directory.list()
         if (bookDirs != null) {
-          for (bookID in bookDirs) {
-            if (BookID.create(bookID).isOldFashion) {
-              val bookDirectory = File(directory, bookID)
+          for (dirName in bookDirs) {
+            if (!BookID.isBookID((dirName))) {
+              val bookDirectory = File(directory, dirName)
               val fileMeta = File(bookDirectory, "meta.json")
               val entry: OPDSAcquisitionFeedEntry =
                 FileInputStream(fileMeta).use { stream ->
