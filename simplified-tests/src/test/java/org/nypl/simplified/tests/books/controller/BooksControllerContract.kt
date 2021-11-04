@@ -570,7 +570,7 @@ abstract class BooksControllerContract {
    */
 
   @Test
-  /*@Timeout(value = 10L, unit = TimeUnit.SECONDS)*/
+  @Timeout(value = 10L, unit = TimeUnit.SECONDS)
   @Throws(Exception::class)
   fun testBooksSyncRemoveEntries() {
     this.bookFormatSupport.onIsSupportedFinalContentType = { true }
