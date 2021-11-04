@@ -109,39 +109,6 @@ $ $EDITOR $app/gradle.properties
 $ git add $app/gradle.properties
 ```
 
-Don't commit yet: There's more work to do!
-
-##### Close The Changelog
-
-We currently use [changelog](https://www.io7m.com/software/changelog/) to
-maintain a humanly-readable list of changes made between releases. The
-[changelog manual](https://www.io7m.com/software/changelog/documentation/index.xhtml#d2e143)
-has a detailed usage guide, but the release process only involves a couple
-of commands. The CI builds generate release notes by looking at the contents
-of the `README-CHANGES.xml` file in the root of the repository.
-
-First, [set the release version](https://www.io7m.com/software/changelog/documentation/index.xhtml#id_f79aa94b-4dc7-44ee-823e-f6d1e3e8f155)
-to the version we're trying to release now. In our case, that's `99.0.0`:
-
-```
-$ changelog release-set-version --version 99.0.0
-```
-
-Take a look at the current changelog and make sure it has all the entries you
-expect to see:
-
-```
-$ changelog write-plain
-```
-
-Then, [close the current release](https://www.io7m.com/software/changelog/documentation/index.xhtml#id_31fe1fbf-62b9-4811-93dd-252a9ebfb222).
-This marks the changelog as being finalized for the current release:
-
-```
-$ changelog release-finish
-$ git add README-CHANGES.xml
-```
-
 ##### Commit!
 
 Commit all of your changes and push:
@@ -202,6 +169,18 @@ $ $EDITOR $app/gradle.properties
 $ git add $app/gradle.properties
 ```
 
+#### Add Release Notes
+
+Create a file called `README-CHANGES.txt` in the root of the project. The contents
+of this file will be included directly in the Firebase release notes.
+
+```
+$ $EDITOR README-CHANGES.txt
+...
+
+$ git add README-CHANGES.txt
+```
+
 #### Verify Library Dependencies
 
 Run `.ci/ci-check-versions.sh` to check if all library dependencies are
@@ -219,6 +198,7 @@ All of the checked libraries are up-to-date.
 $ git status
 Changes staged for commit:
   $app/gradle.properties
+  README-CHANGES.txt
 
 $ git commit -m 'Start 0.99.0 release'
 $ git push --all
@@ -237,9 +217,9 @@ release/$app-99.0.0
 
 $ git merge develop --no-ff
 
-$ changelog change-add --summary 'Something was fixed' --ticket 'SMA-18238'
-$ git add README-CHANGES.xml
-$ git commit -m 'Update changelog'
+$ $EDITOR README-CHANGES.txt
+$ git add README-CHANGES.txt
+$ git commit -m 'Update release notes'
 
 $ git push
 ```
