@@ -72,7 +72,6 @@ abstract class AbstractBookTask(
       val msg = e.message ?: e.javaClass.name
       this.taskRecorder.currentStepFailedAppending(msg, BorrowErrorCodes.unexpectedException, e)
       val result = this.taskRecorder.finishFailure<Unit>()
-      this.onFailure(result)
       result
     }
   }

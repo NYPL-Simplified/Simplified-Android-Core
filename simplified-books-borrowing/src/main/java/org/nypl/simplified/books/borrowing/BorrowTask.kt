@@ -9,7 +9,6 @@ import org.nypl.simplified.accounts.api.AccountReadableType
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookID
-import org.nypl.simplified.books.api.BookIDs
 import org.nypl.simplified.books.audio.AudioBookManifestStrategiesType
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
 import org.nypl.simplified.books.book_registry.BookRegistryType
@@ -74,7 +73,7 @@ class BorrowTask private constructor(
     AtomicBoolean(false)
 
   private val bookId by lazy {
-    BookIDs.newFromOPDSEntry(this.request.opdsAcquisitionFeedEntry)
+    BookID.newFromOPDSAndAccount(this.request.opdsAcquisitionFeedEntry.id, this.request.accountId)
   }
 
   private val bookIdBrief by lazy {

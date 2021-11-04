@@ -117,9 +117,6 @@ class MainCatalogBookRevokeStrings(
   override val revokeFormat: String
     get() = this.resources.getString(R.string.revokeFormat)
 
-  override val revokeBookDatabaseLookupFailed: String
-    get() = this.resources.getString(R.string.revokeBookDatabaseLookupFailed)
-
   override val revokeBookDatabaseLookupOK: String
     get() = this.resources.getString(R.string.revokeBookDatabaseLookupOK)
 

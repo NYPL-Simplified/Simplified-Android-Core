@@ -11,7 +11,4 @@ dependencies {
   implementation libs.kotlin.stdlib
   implementation libs.kotlin.reflect
   implementation libs.slf4j
-
-  compileOnly libs.google.auto.value
-  annotationProcessor libs.google.auto.value.processor
 }

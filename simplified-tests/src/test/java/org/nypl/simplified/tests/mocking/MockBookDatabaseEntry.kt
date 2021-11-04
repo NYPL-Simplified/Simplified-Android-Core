@@ -4,7 +4,7 @@ import com.io7m.junreachable.UnimplementedCodeException
 import one.irradia.mime.api.MIMECompatibility
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookFormat
-import org.nypl.simplified.books.api.BookIDs
+import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryType
 import org.nypl.simplified.books.formats.api.StandardFormatNames.genericEPUBFiles
@@ -75,7 +75,7 @@ class MockBookDatabaseEntry(private val bookInitial: Book) : BookDatabaseEntryTy
   private fun formatHandlesOf(
     entry: OPDSAcquisitionFeedEntry
   ): List<BookDatabaseEntryFormatHandle> {
-    val bookId = BookIDs.newFromOPDSEntry(entry)
+    val bookId = BookID.newFromOPDSAndAccount(entry.id, bookInitial.account)
     val paths = OPDSAcquisitionPaths.linearize(entry)
     val finalTypes = paths.map { it.asMIMETypes().last() }
     val formats = mutableListOf<BookDatabaseEntryFormatHandle>()

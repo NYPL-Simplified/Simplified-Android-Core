@@ -13,7 +13,7 @@ import org.nypl.simplified.accessibility.AccessibilityService
 import org.nypl.simplified.accessibility.AccessibilityServiceType
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.books.api.Book
-import org.nypl.simplified.books.api.BookIDs
+import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_registry.BookRegistry
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatus
@@ -66,7 +66,7 @@ class AccessibilityServiceTest {
 
     this.book0 =
       Book(
-        BookIDs.newFromText("x"),
+        BookID.newFromText("x"),
         AccountID(UUID.randomUUID()),
         null,
         null,

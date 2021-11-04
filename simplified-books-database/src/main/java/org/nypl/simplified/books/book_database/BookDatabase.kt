@@ -42,38 +42,38 @@ class BookDatabase private constructor(
    * A thread-safe map exposing read-only snapshots of database entries.
    */
 
-  private class BookMaps internal constructor() {
+  private class BookMaps() {
 
-    internal val mapsLock: Any = Any()
+    val mapsLock: Any = Any()
 
     @GuardedBy("mapsLock")
-    internal val entries: ConcurrentSkipListMap<BookID, BookDatabaseEntry> =
+    val entries: ConcurrentSkipListMap<BookID, BookDatabaseEntry> =
       ConcurrentSkipListMap()
 
-    internal fun contains(key: BookID): Boolean {
+    fun contains(key: BookID): Boolean {
       synchronized(mapsLock) {
         LOG.debug("BookMaps.contains")
         return this.entries.containsKey(key)
       }
     }
 
-    internal fun clear() {
+    fun clear() {
       synchronized(this.mapsLock) {
         LOG.debug("BookMaps.clear")
         this.entries.clear()
       }
     }
 
-    internal fun delete(bookID: BookID) {
+    fun delete(bookID: BookID) {
       synchronized(this.mapsLock) {
-        LOG.debug("BookMaps.delete: {}", bookID.value())
+        LOG.debug("BookMaps.delete: {}", bookID)
         this.entries.remove(bookID)
       }
     }
 
-    internal fun addEntry(entry: BookDatabaseEntry) {
+    fun addEntry(entry: BookDatabaseEntry) {
       synchronized(this.mapsLock) {
-        LOG.debug("BookMaps.addEntry: {}", entry.id.value())
+        LOG.debug("BookMaps.addEntry: {}", entry.id)
         this.entries.put(entry.id, entry)
       }
     }
@@ -112,7 +112,7 @@ class BookDatabase private constructor(
         LOG.debug("Adding entry for {}", id)
       }
       try {
-        val bookDir = File(this.directory, id.value())
+        val bookDir = File(this.directory, id.toString())
         DirectoryUtilities.directoryCreate(bookDir)
 
         val fileMeta = File(bookDir, "meta.json")
@@ -159,7 +159,7 @@ class BookDatabase private constructor(
   override fun entry(id: BookID): BookDatabaseEntryType {
     synchronized(this.maps.mapsLock) {
       return this.maps.entries[id] ?: throw BookDatabaseException(
-        "Nonexistent book entry: " + id.value(), emptyList()
+        "Nonexistent book entry: $id", emptyList()
       )
     }
   }
@@ -227,6 +227,8 @@ class BookDatabase private constructor(
         errors.add(IOException("Not a directory: $directory"))
       }
 
+      migrateOldIDs(directory, account, parser, errors)
+
       val bookDirs = directory.list()
       if (bookDirs != null) {
         for (bookID in bookDirs) {
@@ -245,6 +247,43 @@ class BookDatabase private constructor(
           ) ?: continue
           maps.addEntry(entry)
         }
+      }
+    }
+
+    private fun migrateOldIDs(
+      directory: File,
+      account: AccountID,
+      parser: OPDSJSONParserType,
+      errors: MutableList<Exception>
+    ) {
+      try {
+        LOG.debug("migrating old book IDs")
+        val bookDirs = directory.list()
+        if (bookDirs != null) {
+          for (dirName in bookDirs) {
+            if (!BookID.isBookID((dirName))) {
+              val bookDirectory = File(directory, dirName)
+              val fileMeta = File(bookDirectory, "meta.json")
+              val entry: OPDSAcquisitionFeedEntry =
+                FileInputStream(fileMeta).use { stream ->
+                  parser.parseAcquisitionFeedEntryFromStream(stream)
+                }
+              val newBookID = BookID.newFromOPDSAndAccount(entry.id, account)
+              val newBookDirectory = File(directory, newBookID.toString())
+              val moveSucceeded = bookDirectory.renameTo(newBookDirectory)
+              if (moveSucceeded) {
+                LOG.debug("book directory $bookDirectory successfully renamed to $newBookDirectory")
+              } else {
+                val e = IOException(
+                  "couldn't rename book directory $bookDirectory to $newBookDirectory"
+                )
+                errors.add(e)
+              }
+            }
+          }
+        }
+      } catch (e: IOException) {
+        errors.add(e)
       }
     }
 

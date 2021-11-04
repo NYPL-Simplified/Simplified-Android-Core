@@ -244,7 +244,7 @@ class BookRevokeTaskAdobeDRMTest {
       Mockito.mock(AdobeAdeptExecutorType::class.java)
 
     val bookId =
-      BookID.create("a")
+      BookID.newFromText("a")
 
     val acquisition =
       OPDSAcquisition(
@@ -360,7 +360,7 @@ class BookRevokeTaskAdobeDRMTest {
       )
 
     val bookId =
-      BookID.create("a")
+      BookID.newFromText("a")
 
     val acquisition =
       OPDSAcquisition(
@@ -477,7 +477,7 @@ class BookRevokeTaskAdobeDRMTest {
       )
 
     val bookId =
-      BookID.create("a")
+      BookID.newFromText("a")
 
     val acquisition =
       OPDSAcquisition(
@@ -635,7 +635,7 @@ class BookRevokeTaskAdobeDRMTest {
       )
 
     val bookId =
-      BookID.create("a")
+      BookID.newFromText("a")
 
     val acquisition =
       OPDSAcquisition(
@@ -783,7 +783,7 @@ class BookRevokeTaskAdobeDRMTest {
       )
 
     val bookId =
-      BookID.create("a")
+      BookID.newFromText("a")
 
     val acquisition =
       OPDSAcquisition(
@@ -932,7 +932,7 @@ class BookRevokeTaskAdobeDRMTest {
       )
 
     val bookId =
-      BookID.create("a")
+      BookID.newFromText("a")
 
     val acquisition =
       OPDSAcquisition(
@@ -1088,7 +1088,7 @@ class BookRevokeTaskAdobeDRMTest {
       )
 
     val bookId =
-      BookID.create("a")
+      BookID.newFromText("a")
 
     val acquisition =
       OPDSAcquisition(
@@ -1219,7 +1219,7 @@ class BookRevokeTaskAdobeDRMTest {
       )
 
     val bookId =
-      BookID.create("a")
+      BookID.newFromText("a")
 
     val acquisition =
       OPDSAcquisition(
@@ -1335,7 +1335,7 @@ class BookRevokeTaskAdobeDRMTest {
       )
 
     val bookId =
-      BookID.create("a")
+      BookID.newFromText("a")
 
     val acquisition =
       OPDSAcquisition(

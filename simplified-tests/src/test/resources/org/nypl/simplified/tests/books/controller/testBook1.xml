@@ -6,7 +6,7 @@
 
   <entry schema:additionalType="http://schema.org/Book">
     <id>urn:book:1</id>
-    <title>Book 0</title>
+    <title>Book 1</title>
     <author>
       <name>A. Author</name>
     </author>

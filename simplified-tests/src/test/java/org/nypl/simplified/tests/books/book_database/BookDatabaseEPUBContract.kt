@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.books.api.BookDRMInformation
 import org.nypl.simplified.books.api.BookDRMKind
-import org.nypl.simplified.books.api.BookIDs
+import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.api.BookLocation
 import org.nypl.simplified.books.api.Bookmark
 import org.nypl.simplified.books.api.BookmarkKind
@@ -54,7 +54,7 @@ abstract class BookDatabaseEPUBContract {
     val database0 = BookDatabase.open(context(), parser, serializer, BookFormatsTesting.supportsEverything, accountID, directory)
 
     val feedEntry: OPDSAcquisitionFeedEntry = this.acquisitionFeedEntryWithEPUB()
-    val bookID = BookIDs.newFromText("abcd")
+    val bookID = BookID.newFromText("abcd")
     val databaseEntry0 = database0.createOrUpdate(bookID, feedEntry)
 
     this.run {
@@ -103,7 +103,8 @@ abstract class BookDatabaseEPUBContract {
     val database0 = BookDatabase.open(context(), parser, serializer, BookFormatsTesting.supportsEverything, accountID, directory)
 
     val feedEntry: OPDSAcquisitionFeedEntry = this.acquisitionFeedEntryWithEPUB()
-    val bookID = BookIDs.newFromText("abcd")
+    val accountID = AccountID.generate()
+    val bookID = BookID.newFromOPDSAndAccount("abcd", accountID)
     val databaseEntry0 = database0.createOrUpdate(bookID, feedEntry)
 
     val bookmark0 =
@@ -202,7 +203,7 @@ abstract class BookDatabaseEPUBContract {
     val database0 = BookDatabase.open(context(), parser, serializer, BookFormatsTesting.supportsEverything, accountID, directory)
 
     val feedEntry: OPDSAcquisitionFeedEntry = this.acquisitionFeedEntryWithEPUB()
-    val bookID = BookIDs.newFromText("abcd")
+    val bookID = BookID.newFromText("abcd")
     val entry = database0.createOrUpdate(bookID, feedEntry)
 
     this.run {

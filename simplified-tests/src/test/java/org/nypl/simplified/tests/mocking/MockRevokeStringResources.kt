@@ -86,8 +86,6 @@ class MockRevokeStringResources : BookRevokeStringResourcesType {
     get() = "revokeFormatNothingToDo"
   override val revokeFormat: String
     get() = "revokeFormat"
-  override val revokeBookDatabaseLookupFailed: String
-    get() = "revokeBookDatabaseLookupFailed"
   override val revokeBookDatabaseLookupOK: String
     get() = "revokeBookDatabaseLookupOK"
   override val revokeBookDatabaseLookup: String

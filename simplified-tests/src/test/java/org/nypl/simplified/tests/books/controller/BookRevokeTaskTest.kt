@@ -205,7 +205,7 @@ class BookRevokeTaskTest {
     val bookDatabase =
       Mockito.mock(BookDatabaseType::class.java)
     val bookId =
-      BookID.create("a")
+      BookID.newFromText("a")
 
     val acquisition =
       OPDSAcquisition(
@@ -301,7 +301,7 @@ class BookRevokeTaskTest {
     val bookDatabaseEntry =
       Mockito.mock(BookDatabaseEntryType::class.java)
     val bookId =
-      BookID.create("a")
+      BookID.newFromText("a")
 
     val acquisition =
       OPDSAcquisition(
@@ -405,7 +405,7 @@ class BookRevokeTaskTest {
     val bookDatabase =
       Mockito.mock(BookDatabaseType::class.java)
     val bookId =
-      BookID.create("a")
+      BookID.newFromText("a")
 
     this.logBookEventsFor(bookId)
 
@@ -467,7 +467,7 @@ class BookRevokeTaskTest {
     val bookDatabaseEntry =
       Mockito.mock(BookDatabaseEntryType::class.java)
     val bookId =
-      BookID.create("a")
+      BookID.newFromText("a")
 
     val acquisition =
       OPDSAcquisition(
@@ -589,7 +589,7 @@ class BookRevokeTaskTest {
     val bookDatabaseEntry =
       Mockito.mock(BookDatabaseEntryType::class.java)
     val bookId =
-      BookID.create("a")
+      BookID.newFromText("a")
 
     val acquisition =
       OPDSAcquisition(
@@ -704,7 +704,7 @@ class BookRevokeTaskTest {
     val bookDatabase =
       Mockito.mock(BookDatabaseType::class.java)
     val bookId =
-      BookID.create("a")
+      BookID.newFromText("a")
 
     val acquisition =
       OPDSAcquisition(
@@ -837,7 +837,7 @@ class BookRevokeTaskTest {
     val bookDatabaseEntry =
       Mockito.mock(BookDatabaseEntryType::class.java)
     val bookId =
-      BookID.create("a")
+      BookID.newFromText("a")
 
     val acquisition =
       OPDSAcquisition(
@@ -934,7 +934,7 @@ class BookRevokeTaskTest {
     val bookDatabase =
       Mockito.mock(BookDatabaseType::class.java)
     val bookId =
-      BookID.create("a")
+      BookID.newFromText("a")
 
     val acquisition =
       OPDSAcquisition(
@@ -1067,7 +1067,7 @@ class BookRevokeTaskTest {
     val bookDatabase =
       Mockito.mock(BookDatabaseType::class.java)
     val bookId =
-      BookID.create("a")
+      BookID.newFromText("a")
 
     val acquisition =
       OPDSAcquisition(
@@ -1148,7 +1148,7 @@ class BookRevokeTaskTest {
       feedLoader.fetchURI(
         account = this.anyNonNull(),
         uri = this.anyNonNull(),
-        auth = this.anyNonNull(),
+        auth = Mockito.any(),
         method = this.anyNonNull()
       )
     ).thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
@@ -1194,7 +1194,7 @@ class BookRevokeTaskTest {
     val bookDatabase =
       Mockito.mock(BookDatabaseType::class.java)
     val bookId =
-      BookID.create("a")
+      BookID.newFromText("a")
 
     val acquisition =
       OPDSAcquisition(
@@ -1328,7 +1328,7 @@ class BookRevokeTaskTest {
     val bookDatabase =
       Mockito.mock(BookDatabaseType::class.java)
     val bookId =
-      BookID.create("a")
+      BookID.newFromText("a")
 
     val acquisition =
       OPDSAcquisition(
@@ -1430,7 +1430,7 @@ class BookRevokeTaskTest {
     val bookDatabase =
       Mockito.mock(BookDatabaseType::class.java)
     val bookId =
-      BookID.create("a")
+      BookID.newFromText("a")
 
     val acquisition =
       OPDSAcquisition(
@@ -1562,7 +1562,7 @@ class BookRevokeTaskTest {
     val bookDatabaseEntry =
       Mockito.mock(BookDatabaseEntryType::class.java)
     val bookId =
-      BookID.create("a")
+      BookID.newFromText("a")
 
     val acquisition =
       OPDSAcquisition(
@@ -1637,7 +1637,7 @@ class BookRevokeTaskTest {
       feedLoader.fetchURI(
         account = this.anyNonNull(),
         uri = this.anyNonNull(),
-        auth = this.anyNonNull(),
+        auth = Mockito.any(),
         method = this.anyNonNull()
       )
     ).thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
@@ -1686,7 +1686,7 @@ class BookRevokeTaskTest {
     val bookDatabaseEntry =
       Mockito.mock(BookDatabaseEntryType::class.java)
     val bookId =
-      BookID.create("a")
+      BookID.newFromText("a")
 
     val acquisition =
       OPDSAcquisition(
@@ -1754,7 +1754,7 @@ class BookRevokeTaskTest {
       feedLoader.fetchURI(
         account = this.anyNonNull(),
         uri = this.anyNonNull(),
-        auth = this.anyNonNull(),
+        auth = Mockito.any(),
         method = this.anyNonNull()
       )
     ).thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
@@ -1803,7 +1803,7 @@ class BookRevokeTaskTest {
     val bookDatabaseEntry =
       Mockito.mock(BookDatabaseEntryType::class.java)
     val bookId =
-      BookID.create("a")
+      BookID.newFromText("a")
 
     val acquisition =
       OPDSAcquisition(
@@ -1863,7 +1863,7 @@ class BookRevokeTaskTest {
       feedLoader.fetchURI(
         account = this.anyNonNull(),
         uri = this.anyNonNull(),
-        auth = this.anyNonNull(),
+        auth = Mockito.any(),
         method = this.anyNonNull()
       )
     ).thenReturn(FluentFuture.from(SettableFuture.create()))
@@ -1915,7 +1915,7 @@ class BookRevokeTaskTest {
     val bookDatabaseEntry =
       Mockito.mock(BookDatabaseEntryType::class.java)
     val bookId =
-      BookID.create("a")
+      BookID.newFromText("a")
 
     val acquisition =
       OPDSAcquisition(
@@ -2021,7 +2021,7 @@ class BookRevokeTaskTest {
     val bookDatabaseEntry =
       Mockito.mock(BookDatabaseEntryType::class.java)
     val bookId =
-      BookID.create("a")
+      BookID.newFromText("a")
 
     val acquisition =
       OPDSAcquisition(
@@ -2126,7 +2126,7 @@ class BookRevokeTaskTest {
     val bookDatabaseEntry =
       Mockito.mock(BookDatabaseEntryType::class.java)
     val bookId =
-      BookID.create("a")
+      BookID.newFromText("a")
 
     val acquisition =
       OPDSAcquisition(
@@ -2186,7 +2186,7 @@ class BookRevokeTaskTest {
       feedLoader.fetchURI(
         account = this.anyNonNull(),
         uri = this.anyNonNull(),
-        auth = this.anyNonNull(),
+        auth = Mockito.any(),
         method = this.anyNonNull()
       )
     ).thenReturn(FluentFuture.from(Futures.immediateFailedFuture(UniqueException())))
@@ -2238,7 +2238,7 @@ class BookRevokeTaskTest {
     val bookDatabaseEntry =
       Mockito.mock(BookDatabaseEntryType::class.java)
     val bookId =
-      BookID.create("a")
+      BookID.newFromText("a")
 
     val acquisition =
       OPDSAcquisition(
@@ -2298,7 +2298,7 @@ class BookRevokeTaskTest {
       feedLoader.fetchURI(
         account = this.anyNonNull(),
         uri = this.anyNonNull(),
-        auth = this.anyNonNull(),
+        auth = Mockito.any(),
         method = this.anyNonNull()
       )
     ).thenReturn(FluentFuture.from(Futures.immediateFailedFuture(UniqueException())))
@@ -2352,7 +2352,7 @@ class BookRevokeTaskTest {
       Mockito.mock(BookDatabaseEntryFormatHandleAudioBook::class.java)
 
     val bookId =
-      BookID.create("a")
+      BookID.newFromText("a")
 
     val bookFormat =
       BookFormat.BookFormatAudioBook(
@@ -2480,7 +2480,7 @@ class BookRevokeTaskTest {
       Mockito.mock(BookDatabaseType::class.java)
 
     val bookId =
-      BookID.create("a")
+      BookID.newFromText("a")
 
     val bookFormat =
       BookFormat.BookFormatPDF(

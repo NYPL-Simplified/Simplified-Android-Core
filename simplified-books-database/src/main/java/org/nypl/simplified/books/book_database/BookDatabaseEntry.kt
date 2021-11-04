@@ -185,7 +185,7 @@ internal class BookDatabaseEntry internal constructor(
        * If any of the format handles failed, abort the deletion.
        */
 
-      if (!failures.isEmpty()) {
+      if (failures.isNotEmpty()) {
         throw BookDatabaseException("Failed to delete one or more format handles", failures)
       }
 

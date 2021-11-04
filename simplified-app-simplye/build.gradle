@@ -36,7 +36,6 @@ dependencies {
   implementation project(":simplified-accounts-source-nyplregistry")
   implementation project(":simplified-analytics-circulation")
   implementation project(":simplified-crashlytics")
-  implementation project(":simplified-migration-from3master")
   implementation libs.firebase.analytics
   implementation libs.firebase.crashlytics
   implementation libs.nypl.readium

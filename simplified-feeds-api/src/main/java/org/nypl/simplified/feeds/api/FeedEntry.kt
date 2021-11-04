@@ -2,7 +2,6 @@ package org.nypl.simplified.feeds.api
 
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.books.api.BookID
-import org.nypl.simplified.books.api.BookIDs.newFromText
 import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import java.io.Serializable
@@ -47,8 +46,8 @@ sealed class FeedEntry : Serializable {
     val feedEntry: OPDSAcquisitionFeedEntry
   ) : FeedEntry() {
 
-    override val bookID: BookID
-      get() = newFromText(feedEntry.id)
+    override val bookID: BookID =
+      BookID.newFromOPDSAndAccount(feedEntry.id, accountID)
 
     val probableFormat: BookFormats.BookFormatDefinition? =
       BookFormats.inferFormat(feedEntry)

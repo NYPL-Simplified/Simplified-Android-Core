@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.books.api.BookDRMInformation
 import org.nypl.simplified.books.api.BookDRMKind
-import org.nypl.simplified.books.api.BookIDs
+import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_database.BookDRMInformationHandleACS
 import org.nypl.simplified.books.book_database.BookDRMInformationHandleLCP
 import org.nypl.simplified.books.book_database.BookDRMInformationHandleNone
@@ -52,7 +52,7 @@ abstract class BookDatabasePDFContract {
     val bookDatabase = BookDatabase.open(context(), parser, serializer, BookFormatsTesting.supportsEverything, accountID, directory)
 
     val feedEntry: OPDSAcquisitionFeedEntry = this.acquisitionFeedEntryWithPDF()
-    val bookID = BookIDs.newFromText("abcd")
+    val bookID = BookID.newFromText("abcd")
 
     val databaseEntry: BookDatabaseEntryType = bookDatabase.createOrUpdate(bookID, feedEntry)
 
@@ -89,7 +89,7 @@ abstract class BookDatabasePDFContract {
     val database0 = BookDatabase.open(context(), parser, serializer, BookFormatsTesting.supportsEverything, accountID, directory)
 
     val feedEntry: OPDSAcquisitionFeedEntry = this.acquisitionFeedEntryWithPDF()
-    val bookID = BookIDs.newFromText("abcd")
+    val bookID = BookID.newFromText("abcd")
     val entry = database0.createOrUpdate(bookID, feedEntry)
 
     this.run {

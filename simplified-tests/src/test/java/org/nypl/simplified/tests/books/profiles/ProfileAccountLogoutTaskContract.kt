@@ -124,8 +124,8 @@ abstract class ProfileAccountLogoutTaskContract {
         .addAcquisition(acquisition)
         .build()
 
-    this.bookDatabase.createOrUpdate(BookID.create("a"), opdsEntry)
-    this.bookDatabase.createOrUpdate(BookID.create("b"), opdsEntry)
+    this.bookDatabase.createOrUpdate(BookID.newFromText("a"), opdsEntry)
+    this.bookDatabase.createOrUpdate(BookID.newFromText("b"), opdsEntry)
 
     this.profile =
       Mockito.mock(ProfileReadableType::class.java)

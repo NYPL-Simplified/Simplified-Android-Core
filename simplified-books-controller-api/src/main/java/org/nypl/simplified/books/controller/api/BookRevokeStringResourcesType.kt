@@ -219,12 +219,6 @@ interface BookRevokeStringResourcesType {
   val revokeFormat: String
 
   /**
-   * Failed to open the book database entry.
-   */
-
-  val revokeBookDatabaseLookupFailed: String
-
-  /**
    * Opened book database entry successfully.
    */
 
