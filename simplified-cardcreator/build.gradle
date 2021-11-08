@@ -19,6 +19,7 @@ dependencies {
   implementation libs.joda.time
   implementation libs.moshi
   implementation libs.moshi.kotlin
+  implementation libs.nypl.theme
   implementation libs.retrofit2
   implementation libs.retrofit2.moshi
   implementation libs.okhttp3.logging.interceptor
