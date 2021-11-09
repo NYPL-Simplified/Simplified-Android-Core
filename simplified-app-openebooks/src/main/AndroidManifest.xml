@@ -84,7 +84,8 @@
             android:name="org.nypl.simplified.cardcreator.CardCreatorActivity"
             android:contentDescription="@string/appName"
             android:exported="false"
-            android:label="@string/appName" />
+            android:label="@string/appName"
+            android:theme="@style/OEI_NoActionBar" />
 
     </application>
 </manifest>
