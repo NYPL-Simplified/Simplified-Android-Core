@@ -80,7 +80,7 @@
         android:contentDescription="@string/appName"
         android:exported="false"
         android:label="@string/appName"
-        android:theme="@style/SimplyE_ActionBar"/>
+        android:theme="@style/SimplyE_NoActionBar"/>
 
   </application>
 
