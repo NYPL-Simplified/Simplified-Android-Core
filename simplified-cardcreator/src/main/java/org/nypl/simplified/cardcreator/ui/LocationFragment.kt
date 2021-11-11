@@ -267,7 +267,7 @@ class LocationFragment : Fragment(), LocationListener {
     }
   }
 
-  override fun onLocationChanged(location: Location?) {
+  override fun onLocationChanged(location: Location) {
     logger.debug("Location has changed")
     val activity = this.activity ?: return
 
@@ -324,11 +324,11 @@ class LocationFragment : Fragment(), LocationListener {
     logger.debug("location status changed")
   }
 
-  override fun onProviderEnabled(provider: String?) {
+  override fun onProviderEnabled(provider: String) {
     logger.debug("location provider enabled")
   }
 
-  override fun onProviderDisabled(provider: String?) {
+  override fun onProviderDisabled(provider: String) {
     logger.debug("location provider disabled")
   }
 

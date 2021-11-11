@@ -195,9 +195,11 @@ class SettingsMainFragment : PreferenceFragmentCompat() {
 
         this.toast = toast.apply {
           this.setText(message)
-          if (!this.view.isShown) {
-            this.setGravity(Gravity.CENTER_HORIZONTAL or Gravity.CENTER_VERTICAL, 0, 0)
-            this.show()
+          this.view?.let {
+            if(!it.isShown) {
+              this.setGravity(Gravity.CENTER_HORIZONTAL or Gravity.CENTER_VERTICAL, 0, 0)
+              this.show()
+            }
           }
         }
       }
