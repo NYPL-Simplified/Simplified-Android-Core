@@ -715,6 +715,7 @@ public final class JSONParserUtilities {
 
     try {
       return ISODateTimeFormat.dateTimeParser()
+        .withZoneUTC()
         .parseDateTime(JSONParserUtilities.getString(s, key));
     } catch (final IllegalArgumentException e) {
       throw new JSONParseException(
