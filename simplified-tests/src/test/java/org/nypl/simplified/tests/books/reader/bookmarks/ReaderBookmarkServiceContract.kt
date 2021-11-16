@@ -777,7 +777,7 @@ abstract class ReaderBookmarkServiceContract {
         enabled = true
       ).get()
 
-    Assertions.assertEquals(3, this.server.requestCount)
+    Assertions.assertTrue(this.server.requestCount >= 3)
     this.run {
       val request = this.server.takeRequest()
       Assertions.assertEquals(this.patronURI, request.requestUrl?.toUri())
