@@ -41,7 +41,7 @@ final class OPDSAtom implements Serializable
       (PartialFunctionType<Element, DateTime, ParseException>) er -> {
         final String text = er.getTextContent();
         final String trimmed = text.trim();
-        return ISODateTimeFormat.dateTimeParser().parseDateTime(trimmed);
+        return OPDSDateParsers.dateTimeParser().parseDateTime(trimmed);
       });
   }
 
@@ -58,6 +58,6 @@ final class OPDSAtom implements Serializable
     throws OPDSParseException {
     final String e_updated_raw =
       OPDSXML.getFirstChildElementTextWithName(e, OPDSFeedConstants.ATOM_URI, "updated");
-    return ISODateTimeFormat.dateTimeParser().parseDateTime(e_updated_raw);
+    return OPDSDateParsers.dateTimeParser().parseDateTime(e_updated_raw);
   }
 }

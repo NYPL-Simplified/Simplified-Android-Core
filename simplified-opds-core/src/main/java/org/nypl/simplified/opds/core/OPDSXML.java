@@ -418,13 +418,15 @@ public final class OPDSXML
     NullCheck.notNull(name);
 
     try {
-      final OptionType<DateTime> end_date;
       if (e.hasAttribute(name)) {
-        return Option.some(ISODateTimeFormat.dateTimeParser().parseDateTime(e.getAttribute(name)));
+        return Option.some(
+          OPDSDateParsers.dateTimeParser()
+            .parseDateTime(e.getAttribute(name))
+        );
       }
 
       return Option.none();
-    } catch (final IllegalArgumentException x) {
+    } catch (final Exception x) {
       throw new OPDSParseException(x);
     }
   }
@@ -449,11 +451,11 @@ public final class OPDSXML
     NullCheck.notNull(e);
     NullCheck.notNull(name);
 
-    final OptionType<DateTime> end_date;
     if (e.hasAttribute(name)) {
       try {
-        return ISODateTimeFormat.dateTimeParser().parseDateTime(e.getAttribute(name));
-      } catch (final IllegalArgumentException x) {
+        return OPDSDateParsers.dateTimeParser()
+          .parseDateTime(e.getAttribute(name));
+      } catch (final Exception x) {
         throw new OPDSParseException(x);
       }
     }
