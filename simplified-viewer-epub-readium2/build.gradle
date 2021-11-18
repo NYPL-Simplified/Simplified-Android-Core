@@ -9,6 +9,7 @@ dependencies {
 
   implementation libs.androidx.activity
   implementation libs.androidx.app.compat
+  implementation libs.androidx.fragment
   implementation libs.androidx.lifecycle
   implementation libs.androidx.lifecycle.viewmodel
   implementation libs.kotlin.stdlib
@@ -16,4 +17,6 @@ dependencies {
   implementation libs.nypl.readium2.api
   implementation libs.nypl.readium2.vanilla
   implementation libs.nypl.readium2.views
+  implementation libs.rxandroid2
+  implementation libs.rxjava2.extensions
 }

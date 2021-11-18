@@ -1,6 +1,5 @@
 package org.nypl.simplified.viewer.epub.readium2
 
-import org.librarysimplified.r2.api.SR2BookMetadata
 import org.librarysimplified.r2.api.SR2Bookmark
 import org.librarysimplified.r2.api.SR2Locator
 import org.nypl.simplified.accounts.api.AccountID
@@ -47,7 +46,6 @@ object Reader2Bookmarks {
     bookmarkService: ReaderBookmarkServiceUsableType,
     accountID: AccountID,
     bookID: BookID,
-    bookMetadata: SR2BookMetadata
   ): List<SR2Bookmark> {
     val rawBookmarks =
       this.loadRawBookmarks(
@@ -56,9 +54,9 @@ object Reader2Bookmarks {
         bookID = bookID
       )
     val lastRead =
-      rawBookmarks.lastRead?.let { this.toSR2Bookmark(bookMetadata, it) }
+      rawBookmarks.lastRead?.let { this.toSR2Bookmark(it) }
     val explicits =
-      rawBookmarks.bookmarks.mapNotNull { this.toSR2Bookmark(bookMetadata, it) }
+      rawBookmarks.bookmarks.mapNotNull { this.toSR2Bookmark(it) }
 
     val results = mutableListOf<SR2Bookmark>()
     lastRead?.let(results::add)
@@ -110,7 +108,6 @@ object Reader2Bookmarks {
    */
 
   fun toSR2Bookmark(
-    bookMetadata: SR2BookMetadata,
     source: Bookmark
   ): SR2Bookmark? {
     return when (val location = source.location) {
