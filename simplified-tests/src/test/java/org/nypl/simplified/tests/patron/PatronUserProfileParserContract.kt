@@ -26,7 +26,14 @@ abstract class PatronUserProfileParserContract {
 
     val result = parser.parse()
     this.dump(result)
-    ExtraAssertions.assertInstanceOf(result, Failure::class.java)
+    ExtraAssertions.assertInstanceOf(result, Success::class.java)
+
+    val success = result as Success
+    val profile = success.result
+
+    Assertions.assertEquals(null, profile.authorization)
+    Assertions.assertEquals(false, profile.settings.synchronizeAnnotations)
+    Assertions.assertEquals(0, profile.drm.size)
   }
 
   @Test
