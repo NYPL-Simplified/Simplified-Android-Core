@@ -35,9 +35,9 @@ class AccountListAdapterTest {
     whenever(mockImageLoader.loader).thenReturn(mockPicasso)
 
     subject = AccountListAdapter(
-        mockImageLoader,
-        mockOnItemClicked,
-        mockOnItemDeleteClicked
+      mockImageLoader,
+      mockOnItemClicked,
+      mockOnItemDeleteClicked
     )
 
     val context = ApplicationProvider.getApplicationContext<Context>()
