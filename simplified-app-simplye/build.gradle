@@ -2,6 +2,7 @@ import org.librarysimplified.gradle.RequiredAssetsTask
 
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.google.firebase.crashlytics'
+apply plugin: 'kotlin-kapt'
 
 // Fail the build if these assets aren't present
 //
@@ -12,11 +13,16 @@ requiredFiles["secrets.conf"] =
   "5e459128eaf8d425f381aa09e9e6081d183cbd4b217b9ba528cdb2d57b63aa87"
 
 android {
+  buildFeatures {
+    dataBinding true
+  }
+
   defaultConfig {
     versionName = project.version
     versionCode = calculateVersionCode(project)
     setProperty("archivesBaseName", "simplye")
   }
+
   applicationVariants.all { variant ->
     def finalizerTask =
       tasks.create(name: "requiredFiles${variant.name.capitalize()}", type: RequiredAssetsTask) {

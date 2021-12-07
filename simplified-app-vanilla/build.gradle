@@ -1,9 +1,16 @@
+apply plugin: 'kotlin-kapt'
+
 android {
+  buildFeatures {
+    dataBinding true
+  }
+
   defaultConfig {
     versionName = project.version
     versionCode = calculateVersionCode(project)
     setProperty("archivesBaseName", "vanilla")
   }
+
   sourceSets {
     main {
       if (project.hasProperty('org.librarysimplified.app.assets.vanilla')) {

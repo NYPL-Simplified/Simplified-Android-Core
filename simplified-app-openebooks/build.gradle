@@ -2,6 +2,7 @@ import org.librarysimplified.gradle.RequiredAssetsTask
 
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.google.firebase.crashlytics'
+apply plugin: 'kotlin-kapt'
 
 // Fail the build if these assets aren't present
 //
@@ -10,11 +11,16 @@ requiredFiles["ReaderClientCert.sig"] =
   "633ef827f8815c40f077ffcdb8edae7a7ad00aedd5806438abdaf48e9c3b59fe"
 
 android {
+  buildFeatures {
+    dataBinding true
+  }
+
   defaultConfig {
     versionName = project.version
     versionCode = calculateVersionCode(project)
     setProperty("archivesBaseName", "openebooks")
   }
+
   applicationVariants.all { variant ->
     def finalizerTask =
       tasks.create(name: "requiredFiles${variant.name.capitalize()}", type: RequiredAssetsTask) {

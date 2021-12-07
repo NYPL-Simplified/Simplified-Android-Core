@@ -4,13 +4,13 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.appcompat.widget.PopupMenu
+import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import org.nypl.simplified.accounts.database.api.AccountType
+import org.nypl.simplified.ui.accounts.databinding.AccountListItemBinding
 import org.nypl.simplified.ui.images.ImageAccountIcons
 import org.nypl.simplified.ui.images.ImageLoaderType
 
@@ -29,9 +29,10 @@ class AccountListAdapter(
     viewType: Int
   ): AccountViewHolder {
     val inflater = LayoutInflater.from(parent.context)
-    val itemView = inflater.inflate(R.layout.account_list_item_old, parent, false)
+    val binding: AccountListItemBinding = DataBindingUtil.inflate(inflater, R.layout.account_list_item, parent, false)
+//    val binding = AccountListItemOldBinding.inflate(inflater, parent, false)
     return AccountViewHolder(
-      itemView,
+      binding,
       imageLoader,
       onItemClicked,
       onItemDeleteClicked
@@ -41,83 +42,57 @@ class AccountListAdapter(
   override fun onBindViewHolder(
     holder: AccountViewHolder,
     position: Int
-  ) {
-    holder.bind(this.getItem(position))
-  }
+  ) = holder.bind(getItem(position), itemCount != 1)
 
   class AccountViewHolder(
-    val itemView: View,
+    val binding: AccountListItemBinding,
     private val imageLoader: ImageLoaderType,
     private val onItemClicked: (AccountType) -> Unit,
     private val onItemDeleteClicked: (AccountType) -> Unit
-  ) : RecyclerView.ViewHolder(itemView) {
-    private val accountIcon =
-      itemView.findViewById<ImageView>(R.id.accountIcon)
-    private val accountTitleView =
-      itemView.findViewById<TextView>(R.id.accountTitle)
-    private val accountCaptionView =
-      itemView.findViewById<TextView>(R.id.accountCaption)
-    private val popupMenuIcon =
-      itemView.findViewById<View>(R.id.popupMenuIcon)
+  ) : RecyclerView.ViewHolder(binding.root) {
 
-    private var accountItem: AccountType? = null
+    fun bind(account: AccountType, hasOptionsMenu: Boolean) {
+      binding.account = account
+      binding.executePendingBindings()
 
-    init {
-      this.itemView.setOnClickListener {
-        this.accountItem?.let { account ->
-          this.onItemClicked.invoke(account)
-        }
+      binding.root.setOnClickListener {
+        onItemClicked(account)
       }
 
+      imageLoader.loader.cancelRequest(binding.accountIcon)
+      ImageAccountIcons.loadAccountLogoIntoView(
+        loader = imageLoader.loader,
+        account = account.provider.toDescription(),
+        defaultIcon = R.drawable.account_default,
+        iconView = binding.accountIcon
+      )
+
+      if (hasOptionsMenu) {
+        binding.popupMenuIcon.setOnClickListener {
+          showPopupMenu(account)
+        }
+      } else {
+        binding.popupMenuIcon.visibility = View.GONE
+      }
+    }
+
+    fun showPopupMenu(account: AccountType) {
       val popupMenu =
-        PopupMenu(this.popupMenuIcon.context, this.popupMenuIcon, Gravity.END)
+        PopupMenu(binding.popupMenuIcon.context, binding.popupMenuIcon, Gravity.END)
           .apply {
-            inflate(R.menu.account_list_item)
+            inflate(R.menu.account_list_menu_item)
           }
 
-      popupMenu.setOnMenuItemClickListener { menuItem ->
-        when (menuItem.itemId) {
+      popupMenu.setOnMenuItemClickListener {
+        when (it.itemId) {
           R.id.menuItemDelete -> {
-            this.accountItem?.let { account ->
-              this.onItemDeleteClicked.invoke(account)
-            }
+            onItemDeleteClicked(account)
           }
         }
         true
       }
 
-      this.popupMenuIcon
-        .apply {
-          visibility = View.VISIBLE
-        }
-        .setOnClickListener {
-          popupMenu.show()
-        }
-    }
-
-    fun bind(item: AccountType) {
-      this.accountTitleView.text = item.provider.displayName
-      this.accountCaptionView.text = item.provider.subtitle
-
-      item.preferences.catalogURIOverride?.let { uri ->
-        this.accountCaptionView.text = uri.toString()
-      }
-
-      this.accountCaptionView.visibility =
-        if (this.accountCaptionView.text.isNotEmpty()) {
-          View.VISIBLE
-        } else {
-          View.GONE
-        }
-
-      this.imageLoader.loader.cancelRequest(this.accountIcon)
-      ImageAccountIcons.loadAccountLogoIntoView(
-        loader = this.imageLoader.loader,
-        account = item.provider.toDescription(),
-        defaultIcon = R.drawable.account_default,
-        iconView = this.accountIcon
-      )
-      this.accountItem = item
+      popupMenu.show()
     }
   }
 

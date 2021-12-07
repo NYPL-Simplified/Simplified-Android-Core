@@ -31,7 +31,7 @@ class FilterableAccountListAdapter(
 
   override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AccountItemViewHolder {
     val inflater = LayoutInflater.from(parent.context)
-    val item = inflater.inflate(R.layout.account_list_item, parent, false)
+    val item = inflater.inflate(R.layout.account_list_registry_item, parent, false)
 
     return AccountItemViewHolder(
       item,

@@ -1,13 +1,12 @@
-import com.nhaarman.mockitokotlin2.doReturn
-import com.nhaarman.mockitokotlin2.mock
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.mock
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.accounts.api.AccountReadableType
 import org.nypl.simplified.ui.accounts.AccountComparator
 
 class AccountComparatorTest {
-
   private val expected = arrayListOf(
     mockAccount("Alameda County Library"),
     mockAccount("Berkeley Public Library"),
@@ -32,7 +31,7 @@ private fun mockAccount(
   val mockProvider = mock<AccountProviderType> {
     on { this.displayName } doReturn displayName
   }
-  return mock<AccountReadableType> {
+  return mock {
     on { this.provider } doReturn mockProvider
     on { toString() } doReturn displayName
   }
