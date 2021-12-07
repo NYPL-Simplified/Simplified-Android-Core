@@ -29,8 +29,7 @@ class AccountListAdapter(
     viewType: Int
   ): AccountViewHolder {
     val inflater = LayoutInflater.from(parent.context)
-    val binding: AccountListItemBinding = DataBindingUtil.inflate(inflater, R.layout.account_list_item, parent, false)
-//    val binding = AccountListItemOldBinding.inflate(inflater, parent, false)
+    val binding = AccountListItemBinding.inflate(inflater, parent, false)
     return AccountViewHolder(
       binding,
       imageLoader,
