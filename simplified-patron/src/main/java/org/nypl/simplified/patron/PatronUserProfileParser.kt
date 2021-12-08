@@ -221,7 +221,8 @@ internal class PatronUserProfileParser(
   private fun parseAuthorization(root: ObjectNode): PatronAuthorization? {
     return try {
       val identifier =
-        JSONParserUtilities.getString(root, "simplified:authorization_identifier")
+        JSONParserUtilities.getStringOrNull(root, "simplified:authorization_identifier")
+          ?: return null
       val expires =
         JSONParserUtilities.getStringOrNull(root, "simplified:authorization_expires")
           ?.let { text -> ISODateTimeFormat.dateTimeParser().parseDateTime(text) }
@@ -235,7 +236,9 @@ internal class PatronUserProfileParser(
 
   private fun parseSettings(root: ObjectNode): PatronSettings {
     return try {
-      val settingsRoot = JSONParserUtilities.getObject(root, "settings")
+      val settingsRoot =
+        JSONParserUtilities.getObjectOrNull(root, "settings")
+          ?: return PatronSettings(synchronizeAnnotations = false)
 
       val synchronizeAnnotations =
         when (settingsRoot["simplified:synchronize_annotations"]) {

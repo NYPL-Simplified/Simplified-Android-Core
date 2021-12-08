@@ -76,6 +76,7 @@
     <activity
       android:name="org.nypl.simplified.cardcreator.CardCreatorActivity"
       android:exported="false"
+      android:theme="@style/VanillaTheme_NoActionBar"
       android:windowSoftInputMode="adjustResize" />
   </application>
 </manifest>

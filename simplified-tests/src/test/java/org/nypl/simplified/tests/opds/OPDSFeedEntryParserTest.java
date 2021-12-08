@@ -7,11 +7,14 @@ import com.io7m.jfunctional.Some;
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.nypl.simplified.books.book_database.api.BookAcquisitionSelection;
+import org.nypl.simplified.books.borrowing.BorrowAcquisitions;
 import org.nypl.simplified.opds.core.DRMLicensor;
 import org.nypl.simplified.opds.core.OPDSAcquisition;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParser;
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntryParserType;
+import org.nypl.simplified.opds.core.OPDSAcquisitionPath;
 import org.nypl.simplified.opds.core.OPDSAvailabilityHeld;
 import org.nypl.simplified.opds.core.OPDSAvailabilityHeldReady;
 import org.nypl.simplified.opds.core.OPDSAvailabilityHoldable;
@@ -21,6 +24,7 @@ import org.nypl.simplified.opds.core.OPDSAvailabilityOpenAccess;
 import org.nypl.simplified.opds.core.OPDSAvailabilityType;
 import org.nypl.simplified.opds.core.OPDSDateParsers;
 import org.nypl.simplified.opds.core.OPDSIndirectAcquisition;
+import org.nypl.simplified.tests.books.BookFormatsTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -451,6 +455,24 @@ public final class OPDSFeedEntryParserTest {
     Assertions.assertEquals(
       Option.some("http://qa.circulation.librarysimplified.org/NYNYPL/AdobeAuth/devices"),
       licensor.getDeviceManager());
+  }
+
+  @Test
+  public void testSMA83()
+    throws Exception {
+    final OPDSAcquisitionFeedEntryParserType parser = this.getParser();
+    final OPDSAcquisitionFeedEntry e = parser.parseEntryStream(URI.create("urn:test"),
+      OPDSFeedEntryParserTest.getResource("entry-SMA-83.xml"));
+
+    final OPDSAcquisitionPath path =
+      BorrowAcquisitions.INSTANCE.pickBestAcquisitionPath(
+        BookFormatsTesting.INSTANCE.getSupportsEverything(),
+        e
+      );
+    Assertions.assertEquals(
+      "application/atom+xml",
+      path.component1().component3().getFullType()
+    );
   }
 
   private OPDSAcquisitionFeedEntryParserType getParser() {
