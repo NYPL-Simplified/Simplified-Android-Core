@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import android.view.View.GONE
 import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
@@ -202,7 +203,7 @@ class AccountDetailFragment : Fragment(R.layout.account) {
     if (this.parameters.showPleaseLogInTitle) {
       this.loginTitle.visibility = VISIBLE
     } else {
-      this.loginTitle.visibility = View.GONE
+      this.loginTitle.visibility = GONE
     }
 
     /*
@@ -276,6 +277,7 @@ class AccountDetailFragment : Fragment(R.layout.account) {
     super.onDestroyView()
     this.cancelImageButtonLoading()
     this.imageLoader.loader.cancelRequest(this.accountIcon)
+    this.authenticationViews.clear()
   }
 
   private fun onBasicUserPasswordChanged(
@@ -444,7 +446,7 @@ class AccountDetailFragment : Fragment(R.layout.account) {
         }
       }
     } else {
-      this.reportIssueGroup.visibility = View.GONE
+      this.reportIssueGroup.visibility = GONE
     }
   }
 
@@ -465,7 +467,7 @@ class AccountDetailFragment : Fragment(R.layout.account) {
       onSuccess = {
         container.background = null
         buttonImage.visibility = VISIBLE
-        buttonText.visibility = View.GONE
+        buttonText.visibility = GONE
       }
     )
   }
@@ -562,27 +564,26 @@ class AccountDetailFragment : Fragment(R.layout.account) {
     this.viewModel.account.setLoginState(this.viewModel.account.loginState)
 
     this.accountIcon.setImageDrawable(null)
-    this.authenticationViews.clear()
     this.subscriptions.clear()
   }
 
   private fun reconfigureAccountUI() {
     this.authenticationViews.showFor(this.viewModel.account.provider.authentication)
 
-    this.hideCardCreatorForNonNYPL()
+    /**
+     * Hides or show sign up options depending on the availability of a card creator
+     */
+
+    if (this.shouldSignUpBeEnabled()) {
+      this.settingsCardCreator.visibility = VISIBLE
+    } else {
+      this.settingsCardCreator.visibility = GONE
+    }
 
     this.accountTitle.text =
       this.viewModel.account.provider.displayName
     this.accountSubtitle.text =
       this.viewModel.account.provider.subtitle
-
-    /*
-     * Conditionally enable sign up button
-     */
-
-    val signUpEnabled = this.shouldSignUpBeEnabled()
-    this.signUpButton.isEnabled = signUpEnabled
-    this.signUpLabel.isEnabled = signUpEnabled
 
     /*
      * Show/hide the custom OPDS feed section.
@@ -594,14 +595,14 @@ class AccountDetailFragment : Fragment(R.layout.account) {
       if (catalogURIOverride != null) {
         VISIBLE
       } else {
-        View.GONE
+        GONE
       }
 
     this.disableSyncSwitchForLoginState(this.viewModel.account.loginState)
 
     return when (val loginState = this.viewModel.account.loginState) {
       AccountNotLoggedIn -> {
-        this.loginProgress.visibility = View.GONE
+        this.loginProgress.visibility = GONE
         this.setLoginButtonStatus(
           AsLoginButtonEnabled {
             this.loginFormLock()
@@ -620,7 +621,7 @@ class AccountDetailFragment : Fragment(R.layout.account) {
         this.loginProgress.visibility = VISIBLE
         this.loginProgressBar.visibility = VISIBLE
         this.loginProgressText.text = loginState.status
-        this.loginButtonErrorDetails.visibility = View.GONE
+        this.loginButtonErrorDetails.visibility = GONE
         this.loginFormLock()
 
         if (loginState.cancellable) {
@@ -639,7 +640,7 @@ class AccountDetailFragment : Fragment(R.layout.account) {
         this.loginProgress.visibility = VISIBLE
         this.loginProgressBar.visibility = VISIBLE
         this.loginProgressText.text = loginState.status
-        this.loginButtonErrorDetails.visibility = View.GONE
+        this.loginButtonErrorDetails.visibility = GONE
         this.loginFormLock()
         this.setLoginButtonStatus(
           AsCancelButtonEnabled {
@@ -655,7 +656,7 @@ class AccountDetailFragment : Fragment(R.layout.account) {
 
       is AccountLoginFailed -> {
         this.loginProgress.visibility = VISIBLE
-        this.loginProgressBar.visibility = View.GONE
+        this.loginProgressBar.visibility = GONE
         this.loginProgressText.text = loginState.taskResult.steps.last().resolution.message
         this.loginFormUnlock()
         this.cancelImageButtonLoading()
@@ -685,9 +686,9 @@ class AccountDetailFragment : Fragment(R.layout.account) {
           }
         }
 
-        this.loginProgress.visibility = View.GONE
+        this.loginProgress.visibility = GONE
         this.loginFormLock()
-        this.loginButtonErrorDetails.visibility = View.GONE
+        this.loginButtonErrorDetails.visibility = GONE
         this.setLoginButtonStatus(
           AsLogoutButtonEnabled {
             this.loginFormLock()
@@ -711,7 +712,7 @@ class AccountDetailFragment : Fragment(R.layout.account) {
         }
 
         this.loginProgress.visibility = VISIBLE
-        this.loginButtonErrorDetails.visibility = View.GONE
+        this.loginButtonErrorDetails.visibility = GONE
         this.loginProgressBar.visibility = VISIBLE
         this.loginProgressText.text = loginState.status
         this.loginFormLock()
@@ -732,7 +733,7 @@ class AccountDetailFragment : Fragment(R.layout.account) {
         }
 
         this.loginProgress.visibility = VISIBLE
-        this.loginProgressBar.visibility = View.GONE
+        this.loginProgressBar.visibility = GONE
         this.loginProgressText.text = loginState.taskResult.steps.last().resolution.message
         this.cancelImageButtonLoading()
         this.loginFormLock()
@@ -780,32 +781,33 @@ class AccountDetailFragment : Fragment(R.layout.account) {
     return when (status) {
       is AsLoginButtonEnabled -> {
         this.signUpLabel.setText(R.string.accountCardCreatorLabel)
+        this.signUpLabel.isEnabled = true
+        this.signUpButton.isEnabled = true
       }
       is AsLoginButtonDisabled -> {
         this.signUpLabel.setText(R.string.accountCardCreatorLabel)
         this.signUpLabel.isEnabled = true
+        this.signUpButton.isEnabled = true
       }
       is AsLogoutButtonEnabled -> {
-        this.signUpLabel.setText(R.string.accountWantChildCard)
-        val enableSignup = shouldSignUpBeEnabled()
-        this.signUpLabel.isEnabled = isNypl() && enableSignup
-        this.signUpButton.isEnabled = isNypl() && enableSignup
         if (isNypl()) {
           this.signUpLabel.setText(R.string.accountWantChildCard)
+          this.signUpLabel.isEnabled = true
+          this.signUpButton.isEnabled = true
         } else {
           this.signUpLabel.setText(R.string.accountCardCreatorLabel)
+          this.signUpLabel.isEnabled = false
+          this.signUpButton.isEnabled = false
         }
       }
       is AsLogoutButtonDisabled -> {
-        if (isNypl()) {
-          this.signUpLabel.setText(R.string.accountWantChildCard)
-        } else {
-          this.signUpLabel.setText(R.string.accountCardCreatorLabel)
-        }
+        this.signUpLabel.isEnabled = false
+        this.signUpButton.isEnabled = false
       }
       is AsCancelButtonEnabled,
       AsCancelButtonDisabled -> {
-        // Nothing
+        this.signUpLabel.isEnabled = false
+        this.signUpButton.isEnabled = false
       }
     }
   }
@@ -842,7 +844,7 @@ class AccountDetailFragment : Fragment(R.layout.account) {
 
             override fun onError(e: Exception) {
               this@AccountDetailFragment.logger.error("failed to load authentication logo: ", e)
-              view.visibility = View.GONE
+              view.visibility = GONE
             }
           }
         )
@@ -872,10 +874,6 @@ class AccountDetailFragment : Fragment(R.layout.account) {
     val loginSatisfied = this.determineLoginIsSatisfied()
     this.setLoginButtonStatus(loginSatisfied)
     this.authenticationAlternativesShow()
-    if (shouldSignUpBeEnabled()) {
-      this.signUpButton.isEnabled = true
-      this.signUpLabel.isEnabled = true
-    }
   }
 
   private fun authenticationAlternativesMake() {
@@ -895,7 +893,7 @@ class AccountDetailFragment : Fragment(R.layout.account) {
   }
 
   private fun authenticationAlternativesHide() {
-    this.authenticationAlternatives.visibility = View.GONE
+    this.authenticationAlternatives.visibility = GONE
   }
 
   private fun tryLogin() {
@@ -910,15 +908,6 @@ class AccountDetailFragment : Fragment(R.layout.account) {
       is AccountProviderAuthenticationDescription.Anonymous,
       is AccountProviderAuthenticationDescription.COPPAAgeGate ->
         throw UnreachableCodeException()
-    }
-  }
-
-  /**
-   * Hides or show sign up options if is user in accessing the NYPL
-   */
-  private fun hideCardCreatorForNonNYPL() {
-    if (this.viewModel.account.provider.cardCreatorURI != null) {
-      this.settingsCardCreator.visibility = VISIBLE
     }
   }
 
