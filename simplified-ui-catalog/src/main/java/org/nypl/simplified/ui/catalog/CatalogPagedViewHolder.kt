@@ -283,7 +283,6 @@ class CatalogPagedViewHolder(
       }
     )
     this.idleButtons.addView(this.buttonCreator.createButtonSizedSpace())
-    this.idleButtons.addView(this.buttonCreator.createButtonSizedSpace())
   }
 
   private fun onBookStatusLoanable(book: Book) {

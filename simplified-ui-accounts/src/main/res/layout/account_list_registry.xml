@@ -36,7 +36,7 @@
             android:id="@+id/accountRegistryList"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            tools:listitem="@layout/account_list_item" />
+            tools:listitem="@layout/account_list_registry_item" />
 
         <androidx.core.widget.ContentLoadingProgressBar
             android:id="@+id/accountRegistryProgress"
