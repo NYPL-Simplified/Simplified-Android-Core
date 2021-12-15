@@ -183,6 +183,10 @@ subprojects { project ->
       url "http://maven.findawayworld.com/artifactory/libs-release/"
       allowInsecureProtocol true
     }
+    maven {
+      url "http://maven.findawayworld.com/artifactory/libs-snapshot/"
+      allowInsecureProtocol true
+    }
     maven { url "https://jitpack.io" }
     jcenter()
   }
