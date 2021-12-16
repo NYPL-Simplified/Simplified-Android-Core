@@ -4,31 +4,22 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.text.TextUtils
-import android.view.Gravity
-import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
-import android.view.View
+import android.view.*
 import android.view.View.TEXT_ALIGNMENT_TEXT_END
-import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
-import android.widget.Button
-import android.widget.LinearLayout
-import android.widget.RadioButton
-import android.widget.RadioGroup
-import android.widget.Space
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.AppCompatButton
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.os.bundleOf
+import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
+import com.google.android.material.textfield.TextInputEditText
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.android.ktx.supportActionBar
 import org.nypl.simplified.books.covers.BookCoverProviderType
@@ -42,13 +33,10 @@ import org.nypl.simplified.listeners.api.fragmentListeners
 import org.nypl.simplified.ui.accounts.AccountPickerDialogFragment
 import org.nypl.simplified.ui.catalog.CatalogFeedOwnership.CollectedFromAccounts
 import org.nypl.simplified.ui.catalog.CatalogFeedOwnership.OwnedByAccount
-import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedAgeGate
-import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoadFailed
-import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedEmpty
-import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedNavigation
-import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithGroups
-import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithoutGroups
-import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoading
+import org.nypl.simplified.ui.catalog.CatalogFeedState.*
+import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.*
+import org.nypl.simplified.ui.catalog.databinding.FeedBinding
+import org.nypl.simplified.ui.catalog.databinding.FeedHeaderBinding
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
 import org.slf4j.LoggerFactory
 
@@ -56,11 +44,11 @@ import org.slf4j.LoggerFactory
  * A fragment displaying an OPDS feed.
  */
 
-class CatalogFeedFragment : Fragment(R.layout.feed), AgeGateDialog.BirthYearSelectedListener {
+class CatalogFeedFragment : Fragment(), AgeGateDialog.BirthYearSelectedListener {
 
   companion object {
 
-    private const val PARAMETERS_ID =
+    const val PARAMETERS_ID =
       "org.nypl.simplified.ui.catalog.CatalogFragmentFeed.parameters"
 
     private val AGE_GATE_DIALOG_TAG =
@@ -77,14 +65,13 @@ class CatalogFeedFragment : Fragment(R.layout.feed), AgeGateDialog.BirthYearSele
     }
   }
 
+  private lateinit var binding: FeedBinding
+
   private val logger = LoggerFactory.getLogger(CatalogFeedFragment::class.java)
 
   private val parameters: CatalogFeedArguments by lazy {
-    this.requireArguments()[PARAMETERS_ID] as CatalogFeedArguments
+    requireArguments()[PARAMETERS_ID] as CatalogFeedArguments
   }
-
-  private val services =
-    Services.serviceDirectory()
 
   private val listener: FragmentListenerType<CatalogFeedEvent> by fragmentListeners()
 
@@ -97,44 +84,24 @@ class CatalogFeedFragment : Fragment(R.layout.feed), AgeGateDialog.BirthYearSele
   private val viewModel: CatalogFeedViewModel by viewModels(
     factoryProducer = {
       CatalogFeedViewModelFactory(
-        application = this.requireActivity().application,
-        services = Services.serviceDirectory(),
+        application = requireActivity().application,
+        services = services,
         borrowViewModel = borrowViewModel,
-        feedArguments = this.parameters,
-        listener = this.listener
+        feedArguments = parameters,
+        listener = listener
       )
     }
   )
 
-  private val bookCovers =
-    services.requireService(BookCoverProviderType::class.java)
-  private val screenInformation =
-    services.requireService(ScreenSizeInformationType::class.java)
-  private val configurationService =
-    services.requireService(BuildConfigurationServiceType::class.java)
+  private val services = Services.serviceDirectory()
+  private val bookCoverProvider = services.requireService(BookCoverProviderType::class.java)
+  private val screenInformation = services.requireService(ScreenSizeInformationType::class.java)
+  private val configService = services.requireService(BuildConfigurationServiceType::class.java)
 
   private lateinit var buttonCreator: CatalogButtons
-  private lateinit var feedEmpty: ViewGroup
-  private lateinit var feedError: ViewGroup
+
   private lateinit var feedErrorDetails: Button
   private lateinit var feedErrorRetry: Button
-  private lateinit var feedLoading: ViewGroup
-  private lateinit var feedNavigation: ViewGroup
-  private lateinit var feedWithGroups: ViewGroup
-  private lateinit var feedWithGroupsAdapter: CatalogFeedWithGroupsAdapter
-  private lateinit var feedWithGroupsFacets: LinearLayout
-  private lateinit var feedWithGroupsFacetsScroll: ViewGroup
-  private lateinit var feedWithGroupsHeader: ViewGroup
-  private lateinit var feedWithGroupsList: RecyclerView
-  private lateinit var feedWithGroupsTabs: RadioGroup
-  private lateinit var feedWithoutGroups: ViewGroup
-  private lateinit var feedWithoutGroupsAdapter: CatalogPagedAdapter
-  private lateinit var feedWithoutGroupsFacets: LinearLayout
-  private lateinit var feedWithoutGroupsFacetsScroll: ViewGroup
-  private lateinit var feedWithoutGroupsHeader: ViewGroup
-  private lateinit var feedWithoutGroupsList: RecyclerView
-  private lateinit var feedWithoutGroupsScrollListener: RecyclerView.OnScrollListener
-  private lateinit var feedWithoutGroupsTabs: RadioGroup
 
   private var ageGateDialog: DialogFragment? = null
   private val feedWithGroupsData: MutableList<FeedGroup> = mutableListOf()
@@ -143,89 +110,85 @@ class CatalogFeedFragment : Fragment(R.layout.feed), AgeGateDialog.BirthYearSele
     super.onCreate(savedInstanceState)
     setHasOptionsMenu(true)
 
-    this.ageGateDialog = childFragmentManager.findFragmentByTag(AGE_GATE_DIALOG_TAG) as? DialogFragment
+    ageGateDialog = childFragmentManager.findFragmentByTag(AGE_GATE_DIALOG_TAG) as? DialogFragment
+  }
+
+  override fun onCreateView(
+    inflater: LayoutInflater,
+    container: ViewGroup?,
+    savedInstanceState: Bundle?
+  ): View {
+    binding = FeedBinding.inflate(inflater, container, false)
+    binding.viewModel = viewModel
+    binding.lifecycleOwner = viewLifecycleOwner
+    return binding.root
   }
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
 
-    this.viewModel.stateLive.observe(this.viewLifecycleOwner, this::reconfigureUI)
+    viewModel.feedStateLiveData.observe(viewLifecycleOwner) { reconfigureUI(it) }
 
-    this.buttonCreator =
-      CatalogButtons(this.requireContext(), this.screenInformation)
+    buttonCreator = CatalogButtons(requireContext(), screenInformation)
 
-    this.feedEmpty =
-      view.findViewById(R.id.feedEmpty)
-    this.feedError =
-      view.findViewById(R.id.feedError)
-    this.feedLoading =
-      view.findViewById(R.id.feedLoading)
-    this.feedNavigation =
-      view.findViewById(R.id.feedNavigation)
-    this.feedWithGroups =
-      view.findViewById(R.id.feedWithGroups)
-    this.feedWithoutGroups =
-      view.findViewById(R.id.feedWithoutGroups)
+    configureFeedWithGroupsList()
+    configureFeedWithoutGroupsList()
 
-    this.feedWithGroupsHeader =
-      view.findViewById(R.id.feedWithGroupsHeader)
-    this.feedWithGroupsFacetsScroll =
-      this.feedWithGroupsHeader.findViewById(R.id.feedHeaderFacetsScroll)
-    this.feedWithGroupsFacets =
-      this.feedWithGroupsHeader.findViewById(R.id.feedHeaderFacets)
-    this.feedWithGroupsTabs =
-      this.feedWithGroupsHeader.findViewById(R.id.feedHeaderTabs)
+    feedErrorRetry =
+      binding.feedError.feedErrorRetry
+    feedErrorDetails =
+      binding.feedError.feedErrorDetails
+  }
 
-    this.feedWithGroupsList = this.feedWithGroups.findViewById(R.id.feedWithGroupsList)
-    this.feedWithGroupsList.setHasFixedSize(true)
-    this.feedWithGroupsList.setItemViewCacheSize(32)
-    this.feedWithGroupsList.layoutManager = LinearLayoutManager(this.context)
-    (this.feedWithGroupsList.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
-    this.feedWithGroupsList.addItemDecoration(
-      CatalogFeedWithGroupsDecorator(this.screenInformation.dpToPixels(16).toInt())
+  private fun configureFeedWithGroupsList() {
+    val feedWithGroupsList = binding.feedWithGroups.feedWithGroupsList
+
+    sharedListConfiguration(feedWithGroupsList)
+
+    feedWithGroupsList.addItemDecoration(
+      CatalogFeedWithGroupsDecorator(screenInformation.dpToPixels(16).toInt())
     )
 
-    this.feedWithGroupsAdapter =
-      CatalogFeedWithGroupsAdapter(
-        groups = this.feedWithGroupsData,
-        coverLoader = this.bookCovers,
-        onFeedSelected = this.viewModel::openFeed,
-        onBookSelected = this.viewModel::openBookDetail
-      )
-    this.feedWithGroupsList.adapter = this.feedWithGroupsAdapter
+    val adapter = CatalogFeedWithGroupsAdapter(
+      groups = feedWithGroupsData,
+      coverLoader = bookCoverProvider,
+      onFeedSelected = viewModel::openFeed,
+      onBookSelected = viewModel::openBookDetail
+    )
 
-    this.feedWithoutGroupsHeader =
-      view.findViewById(R.id.feedWithoutGroupsHeader)
-    this.feedWithoutGroupsFacetsScroll =
-      this.feedWithoutGroupsHeader.findViewById(R.id.feedHeaderFacetsScroll)
-    this.feedWithoutGroupsFacets =
-      this.feedWithoutGroupsHeader.findViewById(R.id.feedHeaderFacets)
-    this.feedWithoutGroupsTabs =
-      this.feedWithoutGroupsHeader.findViewById(R.id.feedHeaderTabs)
+    feedWithGroupsList.adapter = adapter
+  }
 
-    this.feedWithoutGroupsList = this.feedWithoutGroups.findViewById(R.id.feedWithoutGroupsList)
-    this.feedWithoutGroupsList.setHasFixedSize(true)
-    this.feedWithoutGroupsList.setItemViewCacheSize(32)
-    this.feedWithoutGroupsList.layoutManager = LinearLayoutManager(this.context)
-    (this.feedWithoutGroupsList.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
+  private fun configureFeedWithoutGroupsList() {
+    val feedWithoutGroupsList = binding.feedWithoutGroups.feedWithoutGroupsList
 
-    this.feedErrorRetry =
-      this.feedError.findViewById(R.id.feedErrorRetry)
-    this.feedErrorDetails =
-      this.feedError.findViewById(R.id.feedErrorDetails)
+    sharedListConfiguration(feedWithoutGroupsList)
 
-    this.feedError.visibility = View.INVISIBLE
-    this.feedLoading.visibility = View.INVISIBLE
-    this.feedNavigation.visibility = View.INVISIBLE
-    this.feedWithGroups.visibility = View.INVISIBLE
-    this.feedWithoutGroups.visibility = View.INVISIBLE
+    val adapter = CatalogPagedAdapter(
+      context = requireActivity(),
+      listener = viewModel,
+      buttonCreator = buttonCreator,
+      bookCovers = bookCoverProvider,
+    )
+
+    feedWithoutGroupsList.adapter = adapter
+  }
+
+  private fun sharedListConfiguration(list: RecyclerView) {
+    list.setHasFixedSize(true)
+    list.setItemViewCacheSize(32)
+    list.layoutManager = LinearLayoutManager(context)
+    (list.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
   }
 
   override fun onStart() {
     super.onStart()
 
-    this.feedWithoutGroupsScrollListener = CatalogScrollListener(this.bookCovers)
-    this.feedWithoutGroupsList.addOnScrollListener(this.feedWithoutGroupsScrollListener)
+    binding.feedWithoutGroups.feedWithoutGroupsList.addOnScrollListener(
+      CatalogScrollListener(
+        bookCoverProvider
+      )
+    )
   }
 
   override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -236,24 +199,24 @@ class CatalogFeedFragment : Fragment(R.layout.feed), AgeGateDialog.BirthYearSele
     super.onPrepareOptionsMenu(menu)
 
     // Necessary to reconfigure the Toolbar here due to the "Switch Account" action.
-    this.configureToolbar()
+    configureToolbar()
   }
 
   override fun onOptionsItemSelected(item: MenuItem): Boolean {
     return when (item.itemId) {
       R.id.catalogMenuActionSearch -> {
-        this.viewModel.stateLive.value?.search?.let { search ->
-          this.openSearchDialog(requireContext(), search)
+        viewModel.feedStateLiveData.value?.search?.let { search ->
+          openSearchDialog(requireContext(), search)
         }
         true
       }
       R.id.catalogMenuActionReload -> {
-        this.viewModel.syncAccounts()
+        viewModel.syncAccounts()
         true
       }
       android.R.id.home -> {
-        if (this.viewModel.isAccountCatalogRoot()) {
-          this.openAccountPickerDialog()
+        if (viewModel.isAccountCatalogRoot()) {
+          openAccountPickerDialog()
           true
         } else {
           super.onOptionsItemSelected(item)
@@ -264,196 +227,78 @@ class CatalogFeedFragment : Fragment(R.layout.feed), AgeGateDialog.BirthYearSele
   }
 
   private fun reconfigureUI(feedState: CatalogFeedState) {
-    return when (feedState) {
-      is CatalogFeedAgeGate ->
-        this.onCatalogFeedAgeGate(feedState)
-      is CatalogFeedLoading ->
-        this.onCatalogFeedLoading(feedState)
-      is CatalogFeedWithGroups ->
-        this.onCatalogFeedWithGroups(feedState)
-      is CatalogFeedWithoutGroups ->
-        this.onCatalogFeedWithoutGroups(feedState)
-      is CatalogFeedNavigation ->
-        this.onCatalogFeedNavigation(feedState)
-      is CatalogFeedLoadFailed ->
-        this.onCatalogFeedLoadFailed(feedState)
-      is CatalogFeedEmpty ->
-        this.onCatalogFeedEmpty(feedState)
+    if (feedState is CatalogFeedAgeGate) openAgeGateDialog() else dismissAgeGateDialog()
+    configureToolbar()
+
+    when (feedState) {
+      is CatalogFeedWithGroups -> onCatalogFeedWithGroups(feedState)
+      is CatalogFeedWithoutGroups -> onCatalogFeedWithoutGroups(feedState)
+      is CatalogFeedLoadFailed -> onCatalogFeedLoadFailed(feedState)
+      else -> {
+      }
     }
   }
 
   override fun onStop() {
     super.onStop()
-
-    /*
-     * We aggressively unset adapters here in order to try to encourage prompt unsubscription
-     * of views from the book registry.
-     */
-
-    this.feedWithoutGroupsList.removeOnScrollListener(this.feedWithoutGroupsScrollListener)
-  }
-
-  override fun onDestroyView() {
-    super.onDestroyView()
-    this.feedWithoutGroupsList.adapter = null
-    this.feedWithGroupsList.adapter = null
-  }
-
-  private fun onCatalogFeedAgeGate(
-    @Suppress("UNUSED_PARAMETER") feedState: CatalogFeedAgeGate
-  ) {
-    this.openAgeGateDialog()
-    this.feedEmpty.visibility = View.INVISIBLE
-    this.feedError.visibility = View.INVISIBLE
-    this.feedLoading.visibility = View.INVISIBLE
-    this.feedNavigation.visibility = View.INVISIBLE
-    this.feedWithGroups.visibility = View.INVISIBLE
-    this.feedWithoutGroups.visibility = View.INVISIBLE
-
-    this.configureToolbar()
-  }
-
-  private fun onCatalogFeedEmpty(
-    @Suppress("UNUSED_PARAMETER") feedState: CatalogFeedEmpty
-  ) {
-    this.dismissAgeGateDialog()
-    this.feedEmpty.visibility = View.VISIBLE
-    this.feedError.visibility = View.INVISIBLE
-    this.feedLoading.visibility = View.INVISIBLE
-    this.feedNavigation.visibility = View.INVISIBLE
-    this.feedWithGroups.visibility = View.INVISIBLE
-    this.feedWithoutGroups.visibility = View.INVISIBLE
-
-    this.configureToolbar()
-  }
-
-  private fun onCatalogFeedLoading(
-    @Suppress("UNUSED_PARAMETER") feedState: CatalogFeedLoading
-  ) {
-    this.dismissAgeGateDialog()
-    this.feedEmpty.visibility = View.INVISIBLE
-    this.feedError.visibility = View.INVISIBLE
-    this.feedLoading.visibility = View.VISIBLE
-    this.feedNavigation.visibility = View.INVISIBLE
-    this.feedWithGroups.visibility = View.INVISIBLE
-    this.feedWithoutGroups.visibility = View.INVISIBLE
-    this.feedWithoutGroups.visibility = View.INVISIBLE
-
-    this.configureToolbar()
-  }
-
-  private fun onCatalogFeedNavigation(
-    @Suppress("UNUSED_PARAMETER") feedState: CatalogFeedNavigation
-  ) {
-    this.dismissAgeGateDialog()
-    this.feedEmpty.visibility = View.INVISIBLE
-    this.feedError.visibility = View.INVISIBLE
-    this.feedLoading.visibility = View.INVISIBLE
-    this.feedNavigation.visibility = View.VISIBLE
-    this.feedWithGroups.visibility = View.INVISIBLE
-    this.feedWithoutGroups.visibility = View.INVISIBLE
-
-    this.configureToolbar()
+    binding.feedWithoutGroups.feedWithoutGroupsList.clearOnScrollListeners()
   }
 
   private fun onCatalogFeedWithoutGroups(
     feedState: CatalogFeedWithoutGroups
   ) {
-    this.dismissAgeGateDialog()
-    this.feedEmpty.visibility = View.INVISIBLE
-    this.feedError.visibility = View.INVISIBLE
-    this.feedLoading.visibility = View.INVISIBLE
-    this.feedNavigation.visibility = View.INVISIBLE
-    this.feedWithGroups.visibility = View.INVISIBLE
-    this.feedWithoutGroups.visibility = View.VISIBLE
-
-    this.configureToolbar()
-
-    this.configureFacets(
-      facetHeader = this.feedWithoutGroupsHeader,
-      facetTabs = this.feedWithoutGroupsTabs,
-      facetLayoutScroller = this.feedWithoutGroupsFacetsScroll,
-      facetLayout = this.feedWithoutGroupsFacets,
+    configureFacets(
+      headerBinding = binding.feedWithoutGroups.feedWithoutGroupsHeader,
       facetsByGroup = feedState.facetsByGroup
     )
 
-    this.feedWithoutGroupsAdapter =
-      CatalogPagedAdapter(
-        context = requireActivity(),
-        listener = this.viewModel,
-        buttonCreator = this.buttonCreator,
-        bookCovers = this.bookCovers,
+    feedState.entries.observe(viewLifecycleOwner) { newPagedList ->
+      logger.debug("received paged list ({} elements)", newPagedList.size)
+      (binding.feedWithoutGroups.feedWithoutGroupsList.adapter as CatalogPagedAdapter).submitList(
+        newPagedList
       )
-
-    this.feedWithoutGroupsList.adapter = this.feedWithoutGroupsAdapter
-    feedState.entries.observe(this) { newPagedList ->
-      this.logger.debug("received paged list ({} elements)", newPagedList.size)
-      this.feedWithoutGroupsAdapter.submitList(newPagedList)
     }
   }
 
   private fun onCatalogFeedWithGroups(
     feedState: CatalogFeedWithGroups
   ) {
-    this.dismissAgeGateDialog()
-    this.feedEmpty.visibility = View.INVISIBLE
-    this.feedError.visibility = View.INVISIBLE
-    this.feedLoading.visibility = View.INVISIBLE
-    this.feedNavigation.visibility = View.INVISIBLE
-    this.feedWithGroups.visibility = View.VISIBLE
-    this.feedWithoutGroups.visibility = View.INVISIBLE
-
-    this.configureToolbar()
-
-    this.configureFacets(
-      facetHeader = this.feedWithGroupsHeader,
-      facetTabs = this.feedWithGroupsTabs,
-      facetLayoutScroller = this.feedWithGroupsFacetsScroll,
-      facetLayout = this.feedWithGroupsFacets,
+    configureFacets(
+      headerBinding = binding.feedWithGroups.feedWithGroupsHeader,
       facetsByGroup = feedState.feed.facetsByGroup
     )
 
-    this.feedWithGroupsData.clear()
-    this.feedWithGroupsData.addAll(feedState.feed.feedGroupsInOrder)
-    this.feedWithGroupsAdapter.notifyDataSetChanged()
+    feedWithGroupsData.clear()
+    feedWithGroupsData.addAll(feedState.feed.feedGroupsInOrder)
+    (binding.feedWithGroups.feedWithGroupsList.adapter as CatalogFeedWithGroupsAdapter).notifyDataSetChanged()
   }
 
   private fun onCatalogFeedLoadFailed(
     feedState: CatalogFeedLoadFailed
   ) {
-    this.dismissAgeGateDialog()
-    this.feedEmpty.visibility = View.INVISIBLE
-    this.feedError.visibility = View.VISIBLE
-    this.feedLoading.visibility = View.INVISIBLE
-    this.feedNavigation.visibility = View.INVISIBLE
-    this.feedWithGroups.visibility = View.INVISIBLE
-    this.feedWithoutGroups.visibility = View.INVISIBLE
-
-    this.configureToolbar()
-
-    this.feedErrorRetry.isEnabled = true
-    this.feedErrorRetry.setOnClickListener { button ->
+    feedErrorRetry.isEnabled = true
+    feedErrorRetry.setOnClickListener { button ->
       button.isEnabled = false
-      this.viewModel.reloadFeed()
+      viewModel.reloadFeed()
     }
 
-    this.feedErrorDetails.isEnabled = true
-    this.feedErrorDetails.setOnClickListener {
-      this.viewModel.showFeedErrorDetails(feedState.failure)
+    feedErrorDetails.isEnabled = true
+    feedErrorDetails.setOnClickListener {
+      viewModel.showFeedErrorDetails(feedState.failure)
     }
   }
 
   private fun configureToolbar() {
-    this.configureToolbarNavigation()
-    this.configureToolbarTitles()
+    configureToolbarNavigation()
+    configureToolbarTitles()
   }
 
   private fun configureToolbarNavigation() {
     fun showAccountPickerAction() {
       // Configure the 'Home Action' in the Toolbar to show the account picker when tapped.
-      this.supportActionBar?.apply {
+      supportActionBar?.apply {
         // Configure whether or not the user should be able to change accounts
-        if (configurationService.showChangeAccountsUi) {
+        if (configService.showChangeAccountsUi) {
           setHomeAsUpIndicator(R.drawable.accounts)
           setHomeActionContentDescription(R.string.catalogAccounts)
           setDisplayHomeAsUpEnabled(true)
@@ -464,7 +309,7 @@ class CatalogFeedFragment : Fragment(R.layout.feed), AgeGateDialog.BirthYearSele
     }
 
     try {
-      if (this.viewModel.isAccountCatalogRoot()) {
+      if (viewModel.isAccountCatalogRoot()) {
         showAccountPickerAction()
       }
     } catch (e: Exception) {
@@ -473,19 +318,19 @@ class CatalogFeedFragment : Fragment(R.layout.feed), AgeGateDialog.BirthYearSele
   }
 
   private fun configureToolbarTitles() {
-    this.supportActionBar?.let {
-      it.title = this.parameters.title
-      it.subtitle = this.viewModel.accountProvider?.displayName
+    supportActionBar?.let {
+      it.title = parameters.title
+      it.subtitle = viewModel.accountProvider?.displayName
     }
   }
 
   private fun openAccountPickerDialog() {
-    return when (val ownership = this.parameters.ownership) {
+    return when (val ownership = parameters.ownership) {
       is OwnedByAccount -> {
         val dialog =
           AccountPickerDialogFragment.create(
             currentId = ownership.accountId,
-            showAddAccount = this.configurationService.allowAccountsAccess
+            showAddAccount = configService.allowAccountsAccess
           )
         dialog.show(parentFragmentManager, dialog.tag)
       }
@@ -496,17 +341,17 @@ class CatalogFeedFragment : Fragment(R.layout.feed), AgeGateDialog.BirthYearSele
   }
 
   @SuppressLint("InflateParams")
-  private fun openSearchDialog(
+  fun openSearchDialog(
     context: Context,
     search: FeedSearch
   ) {
     val view = LayoutInflater.from(context).inflate(R.layout.search_dialog, null)
-    val searchView = view.findViewById<TextView>(R.id.searchDialogText)!!
+    val searchInput = view.findViewById<TextInputEditText>(R.id.searchDialogText)!!
 
     val builder = AlertDialog.Builder(context).apply {
       setPositiveButton(R.string.catalogSearch) { dialog, _ ->
-        val query = searchView.text.toString().trim()
-        this@CatalogFeedFragment.viewModel.performSearch(search, query)
+        val query = searchInput.text.toString().trim()
+        viewModel.performSearch(search, query)
         dialog.dismiss()
       }
       setNegativeButton(R.string.cancel) { dialog, _ ->
@@ -516,11 +361,11 @@ class CatalogFeedFragment : Fragment(R.layout.feed), AgeGateDialog.BirthYearSele
     }
 
     val dialog = builder.create()
-    searchView.setOnEditorActionListener { _, actionId, _ ->
-      return@setOnEditorActionListener when (actionId) {
+    searchInput.setOnEditorActionListener { _, actionId, _ ->
+      when (actionId) {
         EditorInfo.IME_ACTION_SEARCH -> {
-          val query = searchView.text.toString().trim()
-          this@CatalogFeedFragment.viewModel.performSearch(search, query)
+          val query = searchInput.text.toString().trim()
+          viewModel.performSearch(search, query)
           dialog.dismiss()
           true
         }
@@ -528,30 +373,43 @@ class CatalogFeedFragment : Fragment(R.layout.feed), AgeGateDialog.BirthYearSele
       }
     }
     dialog.show()
+
+    val button = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+    button.isEnabled = false
+    searchInput.doAfterTextChanged { text ->
+      text?.let { button.isEnabled = it.length >= 2 }
+    }
   }
 
   private fun configureFacets(
-    facetHeader: ViewGroup,
+    headerBinding: FeedHeaderBinding,
+    facetsByGroup: Map<String, List<FeedFacet>>
+  ) {
+    if (facetsByGroup.isEmpty()) {
+      headerBinding.root.visibility = View.GONE
+    } else {
+      configureFacets(
+        headerBinding.feedHeaderTabs,
+        headerBinding.feedHeaderFacetsScroll,
+        headerBinding.feedHeaderFacets,
+        facetsByGroup
+      )
+    }
+
+  }
+
+  private fun configureFacets(
     facetTabs: RadioGroup,
     facetLayoutScroller: ViewGroup,
     facetLayout: LinearLayout,
     facetsByGroup: Map<String, List<FeedFacet>>
   ) {
     /*
-     * If the facet groups are empty, hide the header entirely.
-     */
-
-    if (facetsByGroup.isEmpty()) {
-      facetHeader.visibility = View.GONE
-      return
-    }
-
-    /*
      * If one of the groups is an entry point, display it as a set of tabs. Otherwise, hide
      * the tab layout entirely.
      */
 
-    this.configureFacetTabs(FeedFacets.findEntryPointFacetGroup(facetsByGroup), facetTabs)
+    configureFacetTabs(FeedFacets.findEntryPointFacetGroup(facetsByGroup), facetTabs)
 
     /*
      * Otherwise, for each remaining non-entrypoint facet group, show a drop-down menu allowing
@@ -577,7 +435,7 @@ class CatalogFeedFragment : Fragment(R.layout.feed), AgeGateDialog.BirthYearSele
 
     val buttonLayoutParams =
       LinearLayout.LayoutParams(
-        this.screenInformation.dpToPixels(96).toInt(),
+        screenInformation.dpToPixels(96).toInt(),
         LinearLayout.LayoutParams.WRAP_CONTENT
       )
 
@@ -591,12 +449,12 @@ class CatalogFeedFragment : Fragment(R.layout.feed), AgeGateDialog.BirthYearSele
 
     val spacerLayoutParams =
       LinearLayout.LayoutParams(
-        this.screenInformation.dpToPixels(8).toInt(),
+        screenInformation.dpToPixels(8).toInt(),
         LinearLayout.LayoutParams.MATCH_PARENT
       )
 
     val sortedNames = remainingGroups.keys.sorted()
-    val context = this.requireContext()
+    val context = requireContext()
 
     facetLayout.removeAllViews()
     sortedNames.forEach { groupName ->
@@ -620,9 +478,7 @@ class CatalogFeedFragment : Fragment(R.layout.feed), AgeGateDialog.BirthYearSele
       button.layoutParams = buttonLayoutParams
       button.text = active?.title
       button.ellipsize = TextUtils.TruncateAt.END
-      button.setOnClickListener {
-        this.showFacetSelectDialog(groupName, group)
-      }
+      button.setOnClickListener { showFacetSelectDialog(groupName, group) }
 
       spaceStart.layoutParams = spacerLayoutParams
       spaceMiddle.layoutParams = spacerLayoutParams
@@ -663,10 +519,10 @@ class CatalogFeedFragment : Fragment(R.layout.feed), AgeGateDialog.BirthYearSele
     val size = facetGroup.size
     for (index in 0 until size) {
       val facet = facetGroup[index]
-      val button = RadioButton(this.requireContext())
+      val button = RadioButton(requireContext())
       val buttonLayout =
         LinearLayout.LayoutParams(
-          this.screenInformation.dpToPixels(160).toInt(),
+          screenInformation.dpToPixels(160).toInt(),
           ViewGroup.LayoutParams.MATCH_PARENT,
           1.0f / size.toFloat()
         )
@@ -683,21 +539,20 @@ class CatalogFeedFragment : Fragment(R.layout.feed), AgeGateDialog.BirthYearSele
 
       button.id = View.generateViewId()
 
-      if (index == 0) {
-        button.setBackgroundResource(R.drawable.catalog_facet_tab_button_background_left)
-        button.setButtonDrawable(R.drawable.catalog_facet_tab_button_background_left)
-      } else if (index == size - 1) {
-        button.setBackgroundResource(R.drawable.catalog_facet_tab_button_background_right)
-        button.setButtonDrawable(R.drawable.catalog_facet_tab_button_background_right)
-      } else {
-        button.setBackgroundResource(R.drawable.catalog_facet_tab_button_background_middle)
-        button.setButtonDrawable(R.drawable.catalog_facet_tab_button_background_middle)
+
+      val drawableId = when (index) {
+        0 -> R.drawable.catalog_facet_tab_button_background_left
+        size -1 -> R.drawable.catalog_facet_tab_button_background_right
+        else -> R.drawable.catalog_facet_tab_button_background_middle
       }
+
+      button.setBackgroundResource(drawableId)
+      button.setButtonDrawable(drawableId)
 
       button.text = facet.title
       button.setOnClickListener {
-        this.logger.debug("selected entry point facet: {}", facet.title)
-        this.viewModel.openFacet(facet)
+        logger.debug("selected entry point facet: {}", facet.title)
+        viewModel.openFacet(facet)
       }
       facetTabs.addView(button)
     }
@@ -714,7 +569,7 @@ class CatalogFeedFragment : Fragment(R.layout.feed), AgeGateDialog.BirthYearSele
       val button = facetTabs.getChildAt(index) as RadioButton
 
       if (facet.isActive) {
-        this.logger.debug("active entry point facet: {}", facet.title)
+        logger.debug("active entry point facet: {}", facet.title)
         facetTabs.check(button.id)
       }
     }
@@ -729,33 +584,31 @@ class CatalogFeedFragment : Fragment(R.layout.feed), AgeGateDialog.BirthYearSele
     val checkedItem = choices.indexOfFirst { it.isActive }
 
     // Build the dialog
-    val alertBuilder = AlertDialog.Builder(this.requireContext())
+    val alertBuilder = AlertDialog.Builder(requireContext())
     alertBuilder.setTitle(groupName)
     alertBuilder.setSingleChoiceItems(names, checkedItem) { dialog, checked ->
       val selected = choices[checked]
-      this.logger.debug("selected facet: {}", selected)
-      this.viewModel.openFacet(selected)
+      logger.debug("selected facet: {}", selected)
+      viewModel.openFacet(selected)
       dialog.dismiss()
     }
     alertBuilder.create().show()
   }
 
-  override fun onBirthYearSelected(isOver13: Boolean) {
-    this.viewModel.updateBirthYear(isOver13)
-  }
+  override fun onBirthYearSelected(isOver13: Boolean) = viewModel.updateBirthYear(isOver13)
 
   private fun openAgeGateDialog() {
-    if (this.ageGateDialog != null) {
+    if (ageGateDialog != null) {
       return
     }
 
     val ageGate = AgeGateDialog.create()
     ageGate.show(childFragmentManager, AGE_GATE_DIALOG_TAG)
-    this.ageGateDialog = ageGate
+    ageGateDialog = ageGate
   }
 
   private fun dismissAgeGateDialog() {
-    this.ageGateDialog?.dismiss()
-    this.ageGateDialog = null
+    ageGateDialog?.dismiss()
+    ageGateDialog = null
   }
 }

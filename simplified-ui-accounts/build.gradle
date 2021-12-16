@@ -1,19 +1,10 @@
 apply plugin: 'kotlin-kapt'
 
+apply from: "$rootProject.projectDir/build_test.gradle"
+
 android {
   buildFeatures {
     dataBinding true
-  }
-
-  defaultConfig {
-    testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-    testInstrumentationRunnerArgument("runnerBuilder", "de.mannodermaus.junit5.AndroidJUnit5Builder")
-  }
-
-  testOptions {
-    unitTests {
-      includeAndroidResources = true
-    }
   }
 }
 
@@ -46,38 +37,6 @@ dependencies {
   implementation libs.rxjava2.extensions
   implementation libs.rxandroid2
   implementation libs.slf4j
-
-  //JUnit 4 + 5
-  testImplementation libs.junit
-  testImplementation libs.junit.jupiter.api
-  testImplementation libs.junit.jupiter.engine
-  testImplementation libs.junit.vintage.engine
-
-  // Fragment/Activity Testing in JVM
-  testImplementation libs.robolectric
-
-  // AndroidX Test
-  testImplementation libs.androidx.test.core.ktx
-  testImplementation libs.androidx.test.runner
-  testImplementation libs.androidx.test.rules
-  testImplementation libs.androidx.test.ext.junit.ktx
-
-  // Mocking
-  testImplementation libs.mockito.kotlin
-
-  // Espresso
-  testImplementation libs.androidx.test.espresso.core
-
-  // Assertions
-  testImplementation libs.kluent.android
-
-  // Android Junit5 configuration
-  testImplementation libs.junit5.android.test.core
-  testRuntimeOnly libs.junit5.android.test.runner
-  testRuntimeOnly libs.androidx.test.runner
-
-  // Required at this location by 'android-test-runner' regardless of usage
-  androidTestRuntimeOnly libs.junit5.android.test.runner
 
   // Temporary workaround to force databinding codegen in Robolectric tests
   // https://github.com/robolectric/robolectric/issues/3789

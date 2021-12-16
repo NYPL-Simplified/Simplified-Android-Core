@@ -1,3 +1,13 @@
+apply plugin: 'kotlin-kapt'
+
+apply from: "$rootProject.projectDir/build_test.gradle"
+
+android {
+  buildFeatures {
+    dataBinding true
+  }
+}
+
 dependencies {
   api project(":simplified-books-api")
   api project(":simplified-books-covers")
@@ -36,4 +46,8 @@ dependencies {
   implementation libs.rxjava2.extensions
   implementation libs.rxandroid2
   implementation libs.slf4j
+
+  // Temporary workaround to force databinding codegen in Robolectric tests
+  // https://github.com/robolectric/robolectric/issues/3789
+  kaptTest libs.androidx.databinding.kapt
 }
