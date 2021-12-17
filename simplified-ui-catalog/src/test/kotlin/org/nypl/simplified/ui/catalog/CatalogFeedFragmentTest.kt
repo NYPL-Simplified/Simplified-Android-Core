@@ -44,7 +44,6 @@ import org.nypl.simplified.ui.catalog.RecyclerViewEspressoUtils.hasAdapterItemCo
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
 import java.net.URI
 
-
 @RunWith(AndroidJUnit4::class)
 class CatalogFeedFragmentTest {
 
@@ -92,7 +91,6 @@ class CatalogFeedFragmentTest {
       FragmentListenerFinder.findListener(any(), CatalogFeedEvent::class.java)
     } returns mockCatalogFeedEventListener
 
-
     // Mock ViewModel creation
     mockkConstructor(CatalogBorrowViewModelFactory::class)
     every {
@@ -103,7 +101,6 @@ class CatalogFeedFragmentTest {
     every {
       anyConstructed<CatalogFeedViewModelFactory>().create(CatalogFeedViewModel::class.java)
     } returns mockCatalogFeedViewModel
-
 
     // Mock feedViewModel to return test-controlled LiveData
     every { mockCatalogFeedViewModel.feedStateLiveData } returns testFeedStateLiveData
@@ -435,7 +432,6 @@ private fun <T> createMockDataSourceFactory(itemList: List<T>): DataSource.Facto
   object : DataSource.Factory<Int, T>() {
     override fun create(): DataSource<Int, T> = FakePositionalDataSource(itemList)
   }
-
 
 // Revisit this to use PageKeyedDataSource (as CatalogPagedDataSource does)
 class FakePositionalDataSource<T>(private val itemList: List<T>) : PositionalDataSource<T>() {

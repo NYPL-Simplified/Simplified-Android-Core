@@ -4,10 +4,20 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.text.TextUtils
-import android.view.*
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
 import android.view.View.TEXT_ALIGNMENT_TEXT_END
+import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
-import android.widget.*
+import android.widget.Button
+import android.widget.LinearLayout
+import android.widget.RadioButton
+import android.widget.RadioGroup
+import android.widget.Space
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.AppCompatButton
 import androidx.appcompat.widget.AppCompatTextView
@@ -33,8 +43,10 @@ import org.nypl.simplified.listeners.api.fragmentListeners
 import org.nypl.simplified.ui.accounts.AccountPickerDialogFragment
 import org.nypl.simplified.ui.catalog.CatalogFeedOwnership.CollectedFromAccounts
 import org.nypl.simplified.ui.catalog.CatalogFeedOwnership.OwnedByAccount
-import org.nypl.simplified.ui.catalog.CatalogFeedState.*
-import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.*
+import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedAgeGate
+import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoadFailed
+import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithGroups
+import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithoutGroups
 import org.nypl.simplified.ui.catalog.databinding.FeedBinding
 import org.nypl.simplified.ui.catalog.databinding.FeedHeaderBinding
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
@@ -393,7 +405,6 @@ class CatalogFeedFragment : Fragment(), AgeGateDialog.BirthYearSelectedListener 
         facetsByGroup
       )
     }
-
   }
 
   private fun configureFacets(
@@ -536,7 +547,6 @@ class CatalogFeedFragment : Fragment(), AgeGateDialog.BirthYearSelectedListener 
        */
 
       button.id = View.generateViewId()
-
 
       val drawableId = when (index) {
         0 -> R.drawable.catalog_facet_tab_button_background_left

@@ -44,5 +44,3 @@ fun View.showWhenFeedEmpty(feedState: CatalogFeedState) {
   visibility = if (feedState is CatalogFeedState.CatalogFeedLoaded.CatalogFeedEmpty)
     View.VISIBLE else View.INVISIBLE
 }
-
-
