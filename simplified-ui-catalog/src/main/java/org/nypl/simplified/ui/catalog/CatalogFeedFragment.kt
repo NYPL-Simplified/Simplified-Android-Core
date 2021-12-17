@@ -134,10 +134,8 @@ class CatalogFeedFragment : Fragment(), AgeGateDialog.BirthYearSelectedListener 
     configureFeedWithGroupsList()
     configureFeedWithoutGroupsList()
 
-    feedErrorRetry =
-      binding.feedError.feedErrorRetry
-    feedErrorDetails =
-      binding.feedError.feedErrorDetails
+    feedErrorRetry = binding.feedError.feedErrorRetry
+    feedErrorDetails = binding.feedError.feedErrorDetails
   }
 
   private fun configureFeedWithGroupsList() {
@@ -542,7 +540,7 @@ class CatalogFeedFragment : Fragment(), AgeGateDialog.BirthYearSelectedListener 
 
       val drawableId = when (index) {
         0 -> R.drawable.catalog_facet_tab_button_background_left
-        size -1 -> R.drawable.catalog_facet_tab_button_background_right
+        size - 1 -> R.drawable.catalog_facet_tab_button_background_right
         else -> R.drawable.catalog_facet_tab_button_background_middle
       }
 

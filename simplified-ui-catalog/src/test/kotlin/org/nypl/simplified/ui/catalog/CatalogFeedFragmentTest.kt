@@ -1,7 +1,6 @@
 package org.nypl.simplified.ui.catalog
 
 import android.view.View
-import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
@@ -13,7 +12,8 @@ import androidx.paging.PositionalDataSource
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.ViewAssertion
-import androidx.test.espresso.action.ViewActions.*
+import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.action.ViewActions.replaceText
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.BoundedMatcher
 import androidx.test.espresso.matcher.RootMatchers.isDialog
@@ -27,7 +27,6 @@ import org.hamcrest.Description
 import org.hamcrest.Matcher
 import org.hamcrest.Matchers.*
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.librarysimplified.services.api.Services
@@ -48,8 +47,6 @@ import java.net.URI
 
 @RunWith(AndroidJUnit4::class)
 class CatalogFeedFragmentTest {
-  @get: Rule
-  val instantExecutorRule = InstantTaskExecutorRule()
 
   private lateinit var scenario: FragmentScenario<CatalogFeedFragment>
 
@@ -112,7 +109,7 @@ class CatalogFeedFragmentTest {
     every { mockCatalogFeedViewModel.feedStateLiveData } returns testFeedStateLiveData
 
     // Stub this for decorator configuration
-    every { mockScreenInformation.dpToPixels(any()) } returns 10.0 // Hmm
+    every { mockScreenInformation.dpToPixels(any()) } returns 10.0
 
     val catalogFeedArguments = CatalogFeedArguments.CatalogFeedArgumentsRemote(
       "title",
@@ -256,8 +253,7 @@ class CatalogFeedFragmentTest {
       mockk<FeedEntry.FeedEntryCorrupt>(),
     ).asPagedList()
 
-    // adapter isn't instantiated until state is emitted so we can't assert an empty starting state
-    // onView(withId(R.id.feedWithoutGroupsList)).check(hasAdapterItemCount(0))
+    onView(withId(R.id.feedWithoutGroupsList)).check(hasAdapterItemCount(0))
 
     testFeedStateLiveData.value = CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithoutGroups(
       mockk(), // Pass in mock FeedArguments as it is not used when handling state

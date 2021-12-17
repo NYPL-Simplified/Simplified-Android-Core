@@ -26,12 +26,12 @@ dependencies {
   testImplementation libs.androidx.test.runner
   testImplementation libs.androidx.test.rules
   testImplementation libs.androidx.test.ext.junit.ktx
-  testImplementation 'androidx.fragment:fragment-testing:1.3.6' //Pin to 1.3.6 as 1.4.0+ requires minCompileSDK >=31
+  testImplementation libs.androidx.fragment.testing //Pin to 1.3.6 as 1.4.0+ requires minCompileSDK >=31
 
   // Mocking
   testImplementation libs.mockito.kotlin
-  // Enables easy mocking of Kotlin singleton objects
-  testImplementation "io.mockk:mockk:1.12.0" // 1.12.1 seems to re-introduce this issue https://github.com/mockk/mockk/issues/754
+  // Enables easy mocking of Kotlin singleton objects and constructor invocation
+  testImplementation libs.mockk
 
   // Espresso
   testImplementation libs.androidx.test.espresso.core
@@ -46,7 +46,4 @@ dependencies {
 
   // Required at this location by 'android-test-runner' regardless of usage
   androidTestRuntimeOnly libs.junit5.android.test.runner
-
-  testImplementation 'androidx.arch.core:core-testing:2.1.0'
-
 }
