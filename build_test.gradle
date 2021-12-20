@@ -46,4 +46,6 @@ dependencies {
 
   // Required at this location by 'android-test-runner' regardless of usage
   androidTestRuntimeOnly libs.junit5.android.test.runner
+
+  testImplementation libs.androidx.arch.core.testing
 }

@@ -1,6 +1,7 @@
 package org.nypl.simplified.ui.catalog
 
 import android.view.View
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
@@ -42,6 +43,7 @@ import org.hamcrest.core.AllOf.allOf
 import org.hamcrest.core.IsEqual.equalTo
 import org.hamcrest.core.IsNot.not
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.librarysimplified.services.api.Services
@@ -61,6 +63,9 @@ import java.net.URI
 
 @RunWith(AndroidJUnit4::class)
 class CatalogFeedFragmentTest {
+
+  @get: Rule
+  val instantExecutorRule = InstantTaskExecutorRule()
 
   private lateinit var scenario: FragmentScenario<CatalogFeedFragment>
 
