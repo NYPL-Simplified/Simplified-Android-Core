@@ -26,7 +26,7 @@ dependencies {
 
   implementation libs.androidx.app.compat
   implementation libs.androidx.constraint.layout
-  implementation libs.androidx.lifecycle
+  implementation libs.androidx.lifecycle.ext
   implementation libs.androidx.fragment
   implementation libs.androidx.recycler.view
   implementation libs.google.material

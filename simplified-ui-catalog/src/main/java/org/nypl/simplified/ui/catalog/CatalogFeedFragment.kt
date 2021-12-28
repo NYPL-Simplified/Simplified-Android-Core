@@ -77,7 +77,9 @@ class CatalogFeedFragment : Fragment(), AgeGateDialog.BirthYearSelectedListener 
     }
   }
 
-  private lateinit var binding: FeedBinding
+  private var binding by autoCleared<FeedBinding>()
+  private var withGroupsAdapter by autoCleared<CatalogFeedWithGroupsAdapter>()
+  private var withoutGroupsAdapter by autoCleared<CatalogPagedAdapter>()
 
   private val logger = LoggerFactory.getLogger(CatalogFeedFragment::class.java)
 
@@ -159,14 +161,14 @@ class CatalogFeedFragment : Fragment(), AgeGateDialog.BirthYearSelectedListener 
       CatalogFeedWithGroupsDecorator(screenInformation.dpToPixels(16).toInt())
     )
 
-    val adapter = CatalogFeedWithGroupsAdapter(
+    withGroupsAdapter = CatalogFeedWithGroupsAdapter(
       groups = feedWithGroupsData,
       coverLoader = bookCoverProvider,
       onFeedSelected = viewModel::openFeed,
       onBookSelected = viewModel::openBookDetail
     )
 
-    feedWithGroupsList.adapter = adapter
+    feedWithGroupsList.adapter = withGroupsAdapter
   }
 
   private fun configureFeedWithoutGroupsList() {
@@ -174,14 +176,14 @@ class CatalogFeedFragment : Fragment(), AgeGateDialog.BirthYearSelectedListener 
 
     sharedListConfiguration(feedWithoutGroupsList)
 
-    val adapter = CatalogPagedAdapter(
+    withoutGroupsAdapter = CatalogPagedAdapter(
       context = requireActivity(),
       listener = viewModel,
       buttonCreator = buttonCreator,
       bookCovers = bookCoverProvider,
     )
 
-    feedWithoutGroupsList.adapter = adapter
+    feedWithoutGroupsList.adapter = withoutGroupsAdapter
   }
 
   private fun sharedListConfiguration(list: RecyclerView) {
@@ -264,9 +266,7 @@ class CatalogFeedFragment : Fragment(), AgeGateDialog.BirthYearSelectedListener 
 
     feedState.entries.observe(viewLifecycleOwner) { newPagedList ->
       logger.debug("received paged list ({} elements)", newPagedList.size)
-      (binding.feedWithoutGroups.feedWithoutGroupsList.adapter as CatalogPagedAdapter).submitList(
-        newPagedList
-      )
+      withoutGroupsAdapter.submitList(newPagedList)
     }
   }
 
@@ -280,7 +280,7 @@ class CatalogFeedFragment : Fragment(), AgeGateDialog.BirthYearSelectedListener 
 
     feedWithGroupsData.clear()
     feedWithGroupsData.addAll(feedState.feed.feedGroupsInOrder)
-    (binding.feedWithGroups.feedWithGroupsList.adapter as CatalogFeedWithGroupsAdapter).notifyDataSetChanged()
+    withGroupsAdapter.notifyDataSetChanged()
   }
 
   private fun onCatalogFeedLoadFailed(

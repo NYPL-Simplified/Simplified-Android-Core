@@ -6,7 +6,7 @@ dependencies {
 
   implementation libs.androidx.app.compat
   implementation libs.androidx.constraint.layout
-  implementation libs.androidx.lifecycle
+  implementation libs.androidx.lifecycle.ext
   implementation libs.androidx.core.ktx
   implementation libs.androidx.fragment
 }
