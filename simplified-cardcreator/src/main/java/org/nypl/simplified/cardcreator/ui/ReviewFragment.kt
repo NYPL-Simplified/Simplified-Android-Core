@@ -22,6 +22,7 @@ import org.nypl.simplified.cardcreator.model.Patron
 import org.nypl.simplified.cardcreator.utils.Cache
 import org.nypl.simplified.cardcreator.utils.getCache
 import org.nypl.simplified.cardcreator.utils.isBarcode
+import org.nypl.simplified.cardcreator.viewmodel.CardCreatorViewModel
 import org.nypl.simplified.cardcreator.viewmodel.PatronViewModel
 import org.slf4j.LoggerFactory
 
@@ -41,6 +42,7 @@ class ReviewFragment : Fragment() {
   private val policyTypeDefault = "simplye"
 
   private val viewModel: PatronViewModel by activityViewModels()
+  private val activityModel: CardCreatorViewModel by activityViewModels()
 
   private var dialog: AlertDialog? = null
 
@@ -199,10 +201,16 @@ class ReviewFragment : Fragment() {
     val accountInformation = cache.getAccountInformation()
     val workAddress = cache.getWorkAddress()
     val schoolAddress = cache.getSchoolAddress()
+    val deviceAddress = checkNotNull(activityModel.userLocationAddress)
+    val deviceZipCode = deviceAddress.postalCode.toIntOrNull()
+    val isInNewYorkCity = deviceZipCode != null &&
+      deviceZipCode in ((10001..10499) + (11001..11499) + (11601..11699))
+    val location = if (isInNewYorkCity) "nyc" else "nys"
 
     when {
       cache.getHomeAddress().state == nyState -> {
         return Patron(
+          location,
           policyTypeDefault,
           homeAddress,
           personalInformation.email,
@@ -217,6 +225,7 @@ class ReviewFragment : Fragment() {
       }
       cache.getSchoolAddress().line1.isEmpty() -> {
         return Patron(
+          location,
           policyTypeDefault,
           homeAddress,
           personalInformation.email,
@@ -231,6 +240,7 @@ class ReviewFragment : Fragment() {
       }
       else -> {
         return Patron(
+          location,
           policyTypeDefault,
           homeAddress,
           personalInformation.email,
