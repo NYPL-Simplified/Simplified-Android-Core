@@ -32,6 +32,7 @@ import androidx.recyclerview.widget.SimpleItemAnimator
 import com.google.android.material.textfield.TextInputEditText
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.android.ktx.supportActionBar
+import org.nypl.simplified.android.ktx.viewLifecycleAware
 import org.nypl.simplified.books.covers.BookCoverProviderType
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.feeds.api.FeedFacet
@@ -60,7 +61,7 @@ class CatalogFeedFragment : Fragment(), AgeGateDialog.BirthYearSelectedListener 
 
   companion object {
 
-    const val PARAMETERS_ID =
+    internal const val PARAMETERS_ID =
       "org.nypl.simplified.ui.catalog.CatalogFragmentFeed.parameters"
 
     private val AGE_GATE_DIALOG_TAG =
@@ -77,9 +78,9 @@ class CatalogFeedFragment : Fragment(), AgeGateDialog.BirthYearSelectedListener 
     }
   }
 
-  private var binding by autoCleared<FeedBinding>()
-  private var withGroupsAdapter by autoCleared<CatalogFeedWithGroupsAdapter>()
-  private var withoutGroupsAdapter by autoCleared<CatalogPagedAdapter>()
+  private var binding by viewLifecycleAware<FeedBinding>()
+  private var withGroupsAdapter by viewLifecycleAware<CatalogFeedWithGroupsAdapter>()
+  private var withoutGroupsAdapter by viewLifecycleAware<CatalogPagedAdapter>()
 
   private val logger = LoggerFactory.getLogger(CatalogFeedFragment::class.java)
 

@@ -36,7 +36,6 @@ dependencies {
   implementation libs.androidx.cardview
   implementation libs.androidx.constraint.layout
   implementation libs.androidx.lifecycle.ext
-  implementation libs.androidx.lifecycle.java8
   implementation libs.androidx.paging
   implementation libs.androidx.recycler.view
   implementation libs.google.material
