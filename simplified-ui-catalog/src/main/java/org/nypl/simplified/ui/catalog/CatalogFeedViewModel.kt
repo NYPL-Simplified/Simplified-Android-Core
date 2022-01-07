@@ -101,7 +101,7 @@ class CatalogFeedViewModel(
   }
 
   private val state: CatalogFeedState
-    get() = this.stateLive.value!!
+    get() = this.feedStateLiveData.value!!
 
   private class BookModel(
     val feedEntry: FeedEntry.FeedEntryOPDS,
@@ -266,7 +266,7 @@ class CatalogFeedViewModel(
     this.uiExecutor.dispose()
   }
 
-  val stateLive: LiveData<CatalogFeedState>
+  val feedStateLiveData: LiveData<CatalogFeedState>
     get() = stateMutable
 
   fun syncAccounts() {
@@ -883,7 +883,9 @@ class CatalogFeedViewModel(
     feedEntry: FeedEntry.FeedEntryOPDS,
     callback: (BookWithStatus) -> Unit
   ) {
-    this.bookModels.getOrPut(feedEntry.bookID, { BookModel(feedEntry) }).onBookChanged.add(callback)
+    val defaultValue = { BookModel(feedEntry) }
+    val bookModel = this.bookModels.getOrPut(feedEntry.bookID, defaultValue)
+    bookModel.onBookChanged.add(callback)
     this.notifyBookStatus(feedEntry, callback)
   }
 

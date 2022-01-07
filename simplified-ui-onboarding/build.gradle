@@ -8,7 +8,7 @@ dependencies {
   api project(":simplified-ui-errorpage")
 
   implementation libs.androidx.app.compat
-  implementation libs.androidx.lifecycle
+  implementation libs.androidx.lifecycle.ext
   implementation libs.androidx.fragment
   implementation libs.google.material
   implementation libs.io7m.jfunctional

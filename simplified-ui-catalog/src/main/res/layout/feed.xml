@@ -1,19 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-  android:layout_width="match_parent"
-  android:layout_height="match_parent">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-  <include layout="@layout/feed_empty" />
+    <data>
 
-  <include layout="@layout/feed_error" />
+        <variable
+            name="viewModel"
+            type="org.nypl.simplified.ui.catalog.CatalogFeedViewModel" />
+    </data>
 
-  <include layout="@layout/feed_loading" />
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-  <include layout="@layout/feed_navigation" />
+        <include
+            android:id="@+id/feedEmpty"
+            layout="@layout/feed_empty"
+            app:feedState="@{viewModel.feedStateLiveData}" />
 
-  <include layout="@layout/feed_with_groups" />
+        <include
+            android:id="@+id/feedError"
+            layout="@layout/feed_error"
+            app:feedState="@{viewModel.feedStateLiveData}"
+            />
 
-  <include layout="@layout/feed_without_groups" />
+        <include
+            android:id="@+id/feedLoading"
+            layout="@layout/feed_loading"
+            app:feedState="@{viewModel.feedStateLiveData}"
+            />
 
-</FrameLayout>
+        <include
+            android:id="@+id/feedNavigation"
+            layout="@layout/feed_navigation"
+            app:feedState="@{viewModel.feedStateLiveData}"
+            />
+
+        <include
+            android:id="@+id/feedWithGroups"
+            layout="@layout/feed_with_groups"
+            app:feedState="@{viewModel.feedStateLiveData}"
+            />
+
+        <include
+            android:id="@+id/feedWithoutGroups"
+            layout="@layout/feed_without_groups"
+            app:feedState="@{viewModel.feedStateLiveData}"
+            />
+
+    </FrameLayout>
+
+</layout>
