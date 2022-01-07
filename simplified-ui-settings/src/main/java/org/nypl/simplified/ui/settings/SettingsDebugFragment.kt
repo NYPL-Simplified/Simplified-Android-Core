@@ -34,7 +34,6 @@ class SettingsDebugFragment : Fragment(R.layout.settings_debug) {
 
   private lateinit var adobeDRMActivationTable: TableLayout
   private lateinit var cacheButton: Button
-  private lateinit var cardCreatorFakeLocation: SwitchCompat
   private lateinit var crashButton: Button
   private lateinit var crashlyticsId: TextView
   private lateinit var customOPDS: Button
@@ -77,8 +76,6 @@ class SettingsDebugFragment : Fragment(R.layout.settings_debug) {
       view.findViewById(R.id.settingsVersionDevFailNextBootSwitch)
     this.hasSeenLibrarySelection =
       view.findViewById(R.id.settingsVersionDevSeenLibrarySelectionScreen)
-    this.cardCreatorFakeLocation =
-      view.findViewById(R.id.settingsVersionDevCardCreatorLocationSwitch)
     this.showOnlySupportedBooks =
       view.findViewById(R.id.settingsVersionDevShowOnlySupported)
     this.customOPDS =
@@ -107,8 +104,6 @@ class SettingsDebugFragment : Fragment(R.layout.settings_debug) {
       this.viewModel.isBootFailureEnabled
     this.hasSeenLibrarySelection.isChecked =
       this.viewModel.hasSeenLibrarySelection
-    this.cardCreatorFakeLocation.isChecked =
-      this.viewModel.cardCreatorFakeLocation
     this.showOnlySupportedBooks.isChecked =
       this.viewModel.showOnlySupportedBooks
     this.crashlyticsId.text =
@@ -189,10 +184,6 @@ class SettingsDebugFragment : Fragment(R.layout.settings_debug) {
 
     this.hasSeenLibrarySelection.setOnCheckedChangeListener { _, checked ->
       this.viewModel.hasSeenLibrarySelection = checked
-    }
-
-    this.cardCreatorFakeLocation.setOnCheckedChangeListener { _, checked ->
-      this.viewModel.cardCreatorFakeLocation = checked
     }
 
     /*

@@ -151,7 +151,7 @@
     <string name="cancel">Cancel</string>
     <string name="settings">Settings</string>
     <string name="new_york_success">We have successfully determined that you are in New York!</string>
-    <string name="location_permission_prompt">SimplyE needs access to you location in order to create a library card.</string>
+    <string name="location_permission_prompt">SimplyE needs access to your location in order to create a library card.</string>
     <string name="location_access_error">SimplyE cannot access your device\'s location, configure your location settings to continue.</string>
 
     <!-- Accessibility -->

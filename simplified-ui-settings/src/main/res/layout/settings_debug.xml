@@ -182,16 +182,6 @@
       android:text="User has seen library selection screen?" />
 
     <androidx.appcompat.widget.SwitchCompat
-      android:id="@+id/settingsVersionDevCardCreatorLocationSwitch"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:layout_marginBottom="16dp"
-      android:checked="false"
-      android:enabled="true"
-      android:visibility="gone"
-      android:text="Card Creator: Pretend the user is in New York" />
-
-    <androidx.appcompat.widget.SwitchCompat
       android:id="@+id/settingsVersionDevShowOnlySupported"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"

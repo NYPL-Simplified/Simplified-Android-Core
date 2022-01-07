@@ -20,7 +20,6 @@ import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.boot.api.BootFailureTesting
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
-import org.nypl.simplified.cardcreator.CardCreatorDebugging
 import org.nypl.simplified.crashlytics.api.CrashlyticsServiceType
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.profiles.api.ProfileEvent
@@ -108,14 +107,6 @@ class SettingsDebugViewModel(application: Application) : AndroidViewModel(applic
 
   val adeptActivations: LiveData<List<AdobeDRMExtensions.Activation>> =
     fetchAdeptActivations()
-
-  var cardCreatorFakeLocation: Boolean
-    get() =
-      CardCreatorDebugging.fakeNewYorkLocation
-    set(value) {
-      this.logger.debug("card creator fake location: {}", value)
-      CardCreatorDebugging.fakeNewYorkLocation = value
-    }
 
   var showOnlySupportedBooks: Boolean
     get() =

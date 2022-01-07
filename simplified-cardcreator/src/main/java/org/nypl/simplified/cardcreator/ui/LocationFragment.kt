@@ -21,6 +21,7 @@ import androidx.activity.addCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.NavController
 import androidx.navigation.NavDirections
 import androidx.navigation.Navigation
@@ -29,6 +30,7 @@ import org.nypl.simplified.cardcreator.R
 import org.nypl.simplified.cardcreator.databinding.FragmentLocationBinding
 import org.nypl.simplified.cardcreator.utils.getCache
 import org.nypl.simplified.cardcreator.utils.startEllipses
+import org.nypl.simplified.cardcreator.viewmodel.CardCreatorViewModel
 import org.slf4j.LoggerFactory
 import java.util.Locale
 
@@ -39,6 +41,12 @@ class LocationFragment : Fragment(), LocationListener {
 
   private val logger = LoggerFactory.getLogger(LocationFragment::class.java)
 
+  private val activityModel: CardCreatorViewModel by activityViewModels()
+
+  private val geocoder by lazy {
+    Geocoder(requireContext(), Locale.getDefault())
+  }
+
   private var _binding: FragmentLocationBinding? = null
   private val binding get() = _binding!!
 
@@ -47,7 +55,7 @@ class LocationFragment : Fragment(), LocationListener {
   private lateinit var locationManager: LocationManager
 
   private var isNewYork = false
-  private var locationMock = false
+  private var locationMock: Location? = null
   private var initialLocationCheckCompleted = false
 
   private val locationRequestCode = 102
@@ -85,7 +93,7 @@ class LocationFragment : Fragment(), LocationListener {
     super.onViewCreated(view, savedInstanceState)
 
     binding.ellipsesTv.startEllipses()
-    locationMock = CardCreatorDebugging.fakeNewYorkLocation
+    locationMock = CardCreatorDebugging.fakeLocation
 
     navController = Navigation.findNavController(requireActivity(), R.id.card_creator_nav_host_fragment)
     checkIfInNewYorkState()
@@ -96,7 +104,12 @@ class LocationFragment : Fragment(), LocationListener {
 
     // Go to next screen
     binding.nextBtn.setOnClickListener {
-      if (isNewYork || locationMock) {
+      if (isNewYork || locationMock != null) {
+        locationMock?.let { location ->
+          activityModel.userLocationAddress =
+            geocoder.getFromLocation(location.latitude, location.longitude, 1)[0]
+        }
+
         logger.debug("User navigated to the next screen")
         if (getCache().isJuvenileCard!!) {
           nextAction = LocationFragmentDirections.actionJuvenileInformation()
@@ -209,10 +222,9 @@ class LocationFragment : Fragment(), LocationListener {
   // TODO: This function is doing to much, break it up into smaller pieces
   private fun checkIfInNewYorkState() {
     logger.debug("Checking to see if user is in New York")
-    binding.nextBtn.isEnabled = false || locationMock
+    binding.nextBtn.isEnabled = false || locationMock != null
     val maxResults = 1
     val location = getLocation()
-    val geocoder = Geocoder(requireContext(), Locale.getDefault())
 
     // Address found using the Geocoder.
     val address: Address?
@@ -227,6 +239,7 @@ class LocationFragment : Fragment(), LocationListener {
           logger.debug("User is in New York")
           logger.debug("Stopping location updates")
           locationManager.removeUpdates(this)
+          activityModel.userLocationAddress = address
           enableNext(true)
         } else {
           enableNext(false)
@@ -272,7 +285,7 @@ class LocationFragment : Fragment(), LocationListener {
     val activity = this.activity ?: return
 
     logger.debug("Checking to see if user is in New York")
-    binding.nextBtn.isEnabled = false || locationMock
+    binding.nextBtn.isEnabled = false || locationMock != null
     val maxResults = 1
     val geocoder = Geocoder(activity, Locale.getDefault())
 
@@ -288,6 +301,7 @@ class LocationFragment : Fragment(), LocationListener {
         logger.debug("User is in New York")
         logger.debug("Stopping location updates")
         locationManager.removeUpdates(this)
+        activityModel.userLocationAddress = address
         enableNext(true)
       } else {
         enableNext(false)
@@ -303,8 +317,8 @@ class LocationFragment : Fragment(), LocationListener {
    * Enables the next button and update header status
    */
   private fun enableNext(enable: Boolean) {
-    isNewYork = enable || locationMock
-    binding.nextBtn.isEnabled = enable || locationMock
+    isNewYork = enable || locationMock != null
+    binding.nextBtn.isEnabled = enable || locationMock != null
     if (enable) {
       binding.nextBtn.text = getString(R.string.next)
       binding.headerStatusDescTv.text = getString(R.string.new_york_success)

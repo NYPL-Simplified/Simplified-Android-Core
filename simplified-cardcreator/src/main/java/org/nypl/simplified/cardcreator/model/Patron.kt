@@ -3,6 +3,7 @@ package org.nypl.simplified.cardcreator.model
 import com.squareup.moshi.Json
 
 data class Patron(
+  @field:Json(name = "location") val location: String,
   @field:Json(name = "policy_type") val policy_type: String,
   @field:Json(name = "address") val address: Address,
   @field:Json(name = "email") val email: String,
