@@ -151,6 +151,15 @@ class AudioBookPlayerActivity :
     this.setContentView(R.layout.audio_book_player_base)
     this.playerScheduledExecutor = Executors.newSingleThreadScheduledExecutor()
 
+    /*
+    * Create a new downloader that is solely used to fetch audio book manifests.
+    */
+
+    this.downloadExecutor =
+      MoreExecutors.listeningDecorator(
+        NamedThreadPools.namedThreadPool(1, "audiobook-player", 19)
+      )
+
     this.supportActionBar?.setDisplayHomeAsUpEnabled(false)
 
     this.bookTitle = this.parameters.opdsEntry.title
@@ -199,14 +208,6 @@ class AudioBookPlayerActivity :
 
     this.formatHandle = formatHandleOpt
 
-    /*
-     * Create a new downloader that is solely used to fetch audio book manifests.
-     */
-
-    this.downloadExecutor =
-      MoreExecutors.listeningDecorator(
-        NamedThreadPools.namedThreadPool(1, "audiobook-player", 19)
-      )
     this.downloadProvider =
       DownloadProvider.create(this.downloadExecutor)
 
