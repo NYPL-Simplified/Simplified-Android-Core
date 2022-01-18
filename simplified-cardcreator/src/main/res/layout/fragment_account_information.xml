@@ -6,117 +6,110 @@
     android:layout_height="match_parent"
     tools:context=".ui.AccountInformationFragment">
 
+    <TextView
+        android:id="@+id/header_tv"
+        style="@style/WizardHeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/account_information"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ScrollView
+        android:id="@+id/form_sv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="16dp"
+        android:scrollbarStyle="outsideOverlay"
+        app:layout_constraintBottom_toTopOf="@id/footer"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/header_tv"
+        app:layout_constraintVertical_bias="0.1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                style="@style/WizardFormLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/username" />
+
+            <EditText
+                android:id="@+id/username_et"
+                style="@style/WizardFormEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+                android:hint="@string/required"
+                android:maxLength="25" />
+
+            <TextView
+                style="@style/WizardFormLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/password" />
+
+            <EditText
+                android:id="@+id/password_et"
+                style="@style/WizardFormEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/required"
+                android:maxLength="32"
+                tools:ignore="TextFields" />
+
+        </LinearLayout>
+
+    </ScrollView>
+
     <LinearLayout
-        android:id="@+id/header"
+        android:id="@+id/footer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <TextView
-            android:id="@+id/header_tv"
-            style="@style/WizardHeader"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/account_information" />
-
-        <TextView
-            android:id="@+id/header_status_desc_tv"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="16sp"
-            android:layout_marginRight="8dp"
-            android:layout_marginBottom="8dp"
-            android:fontFamily="sans-serif"
-            android:gravity="center"
-            android:textSize="16sp" />
-
-        <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingLeft="16dp"
-            android:paddingTop="16dp"
-            android:paddingRight="16dp"
-            android:scrollbarStyle="outsideOverlay">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <TextView
-                    style="@style/WizardFormLabel"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/username" />
-
-                <EditText
-                    android:id="@+id/username_et"
-                    android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-                    style="@style/WizardFormEditText"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="@string/required"
-                    android:maxLength="25" />
-
-                <TextView
-                    style="@style/WizardFormLabel"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/password" />
-
-                <EditText
-                    android:id="@+id/password_et"
-                    style="@style/WizardFormEditText"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="@string/required"
-                    android:maxLength="32"
-                    tools:ignore="TextFields" />
-
-            </LinearLayout>
-
-        </ScrollView>
-    </LinearLayout>
-
-    <TextView
-        style="@style/WizardFooter"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/username_desc"
-        app:layout_constraintBottom_toTopOf="@id/nav_buttons" />
-
-    <LinearLayout
-        android:id="@+id/nav_buttons"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintVertical_bias="1">
 
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/prev_btn"
-            style="?android:attr/buttonBarButtonStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="50dp"
-            android:layout_weight="1"
-            android:text="@string/previous"
-            android:textAllCaps="true" />
+        <TextView
+            style="@style/WizardFooter"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="12dp"
+            android:text="@string/username_desc"
+            android:textSize="12sp" />
 
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/next_btn"
-            style="?android:attr/buttonBarButtonStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="50dp"
-            android:layout_weight="1"
-            android:enabled="false"
-            android:text="@string/next"
-            android:textAllCaps="true" />
+        <LinearLayout
+            android:id="@+id/nav_buttons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
 
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/prev_btn"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:text="@string/previous"
+                android:textAllCaps="true" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/next_btn"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:enabled="false"
+                android:text="@string/next"
+                android:textAllCaps="true" />
+        </LinearLayout>
     </LinearLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
