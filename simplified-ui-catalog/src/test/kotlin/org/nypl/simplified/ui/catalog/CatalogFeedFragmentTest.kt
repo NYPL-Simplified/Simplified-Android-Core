@@ -439,7 +439,7 @@ object RecyclerViewEspressoUtils {
 }
 
 // PagedList stuff
-fun <T> List<T>.asPagedList() = LivePagedListBuilder(
+fun <T: Any> List<T>.asPagedList() = LivePagedListBuilder(
   createMockDataSourceFactory(this),
   Config(
     enablePlaceholders = false,
@@ -448,13 +448,13 @@ fun <T> List<T>.asPagedList() = LivePagedListBuilder(
   )
 ).build()
 
-private fun <T> createMockDataSourceFactory(itemList: List<T>): DataSource.Factory<Int, T> =
+private fun <T: Any> createMockDataSourceFactory(itemList: List<T>): DataSource.Factory<Int, T> =
   object : DataSource.Factory<Int, T>() {
     override fun create(): DataSource<Int, T> = FakePositionalDataSource(itemList)
   }
 
 // Revisit this to use PageKeyedDataSource (as CatalogPagedDataSource does)
-class FakePositionalDataSource<T>(private val itemList: List<T>) : PositionalDataSource<T>() {
+class FakePositionalDataSource<T: Any>(private val itemList: List<T>) : PositionalDataSource<T>() {
   override fun loadInitial(params: LoadInitialParams, callback: LoadInitialCallback<T>) {
     callback.onResult(itemList, 0)
   }
