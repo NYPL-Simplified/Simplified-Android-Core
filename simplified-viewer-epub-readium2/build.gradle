@@ -9,7 +9,12 @@ dependencies {
 
   implementation libs.androidx.activity
   implementation libs.androidx.app.compat
+
   implementation libs.androidx.fragment
+  //fragment-ktx pulls in viewModel-ktx. We need to explicitly declare the latest viewModel-ktx
+  //to force fragment-ktx to use the latest viewModel-ktx and avoid duplicate class collisions
+  implementation libs.androidx.lifecycle.viewmodel.ktx
+
   implementation libs.androidx.lifecycle.ext
   implementation libs.androidx.lifecycle.viewmodel
   implementation libs.kotlin.stdlib

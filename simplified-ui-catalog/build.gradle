@@ -31,7 +31,12 @@ dependencies {
   implementation project(":simplified-ui-thread-api")
 
   implementation libs.androidx.core
+
   implementation libs.androidx.fragment
+  //fragment-ktx pulls in viewModel-ktx. We need to explicitly declare the latest viewModel-ktx
+  //to force fragment-ktx to use the latest viewModel-ktx and avoid duplicate class collisions
+  implementation libs.androidx.lifecycle.viewmodel.ktx
+
   implementation libs.androidx.app.compat
   implementation libs.androidx.cardview
   implementation libs.androidx.constraint.layout
