@@ -41,9 +41,9 @@ class CardCreatorContract(
       USER_IDENTIFIER_KEY to input.userIdentifier
     )
 
-  override fun parseResult(resultCode: Int, intent: Intent?): Output? =
+  override fun parseResult(resultCode: Int, intent: Intent?): Output =
     if (intent == null || resultCode != Activity.RESULT_OK) {
-      null
+      Output("", "")
     } else {
       this.parseResult(intent.extras!!)
     }

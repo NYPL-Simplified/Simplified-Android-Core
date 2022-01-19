@@ -17,7 +17,7 @@ class AccountSAML20ViewModelFactory(
 ) : ViewModelProvider.Factory {
 
   @Suppress("UNCHECKED_CAST")
-  override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+  override fun <T : ViewModel> create(modelClass: Class<T>): T {
     if (modelClass == AccountSAML20ViewModel::class.java) {
       return AccountSAML20ViewModel(
         application = this.application,

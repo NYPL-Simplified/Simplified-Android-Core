@@ -27,7 +27,12 @@ dependencies {
   implementation libs.androidx.app.compat
   implementation libs.androidx.constraint.layout
   implementation libs.androidx.lifecycle.ext
+
   implementation libs.androidx.fragment
+  //fragment-ktx pulls in viewModel-ktx. We need to explicitly declare the latest viewModel-ktx
+  //to force fragment-ktx to use the latest viewModel-ktx and avoid duplicate class collisions
+  implementation libs.androidx.lifecycle.viewmodel.ktx
+
   implementation libs.androidx.recycler.view
   implementation libs.google.material
   implementation libs.kotlin.stdlib

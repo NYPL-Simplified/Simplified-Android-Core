@@ -9,7 +9,7 @@ class AnnouncementsViewModelFactory(
   private val services: ServiceDirectoryType
 ) : ViewModelProvider.Factory {
 
-  override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+  override fun <T : ViewModel> create(modelClass: Class<T>): T {
     return when {
       modelClass.isAssignableFrom(AnnouncementsViewModel::class.java) -> {
         val profilesController: ProfilesControllerType =
