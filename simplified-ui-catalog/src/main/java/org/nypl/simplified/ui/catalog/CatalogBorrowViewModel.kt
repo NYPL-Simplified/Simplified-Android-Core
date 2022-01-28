@@ -60,8 +60,14 @@ class CatalogBorrowViewModel(
     return try {
       val account = this.profilesController.profileCurrent().account(accountID)
       val requiresLogin = account.requiresCredentials
-      val isNotLoggedIn = account.loginState !is AccountLoggedIn
-      requiresLogin && isNotLoggedIn
+      val isLoggedIn = when (account.loginState) {
+        is AccountLoggedIn, is AccountLogoutFailed ->
+          true
+        is AccountLoggingIn, is AccountLoggingInWaitingForExternalAuthentication,
+        is AccountLoggingOut, is AccountLoginFailed, AccountNotLoggedIn ->
+          false
+      }
+      requiresLogin && !isLoggedIn
     } catch (e: Exception) {
       this.logger.error("could not retrieve account: ", e)
       false
