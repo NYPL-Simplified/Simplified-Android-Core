@@ -1,12 +1,10 @@
 package org.nypl.simplified.accounts.database
 
 import android.content.Context
-
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.common.base.Preconditions
 import com.io7m.jfunctional.FunctionType
 import io.reactivex.subjects.Subject
-
 import net.jcip.annotations.GuardedBy
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentialsStoreType
 import org.nypl.simplified.accounts.api.AccountDescription
@@ -39,15 +37,10 @@ import org.nypl.simplified.files.FileLocking
 import org.nypl.simplified.files.FileUtilities
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.slf4j.LoggerFactory
-
 import java.io.File
 import java.io.IOException
 import java.net.URI
-import java.util.ArrayList
-import java.util.Collections
-import java.util.Objects
-import java.util.SortedMap
-import java.util.UUID
+import java.util.*
 import java.util.concurrent.ConcurrentSkipListMap
 
 /**
@@ -217,7 +210,7 @@ class AccountsDatabase private constructor(
     private val accountEvents: Subject<AccountEvent>,
     @GuardedBy("descriptionLock")
     private var description: AccountDescription,
-    private val credentials: AccountAuthenticationCredentialsStoreType,
+    val credentials: AccountAuthenticationCredentialsStoreType,
     providerInitial: AccountProviderType,
     accountLoginState: AccountLoginState
   ) : AccountType {

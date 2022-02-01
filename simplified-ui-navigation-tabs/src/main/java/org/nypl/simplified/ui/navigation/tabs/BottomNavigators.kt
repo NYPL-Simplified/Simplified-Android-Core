@@ -18,6 +18,7 @@ import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.ui.catalog.CatalogFeedArguments
 import org.nypl.simplified.ui.catalog.CatalogFeedFragment
 import org.nypl.simplified.ui.catalog.CatalogFeedOwnership
+import org.nypl.simplified.ui.catalog.CatalogFeedWebFragment
 import org.nypl.simplified.ui.profiles.ProfileTabFragment
 import org.nypl.simplified.ui.settings.SettingsMainFragment
 import org.slf4j.LoggerFactory
@@ -50,17 +51,18 @@ object BottomNavigators {
         fragmentContainer = fragmentContainerId,
         bottomNavigationView = navigationView,
         rootFragmentsFactory = mapOf(
-          R.id.tabCatalog to {
-            createCatalogFragment(
-              context = context,
-              id = R.id.tabCatalog,
-              feedArguments = catalogFeedArguments(
-                context,
-                profilesController,
-                accountProviders.defaultProvider
-              )
-            )
-          },
+          // R.id.tabCatalog to {
+          //   createCatalogFragment(
+          //     context = context,
+          //     id = R.id.tabCatalog,
+          //     feedArguments = catalogFeedArguments(
+          //       context,
+          //       profilesController,
+          //       accountProviders.defaultProvider
+          //     )
+          //   )
+          // },
+          R.id.tabCatalog to { CatalogFeedWebFragment() },
           R.id.tabBooks to {
             createBooksFragment(
               context = context,
