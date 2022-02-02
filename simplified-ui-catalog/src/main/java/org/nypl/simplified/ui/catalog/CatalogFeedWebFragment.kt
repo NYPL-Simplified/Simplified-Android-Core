@@ -163,7 +163,7 @@ class CatalogFeedWebFragment : Fragment(R.layout.catalog_feed_web) {
     val slug = with(initialFeedUri.toString()) {
       when {
         contains("circulation.openebooks") -> "oe-qa"
-        contains("simply") -> "simply-qa"
+        contains("circulation.librarysimplified") -> "simply-qa"
         else -> this
       }
     }
@@ -176,7 +176,9 @@ class CatalogFeedWebFragment : Fragment(R.layout.catalog_feed_web) {
       cookie
     )
 
-    webView.loadUrl("$testUrl/$slug")
+    val targetUrl = "$testUrl/$slug"
+    logger.error("TargetUrl: $targetUrl")
+    webView.loadUrl(targetUrl)
   }
 
   private fun buildAuthCookie(slug: String): String {
@@ -187,9 +189,9 @@ class CatalogFeedWebFragment : Fragment(R.layout.catalog_feed_web) {
         val password = currentCreds.password.value
         "$username:$password"
       }
-      is AccountAuthenticationCredentials.OAuthWithIntermediary -> TODO()
-      is AccountAuthenticationCredentials.SAML2_0 -> TODO()
-      null -> TODO()
+      is AccountAuthenticationCredentials.OAuthWithIntermediary -> "TODO()->OAUTH"
+      is AccountAuthenticationCredentials.SAML2_0 -> "TODO()-SAML"
+      null -> "TODO()-NOCREDS"
     }
 
     val encodedCreds = Base64.encodeToString(creds.toByteArray(Charsets.UTF_8), Base64.NO_WRAP)
