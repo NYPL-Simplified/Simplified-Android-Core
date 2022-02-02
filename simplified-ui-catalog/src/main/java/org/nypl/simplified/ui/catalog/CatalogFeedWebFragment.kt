@@ -1,5 +1,7 @@
 package org.nypl.simplified.ui.catalog
 
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.util.Base64
 import android.view.View
@@ -8,8 +10,11 @@ import android.webkit.JavascriptInterface
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.annotation.RequiresApi
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
@@ -30,6 +35,21 @@ import java.net.URI
 
 class CatalogFeedWebFragment : Fragment(R.layout.catalog_feed_web) {
 
+  companion object {
+    internal const val PARAMETERS_ID =
+      "org.nypl.simplified.ui.catalog.CatalogFeedWebFragment.parameters"
+
+    fun create(parameters: CatalogFeedArguments): CatalogFeedWebFragment {
+        val fragment = CatalogFeedWebFragment()
+        fragment.arguments = bundleOf(PARAMETERS_ID to parameters)
+        return fragment
+    }
+  }
+
+  private val parameters: CatalogFeedArguments by lazy {
+    requireArguments()[PARAMETERS_ID] as CatalogFeedArguments
+  }
+
   private val services: ServiceDirectoryType = Services.serviceDirectory()
 
   private val profilesController = services.requireService(ProfilesControllerType::class.java)
@@ -47,14 +67,6 @@ class CatalogFeedWebFragment : Fragment(R.layout.catalog_feed_web) {
     webView = view.findViewById(R.id.feedWebView)
     webView.settings.javaScriptEnabled = true
 
-    val cookie = buildAuthCookie()
-    logger.error("Writing cookie: $cookie")
-    CookieManager.getInstance().removeAllCookies(null)
-    CookieManager.getInstance().setCookie(
-      "https://beta.openebooks.us",
-      cookie
-    )
-
     webView.webChromeClient = object : WebChromeClient() {
       override fun onConsoleMessage(message: String?, lineNumber: Int, sourceID: String?) {
         logger.debug("JS Console: $message")
@@ -65,20 +77,10 @@ class CatalogFeedWebFragment : Fragment(R.layout.catalog_feed_web) {
 
     webView.webViewClient = object : WebViewClient() {
       override fun onPageFinished(view: WebView?, url: String?) {
-        view?.evaluateJavascript("(function(history){\n" +
-          "    var pushState = history.pushState;\n" +
-          "    history.pushState = function(state) {\n" +
-          "        if (state.as.startsWith('/app/book/https')) {\n" +
-          "            var encodedUri = state.as.split('/')[3]\n" +
-          "            var uri = decodeURIComponent(encodedUri)\n" +
-          "            AndroidCatalog.openBookDetail(uri)\n" +
-          "            return\n" +
-          "        }\n" +
-          "        return pushState.apply(history, arguments);\n" +
-          "    };\n" +
-          "})(window.history);") { logger.debug("ValueCallback: $it")}
+        view?.evaluateJavascript(javascriptToInject(), null)
       }
-        // override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+
+      // override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
       //   logger.error("override url: webresourcerequest")
       //   return request?.let {
       //     handleBookDetailUrl(it.url)
@@ -90,6 +92,12 @@ class CatalogFeedWebFragment : Fragment(R.layout.catalog_feed_web) {
       //   val uri = Uri.parse(url)
       //   return handleBookDetailUrl(uri)
       // }
+      override fun shouldInterceptRequest(
+        view: WebView?,
+        request: WebResourceRequest?
+      ): WebResourceResponse? {
+        return super.shouldInterceptRequest(view, request)
+      }
 
       // override fun shouldInterceptRequest(
       //   view: WebView?,
@@ -115,15 +123,20 @@ class CatalogFeedWebFragment : Fragment(R.layout.catalog_feed_web) {
         description: String?,
         failingUrl: String?
       ) {
-        logger.error("Received error!")
+        logger.error("Received error from $failingUrl" +
+          " with code $errorCode" +
+          " and description: $description")
       }
 
+      @RequiresApi(Build.VERSION_CODES.M)
       override fun onReceivedError(
         view: WebView?,
         request: WebResourceRequest?,
         error: WebResourceError?
       ) {
-        logger.error("Received error!")
+        logger.error("Received error from ${request?.url}" +
+          " with code ${error?.errorCode}" +
+          " and description ${error?.description}")
       }
 
       // fun handleBookDetailUrl(uri: Uri): Boolean {
@@ -142,13 +155,38 @@ class CatalogFeedWebFragment : Fragment(R.layout.catalog_feed_web) {
       // }
     }
 
-    webView.loadUrl("https://beta.openebooks.us/app")
+    logger.error("ParamsURI: ${(parameters as CatalogFeedArguments.CatalogFeedArgumentsRemote).feedURI}")
+
+    val testUrl = "https://simplye-web-git-oe-326-mobile-webview-nypl.vercel.app"
+
+    val initialFeedUri = (parameters as CatalogFeedArguments.CatalogFeedArgumentsRemote).feedURI
+    val slug = with(initialFeedUri.toString()) {
+      when {
+        contains("circulation.openebooks") -> "oe-qa"
+        contains("simply") -> "simply-qa"
+        else -> this
+      }
+    }
+
+    val cookie = buildAuthCookie(slug)
+    logger.error("Writing cookie: $cookie")
+    CookieManager.getInstance().removeAllCookies(null)
+    CookieManager.getInstance().setCookie(
+      testUrl,
+      cookie
+    )
+
+    webView.loadUrl("$testUrl/$slug")
   }
 
-  private fun buildAuthCookie(): String {
+  private fun buildAuthCookie(slug: String): String {
     val currentCreds = profilesController.profileCurrent().mostRecentAccount().loginState.credentials
     val creds = when (currentCreds) {
-      is AccountAuthenticationCredentials.Basic -> "${currentCreds.userName}:${currentCreds.password}"
+      is AccountAuthenticationCredentials.Basic -> {
+        val username = currentCreds.userName.value
+        val password = currentCreds.password.value
+        "$username:$password"
+      }
       is AccountAuthenticationCredentials.OAuthWithIntermediary -> TODO()
       is AccountAuthenticationCredentials.SAML2_0 -> TODO()
       null -> TODO()
@@ -157,7 +195,9 @@ class CatalogFeedWebFragment : Fragment(R.layout.catalog_feed_web) {
     val encodedCreds = Base64.encodeToString(creds.toByteArray(Charsets.UTF_8), Base64.NO_WRAP)
     val cookieValue =
       "{\"token\": \"Basic ${encodedCreds}\", \"methodType\": \"http://opds-spec.org/auth/basic\"}"
-    val cookie = "CPW_AUTH_COOKIE/app=$cookieValue"
+    val cookiePrefix = "CPW_AUTH_COOKIE/$slug"
+    val urlEscapedPrefix = Uri.encode(cookiePrefix)
+    val cookie = "$urlEscapedPrefix=$cookieValue"
     return cookie
   }
 
@@ -206,6 +246,26 @@ class CatalogFeedWebFragment : Fragment(R.layout.catalog_feed_web) {
       listener.post(event)
     }
   }
+
+  private fun javascriptToInject() : String = "(function (document) {\n" +
+    "    function handleLinkClick(evt) {\n" +
+    "        // determine if it's a book\n" +
+    "        var url = new URL(evt.currentTarget.href);\n" +
+    "        var isBookLink = url.pathname.startsWith(\"/oe-qa/book/https\");\n" +
+    "        if (isBookLink){\n" +
+    "            // don't navigate\n" +
+    "            evt.preventDefault();\n" +
+    "            var encodedUri = url.pathname.split(\"/\")[3];\n" +
+    "            var uri = decodeURIComponent(encodedUri);\n" +
+    "            console.log(\"BOOK CLICKED\", uri)\n" +
+    "            AndroidCatalog.openBookDetail(uri)\n" +
+    "        }\n" +
+    "    }\n" +
+    "    var links = document.querySelectorAll(\"a\");\n" +
+    "    for (var i = 0; i < links.length; i++) {\n" +
+    "        links[i].addEventListener(\"click\", handleLinkClick);\n" +
+    "    }\n" +
+    "})(document);"
 }
 
 class CatalogWebInterface(private val onViewBook: (String) -> Unit) {

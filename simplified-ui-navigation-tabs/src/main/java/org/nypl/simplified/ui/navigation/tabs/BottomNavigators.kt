@@ -62,7 +62,14 @@ object BottomNavigators {
           //     )
           //   )
           // },
-          R.id.tabCatalog to { CatalogFeedWebFragment() },
+          R.id.tabCatalog to {
+            val arguments = catalogFeedArguments(
+              context,
+              profilesController,
+              accountProviders.defaultProvider
+            )
+            CatalogFeedWebFragment.create(arguments)
+          },
           R.id.tabBooks to {
             createBooksFragment(
               context = context,
