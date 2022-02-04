@@ -5,6 +5,7 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Base64
 import android.view.View
+import android.webkit.ConsoleMessage
 import android.webkit.CookieManager
 import android.webkit.JavascriptInterface
 import android.webkit.WebChromeClient
@@ -70,14 +71,31 @@ class CatalogFeedWebFragment : Fragment(R.layout.catalog_feed_web) {
     webView.webChromeClient = object : WebChromeClient() {
       override fun onConsoleMessage(message: String?, lineNumber: Int, sourceID: String?) {
         logger.debug("JS Console: $message")
-        super.onConsoleMessage(message, lineNumber, sourceID)
+      }
+
+      override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
+        logger.debug("JS Console: ${consoleMessage?.message()}")
+        return true
       }
     }
     webView.addJavascriptInterface(CatalogWebInterface { loadBookDetail(it) }, "AndroidCatalog")
 
+    logger.error("ParamsURI: ${(parameters as CatalogFeedArguments.CatalogFeedArgumentsRemote).feedURI}")
+
+    val testUrl = "https://simplye-web-git-oe-326-mobile-webview-nypl.vercel.app"
+
+    val initialFeedUri = (parameters as CatalogFeedArguments.CatalogFeedArgumentsRemote).feedURI
+    val slug = with(initialFeedUri.toString()) {
+      when {
+        contains("circulation.openebooks") -> "oe-qa"
+        contains("circulation.librarysimplified") -> "simply-qa"
+        else -> this
+      }
+    }
+
     webView.webViewClient = object : WebViewClient() {
       override fun onPageFinished(view: WebView?, url: String?) {
-        view?.evaluateJavascript(javascriptToInject(), null)
+        view?.evaluateJavascript(javascriptToInject(slug), null)
       }
 
       // override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
@@ -153,19 +171,6 @@ class CatalogFeedWebFragment : Fragment(R.layout.catalog_feed_web) {
       //     false
       //   }
       // }
-    }
-
-    logger.error("ParamsURI: ${(parameters as CatalogFeedArguments.CatalogFeedArgumentsRemote).feedURI}")
-
-    val testUrl = "https://simplye-web-git-oe-326-mobile-webview-nypl.vercel.app"
-
-    val initialFeedUri = (parameters as CatalogFeedArguments.CatalogFeedArgumentsRemote).feedURI
-    val slug = with(initialFeedUri.toString()) {
-      when {
-        contains("circulation.openebooks") -> "oe-qa"
-        contains("circulation.librarysimplified") -> "simply-qa"
-        else -> this
-      }
     }
 
     val cookie = buildAuthCookie(slug)
@@ -249,11 +254,11 @@ class CatalogFeedWebFragment : Fragment(R.layout.catalog_feed_web) {
     }
   }
 
-  private fun javascriptToInject() : String = "(function (document) {\n" +
+  private fun javascriptToInject(slug: String) : String = "(function (document) {\n" +
     "    function handleLinkClick(evt) {\n" +
     "        // determine if it's a book\n" +
     "        var url = new URL(evt.currentTarget.href);\n" +
-    "        var isBookLink = url.pathname.startsWith(\"/oe-qa/book/https\");\n" +
+    "        var isBookLink = url.pathname.startsWith(\"/$slug/book/https\");\n" +
     "        if (isBookLink){\n" +
     "            // don't navigate\n" +
     "            evt.preventDefault();\n" +
@@ -261,6 +266,8 @@ class CatalogFeedWebFragment : Fragment(R.layout.catalog_feed_web) {
     "            var uri = decodeURIComponent(encodedUri);\n" +
     "            console.log(\"BOOK CLICKED\", uri)\n" +
     "            AndroidCatalog.openBookDetail(uri)\n" +
+    "        } else {\n" +
+    "            console.log(\"URL did not match bookLink: \", url.pathname)\n" +
     "        }\n" +
     "    }\n" +
     "    var links = document.querySelectorAll(\"a\");\n" +
