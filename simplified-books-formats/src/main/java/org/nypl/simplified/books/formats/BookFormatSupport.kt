@@ -8,6 +8,7 @@ import org.nypl.simplified.books.api.BookDRMKind.LCP
 import org.nypl.simplified.books.api.BookDRMKind.NONE
 import org.nypl.simplified.books.formats.api.BookFormatSupportType
 import org.nypl.simplified.books.formats.api.StandardFormatNames
+import org.nypl.simplified.opds.core.OPDSAcquisitionPath
 import org.slf4j.LoggerFactory
 
 /**
@@ -152,5 +153,20 @@ class BookFormatSupport private constructor(
       ACS -> this.parameters.supportsAdobeDRM
       AXIS -> this.parameters.supportsAxisNow
     }
+  }
+
+  override fun getDRMKind(
+    typePath: List<MIMEType>
+  ): BookDRMKind {
+
+    if (StandardFormatNames.adobeACSMFiles in typePath) {
+      return ACS
+    }
+
+    if (StandardFormatNames.axisNow in typePath) {
+      return AXIS
+    }
+
+    return NONE
   }
 }

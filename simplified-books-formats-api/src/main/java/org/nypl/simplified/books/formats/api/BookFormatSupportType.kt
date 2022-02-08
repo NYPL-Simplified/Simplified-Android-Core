@@ -32,4 +32,12 @@ interface BookFormatSupportType {
    */
 
   fun isDRMSupported(drmKind: BookDRMKind): Boolean
+
+  /**
+   * @return the DRM kind associated with the given acquisition path if any
+   */
+
+  fun getDRMKind(
+    typePath: List<MIMEType>
+  ): BookDRMKind
 }
