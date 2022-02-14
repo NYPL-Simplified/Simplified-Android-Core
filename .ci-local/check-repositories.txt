@@ -4,4 +4,3 @@
 #
 
 https://jitpack.io/
-https://dl.google.com/dl/android/maven2/
