@@ -2,13 +2,8 @@ package org.nypl.simplified.books.formats
 
 import one.irradia.mime.api.MIMEType
 import org.nypl.simplified.books.api.BookDRMKind
-import org.nypl.simplified.books.api.BookDRMKind.ACS
-import org.nypl.simplified.books.api.BookDRMKind.AXIS
-import org.nypl.simplified.books.api.BookDRMKind.LCP
-import org.nypl.simplified.books.api.BookDRMKind.NONE
 import org.nypl.simplified.books.formats.api.BookFormatSupportType
 import org.nypl.simplified.books.formats.api.StandardFormatNames
-import org.nypl.simplified.opds.core.OPDSAcquisitionPath
 import org.slf4j.LoggerFactory
 
 /**
@@ -148,10 +143,10 @@ class BookFormatSupport private constructor(
 
   override fun isDRMSupported(drmKind: BookDRMKind): Boolean {
     return when (drmKind) {
-      NONE -> true
-      LCP -> this.parameters.supportsLCP
-      ACS -> this.parameters.supportsAdobeDRM
-      AXIS -> this.parameters.supportsAxisNow
+      BookDRMKind.NONE -> true
+      BookDRMKind.LCP -> this.parameters.supportsLCP
+      BookDRMKind.ACS -> this.parameters.supportsAdobeDRM
+      BookDRMKind.AXIS -> this.parameters.supportsAxisNow
     }
   }
 
@@ -160,13 +155,13 @@ class BookFormatSupport private constructor(
   ): BookDRMKind {
 
     if (StandardFormatNames.adobeACSMFiles in typePath) {
-      return ACS
+      return BookDRMKind.ACS
     }
 
     if (StandardFormatNames.axisNow in typePath) {
-      return AXIS
+      return BookDRMKind.AXIS
     }
 
-    return NONE
+    return BookDRMKind.NONE
   }
 }

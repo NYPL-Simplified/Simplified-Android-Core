@@ -24,7 +24,6 @@ class BorrowAcquisitionsTest {
     return url.openStream()
   }
 
-
   @Test
   fun adobeIsPreferredOverAxis() {
     val support =
