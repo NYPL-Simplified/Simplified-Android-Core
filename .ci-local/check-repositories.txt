@@ -3,6 +3,5 @@
 # repositories holding Maven packages.
 #
 
-http://maven.findawayworld.com/artifactory/libs-release/
 https://jitpack.io/
 https://dl.google.com/dl/android/maven2/
