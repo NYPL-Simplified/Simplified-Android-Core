@@ -2,6 +2,7 @@ package org.nypl.simplified.tests.books.formats
 
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import org.nypl.simplified.books.api.BookDRMKind
 import org.nypl.simplified.books.formats.BookFormatAudioSupportParameters
 import org.nypl.simplified.books.formats.BookFormatSupport
 import org.nypl.simplified.books.formats.BookFormatSupportParameters
@@ -111,6 +112,81 @@ class BookFormatSupportTest {
       supportWithout.isSupportedPath(
         listOf(
           StandardFormatNames.adobeACSMFiles,
+          StandardFormatNames.genericEPUBFiles
+        )
+      )
+    )
+  }
+
+  /**
+   * Acquisition paths through ACS are associated with BookDRMKind.ACS.
+   */
+
+  @Test
+  fun testDRMKindAdobe() {
+    val support =
+      BookFormatSupport.create(
+        BookFormatSupportParameters(
+          supportsPDF = false,
+          supportsLCP = false,
+          supportsAdobeDRM = true,
+          supportsAxisNow = false,
+          supportsAudioBooks = null
+        )
+      )
+    Assertions.assertEquals(
+      BookDRMKind.ACS,
+      support.getDRMKind(
+        listOf(
+          StandardFormatNames.adobeACSMFiles,
+          StandardFormatNames.genericEPUBFiles
+        )
+      )
+    )
+  }
+
+  /**
+   * Acquisition paths through AxisNow are associated with BookDRMKind.AXIS.
+   */
+
+  @Test
+  fun testDRMKindAxis() {
+    val support =
+      BookFormatSupport.create(
+        BookFormatSupportParameters(
+          supportsPDF = false,
+          supportsLCP = false,
+          supportsAdobeDRM = false,
+          supportsAxisNow = true,
+          supportsAudioBooks = null
+        )
+      )
+    Assertions.assertEquals(
+      BookDRMKind.AXIS,
+      support.getDRMKind(
+        listOf(
+          StandardFormatNames.axisNow
+        )
+      )
+    )
+  }
+
+  @Test
+  fun testDRMKindNone() {
+    val support =
+      BookFormatSupport.create(
+        BookFormatSupportParameters(
+          supportsPDF = false,
+          supportsLCP = false,
+          supportsAdobeDRM = false,
+          supportsAxisNow = false,
+          supportsAudioBooks = null
+        )
+      )
+    Assertions.assertEquals(
+      BookDRMKind.NONE,
+      support.getDRMKind(
+        listOf(
           StandardFormatNames.genericEPUBFiles
         )
       )
