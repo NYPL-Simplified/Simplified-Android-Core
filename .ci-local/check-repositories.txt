@@ -3,4 +3,3 @@
 # repositories holding Maven packages.
 #
 
-https://jitpack.io/
