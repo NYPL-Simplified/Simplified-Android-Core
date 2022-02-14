@@ -1,0 +1,92 @@
+<entry xmlns:bibframe="http://bibframe.org/vocab/" xmlns:dcterms="http://purl.org/dc/terms/"
+    xmlns:opds="http://opds-spec.org/2010/catalog" xmlns:schema="http://schema.org/"
+    xmlns:simplified="http://librarysimplified.org/terms/" xmlns="http://www.w3.org/2005/Atom"
+    schema:additionalType="http://schema.org/EBook">
+    <title>The Hands-off Manager</title>
+    <author>
+        <name>Duane Black</name>
+        <link rel="contributor"
+            type="application/atom+xml;profile=opds-catalog;kind=acquisition"
+            title="Duane Black"
+            href="https://circulation.librarysimplified.org/NYNYPL/works/contributor/Duane%20Black/eng/Adult%2CAdults%2BOnly%2CAll%2BAges%2CChildren%2CYoung%2BAdult"/>
+    </author>
+    <author>
+        <name>Steve Chandler</name>
+        <link rel="contributor"
+            type="application/atom+xml;profile=opds-catalog;kind=acquisition"
+            title="Steve Chandler"
+            href="https://circulation.librarysimplified.org/NYNYPL/works/contributor/Steve%20Chandler/eng/Adult%2CAdults%2BOnly%2CAll%2BAges%2CChildren%2CYoung%2BAdult"/>
+    </author>
+    <summary type="html">The number one reason cited in exit interviews for an employee quitting is...</summary>
+    <simplified:pwid>7b6cc84f-9679-0b35-47f8-f11746810689</simplified:pwid>
+    <link
+        rel="http://opds-spec.org/image"
+        href="http://contentcafecloud.baker-taylor.com/Jacket.svc/D65D0665-050A-487B-9908-16E6D8FF5C3E/9781601635921/Large/Logo"
+        type="image/png"/>
+    <link
+        rel="http://opds-spec.org/image/thumbnail"
+        href="http://contentcafecloud.baker-taylor.com/Jacket.svc/D65D0665-050A-487B-9908-16E6D8FF5C3E/9781601635921/Medium/Logo"
+        type="image/png"/>
+    <category
+        scheme="http://librarysimplified.org/terms/fiction/"
+        term="http://librarysimplified.org/terms/fiction/Nonfiction"
+        label="Nonfiction"/>
+    <category
+        scheme="http://librarysimplified.org/terms/genres/Simplified/"
+        term="http://librarysimplified.org/terms/genres/Simplified/Management%20%26%20Leadership"
+        label="Management &amp; Leadership"/>
+    <category
+        scheme="http://schema.org/audience"
+        term="Adult"
+        label="Adult"/>
+    <dcterms:language>en</dcterms:language>
+    <dcterms:publisher>Red Wheel Weiser</dcterms:publisher>
+    <dcterms:issued>2012-03-22</dcterms:issued>
+    <link
+        rel="issues"
+        href="https://circulation.librarysimplified.org/NYNYPL/works/Axis%20360%20ID/0010862813/report"/>
+    <id>urn:librarysimplified.org/terms/id/Axis%20360%20ID/0010862813</id>
+    <link
+        rel="alternate"
+        href="https://circulation.librarysimplified.org/NYNYPL/works/Axis%20360%20ID/0010862813"
+        type="application/atom+xml;type=entry;profile=opds-catalog" />
+    <bibframe:distribution bibframe:ProviderName="Axis 360"/>
+    <published>2021-07-30T00:00:00Z</published>
+    <updated>2022-02-07T19:45:43+00:00</updated>
+    <link
+        type="application/atom+xml;type=entry;profile=opds-catalog"
+        rel="http://opds-spec.org/acquisition/borrow"
+        href="https://circulation.librarysimplified.org/NYNYPL/works/Axis%20360%20ID/0010862813/borrow/2">
+        <opds:indirectAcquisition type="application/vnd.adobe.adept+xml">
+            <opds:indirectAcquisition type="application/epub+zip"/>
+        </opds:indirectAcquisition>
+        <opds:availability status="available"/>
+        <opds:holds total="0"/>
+        <opds:copies total="2" available="2"/>
+    </link>
+    <link
+        type="application/atom+xml;type=entry;profile=opds-catalog"
+        rel="http://opds-spec.org/acquisition/borrow"
+        href="https://circulation.librarysimplified.org/NYNYPL/works/Axis%20360%20ID/0010862813/borrow/28">
+        <opds:indirectAcquisition type="application/vnd.librarysimplified.axisnow+json"/>
+        <opds:availability status="available"/>
+        <opds:holds total="0"/>
+        <opds:copies total="2" available="2"/>
+    </link>
+    <link
+        rel="recommendations"
+        type="application/atom+xml;profile=opds-catalog;kind=acquisition"
+        title="Recommended Works"
+        href="https://circulation.librarysimplified.org/NYNYPL/works/Axis%20360%20ID/0010862813/recommendations" />
+    <link
+        rel="related" type="application/atom+xml;profile=opds-catalog;kind=acquisition"
+        title="Recommended Works"
+        href="https://circulation.librarysimplified.org/NYNYPL/works/Axis%20360%20ID/0010862813/related_books" />
+    <link
+        rel="http://www.w3.org/ns/oa#annotationService"
+        type="application/ld+json; profile=&quot;http://www.w3.org/ns/anno.jsonld&quot;"
+        href="https://circulation.librarysimplified.org/NYNYPL/annotations/Axis%20360%20ID/0010862813" />
+    <link
+        rel="http://librarysimplified.org/terms/rel/analytics/open-book"
+        href="https://circulation.librarysimplified.org/NYNYPL/analytics/Axis%20360%20ID/0010862813/open_book" />
+</entry>

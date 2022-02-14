@@ -23,4 +23,8 @@ class MockBookFormatSupport : BookFormatSupportType {
   override fun isDRMSupported(drmKind: BookDRMKind): Boolean {
     return true
   }
+
+  override fun getDRMKind(typePath: List<MIMEType>): BookDRMKind {
+    return BookDRMKind.NONE
+  }
 }
