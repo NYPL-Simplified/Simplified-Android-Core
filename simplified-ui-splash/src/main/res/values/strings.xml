@@ -14,6 +14,6 @@
   <!-- Library selection screen strings -->
   <string name="selectionTitle">Read E-Books from Your Library</string>
   <string name="selectionButton">Find Your Library</string>
-  <string name="selectionAlternateTitle">Browse the SimplyE Collection</string>
+  <string name="selectionAlternateTitle">Browse Books for All</string>
   <string name="selectionAlternateButton">Add a Library Later</string>
 </resources>

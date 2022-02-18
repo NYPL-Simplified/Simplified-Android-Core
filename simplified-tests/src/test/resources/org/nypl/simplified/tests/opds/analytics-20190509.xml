@@ -304,10 +304,10 @@
   </entry>
   <link href="https://circulation.librarysimplified.org/CLASSICS/groups/" rel="start" title="All Books"/>
   <link href="https://circulation.librarysimplified.org/CLASSICS/search/1831?q=corner&amp;after=10&amp;entrypoint=Book&amp;size=10" rel="next"/>
-  <link href="https://circulation.librarysimplified.org/CLASSICS/groups/1831" rel="up" title="The SimplyE Collection"/>
+  <link href="https://circulation.librarysimplified.org/CLASSICS/groups/1831" rel="up" title="Books for All"/>
   <simplified:breadcrumbs>
     <link href="https://circulation.librarysimplified.org/CLASSICS/groups/" title="All Books"/>
-    <link href="https://circulation.librarysimplified.org/CLASSICS/groups/1831" title="The SimplyE Collection"/>
+    <link href="https://circulation.librarysimplified.org/CLASSICS/groups/1831" title="Books for All"/>
   </simplified:breadcrumbs>
   <link href="https://circulation.librarysimplified.org/CLASSICS/authentication_document" rel="http://opds-spec.org/auth/document"/>
   <link href="https://circulation.librarysimplified.org/CLASSICS/search/1831?entrypoint=Book" type="application/opensearchdescription+xml" rel="search"/>
