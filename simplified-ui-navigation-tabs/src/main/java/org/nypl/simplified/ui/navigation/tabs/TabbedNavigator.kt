@@ -70,7 +70,7 @@ class TabbedNavigator private constructor (private val navigator: BottomNavigato
   }
 
   fun popToRoot(): Boolean {
-    val isAtRootOfStack = (1 == this.navigator.currentStackSize())
+    val isAtRootOfStack = (backStackSize() == 0)
     if (isAtRootOfStack) {
       return false // Nothing to do
     }
@@ -80,7 +80,8 @@ class TabbedNavigator private constructor (private val navigator: BottomNavigato
   }
 
   fun backStackSize(): Int {
-    // Note: currentStackSize() is not safe to call here as it may throw an NPE.
+    // Note: currentStackSize() is not always safe to call as it may throw an NPE
+    // if this.navigator.currentTab() == -1.
     return this.navigator.stackSize(this.navigator.currentTab()) - 1
   }
 }
