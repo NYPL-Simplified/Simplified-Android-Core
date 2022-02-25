@@ -1,6 +1,5 @@
 package org.nypl.simplified.cardcreator.ui
 
-import android.app.Activity
 import android.graphics.Color
 import android.os.Bundle
 import android.text.SpannableString
@@ -18,6 +17,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.NavController
 import androidx.navigation.NavDirections
 import androidx.navigation.Navigation
+import org.nypl.simplified.cardcreator.CardCreatorActivity
 import org.nypl.simplified.cardcreator.R
 import org.nypl.simplified.cardcreator.databinding.FragmentJuvenilePolicyBinding
 import org.nypl.simplified.cardcreator.model.DependentEligibilityResponse
@@ -94,13 +94,13 @@ class JuvenilePolicyFragment : Fragment() {
       if (validateForm()) {
         getEligibility()
       } else {
-        requireActivity().setResult(Activity.RESULT_CANCELED)
+        requireActivity().setResult(CardCreatorActivity.CARD_CREATION_CANCELED)
         requireActivity().finish()
       }
     }
 
     val callback = requireActivity().onBackPressedDispatcher.addCallback(this) {
-      requireActivity().setResult(Activity.RESULT_CANCELED)
+      requireActivity().setResult(CardCreatorActivity.CARD_CREATION_CANCELED)
       requireActivity().finish()
     }
     callback.isEnabled = true
@@ -153,7 +153,7 @@ class JuvenilePolicyFragment : Fragment() {
     dialogBuilder.setMessage(message)
       .setCancelable(false)
       .setNegativeButton(getString(R.string.cancel)) { _, _ ->
-        requireActivity().setResult(Activity.RESULT_CANCELED)
+        requireActivity().setResult(CardCreatorActivity.CARD_CREATION_CANCELED)
         requireActivity().finish()
       }
     if (dialog == null) {

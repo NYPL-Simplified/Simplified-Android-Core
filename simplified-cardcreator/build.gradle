@@ -1,6 +1,10 @@
+apply plugin: 'kotlin-kapt'
+
+apply from: "$rootProject.projectDir/build_test.gradle"
+
 android {
   buildFeatures {
-    viewBinding = true
+    dataBinding true
   }
 }
 
@@ -23,4 +27,8 @@ dependencies {
   implementation libs.retrofit2
   implementation libs.retrofit2.moshi
   implementation libs.okhttp3.logging.interceptor
+
+  // Temporary workaround to force databinding codegen in Robolectric tests
+  // https://github.com/robolectric/robolectric/issues/3789
+  kaptTest libs.androidx.databinding.kapt
 }

@@ -1,113 +1,116 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context=".ui.JuvenileInformationFragment">
+    xmlns:tools="http://schemas.android.com/tools">
 
     <LinearLayout
-        android:id="@+id/header"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:orientation="vertical"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <TextView
-            android:id="@+id/header_error_tv"
-            style="@style/WizardHeader"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/personal_information" />
-
-        <TextView
-            android:id="@+id/header_status_desc_tv"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="16sp"
-            android:layout_marginRight="8dp"
-            android:layout_marginBottom="8dp"
-            android:fontFamily="sans-serif"
-            android:gravity="center"
-            android:textSize="16sp" />
-    </LinearLayout>
-
-    <ScrollView
-        android:id="@+id/form"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:paddingLeft="16dp"
-        android:paddingTop="16dp"
-        android:paddingRight="16dp"
-        android:scrollbarStyle="outsideOverlay">
+        tools:context=".ui.JuvenileInformationFragment">
 
         <LinearLayout
+            android:id="@+id/header"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-
-            <TextView
-                style="@style/WizardFormLabel"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/first_name" />
-
-            <EditText
-                android:id="@+id/first_name_et"
-                style="@style/WizardFormEditText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/required"
-                android:inputType="text" />
+            android:orientation="vertical"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
             <TextView
-                style="@style/WizardFormLabel"
+                android:id="@+id/header_error_tv"
+                style="@style/WizardHeader"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/last_name" />
+                android:text="@string/personal_information" />
 
-            <EditText
-                android:id="@+id/last_name_et"
-                style="@style/WizardFormEditText"
+            <TextView
+                android:id="@+id/header_status_desc_tv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/optional"
-                android:inputType="text" />
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="16sp"
+                android:layout_marginRight="8dp"
+                android:layout_marginBottom="8dp"
+                android:fontFamily="sans-serif"
+                android:gravity="center"
+                android:textSize="16sp" />
+        </LinearLayout>
+
+        <ScrollView
+            android:id="@+id/form"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:paddingLeft="16dp"
+            android:paddingTop="16dp"
+            android:paddingRight="16dp"
+            android:scrollbarStyle="outsideOverlay">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+
+                <TextView
+                    style="@style/WizardFormLabel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/first_name" />
+
+                <EditText
+                    android:id="@+id/first_name_et"
+                    style="@style/WizardFormEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/required"
+                    android:inputType="text" />
+
+                <TextView
+                    style="@style/WizardFormLabel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/last_name" />
+
+                <EditText
+                    android:id="@+id/last_name_et"
+                    style="@style/WizardFormEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/optional"
+                    android:inputType="text" />
+
+            </LinearLayout>
+        </ScrollView>
+
+        <LinearLayout
+            android:id="@+id/nav_buttons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/prev_btn"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:text="@string/previous"
+                android:textAllCaps="true" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/next_btn"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:enabled="false"
+                android:text="@string/next"
+                android:textAllCaps="true" />
 
         </LinearLayout>
-    </ScrollView>
-
-    <LinearLayout
-        android:id="@+id/nav_buttons"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/prev_btn"
-            style="?android:attr/buttonBarButtonStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="50dp"
-            android:layout_weight="1"
-            android:text="@string/previous"
-            android:textAllCaps="true" />
-
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/next_btn"
-            style="?android:attr/buttonBarButtonStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="50dp"
-            android:layout_weight="1"
-            android:enabled="false"
-            android:text="@string/next"
-            android:textAllCaps="true" />
 
     </LinearLayout>
-
-</LinearLayout>
+</layout>

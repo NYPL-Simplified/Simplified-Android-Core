@@ -1,6 +1,5 @@
 package org.nypl.simplified.cardcreator
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -19,10 +18,14 @@ class CardCreatorContract(
     val isLoggedIn: Boolean
   )
 
-  data class Output(
-    val barcode: String,
-    val pin: String
-  )
+  sealed class Output {
+    data class CardCreated(
+      val barcode: String,
+      val pin: String,
+    ) : Output()
+    object ChildCardCreated : Output()
+    object CardCreationNoOp : Output() // Covers cancellation and error
+  }
 
   override fun createIntent(context: Context, input: Input): Intent {
     val extras = this.createExtras(input)
@@ -42,18 +45,18 @@ class CardCreatorContract(
     )
 
   override fun parseResult(resultCode: Int, intent: Intent?): Output =
-    if (intent == null || resultCode != Activity.RESULT_OK) {
-      Output("", "")
-    } else {
-      this.parseResult(intent.extras!!)
+    when {
+      intent == null -> Output.CardCreationNoOp // ??
+      intent.extras == null -> Output.CardCreationNoOp // ??
+      resultCode == CardCreatorActivity.CHILD_CARD_CREATED -> Output.ChildCardCreated
+      resultCode == CardCreatorActivity.CARD_CREATED -> {
+        Output.CardCreated(
+          intent.extras!!.getString(BARCODE_KEY)!!,
+          intent.extras!!.getString(PIN_KEY)!!
+        )
+      }
+      else -> Output.CardCreationNoOp
     }
-
-  private fun parseResult(result: Bundle): Output {
-    val barcode = result.getString(BARCODE_KEY)!!
-    val pin = result.getString(PIN_KEY)!!
-
-    return Output(barcode, pin)
-  }
 
   companion object {
     private const val USERNAME_KEY = "username"

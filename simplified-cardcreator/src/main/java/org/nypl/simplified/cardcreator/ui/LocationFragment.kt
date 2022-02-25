@@ -1,7 +1,6 @@
 package org.nypl.simplified.cardcreator.ui
 
 import android.Manifest
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -25,6 +24,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.NavController
 import androidx.navigation.NavDirections
 import androidx.navigation.Navigation
+import org.nypl.simplified.cardcreator.CardCreatorActivity
 import org.nypl.simplified.cardcreator.CardCreatorDebugging
 import org.nypl.simplified.cardcreator.R
 import org.nypl.simplified.cardcreator.databinding.FragmentLocationBinding
@@ -32,7 +32,7 @@ import org.nypl.simplified.cardcreator.utils.getCache
 import org.nypl.simplified.cardcreator.utils.startEllipses
 import org.nypl.simplified.cardcreator.viewmodel.CardCreatorViewModel
 import org.slf4j.LoggerFactory
-import java.util.Locale
+import java.util.*
 
 /**
  * The Location screens that gates users who are not in New York
@@ -119,8 +119,7 @@ class LocationFragment : Fragment(), LocationListener {
           navController.navigate(nextAction)
         }
       } else {
-        val data = Intent()
-        requireActivity().setResult(Activity.RESULT_CANCELED, data)
+        requireActivity().setResult(CardCreatorActivity.CARD_CREATION_CANCELED)
         requireActivity().finish()
       }
     }

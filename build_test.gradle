@@ -35,6 +35,7 @@ dependencies {
 
   // Espresso
   testImplementation libs.androidx.test.espresso.core
+  testImplementation 'androidx.test.espresso:espresso-intents:3.5.0-alpha03'
 
   // Assertions
   testImplementation libs.kluent.android
