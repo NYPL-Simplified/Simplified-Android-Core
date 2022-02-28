@@ -26,7 +26,8 @@ import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Locale
+import java.util.Date
 
 class ConfirmationFragment : Fragment() {
 
@@ -54,7 +55,8 @@ class ConfirmationFragment : Fragment() {
     super.onViewCreated(view, savedInstanceState)
 
     binding.nameCard.text = confirmationFragmentArgs.name
-    binding.cardBarcode.text = getString(R.string.user_card_number, confirmationFragmentArgs.barcode)
+    binding.cardBarcode.text =
+      getString(R.string.user_card_number, confirmationFragmentArgs.barcode)
     binding.cardPin.text = getString(R.string.user_password, confirmationFragmentArgs.password)
     binding.headerStatusDescTv.text = confirmationFragmentArgs.message
 
@@ -69,7 +71,10 @@ class ConfirmationFragment : Fragment() {
 
     // Go to previous screen
     binding.prevBtn.setOnClickListener {
-      if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE)
+      if (ContextCompat.checkSelfPermission(
+          requireContext(),
+          Manifest.permission.WRITE_EXTERNAL_STORAGE
+        )
         != PackageManager.PERMISSION_GRANTED
       ) {
         logger.debug("Requesting storage permission")
@@ -105,7 +110,8 @@ class ConfirmationFragment : Fragment() {
           outStream.close()
           addCardToGallery(f)
 
-          Toast.makeText(requireContext(), getString(R.string.card_saved), Toast.LENGTH_SHORT).show()
+          Toast.makeText(requireContext(), getString(R.string.card_saved), Toast.LENGTH_SHORT)
+            .show()
         }
       } catch (e: Exception) {
         logger.error("Error creating digital card", e)
@@ -154,7 +160,10 @@ class ConfirmationFragment : Fragment() {
    * Returns result to caller with card details
    */
   private fun returnResult() {
-    val bundle = CardCreatorContract.createResult(confirmationFragmentArgs.barcode, confirmationFragmentArgs.password)
+    val bundle = CardCreatorContract.createResult(
+      confirmationFragmentArgs.barcode,
+      confirmationFragmentArgs.password
+    )
       .apply {
         putString("username", confirmationFragmentArgs.username)
         putString("message", confirmationFragmentArgs.message)

@@ -52,8 +52,8 @@ class ConfirmationFragmentTest {
     onView(withId(R.id.card_pin)).check(matches(withText("Password: testPassword")))
     onView(withId(R.id.header_status_desc_tv)).check(matches(withText("testMessage")))
 
-    //set up time stub
-    //onView(withId(R.id.header_status_desc_tv)).check(matches(withText("testTime")))
+    // set up time stub
+    // onView(withId(R.id.header_status_desc_tv)).check(matches(withText("testTime")))
   }
 
   @Test
@@ -124,6 +124,3 @@ fun <F : Fragment> FragmentScenario<F>.setActivityIntent(customIntent: Intent) {
     }
   }
 }
-
-
-

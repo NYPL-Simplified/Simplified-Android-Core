@@ -32,7 +32,7 @@ import org.nypl.simplified.cardcreator.utils.getCache
 import org.nypl.simplified.cardcreator.utils.startEllipses
 import org.nypl.simplified.cardcreator.viewmodel.CardCreatorViewModel
 import org.slf4j.LoggerFactory
-import java.util.*
+import java.util.Locale
 
 /**
  * The Location screens that gates users who are not in New York

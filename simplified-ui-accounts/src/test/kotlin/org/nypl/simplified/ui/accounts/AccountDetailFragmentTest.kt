@@ -131,10 +131,12 @@ class AccountDetailFragmentTest {
 
     // covers initial reconfigureAccountUI state
     every { mockAccountDetailViewModel.account.loginState } returns
-      AccountLoginState.AccountLoggedIn(mockk<AccountAuthenticationCredentials.Basic> {
-        every { userName.value } returns "userName"
-        every { password.value } returns "password"
-      })
+      AccountLoginState.AccountLoggedIn(
+        mockk<AccountAuthenticationCredentials.Basic> {
+          every { userName.value } returns "userName"
+          every { password.value } returns "password"
+        }
+      )
 
     testProviderBasicAuthDescription = AccountProviderAuthenticationDescription.Basic(
       "description",
