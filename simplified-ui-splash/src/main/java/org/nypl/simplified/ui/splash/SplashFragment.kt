@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentResultListener
 import androidx.fragment.app.commit
-import androidx.lifecycle.ViewModelProvider
 import org.librarysimplified.documents.DocumentStoreType
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.listeners.api.FragmentListenerType
@@ -30,8 +29,6 @@ class SplashFragment : Fragment(R.layout.splash_fragment), FragmentResultListene
     when (childFragmentManager.fragments.last()) {
       is BootFragment -> onBootCompleted()
       is EulaFragment -> onEulaFinished()
-      is MigrationProgressFragment -> onMigrationCompleted()
-      is MigrationReportFragment -> onMigrationReportFinished()
     }
   }
 
@@ -59,32 +56,6 @@ class SplashFragment : Fragment(R.layout.splash_fragment), FragmentResultListene
       requireActivity().finish()
     }
 
-    val migrationViewModel =
-      ViewModelProvider(this)
-        .get(MigrationViewModel::class.java)
-
-    if (migrationViewModel.anyMigrationNeedToRun()) {
-      showMigrationRunning()
-    } else {
-      this.logger.debug("no migration to run")
-      onMigrationReportFinished()
-    }
-  }
-
-  private fun onMigrationCompleted() {
-    val migrationViewModel =
-      ViewModelProvider(this)
-        .get(MigrationViewModel::class.java)
-
-    if (migrationViewModel.migrationReport.value != null) {
-      showMigrationReport()
-    } else {
-      this.logger.debug("no report to show")
-      onMigrationReportFinished()
-    }
-  }
-
-  private fun onMigrationReportFinished() {
     this.listener.post(SplashEvent.SplashCompleted)
   }
 
@@ -92,20 +63,6 @@ class SplashFragment : Fragment(R.layout.splash_fragment), FragmentResultListene
     this.logger.debug("showEula")
     childFragmentManager.commit {
       replace(R.id.splash_fragment_container, EulaFragment::class.java, Bundle())
-    }
-  }
-
-  private fun showMigrationRunning() {
-    this.logger.debug("showMigrationRunning")
-    childFragmentManager.commit {
-      replace(R.id.splash_fragment_container, MigrationProgressFragment::class.java, Bundle())
-    }
-  }
-
-  private fun showMigrationReport() {
-    this.logger.debug("showMigrationReport")
-    childFragmentManager.commit {
-      replace(R.id.splash_fragment_container, MigrationReportFragment::class.java, Bundle())
     }
   }
 }

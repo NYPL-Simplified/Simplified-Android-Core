@@ -19,7 +19,6 @@ dependencies {
   implementation project(":simplified-analytics-api")
   implementation project(":simplified-books-controller-api")
   implementation project(":simplified-buildconfig-api")
-  implementation project(":simplified-migration-fake")
   implementation project(":simplified-oauth")
   implementation project(":simplified-services-api")
   implementation project(":simplified-tests")
