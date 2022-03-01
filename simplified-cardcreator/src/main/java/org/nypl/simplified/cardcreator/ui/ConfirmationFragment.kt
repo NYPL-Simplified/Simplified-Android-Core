@@ -1,7 +1,6 @@
 package org.nypl.simplified.cardcreator.ui
 
 import android.Manifest
-import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -18,6 +17,7 @@ import androidx.fragment.app.Fragment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.nypl.simplified.cardcreator.CardCreatorActivity
 import org.nypl.simplified.cardcreator.CardCreatorContract
 import org.nypl.simplified.cardcreator.R
 import org.nypl.simplified.cardcreator.databinding.FragmentConfirmationBinding
@@ -32,7 +32,9 @@ import java.util.Date
 class ConfirmationFragment : Fragment() {
 
   private val logger = LoggerFactory.getLogger(ConfirmationFragment::class.java)
-  private val bundle by lazy { ConfirmationFragmentArgs.fromBundle(requireArguments()) }
+  private val confirmationFragmentArgs by lazy {
+    ConfirmationFragmentArgs.fromBundle(requireArguments())
+  }
 
   private var _binding: FragmentConfirmationBinding? = null
   private val binding get() = _binding!!
@@ -52,10 +54,11 @@ class ConfirmationFragment : Fragment() {
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
 
-    binding.nameCard.text = bundle.name
-    binding.cardBarcode.text = getString(R.string.user_card_number, bundle.barcode)
-    binding.cardPin.text = getString(R.string.user_password, bundle.password)
-    binding.headerStatusDescTv.text = bundle.message
+    binding.nameCard.text = confirmationFragmentArgs.name
+    binding.cardBarcode.text =
+      getString(R.string.user_card_number, confirmationFragmentArgs.barcode)
+    binding.cardPin.text = getString(R.string.user_password, confirmationFragmentArgs.password)
+    binding.headerStatusDescTv.text = confirmationFragmentArgs.message
 
     val currentDate: String = SimpleDateFormat(dateFormat, Locale.getDefault()).format(Date())
     binding.issued.text = getString(R.string.issued_date, currentDate)
@@ -68,7 +71,10 @@ class ConfirmationFragment : Fragment() {
 
     // Go to previous screen
     binding.prevBtn.setOnClickListener {
-      if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE)
+      if (ContextCompat.checkSelfPermission(
+          requireContext(),
+          Manifest.permission.WRITE_EXTERNAL_STORAGE
+        )
         != PackageManager.PERMISSION_GRANTED
       ) {
         logger.debug("Requesting storage permission")
@@ -104,7 +110,8 @@ class ConfirmationFragment : Fragment() {
           outStream.close()
           addCardToGallery(f)
 
-          Toast.makeText(requireContext(), getString(R.string.card_saved), Toast.LENGTH_SHORT).show()
+          Toast.makeText(requireContext(), getString(R.string.card_saved), Toast.LENGTH_SHORT)
+            .show()
         }
       } catch (e: Exception) {
         logger.error("Error creating digital card", e)
@@ -153,18 +160,21 @@ class ConfirmationFragment : Fragment() {
    * Returns result to caller with card details
    */
   private fun returnResult() {
-    val bundle = CardCreatorContract.createResult(bundle.barcode, bundle.password)
+    val bundle = CardCreatorContract.createResult(
+      confirmationFragmentArgs.barcode,
+      confirmationFragmentArgs.password
+    )
       .apply {
-        putString("username", bundle.username)
-        putString("message", bundle.message)
+        putString("username", confirmationFragmentArgs.username)
+        putString("message", confirmationFragmentArgs.message)
       }
     val data = Intent().apply {
       putExtras(bundle)
     }
     if (requireActivity().intent.getBooleanExtra("isLoggedIn", false)) {
-      requireActivity().setResult(Activity.RESULT_CANCELED, data)
+      requireActivity().setResult(CardCreatorActivity.CHILD_CARD_CREATED, data)
     } else {
-      requireActivity().setResult(Activity.RESULT_OK, data)
+      requireActivity().setResult(CardCreatorActivity.CARD_CREATED, data)
     }
     Cache(requireContext()).clear()
     requireActivity().finish()

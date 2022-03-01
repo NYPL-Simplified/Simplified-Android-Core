@@ -1,5 +1,6 @@
 package org.nypl.simplified.cardcreator
 
+import android.app.Activity
 import android.graphics.Color
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
@@ -16,6 +17,13 @@ import org.nypl.simplified.cardcreator.viewmodel.CardCreatorViewModelFactory
  * Should be with startActivityForResult
  */
 class CardCreatorActivity : AppCompatActivity() {
+
+  companion object {
+    const val CARD_CREATED = Activity.RESULT_OK
+    const val CARD_CREATION_CANCELED = Activity.RESULT_CANCELED
+    const val CHILD_CARD_CREATED = Activity.RESULT_FIRST_USER
+    const val CARD_CREATION_ERROR = Activity.RESULT_FIRST_USER + 1
+  }
 
   private lateinit var binding: ActivityCardCreatorBinding
 

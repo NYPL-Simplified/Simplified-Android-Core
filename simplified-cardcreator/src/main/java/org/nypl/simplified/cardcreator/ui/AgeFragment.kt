@@ -1,6 +1,5 @@
 package org.nypl.simplified.cardcreator.ui
 
-import android.app.Activity
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,6 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import androidx.navigation.NavDirections
 import androidx.navigation.Navigation
+import org.nypl.simplified.cardcreator.CardCreatorActivity
 import org.nypl.simplified.cardcreator.R
 import org.nypl.simplified.cardcreator.databinding.FragmentAgeBinding
 import org.nypl.simplified.cardcreator.utils.Cache
@@ -76,7 +76,7 @@ class AgeFragment : Fragment() {
         nextAction = AgeFragmentDirections.actionNext()
         navController.navigate(nextAction)
       } else {
-        requireActivity().setResult(Activity.RESULT_CANCELED)
+        requireActivity().setResult(CardCreatorActivity.CARD_CREATION_CANCELED)
         requireActivity().finish()
       }
     }

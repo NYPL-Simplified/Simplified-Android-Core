@@ -127,7 +127,7 @@ class AccountDetailFragment : Fragment(R.layout.account) {
 
   companion object {
 
-    private const val PARAMETERS_ID =
+    internal const val PARAMETERS_ID =
       "org.nypl.simplified.ui.accounts.AccountFragment.parameters"
 
     /**
@@ -938,14 +938,20 @@ class AccountDetailFragment : Fragment(R.layout.account) {
 
   private fun onCardCreatorResult(result: CardCreatorContract.Output?) {
     if (result == null) {
-      this.logger.debug("User has exited the card creator")
+      logger.debug("User has exited the card creator")
       return
     }
 
-    this.authenticationViews.setBasicUserAndPass(
-      user = result.barcode,
-      password = result.pin
-    )
-    this.tryLogin()
+    when (result) {
+      is CardCreatorContract.Output.CardCreated -> {
+        authenticationViews.setBasicUserAndPass(
+          user = result.barcode,
+          password = result.pin
+        )
+        tryLogin()
+      }
+      CardCreatorContract.Output.CardCreationNoOp -> logger.debug("Card creator cancellation or error")
+      CardCreatorContract.Output.ChildCardCreated -> logger.debug("Child card created")
+    }
   }
 }

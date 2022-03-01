@@ -1,6 +1,5 @@
 package org.nypl.simplified.cardcreator.ui
 
-import android.app.Activity
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -13,6 +12,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.NavController
 import androidx.navigation.NavDirections
 import androidx.navigation.Navigation
+import org.nypl.simplified.cardcreator.CardCreatorActivity
 import org.nypl.simplified.cardcreator.R
 import org.nypl.simplified.cardcreator.databinding.FragmentReviewBinding
 import org.nypl.simplified.cardcreator.model.CreatePatronResponse
@@ -132,7 +132,7 @@ class ReviewFragment : Fragment() {
       }
       .setNegativeButton(getString(R.string.quit)) { _, _ ->
         Cache(requireContext()).clear()
-        requireActivity().setResult(Activity.RESULT_CANCELED)
+        requireActivity().setResult(CardCreatorActivity.CARD_CREATION_CANCELED)
         requireActivity().finish()
       }
     if (dialog == null) {
