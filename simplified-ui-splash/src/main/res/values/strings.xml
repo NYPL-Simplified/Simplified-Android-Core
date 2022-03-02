@@ -5,11 +5,7 @@
   <string name="eula_disagree">Disagree</string>
   <string name="eula_agree">Agree</string>
 
-  <!-- Migration strings -->
-  <string name="migrationFailure">There were one or more problems migrating your data&#8230;</string>
-  <string name="migrationSuccess">Your data was migrated successfully!</string>
-  <string name="migrationSendReport">Send Report</string>
-  <string name="migrationOK">OK</string>
+  <string name="sendReport">Send Report</string>
 
   <!-- Library selection screen strings -->
   <string name="selectionTitle">Read E-Books from Your Library</string>

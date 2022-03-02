@@ -1,7 +1,6 @@
 dependencies {
   api project(":simplified-boot-api")
   api project(":simplified-documents")
-  api project(":simplified-migration-api")
   api project(":simplified-presentableerror-api")
   api project(":simplified-reports")
   api project(":simplified-ui-branding")

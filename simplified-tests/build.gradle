@@ -37,7 +37,6 @@ dependencies {
   api project(":simplified-files")
   api project(":simplified-futures")
   api project(":simplified-json-core")
-  api project(":simplified-migration-spi")
   api project(":simplified-metrics")
   api project(":simplified-metrics-api")
   api project(":simplified-notifications")
