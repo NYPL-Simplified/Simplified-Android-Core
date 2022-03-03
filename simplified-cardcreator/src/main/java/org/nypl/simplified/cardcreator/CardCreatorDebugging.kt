@@ -24,5 +24,5 @@ object CardCreatorDebugging {
  * Set to `newYorkCityLocation` or `albanyLocation` to pretend the user is in New York City or Albany.
  */
 
-  val fakeLocation: Location? = null
+  val fakeLocation: Location? = newYorkCityLocation
 }

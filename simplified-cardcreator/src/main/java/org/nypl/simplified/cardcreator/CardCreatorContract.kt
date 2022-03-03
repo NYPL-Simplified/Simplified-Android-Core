@@ -28,7 +28,7 @@ class CardCreatorContract(
   }
 
   override fun createIntent(context: Context, input: Input): Intent {
-    val extras = this.createExtras(input)
+    val extras = createExtras(input)
     val intent = Intent(context, CardCreatorActivity::class.java)
     intent.putExtras(extras)
     return intent
@@ -69,7 +69,7 @@ class CardCreatorContract(
     private const val BARCODE_KEY = "barcode"
     private const val PIN_KEY = "pin"
 
-    fun createResult(barcode: String, pin: String): Bundle {
+    fun resultBundle(barcode: String, pin: String): Bundle {
       return bundleOf(BARCODE_KEY to barcode, PIN_KEY to pin)
     }
   }
