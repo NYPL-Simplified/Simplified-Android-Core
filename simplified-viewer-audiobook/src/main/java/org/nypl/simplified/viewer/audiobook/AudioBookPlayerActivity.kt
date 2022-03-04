@@ -63,7 +63,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import rx.Subscription
 import java.io.IOException
-import java.util.ServiceLoader
+import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
@@ -244,6 +244,14 @@ class AudioBookPlayerActivity :
       return ""
     }
     return entry.authors.first()
+  }
+
+  override fun onPause() {
+    this.log.debug("onPause")
+    super.onPause()
+    if (this.playerInitialized) {
+      this.savePlayerPosition()
+    }
   }
 
   override fun onDestroy() {
