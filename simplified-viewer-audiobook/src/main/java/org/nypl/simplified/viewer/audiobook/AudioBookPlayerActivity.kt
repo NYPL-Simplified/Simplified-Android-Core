@@ -246,6 +246,14 @@ class AudioBookPlayerActivity :
     return entry.authors.first()
   }
 
+  override fun onPause() {
+    this.log.debug("onPause")
+    super.onPause()
+    if (this.playerInitialized) {
+      this.savePlayerPosition()
+    }
+  }
+
   override fun onDestroy() {
     this.log.debug("onDestroy")
     super.onDestroy()
