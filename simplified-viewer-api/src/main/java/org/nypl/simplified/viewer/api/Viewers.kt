@@ -74,7 +74,7 @@ object Viewers {
           service.publishEvent(
             AnalyticsEvent.BookOpened(
               timestamp = LocalDateTime.now(),
-              credentials = account.loginState.credentials,
+              account = account,
               profileUUID = profile.id.uuid,
               profileDisplayName = profile.displayName,
               accountProvider = account.provider.id,

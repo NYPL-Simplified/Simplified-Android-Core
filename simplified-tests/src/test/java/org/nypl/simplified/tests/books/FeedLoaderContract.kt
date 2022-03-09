@@ -7,10 +7,11 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.nypl.simplified.accounts.api.AccountID
+import org.nypl.simplified.accounts.api.AccountReadableType
 import org.nypl.simplified.feeds.api.FeedLoaderResult
 import org.nypl.simplified.feeds.api.FeedLoaderType
+import org.nypl.simplified.tests.mocking.MockAccount
 import java.net.URI
-import java.util.UUID
 import java.util.concurrent.Executors
 
 abstract class FeedLoaderContract {
@@ -20,10 +21,12 @@ abstract class FeedLoaderContract {
   abstract fun resource(name: String): URI
 
   private lateinit var exec: ListeningExecutorService
+  private lateinit var account: AccountReadableType
 
   @BeforeEach
   fun setup() {
     this.exec = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(1))
+    this.account = MockAccount(AccountID.generate())
   }
 
   @AfterEach
@@ -41,9 +44,8 @@ abstract class FeedLoaderContract {
       this.createFeedLoader(this.exec)
     val future =
       loader.fetchURI(
-        account = AccountID(UUID.randomUUID()),
+        account = this.account,
         uri = resource("feed-no-usable-acquisitions.xml"),
-        auth = null,
         method = "GET"
       )
     val result =
@@ -64,9 +66,8 @@ abstract class FeedLoaderContract {
       this.createFeedLoader(this.exec)
     val future =
       loader.fetchURI(
-        account = AccountID(UUID.randomUUID()),
+        account = this.account,
         uri = resource("feed-only-buy-acquisitions.xml"),
-        auth = null,
         method = "GET"
       )
     val result =

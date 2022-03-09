@@ -5,7 +5,7 @@ import com.squareup.picasso.Picasso.LoadedFrom.DISK
 import com.squareup.picasso.Picasso.LoadedFrom.NETWORK
 import com.squareup.picasso.Request
 import com.squareup.picasso.RequestHandler
-import okio.Okio
+import okio.source
 import java.io.ByteArrayInputStream
 import java.net.URL
 
@@ -38,18 +38,18 @@ class ImageAccountIconRequestHandler(
       "simplified-asset" -> {
         val path = request.uri.schemeSpecificPart
         if (path != null) {
-          Result(Okio.source(context.assets.open(path)), DISK)
+          Result(context.assets.open(path).source(), DISK)
         } else {
           this.failQuietly()
         }
       }
 
       else -> {
-        Result(Okio.source(URL(request.uri.toString()).openStream()), NETWORK)
+        Result(URL(request.uri.toString()).openStream().source(), NETWORK)
       }
     }
   }
 
   private fun failQuietly() =
-    Result(Okio.source(ByteArrayInputStream(ByteArray(0))), DISK)
+    Result(ByteArrayInputStream(ByteArray(0)).source(), DISK)
 }

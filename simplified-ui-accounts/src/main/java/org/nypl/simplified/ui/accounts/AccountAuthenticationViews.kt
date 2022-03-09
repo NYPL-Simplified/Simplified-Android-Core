@@ -11,6 +11,7 @@ import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.COPPAAgeGate
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.OAuthWithIntermediary
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.SAML2_0
+import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.OAuthClientCredentials
 import org.nypl.simplified.accounts.api.AccountUsername
 import org.nypl.simplified.ui.accounts.AccountAuthenticationViewBindings.ViewsForAnonymous
 import org.nypl.simplified.ui.accounts.AccountAuthenticationViewBindings.ViewsForBasic
@@ -114,7 +115,11 @@ class AccountAuthenticationViews(
         this.coppa.viewGroup.visibility = VISIBLE
       is Basic -> {
         this.basic.viewGroup.visibility = VISIBLE
-        this.basic.configureFor(description)
+        this.basic.configureFor(description.formDescription)
+      }
+      is OAuthClientCredentials -> {
+        this.basic.viewGroup.visibility = VISIBLE
+        this.basic.configureFor(description.formDescription)
       }
       is OAuthWithIntermediary ->
         this.oAuthWithIntermediary.viewGroup.visibility = VISIBLE
@@ -147,7 +152,9 @@ class AccountAuthenticationViews(
       is COPPAAgeGate ->
         true
       is Basic ->
-        this.basic.isSatisfied(description)
+        this.basic.isSatisfied(description.formDescription)
+      is OAuthClientCredentials ->
+        this.basic.isSatisfied(description.formDescription)
       is OAuthWithIntermediary ->
         true
       Anonymous ->

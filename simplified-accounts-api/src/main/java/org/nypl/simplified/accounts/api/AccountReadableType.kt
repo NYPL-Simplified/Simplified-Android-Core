@@ -37,7 +37,8 @@ interface AccountReadableType {
       is AccountProviderAuthenticationDescription.SAML2_0,
       AccountProviderAuthenticationDescription.Anonymous,
       is AccountProviderAuthenticationDescription.Basic,
-      is AccountProviderAuthenticationDescription.OAuthWithIntermediary ->
+      is AccountProviderAuthenticationDescription.OAuthWithIntermediary,
+      is AccountProviderAuthenticationDescription.OAuthClientCredentials ->
         this.provider.catalogURI == feedURI || this.preferences.catalogURIOverride == feedURI
     }
   }
@@ -80,6 +81,7 @@ interface AccountReadableType {
     get() = when (this.provider.authentication) {
       is AccountProviderAuthenticationDescription.COPPAAgeGate -> false
       is AccountProviderAuthenticationDescription.Basic -> true
+      is AccountProviderAuthenticationDescription.OAuthClientCredentials -> true
       is AccountProviderAuthenticationDescription.OAuthWithIntermediary -> true
       is AccountProviderAuthenticationDescription.SAML2_0 -> true
       is AccountProviderAuthenticationDescription.Anonymous -> false

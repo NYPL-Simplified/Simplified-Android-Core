@@ -13,22 +13,22 @@ import org.librarysimplified.http.api.LSHTTPClientConfiguration
 import org.librarysimplified.http.api.LSHTTPClientType
 import org.librarysimplified.http.vanilla.LSHTTPClients
 import org.mockito.Mockito
-import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
-import org.nypl.simplified.accounts.api.AccountPassword
-import org.nypl.simplified.accounts.api.AccountUsername
+import org.nypl.simplified.accounts.api.AccountID
+import org.nypl.simplified.accounts.api.AccountReadableType
 import org.nypl.simplified.books.reader.bookmarks.ReaderBookmarkHTTPCalls
 import org.nypl.simplified.reader.bookmarks.api.BookmarkAnnotation
 import org.nypl.simplified.reader.bookmarks.api.BookmarkAnnotationBodyNode
 import org.nypl.simplified.reader.bookmarks.api.BookmarkAnnotationSelectorNode
 import org.nypl.simplified.reader.bookmarks.api.BookmarkAnnotationTargetNode
+import org.nypl.simplified.tests.mocking.MockAccount
 import java.io.IOException
-import java.net.URI
 import java.util.concurrent.TimeUnit
 
 class ReaderBookmarkHTTPCallsTest {
 
   private lateinit var http: LSHTTPClientType
   private lateinit var server: MockWebServer
+  private lateinit var account: AccountReadableType
 
   private fun checkGetSyncing(
     expected: Boolean,
@@ -36,15 +36,6 @@ class ReaderBookmarkHTTPCallsTest {
   ) {
     val objectMapper = ObjectMapper()
     val calls = ReaderBookmarkHTTPCalls(objectMapper, this.http)
-
-    val credentials =
-      AccountAuthenticationCredentials.Basic(
-        userName = AccountUsername("abcd"),
-        password = AccountPassword("1234"),
-        adobeCredentials = null,
-        authenticationDescription = null,
-        annotationsURI = URI("https://www.example.com")
-      )
 
     val targetURI =
       this.server.url("me").toUri()
@@ -55,7 +46,7 @@ class ReaderBookmarkHTTPCallsTest {
         .setBody(serverResponseText)
     )
 
-    val enabled0 = calls.syncingIsEnabled(targetURI, credentials)
+    val enabled0 = calls.syncingIsEnabled(targetURI, this.account)
     Assertions.assertEquals(expected, enabled0)
   }
 
@@ -66,15 +57,6 @@ class ReaderBookmarkHTTPCallsTest {
     val objectMapper = ObjectMapper()
     val calls = ReaderBookmarkHTTPCalls(objectMapper, this.http)
 
-    val credentials =
-      AccountAuthenticationCredentials.Basic(
-        userName = AccountUsername("abcd"),
-        password = AccountPassword("1234"),
-        adobeCredentials = null,
-        authenticationDescription = null,
-        annotationsURI = URI("https://www.example.com")
-      )
-
     val targetURI =
       this.server.url("annotations").toUri()
 
@@ -84,7 +66,7 @@ class ReaderBookmarkHTTPCallsTest {
         .setBody(serverResponseText)
     )
 
-    val receivedBookmarks = calls.bookmarksGet(targetURI, credentials)
+    val receivedBookmarks = calls.bookmarksGet(targetURI, this.account)
     Assertions.assertEquals(expectedBookmarks, receivedBookmarks)
   }
 
@@ -104,6 +86,7 @@ class ReaderBookmarkHTTPCallsTest {
 
     this.server = MockWebServer()
     this.server.start()
+    this.account = MockAccount(AccountID.generate())
   }
 
   @AfterEach
@@ -289,15 +272,6 @@ class ReaderBookmarkHTTPCallsTest {
     val objectMapper = ObjectMapper()
     val calls = ReaderBookmarkHTTPCalls(objectMapper, this.http)
 
-    val credentials =
-      AccountAuthenticationCredentials.Basic(
-        userName = AccountUsername("abcd"),
-        password = AccountPassword("1234"),
-        adobeCredentials = null,
-        authenticationDescription = null,
-        annotationsURI = URI("https://www.example.com")
-      )
-
     val targetURI = this.server.url("me").toUri()
     this.server.enqueue(
       MockResponse()
@@ -307,7 +281,7 @@ class ReaderBookmarkHTTPCallsTest {
     Assertions.assertThrows(
       IOException::class.java,
       Executable {
-        calls.syncingIsEnabled(targetURI, credentials)
+        calls.syncingIsEnabled(targetURI, this.account)
       }
     )
   }
@@ -317,15 +291,6 @@ class ReaderBookmarkHTTPCallsTest {
     val objectMapper = ObjectMapper()
     val calls = ReaderBookmarkHTTPCalls(objectMapper, this.http)
 
-    val credentials =
-      AccountAuthenticationCredentials.Basic(
-        userName = AccountUsername("io7mtest"),
-        password = AccountPassword("1234"),
-        adobeCredentials = null,
-        authenticationDescription = null,
-        annotationsURI = URI("https://www.example.com")
-      )
-
     val targetURI = this.server.url("annotations").toUri()
     this.server.enqueue(
       MockResponse()
@@ -335,7 +300,7 @@ class ReaderBookmarkHTTPCallsTest {
     Assertions.assertThrows(
       IOException::class.java,
       Executable {
-        calls.bookmarksGet(targetURI, credentials)
+        calls.bookmarksGet(targetURI, this.account)
       }
     )
   }
@@ -345,15 +310,6 @@ class ReaderBookmarkHTTPCallsTest {
     val objectMapper = ObjectMapper()
     val calls = ReaderBookmarkHTTPCalls(objectMapper, this.http)
 
-    val credentials =
-      AccountAuthenticationCredentials.Basic(
-        userName = AccountUsername("io7mtest"),
-        password = AccountPassword("1234"),
-        adobeCredentials = null,
-        authenticationDescription = null,
-        annotationsURI = URI("https://www.example.com")
-      )
-
     val targetURI = this.server.url("annotations").toUri()
     this.server.enqueue(
       MockResponse()
@@ -363,7 +319,7 @@ class ReaderBookmarkHTTPCallsTest {
     Assertions.assertThrows(
       IOException::class.java,
       Executable {
-        calls.bookmarkAdd(targetURI, credentials, this.bookmark0)
+        calls.bookmarkAdd(targetURI, this.bookmark0, this.account)
       }
     )
   }

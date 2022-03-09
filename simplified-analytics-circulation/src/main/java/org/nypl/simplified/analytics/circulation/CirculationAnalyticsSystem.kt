@@ -1,8 +1,8 @@
 package org.nypl.simplified.analytics.circulation
 
 import org.librarysimplified.http.api.LSHTTPResponseStatus
-import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
-import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
+import org.nypl.simplified.accounts.api.AccountReadableType
+import org.nypl.simplified.accounts.api.setAuthentication
 import org.nypl.simplified.analytics.api.AnalyticsConfiguration
 import org.nypl.simplified.analytics.api.AnalyticsEvent
 import org.nypl.simplified.analytics.api.AnalyticsSystem
@@ -30,7 +30,7 @@ class CirculationAnalyticsSystem(
     when (event) {
       is AnalyticsEvent.BookOpened -> {
         event.targetURI?.let { target ->
-          postURI(target, event.credentials)
+          postURI(target, event.account)
         }
         this.logger.debug("consuming 'BookOpened' event for {}", event.targetURI)
       }
@@ -42,11 +42,11 @@ class CirculationAnalyticsSystem(
 
   private fun postURI(
     target: URI,
-    credentials: AccountAuthenticationCredentials?
+    account: AccountReadableType?
   ) {
     val request =
       this.configuration.http.newRequest(target)
-        .setAuthorization(AccountAuthenticatedHTTP.createAuthorizationIfPresent(credentials))
+        .apply { account?.let { setAuthentication(account) } }
         .build()
 
     val response = request.execute()

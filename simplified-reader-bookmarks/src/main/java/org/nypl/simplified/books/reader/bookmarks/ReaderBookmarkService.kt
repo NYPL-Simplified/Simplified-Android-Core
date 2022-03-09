@@ -7,7 +7,6 @@ import com.google.common.util.concurrent.ListeningScheduledExecutorService
 import com.google.common.util.concurrent.MoreExecutors
 import io.reactivex.Observable
 import io.reactivex.subjects.Subject
-import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventCreation.AccountEventCreationSucceeded
 import org.nypl.simplified.accounts.api.AccountEventDeletion.AccountEventDeletionSucceeded
@@ -234,7 +233,7 @@ class ReaderBookmarkService private constructor(
           account.account.id
         )
 
-        if (this.httpCalls.syncingIsEnabled(account.settingsURI, account.credentials)) {
+        if (this.httpCalls.syncingIsEnabled(account.settingsURI, account.account)) {
           this.logger.debug(
             "[{}]: account {} has syncing enabled",
             profile.id.uuid,
@@ -289,7 +288,7 @@ class ReaderBookmarkService private constructor(
 
       val bookmarks: List<Bookmark> =
         try {
-          this.httpCalls.bookmarksGet(syncable.annotationsURI, syncable.credentials)
+          this.httpCalls.bookmarksGet(syncable.annotationsURI, syncable.account)
             .map { annotation -> parseBookmarkOrNull(this.logger, this.objectMapper, annotation) }
             .filterNotNull()
         } catch (e: Exception) {
@@ -341,7 +340,9 @@ class ReaderBookmarkService private constructor(
           return
         }
 
-        val syncInfo = accountSupportsSyncing(this.profile.account(this.accountID))
+        val account = this.profile.account(this.accountID)
+
+        val syncInfo = accountSupportsSyncing(account)
         if (syncInfo == null) {
           this.logger.debug(
             "[{}]: cannot remotely delete bookmark {} because the account is not syncable",
@@ -353,7 +354,7 @@ class ReaderBookmarkService private constructor(
 
         this.httpCalls.bookmarkDelete(
           bookmarkURI = bookmarkURI,
-          credentials = syncInfo.credentials
+          account = account
         )
       } catch (e: Exception) {
         this.logger.error("error sending bookmark: ", e)
@@ -395,7 +396,7 @@ class ReaderBookmarkService private constructor(
 
         this.httpCalls.bookmarkAdd(
           annotationsURI = syncInfo.annotationsURI,
-          credentials = syncInfo.credentials,
+          account = syncInfo.account,
           bookmark = BookmarkAnnotations.fromBookmark(this.objectMapper, this.bookmark)
         )
 
@@ -546,7 +547,7 @@ class ReaderBookmarkService private constructor(
       try {
         this.httpCalls.syncingEnable(
           settingsURI = this.syncableAccount.settingsURI,
-          credentials = this.syncableAccount.credentials,
+          account = syncableAccount.account,
           enabled = this.enable
         )
 
@@ -583,7 +584,6 @@ class ReaderBookmarkService private constructor(
     val account: AccountType,
     val settingsURI: URI,
     val annotationsURI: URI,
-    val credentials: AccountAuthenticationCredentials
   )
 
   private fun reconfigureForProfile(profile: ProfileReadableType) {
@@ -1047,7 +1047,6 @@ class ReaderBookmarkService private constructor(
             account = account,
             settingsURI = settingsOpt,
             annotationsURI = annotationsURI,
-            credentials = credentials
           )
         } else {
           null

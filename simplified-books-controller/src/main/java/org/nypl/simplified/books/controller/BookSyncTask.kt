@@ -3,12 +3,12 @@ package org.nypl.simplified.books.controller
 import com.io7m.jfunctional.Some
 import org.librarysimplified.http.api.LSHTTPClientType
 import org.librarysimplified.http.api.LSHTTPResponseStatus
-import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountID
 import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.api.AccountProviderType
+import org.nypl.simplified.accounts.api.setAuthentication
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.accounts.registry.api.AccountProviderRegistryType
 import org.nypl.simplified.books.api.BookID
@@ -75,7 +75,6 @@ class BookSyncTask(
 
     this.fetchPatronUserProfile(
       account = account,
-      credentials = credentials
     )
 
     val loansURI = provider.loansURI
@@ -86,7 +85,7 @@ class BookSyncTask(
 
     val request =
       this.http.newRequest(loansURI)
-        .setAuthorization(AccountAuthenticatedHTTP.createAuthorization(credentials))
+        .setAuthentication(account)
         .build()
 
     val response = request.execute()
@@ -118,14 +117,13 @@ class BookSyncTask(
 
   private fun fetchPatronUserProfile(
     account: AccountType,
-    credentials: AccountAuthenticationCredentials
   ) {
     try {
       val profile =
         PatronUserProfiles.runPatronProfileRequest(
           taskRecorder = this.taskRecorder,
           patronParsers = this.patronParsers,
-          credentials = credentials,
+          authenticate = { setAuthentication(account) },
           http = this.http,
           account = account
         )
@@ -288,10 +286,10 @@ class BookSyncTask(
         FeedLoading.loadSingleEntryFeed(
           feedLoader = this.feedLoader,
           taskRecorder = this.taskRecorder,
-          accountID = this.accountID,
+          account = account,
           uri = alternate,
           timeout = Pair(30L, TimeUnit.SECONDS),
-          httpAuth = null,
+          authenticate = false,
           method = "GET"
         )
 

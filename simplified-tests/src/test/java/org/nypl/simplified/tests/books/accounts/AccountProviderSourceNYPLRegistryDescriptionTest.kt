@@ -19,6 +19,7 @@ import org.nypl.simplified.accounts.api.AccountProvider
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.Companion.BASIC_TYPE
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.Companion.COPPA_TYPE
+import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.Companion.OAUTH_CLIENT_CREDENTIALS
 import org.nypl.simplified.accounts.api.AccountProviderDescription
 import org.nypl.simplified.accounts.source.nyplregistry.AccountProviderResolution
 import org.nypl.simplified.links.Link
@@ -392,13 +393,15 @@ class AccountProviderSourceNYPLRegistryDescriptionTest {
       announcements = emptyList(),
       authentication = AccountProviderAuthenticationDescription.Basic(
         description = "Basic Auth",
-        barcodeFormat = "CODABAR",
-        keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
-        passwordMaximumLength = 20,
-        passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
-        labels = mapOf(
-          Pair("LOGIN", "LOGIN!"),
-          Pair("PASSWORD", "PASSWORD!")
+        formDescription = AccountProviderAuthenticationDescription.FormDescription(
+          barcodeFormat = "CODABAR",
+          keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
+          passwordMaximumLength = 20,
+          passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
+          labels = mapOf(
+            Pair("LOGIN", "LOGIN!"),
+            Pair("PASSWORD", "PASSWORD!")
+          ),
         ),
         logoURI = null
       ),
@@ -552,6 +555,186 @@ class AccountProviderSourceNYPLRegistryDescriptionTest {
       authentication = AccountProviderAuthenticationDescription.COPPAAgeGate(
         greaterEqual13 = URI("http://www.example.com/feed-13.xml"),
         under13 = URI("http://www.example.com/feed-under-13.xml")
+      ),
+      authenticationAlternatives = listOf(),
+      authenticationDocumentURI = this.server.url("auth").toUri(),
+      cardCreatorURI = URI("http://www.example.com/card.xml"),
+      catalogURI = URI("http://www.example.com/feed.xml"),
+      displayName = "Auth",
+      eula = URI("http://www.example.com/eula.xml"),
+      id = URI.create("urn:fake:0"),
+      idNumeric = -1,
+      isProduction = true,
+      license = URI("http://www.example.com/license.xml"),
+      loansURI = URI("http://www.example.com/shelf.xml"),
+      logo = URI("http://www.example.com/logo.png"),
+      mainColor = "blue",
+      patronSettingsURI = URI("http://www.example.com/settings.xml"),
+      privacyPolicy = URI("http://www.example.com/privacy.xml"),
+      subtitle = "Some library you've never heard of",
+      supportEmail = "mailto:someone@example.com",
+      supportsReservations = true,
+      updated = DateTime.parse("1970-01-01T00:00:00.000Z"),
+      location = null
+    )
+
+    Assertions.assertEquals(provider, result.result)
+  }
+
+  /**
+   * Resolution succeeds if nothing fails.
+   */
+
+  @Test
+  fun testAuthDocumentOK_OAuthClientCredentials() {
+    val metadata =
+      AccountProviderDescription(
+        id = URI.create("urn:fake:0"),
+        title = "Title",
+        updated = DateTime.parse("2019-07-09T08:33:40+00:00"),
+        links = listOf(
+          Link.LinkBasic(
+            this.server.url("auth").toUri(),
+            AUTH_DOCUMENT_TYPE
+          )
+        ),
+        images = listOf(),
+        isProduction = true,
+        isAutomatic = false,
+        location = null
+      )
+
+    val description =
+      AccountProviderResolution(
+        stringResources = this.stringResources,
+        authDocumentParsers = this.authDocumentParsers,
+        http = this.http,
+        description = metadata
+      )
+
+    this.server.enqueue(
+      MockResponse()
+        .setResponseCode(200)
+        .setBody("")
+    )
+
+    Mockito.`when`(
+      this.authDocumentParsers.createParser(anyNotNull(), anyNotNull(), Mockito.anyBoolean())
+    ).thenReturn(this.authDocumentParser)
+
+    val authDocument =
+      AuthenticationDocument(
+        announcements = emptyList(),
+        id = URI("http://www.example.com/auth"),
+        title = "Auth",
+        mainColor = "blue",
+        description = "Some library you've never heard of",
+        features = AuthenticationObjectNYPLFeatures(
+          enabled = setOf("https://librarysimplified.org/rel/policy/reservations"),
+          disabled = setOf()
+        ),
+        authentication = listOf(
+          AuthenticationObject(
+            type = URI(OAUTH_CLIENT_CREDENTIALS),
+            description = "OAuth Client Credentials",
+            labels = mapOf(
+              Pair("LOGIN", "LOGIN!"),
+              Pair("PASSWORD", "PASSWORD!")
+            ),
+            inputs = mapOf(
+              Pair(
+                "LOGIN",
+                AuthenticationObjectNYPLInput(
+                  fieldName = "LOGIN",
+                  keyboardType = "DEFAULT",
+                  maximumLength = 20,
+                  barcodeFormat = "CODABAR"
+                )
+              ),
+              Pair(
+                "PASSWORD",
+                AuthenticationObjectNYPLInput(
+                  fieldName = "PASSWORD",
+                  keyboardType = "DEFAULT",
+                  maximumLength = 20,
+                  barcodeFormat = "CODABAR"
+                )
+              )
+            ),
+            links = listOf(
+              Link.LinkBasic(
+                href = URI("http://www.example.com/http_basic_auth_token"),
+                relation = "authenticate"
+              )
+            )
+          )
+        ),
+        links = listOf(
+          Link.LinkBasic(
+            href = URI("http://www.example.com/feed.xml"),
+            relation = "start"
+          ),
+          Link.LinkBasic(
+            href = URI("http://www.example.com/card.xml"),
+            relation = "register"
+          ),
+          Link.LinkBasic(
+            href = URI("http://www.example.com/license.xml"),
+            relation = "license"
+          ),
+          Link.LinkBasic(
+            href = URI("http://www.example.com/eula.xml"),
+            relation = "terms-of-service"
+          ),
+          Link.LinkBasic(
+            href = URI("http://www.example.com/settings.xml"),
+            relation = "http://librarysimplified.org/terms/rel/user-profile"
+          ),
+          Link.LinkBasic(
+            href = URI("http://www.example.com/privacy.xml"),
+            relation = "privacy-policy"
+          ),
+          Link.LinkBasic(
+            href = URI("http://www.example.com/shelf.xml"),
+            relation = "http://opds-spec.org/shelf"
+          ),
+          Link.LinkBasic(
+            href = URI("mailto:someone@example.com"),
+            relation = "help"
+          ),
+          Link.LinkBasic(
+            href = URI("http://www.example.com/logo.png"),
+            relation = "logo"
+          )
+        )
+      )
+
+    Mockito.`when`(this.authDocumentParser.parse())
+      .thenReturn(ParseResult.Success(listOf(), authDocument))
+
+    val result =
+      description.resolve { _, message -> this.logger.debug("{}", message) }
+
+    this.logger.debug("result: {}", result)
+    result as TaskResult.Success
+
+    val provider = AccountProvider(
+      addAutomatically = false,
+      announcements = emptyList(),
+      authentication = AccountProviderAuthenticationDescription.OAuthClientCredentials(
+        description = "OAuth Client Credentials",
+        formDescription = AccountProviderAuthenticationDescription.FormDescription(
+          barcodeFormat = "CODABAR",
+          keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
+          passwordMaximumLength = 20,
+          passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
+          labels = mapOf(
+            Pair("LOGIN", "LOGIN!"),
+            Pair("PASSWORD", "PASSWORD!")
+          ),
+        ),
+        logoURI = null,
+        authenticate = URI("http://www.example.com/http_basic_auth_token")
       ),
       authenticationAlternatives = listOf(),
       authenticationDocumentURI = this.server.url("auth").toUri(),

@@ -169,12 +169,14 @@ abstract class ProfileAccountLoginTaskContract {
       ProfileAccountLoginRequest.Basic(
         accountId = this.accountID,
         description = AccountProviderAuthenticationDescription.Basic(
-          barcodeFormat = null,
-          keyboard = KeyboardInput.DEFAULT,
-          passwordMaximumLength = 8,
-          passwordKeyboard = KeyboardInput.DEFAULT,
+          formDescription = AccountProviderAuthenticationDescription.FormDescription(
+            barcodeFormat = null,
+            keyboard = KeyboardInput.DEFAULT,
+            passwordMaximumLength = 8,
+            passwordKeyboard = KeyboardInput.DEFAULT,
+            labels = mapOf(),
+          ),
           description = "Description",
-          labels = mapOf(),
           logoURI = null
         ),
         username = AccountUsername("user"),
@@ -234,12 +236,14 @@ abstract class ProfileAccountLoginTaskContract {
   fun testLoginServer401() {
     val authDescription =
       AccountProviderAuthenticationDescription.Basic(
-        barcodeFormat = null,
-        keyboard = KeyboardInput.DEFAULT,
-        passwordMaximumLength = 8,
-        passwordKeyboard = KeyboardInput.DEFAULT,
+        formDescription = AccountProviderAuthenticationDescription.FormDescription(
+          barcodeFormat = null,
+          keyboard = KeyboardInput.DEFAULT,
+          passwordMaximumLength = 8,
+          passwordKeyboard = KeyboardInput.DEFAULT,
+          labels = mapOf(),
+        ),
         description = "Description",
-        labels = mapOf(),
         logoURI = null
       )
     val request =
@@ -313,12 +317,14 @@ abstract class ProfileAccountLoginTaskContract {
   fun testLoginServerNon401() {
     val authDescription =
       AccountProviderAuthenticationDescription.Basic(
-        barcodeFormat = null,
-        keyboard = KeyboardInput.DEFAULT,
-        passwordMaximumLength = 8,
-        passwordKeyboard = KeyboardInput.DEFAULT,
+        formDescription = AccountProviderAuthenticationDescription.FormDescription(
+          barcodeFormat = null,
+          keyboard = KeyboardInput.DEFAULT,
+          passwordMaximumLength = 8,
+          passwordKeyboard = KeyboardInput.DEFAULT,
+          labels = mapOf(),
+        ),
         description = "Description",
-        labels = mapOf(),
         logoURI = null
       )
     val request =
@@ -394,12 +400,14 @@ abstract class ProfileAccountLoginTaskContract {
 
     val authDescription =
       AccountProviderAuthenticationDescription.Basic(
-        barcodeFormat = null,
-        keyboard = KeyboardInput.DEFAULT,
-        passwordMaximumLength = 8,
-        passwordKeyboard = KeyboardInput.DEFAULT,
+        formDescription = AccountProviderAuthenticationDescription.FormDescription(
+          barcodeFormat = null,
+          keyboard = KeyboardInput.DEFAULT,
+          passwordMaximumLength = 8,
+          passwordKeyboard = KeyboardInput.DEFAULT,
+          labels = mapOf(),
+        ),
         description = "Description",
-        labels = mapOf(),
         logoURI = null
       )
     val request =
@@ -465,12 +473,14 @@ abstract class ProfileAccountLoginTaskContract {
       ProfileAccountLoginRequest.Basic(
         accountId = this.accountID,
         description = AccountProviderAuthenticationDescription.Basic(
-          barcodeFormat = null,
-          keyboard = KeyboardInput.DEFAULT,
-          passwordMaximumLength = 8,
-          passwordKeyboard = KeyboardInput.DEFAULT,
+          formDescription = AccountProviderAuthenticationDescription.FormDescription(
+            barcodeFormat = null,
+            keyboard = KeyboardInput.DEFAULT,
+            passwordMaximumLength = 8,
+            passwordKeyboard = KeyboardInput.DEFAULT,
+            labels = mapOf(),
+          ),
           description = "Description",
-          labels = mapOf(),
           logoURI = null
         ),
         username = AccountUsername("user"),
@@ -486,12 +496,14 @@ abstract class ProfileAccountLoginTaskContract {
     Mockito.`when`(provider.authentication)
       .thenReturn(
         AccountProviderAuthenticationDescription.Basic(
-          barcodeFormat = "CODABAR",
-          keyboard = KeyboardInput.DEFAULT,
-          passwordMaximumLength = 10,
-          passwordKeyboard = KeyboardInput.DEFAULT,
+          formDescription = AccountProviderAuthenticationDescription.FormDescription(
+            barcodeFormat = "CODABAR",
+            keyboard = KeyboardInput.DEFAULT,
+            passwordMaximumLength = 10,
+            passwordKeyboard = KeyboardInput.DEFAULT,
+            labels = mapOf(),
+          ),
           description = "Library Login",
-          labels = mapOf(),
           logoURI = null
         )
       )
@@ -543,12 +555,14 @@ abstract class ProfileAccountLoginTaskContract {
   fun testLoginPatronProfileUnparseable() {
     val authDescription =
       AccountProviderAuthenticationDescription.Basic(
-        barcodeFormat = null,
-        keyboard = KeyboardInput.DEFAULT,
-        passwordMaximumLength = 8,
-        passwordKeyboard = KeyboardInput.DEFAULT,
+        formDescription = AccountProviderAuthenticationDescription.FormDescription(
+          barcodeFormat = null,
+          keyboard = KeyboardInput.DEFAULT,
+          passwordMaximumLength = 8,
+          passwordKeyboard = KeyboardInput.DEFAULT,
+          labels = mapOf(),
+        ),
         description = "Description",
-        labels = mapOf(),
         logoURI = null
       )
     val request =
@@ -622,12 +636,14 @@ abstract class ProfileAccountLoginTaskContract {
   fun testLoginNoDRM() {
     val authDescription =
       AccountProviderAuthenticationDescription.Basic(
-        barcodeFormat = null,
-        keyboard = KeyboardInput.DEFAULT,
-        passwordMaximumLength = 8,
-        passwordKeyboard = KeyboardInput.DEFAULT,
+        formDescription = AccountProviderAuthenticationDescription.FormDescription(
+          barcodeFormat = null,
+          keyboard = KeyboardInput.DEFAULT,
+          passwordMaximumLength = 8,
+          passwordKeyboard = KeyboardInput.DEFAULT,
+          labels = mapOf(),
+        ),
         description = "Description",
-        labels = mapOf(),
         logoURI = null
       )
     val request =
@@ -713,12 +729,15 @@ abstract class ProfileAccountLoginTaskContract {
   fun testLoginAdobeDRM() {
     val authDescription =
       AccountProviderAuthenticationDescription.Basic(
-        barcodeFormat = "CODABAR",
-        keyboard = KeyboardInput.DEFAULT,
-        passwordMaximumLength = 10,
-        passwordKeyboard = KeyboardInput.DEFAULT,
+        formDescription =
+          AccountProviderAuthenticationDescription.FormDescription(
+            barcodeFormat = "CODABAR",
+            keyboard = KeyboardInput.DEFAULT,
+            passwordMaximumLength = 10,
+            passwordKeyboard = KeyboardInput.DEFAULT,
+            labels = mapOf(),
+          ),
         description = "Library Login",
-        labels = mapOf(),
         logoURI = null
       )
 
@@ -857,12 +876,15 @@ abstract class ProfileAccountLoginTaskContract {
   fun testLoginAdobeDRMNotSupported() {
     val authDescription =
       AccountProviderAuthenticationDescription.Basic(
-        barcodeFormat = null,
-        keyboard = KeyboardInput.DEFAULT,
-        passwordMaximumLength = 8,
-        passwordKeyboard = KeyboardInput.DEFAULT,
+        formDescription =
+          AccountProviderAuthenticationDescription.FormDescription(
+            barcodeFormat = null,
+            keyboard = KeyboardInput.DEFAULT,
+            passwordMaximumLength = 8,
+            passwordKeyboard = KeyboardInput.DEFAULT,
+            labels = mapOf(),
+          ),
         description = "Description",
-        labels = mapOf(),
         logoURI = null
       )
 
@@ -960,12 +982,14 @@ abstract class ProfileAccountLoginTaskContract {
       ProfileAccountLoginRequest.Basic(
         accountId = this.accountID,
         description = AccountProviderAuthenticationDescription.Basic(
-          barcodeFormat = null,
-          keyboard = KeyboardInput.DEFAULT,
-          passwordMaximumLength = 8,
-          passwordKeyboard = KeyboardInput.DEFAULT,
+          formDescription = AccountProviderAuthenticationDescription.FormDescription(
+            barcodeFormat = null,
+            keyboard = KeyboardInput.DEFAULT,
+            passwordMaximumLength = 8,
+            passwordKeyboard = KeyboardInput.DEFAULT,
+            labels = mapOf(),
+          ),
           description = "Description",
-          labels = mapOf(),
           logoURI = null
         ),
         username = AccountUsername("user"),
@@ -981,12 +1005,14 @@ abstract class ProfileAccountLoginTaskContract {
     Mockito.`when`(provider.authentication)
       .thenReturn(
         AccountProviderAuthenticationDescription.Basic(
-          barcodeFormat = "CODABAR",
-          keyboard = KeyboardInput.DEFAULT,
-          passwordMaximumLength = 10,
-          passwordKeyboard = KeyboardInput.DEFAULT,
+          formDescription = AccountProviderAuthenticationDescription.FormDescription(
+            barcodeFormat = "CODABAR",
+            keyboard = KeyboardInput.DEFAULT,
+            passwordMaximumLength = 10,
+            passwordKeyboard = KeyboardInput.DEFAULT,
+            labels = mapOf(),
+          ),
           description = "Library Login",
-          labels = mapOf(),
           logoURI = null
         )
       )
@@ -1075,12 +1101,14 @@ abstract class ProfileAccountLoginTaskContract {
 
     val authDescription =
       AccountProviderAuthenticationDescription.Basic(
-        barcodeFormat = "CODABAR",
-        keyboard = KeyboardInput.DEFAULT,
-        passwordMaximumLength = 10,
-        passwordKeyboard = KeyboardInput.DEFAULT,
+        formDescription = AccountProviderAuthenticationDescription.FormDescription(
+          barcodeFormat = "CODABAR",
+          keyboard = KeyboardInput.DEFAULT,
+          passwordMaximumLength = 10,
+          passwordKeyboard = KeyboardInput.DEFAULT,
+          labels = mapOf(),
+        ),
         description = "Library Login",
-        labels = mapOf(),
         logoURI = null
       )
 
@@ -1227,12 +1255,14 @@ abstract class ProfileAccountLoginTaskContract {
   fun testLoginAdobeDRMActivationError() {
     val authDescription =
       AccountProviderAuthenticationDescription.Basic(
-        barcodeFormat = null,
-        keyboard = KeyboardInput.DEFAULT,
-        passwordMaximumLength = 8,
-        passwordKeyboard = KeyboardInput.DEFAULT,
+        formDescription = AccountProviderAuthenticationDescription.FormDescription(
+          barcodeFormat = null,
+          keyboard = KeyboardInput.DEFAULT,
+          passwordMaximumLength = 8,
+          passwordKeyboard = KeyboardInput.DEFAULT,
+          labels = mapOf(),
+        ),
         description = "Description",
-        labels = mapOf(),
         logoURI = null
       )
     val request =
@@ -1331,12 +1361,14 @@ abstract class ProfileAccountLoginTaskContract {
       ProfileAccountLoginRequest.Basic(
         accountId = this.accountID,
         description = AccountProviderAuthenticationDescription.Basic(
-          barcodeFormat = null,
-          keyboard = KeyboardInput.DEFAULT,
-          passwordMaximumLength = 8,
-          passwordKeyboard = KeyboardInput.DEFAULT,
+          formDescription = AccountProviderAuthenticationDescription.FormDescription(
+            barcodeFormat = null,
+            keyboard = KeyboardInput.DEFAULT,
+            passwordMaximumLength = 8,
+            passwordKeyboard = KeyboardInput.DEFAULT,
+            labels = mapOf(),
+          ),
           description = "Description",
-          labels = mapOf(),
           logoURI = null
         ),
         username = AccountUsername("user"),
@@ -1417,12 +1449,14 @@ abstract class ProfileAccountLoginTaskContract {
     Mockito.`when`(provider.authentication)
       .thenReturn(
         AccountProviderAuthenticationDescription.Basic(
-          barcodeFormat = null,
-          keyboard = KeyboardInput.DEFAULT,
-          passwordMaximumLength = 8,
-          passwordKeyboard = KeyboardInput.DEFAULT,
+          formDescription = AccountProviderAuthenticationDescription.FormDescription(
+            barcodeFormat = null,
+            keyboard = KeyboardInput.DEFAULT,
+            passwordMaximumLength = 8,
+            passwordKeyboard = KeyboardInput.DEFAULT,
+            labels = mapOf()
+          ),
           description = "Description",
-          labels = mapOf(),
           logoURI = null
         )
       )

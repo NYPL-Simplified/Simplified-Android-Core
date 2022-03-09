@@ -4,7 +4,6 @@ import com.google.common.base.Preconditions
 import org.librarysimplified.http.api.LSHTTPClientType
 import org.librarysimplified.http.api.LSHTTPRequestBuilderType
 import org.nypl.drm.core.AdobeAdeptExecutorType
-import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobeClientToken
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePreActivationCredentials
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
@@ -16,6 +15,7 @@ import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoginFailed
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLogoutFailed
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountNotLoggedIn
 import org.nypl.simplified.accounts.api.AccountLogoutStringResourcesType
+import org.nypl.simplified.accounts.api.setAuthorization
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions
 import org.nypl.simplified.books.book_registry.BookRegistryType
@@ -137,8 +137,8 @@ class ProfileAccountLogoutTask(
       PatronUserProfiles.runPatronProfileRequest(
         taskRecorder = this.steps,
         patronParsers = this.patronParsers,
-        credentials = this.credentials,
         http = this.http,
+        authenticate = { setAuthorization(credentials) },
         account = this.account
       )
     return patronProfile.drm
@@ -226,7 +226,7 @@ class ProfileAccountLogoutTask(
 
     val request =
       this.http.newRequest(deviceManagerURI)
-        .setAuthorization(AccountAuthenticatedHTTP.createAuthorizationIfPresent(this.credentials))
+        .setAuthorization(this.credentials)
         .setMethod(LSHTTPRequestBuilderType.Method.Delete)
         .addHeader("Content-Type", "vnd.librarysimplified/drm-device-id-list")
         .build()
@@ -293,9 +293,8 @@ class ProfileAccountLogoutTask(
   private fun fetchOPDSEntry(uri: URI): OPDSAcquisitionFeedEntry {
     val feedResult = try {
       this.feedLoader.fetchURI(
-        account = this.account.id,
+        account = this.account,
         uri = uri,
-        auth = null,
         method = "GET"
       ).get()
     } catch (e: TimeoutException) {

@@ -1,10 +1,11 @@
 package org.nypl.simplified.feeds.api
 
 import one.irradia.mime.api.MIMECompatibility
-import org.librarysimplified.http.api.LSHTTPAuthorizationType
 import org.librarysimplified.http.api.LSHTTPClientType
 import org.librarysimplified.http.api.LSHTTPRequestBuilderType
 import org.librarysimplified.http.api.LSHTTPResponseStatus
+import org.nypl.simplified.accounts.api.AccountReadableType
+import org.nypl.simplified.accounts.api.setAuthentication
 import org.nypl.simplified.opds.core.OPDSFeedTransportException
 import org.nypl.simplified.opds.core.OPDSFeedTransportIOException
 import org.nypl.simplified.opds.core.OPDSFeedTransportType
@@ -23,23 +24,24 @@ import java.util.Locale
 
 class FeedHTTPTransport(
   private val http: LSHTTPClientType
-) : OPDSFeedTransportType<LSHTTPAuthorizationType?> {
+) : OPDSFeedTransportType<AccountReadableType> {
 
   private val logger =
     LoggerFactory.getLogger(FeedHTTPTransport::class.java)
 
   @Throws(OPDSFeedTransportException::class)
   override fun getStream(
-    auth: LSHTTPAuthorizationType?,
+    account: AccountReadableType,
     uri: URI,
-    method: String
+    method: String,
+    authenticate: Boolean
   ): InputStream {
-    this.logger.debug("get stream: {} {}", uri, auth)
+    this.logger.debug("get stream: {} {}", uri, account)
 
     val request =
       this.http.newRequest(uri)
-        .setAuthorization(auth)
         .setMethod(this.methodOfName(method))
+        .apply { if (authenticate) { setAuthentication(account) } }
         .build()
 
     val response = request.execute()

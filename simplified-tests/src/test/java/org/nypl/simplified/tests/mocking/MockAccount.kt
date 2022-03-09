@@ -41,12 +41,14 @@ class MockAccount(override val id: AccountID) : AccountType {
     run {
       val authentication =
         AccountProviderAuthenticationDescription.Basic(
-          barcodeFormat = null,
-          keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
-          passwordMaximumLength = 4,
-          passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
+          formDescription = AccountProviderAuthenticationDescription.FormDescription(
+            barcodeFormat = null,
+            keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
+            passwordMaximumLength = 4,
+            passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
+            labels = mapOf(),
+          ),
           description = "What?",
-          labels = mapOf(),
           logoURI = null
         )
 

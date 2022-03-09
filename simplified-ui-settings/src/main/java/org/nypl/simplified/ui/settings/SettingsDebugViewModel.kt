@@ -153,7 +153,7 @@ class SettingsDebugViewModel(application: Application) : AndroidViewModel(applic
     this.analytics.publishEvent(
       AnalyticsEvent.SyncRequested(
         timestamp = LocalDateTime.now(),
-        credentials = null
+        account = null
       )
     )
   }
@@ -226,11 +226,29 @@ class SettingsDebugViewModel(application: Application) : AndroidViewModel(applic
     val basicAuth =
       AccountProviderAuthenticationDescription.Basic(
         description = "First Book - JWT",
-        barcodeFormat = null,
-        keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
-        passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
-        passwordMaximumLength = -1,
-        labels = mapOf(),
+        formDescription =
+          AccountProviderAuthenticationDescription.FormDescription(
+            barcodeFormat = null,
+            keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
+            passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
+            passwordMaximumLength = -1,
+            labels = mapOf()
+          ),
+        logoURI = URI.create("https://qa-circulation.openebooks.us/images/FirstBookLoginButton280.png")
+      )
+
+    val oauthClientCredentials =
+      AccountProviderAuthenticationDescription.OAuthClientCredentials(
+        description = "First Book - JWT",
+        authenticate = URI.create("https://qa-circulation.openebooks.us/http_basic_auth_token"),
+        formDescription =
+          AccountProviderAuthenticationDescription.FormDescription(
+            barcodeFormat = null,
+            keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
+            passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
+            passwordMaximumLength = -1,
+            labels = mapOf()
+          ),
         logoURI = URI.create("https://qa-circulation.openebooks.us/images/FirstBookLoginButton280.png")
       )
 
@@ -246,7 +264,7 @@ class SettingsDebugViewModel(application: Application) : AndroidViewModel(applic
         addAutomatically = true,
         authenticationDocumentURI = URI.create("https://qa-circulation.openebooks.us/USOEI/authentication_document"),
         authentication = this.basicAuth,
-        authenticationAlternatives = listOf(this.cleverAuth),
+        authenticationAlternatives = listOf(this.oauthClientCredentials, this.cleverAuth),
         cardCreatorURI = null,
         catalogURI = URI.create("https://qa-circulation.openebooks.us/USOEI/groups"),
         displayName = "Open eBooks (QA)",

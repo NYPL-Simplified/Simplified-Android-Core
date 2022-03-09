@@ -29,18 +29,20 @@ class TransformProviders {
         val authentication =
           if (entry.needsAuth) {
             AccountProviderAuthenticationDescription.Basic(
-              barcodeFormat = if (entry.supportsBarcodeDisplay) "CodaBar" else null,
-              keyboard = AccountProviderAuthenticationDescription.KeyboardInput.valueOf(
-                entry.loginKeyboard
-                  ?: "DEFAULT"
-              ),
-              passwordMaximumLength = entry.authPasscodeLength,
-              passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.valueOf(
-                entry.pinKeyboard
-                  ?: "DEFAULT"
-              ),
               description = "",
-              labels = mapOf(),
+              formDescription = AccountProviderAuthenticationDescription.FormDescription(
+                barcodeFormat = if (entry.supportsBarcodeDisplay) "CodaBar" else null,
+                keyboard = AccountProviderAuthenticationDescription.KeyboardInput.valueOf(
+                  entry.loginKeyboard
+                    ?: "DEFAULT"
+                ),
+                passwordMaximumLength = entry.authPasscodeLength,
+                passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.valueOf(
+                  entry.pinKeyboard
+                    ?: "DEFAULT"
+                ),
+                labels = mapOf(),
+              ),
               logoURI = null
             )
           } else {
