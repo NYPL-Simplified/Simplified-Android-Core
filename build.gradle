@@ -30,7 +30,7 @@ plugins {
 ext {
   android_build_tools_version = "30.0.2"
   android_compile_sdk_version = 31
-  android_min_sdk_version = 21
+  android_min_sdk_version = 24
   android_target_sdk_version = 31
 
   // Required for some dependencies only available from our private S3
