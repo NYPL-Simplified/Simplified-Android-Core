@@ -12,7 +12,6 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.subjects.PublishSubject
 import org.joda.time.DateTime
 import org.joda.time.LocalDateTime
-import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
 import org.nypl.simplified.accounts.api.AccountEvent
 import org.nypl.simplified.accounts.api.AccountEventCreation
 import org.nypl.simplified.accounts.api.AccountEventDeletion
@@ -373,16 +372,10 @@ class CatalogFeedViewModel(
       return
     }
 
-    val loginState =
-      account.loginState
-    val authentication =
-      AccountAuthenticatedHTTP.createAuthorizationIfPresent(loginState.credentials)
-
     val future =
       this.feedLoader.fetchURI(
-        account = account.id,
+        account = account,
         uri = arguments.feedURI,
-        auth = authentication,
         method = "GET"
       )
 
@@ -688,7 +681,7 @@ class CatalogFeedViewModel(
         this.analytics.publishEvent(
           AnalyticsEvent.CatalogSearched(
             timestamp = LocalDateTime.now(),
-            credentials = account.loginState.credentials,
+            account = account,
             profileUUID = profile.id.uuid,
             accountProvider = account.provider.id,
             accountUUID = account.id.uuid,

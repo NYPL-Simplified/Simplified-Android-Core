@@ -9,8 +9,8 @@ import org.librarysimplified.http.api.LSHTTPRequestBuilderType.Method.Delete
 import org.librarysimplified.http.api.LSHTTPRequestBuilderType.Method.Post
 import org.librarysimplified.http.api.LSHTTPRequestBuilderType.Method.Put
 import org.librarysimplified.http.api.LSHTTPResponseStatus
-import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
-import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
+import org.nypl.simplified.accounts.api.AccountReadableType
+import org.nypl.simplified.accounts.api.setAuthentication
 import org.nypl.simplified.json.core.JSONParserUtilities
 import org.nypl.simplified.reader.bookmarks.api.BookmarkAnnotation
 import org.nypl.simplified.reader.bookmarks.api.BookmarkAnnotationsJSON
@@ -34,13 +34,11 @@ class ReaderBookmarkHTTPCalls(
 
   override fun bookmarksGet(
     annotationsURI: URI,
-    credentials: AccountAuthenticationCredentials
+    account: AccountReadableType
   ): List<BookmarkAnnotation> {
-    val auth =
-      AccountAuthenticatedHTTP.createAuthorization(credentials)
     val request =
       this.http.newRequest(annotationsURI)
-        .setAuthorization(auth)
+        .setAuthentication(account)
         .build()
 
     val response = request.execute()
@@ -56,13 +54,11 @@ class ReaderBookmarkHTTPCalls(
 
   override fun bookmarkDelete(
     bookmarkURI: URI,
-    credentials: AccountAuthenticationCredentials
+    account: AccountReadableType
   ) {
-    val auth =
-      AccountAuthenticatedHTTP.createAuthorization(credentials)
     val request =
       this.http.newRequest(bookmarkURI)
-        .setAuthorization(auth)
+        .setAuthentication(account)
         .setMethod(Delete)
         .build()
 
@@ -83,18 +79,16 @@ class ReaderBookmarkHTTPCalls(
 
   override fun bookmarkAdd(
     annotationsURI: URI,
-    credentials: AccountAuthenticationCredentials,
-    bookmark: BookmarkAnnotation
+    bookmark: BookmarkAnnotation,
+    account: AccountReadableType
   ) {
     val data =
       BookmarkAnnotationsJSON.serializeBookmarkAnnotationToBytes(this.objectMapper, bookmark)
-    val auth =
-      AccountAuthenticatedHTTP.createAuthorization(credentials)
     val post =
       Post(data, MIMEType("application", "ld+json", mapOf()))
     val request =
       this.http.newRequest(annotationsURI)
-        .setAuthorization(auth)
+        .setAuthentication(account)
         .setMethod(post)
         .build()
 
@@ -111,18 +105,16 @@ class ReaderBookmarkHTTPCalls(
 
   override fun syncingEnable(
     settingsURI: URI,
-    credentials: AccountAuthenticationCredentials,
+    account: AccountReadableType,
     enabled: Boolean
   ) {
     val data =
       this.serializeSynchronizeEnableData(enabled)
-    val auth =
-      AccountAuthenticatedHTTP.createAuthorization(credentials)
     val put =
       Put(data, MIMEType("vnd.librarysimplified", "user-profile+json", mapOf()))
     val request =
       this.http.newRequest(settingsURI)
-        .setAuthorization(auth)
+        .setAuthentication(account)
         .setMethod(put)
         .build()
 
@@ -139,13 +131,11 @@ class ReaderBookmarkHTTPCalls(
 
   override fun syncingIsEnabled(
     settingsURI: URI,
-    credentials: AccountAuthenticationCredentials
+    account: AccountReadableType
   ): Boolean {
-    val auth =
-      AccountAuthenticatedHTTP.createAuthorization(credentials)
     val request =
       this.http.newRequest(settingsURI)
-        .setAuthorization(auth)
+        .setAuthentication(account)
         .build()
 
     val response = request.execute()

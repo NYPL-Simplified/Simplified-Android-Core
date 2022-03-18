@@ -2,9 +2,7 @@ package org.nypl.simplified.ui.catalog
 
 import androidx.paging.PageKeyedDataSource
 import com.google.common.base.Preconditions
-import org.librarysimplified.http.api.LSHTTPAuthorizationType
-import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
-import org.nypl.simplified.accounts.api.AccountID
+import org.nypl.simplified.accounts.api.AccountReadableType
 import org.nypl.simplified.feeds.api.Feed
 import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.feeds.api.FeedLoaderResult
@@ -48,25 +46,12 @@ class CatalogPagedDataSource(
     )
   }
 
-  private fun findAuthenticatedHTTP(): LSHTTPAuthorizationType? {
+  private fun findAccount(): AccountReadableType? {
     return when (val ownership = this.ownership) {
-      is CatalogFeedOwnership.OwnedByAccount ->
-        AccountAuthenticatedHTTP.createAuthorizationIfPresent(
-          profilesController.profileCurrent()
-            .account(ownership.accountId)
-            .loginState
-            .credentials
-        )
-
-      is CatalogFeedOwnership.CollectedFromAccounts ->
-        null
-    }
-  }
-
-  private fun findAccountID(): AccountID? {
-    return when (val ownership = this.ownership) {
-      is CatalogFeedOwnership.OwnedByAccount ->
-        ownership.accountId
+      is CatalogFeedOwnership.OwnedByAccount -> {
+        profilesController.profileCurrent()
+          .account(ownership.accountId)
+      }
       is CatalogFeedOwnership.CollectedFromAccounts ->
         null
     }
@@ -78,17 +63,16 @@ class CatalogPagedDataSource(
   ) {
     this.logger.debug("loadAfter: {}", params.key)
 
-    val accountId = this.findAccountID()
-    if (accountId == null) {
+    val account = this.findAccount()
+    if (account == null) {
       this.logger.error("loadAfter: can't support paged feeds without feed ownership")
       callback.onResult(mutableListOf(), null)
       return
     }
 
     this.feedLoader.fetchURI(
-      account = accountId,
+      account = account,
       uri = params.key,
-      auth = this.findAuthenticatedHTTP(),
       method = "GET"
     ).map { result ->
       return@map when (result) {
@@ -127,17 +111,16 @@ class CatalogPagedDataSource(
   ) {
     this.logger.debug("loadBefore: {}", params.key)
 
-    val accountId = this.findAccountID()
-    if (accountId == null) {
+    val account = this.findAccount()
+    if (account == null) {
       this.logger.error("loadBefore: can't support paged feeds without feed ownership")
       callback.onResult(mutableListOf(), null)
       return
     }
 
     this.feedLoader.fetchURI(
-      account = accountId,
+      account = account,
       uri = params.key,
-      auth = this.findAuthenticatedHTTP(),
       method = "GET"
     ).map { result ->
       return@map when (result) {

@@ -261,8 +261,6 @@ class BookRevokeTask(
    */
 
   private fun revokeNotifyServerURIFeed(targetURI: URI, account: AccountType): Feed {
-    val httpAuth = this.createHttpAuthIfRequired(account)
-
     /*
      * Hitting a revoke link yields a single OPDS entry indicating
      * the current state of the book. It should be equivalent to the
@@ -271,10 +269,9 @@ class BookRevokeTask(
 
     val feedResult = try {
       this.feedLoader.fetchURI(
-        account.id,
+        account,
         targetURI,
-        httpAuth,
-        "PUT"
+        "PUT",
       ).get(this.revokeServerTimeoutDuration.standardSeconds, TimeUnit.SECONDS)
     } catch (e: TimeoutException) {
       val message = this.revokeStrings.revokeServerNotifyFeedTimedOut

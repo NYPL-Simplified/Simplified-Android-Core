@@ -232,7 +232,7 @@ internal class ProfilesDatabase internal constructor(
     this.analytics.publishEvent(
       AnalyticsEvent.ProfileCreated(
         timestamp = LocalDateTime.now(),
-        credentials = null,
+        account = null,
         profileUUID = profile.id.uuid,
         displayName = profile.displayName,
         birthDate = profile.preferences().dateOfBirth?.show(),

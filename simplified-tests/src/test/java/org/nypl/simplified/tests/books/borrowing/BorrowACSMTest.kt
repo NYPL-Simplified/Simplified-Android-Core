@@ -172,6 +172,9 @@ class BorrowACSMTest {
     this.accountProvider =
       MockAccountProviders.fakeProvider("urn:uuid:ea9480d4-5479-4ef1-b1d1-84ccbedb680f")
 
+    Mockito.`when`(this.account.provider)
+      .thenReturn(this.accountProvider)
+
     Mockito.`when`(this.account.loginState)
       .thenReturn(
         AccountLoggedIn(

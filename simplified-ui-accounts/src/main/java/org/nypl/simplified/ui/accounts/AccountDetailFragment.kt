@@ -383,7 +383,7 @@ class AccountDetailFragment : Fragment(R.layout.account) {
 
   private fun instantiateAlternativeAuthenticationViews() {
     for (alternative in this.viewModel.account.provider.authenticationAlternatives) {
-      when (alternative) {
+      return when (alternative) {
         is AccountProviderAuthenticationDescription.COPPAAgeGate ->
           this.logger.warn("COPPA age gate is not currently supported as an alternative.")
         is AccountProviderAuthenticationDescription.Basic ->
@@ -392,6 +392,8 @@ class AccountDetailFragment : Fragment(R.layout.account) {
           this.logger.warn("Anonymous authentication makes no sense as an alternative.")
         is AccountProviderAuthenticationDescription.SAML2_0 ->
           this.logger.warn("SAML 2.0 is not currently supported as an alternative.")
+        is AccountProviderAuthenticationDescription.OAuthClientCredentials ->
+          this.logger.warn("OAuth Client Credentials is not currently supported as an alternative.")
 
         is AccountProviderAuthenticationDescription.OAuthWithIntermediary -> {
           val layout =
@@ -408,7 +410,7 @@ class AccountDetailFragment : Fragment(R.layout.account) {
             text = this.getString(R.string.accountLoginWith, alternative.description),
             logoURI = alternative.logoURI,
             onClick = {
-              this.onTryOAuthLogin(alternative)
+              this.onTryOAuthWithIntermediaryLogin(alternative)
             }
           )
           this.authenticationAlternativesButtons.addView(layout)
@@ -487,7 +489,7 @@ class AccountDetailFragment : Fragment(R.layout.account) {
     )
   }
 
-  private fun onTryOAuthLogin(
+  private fun onTryOAuthWithIntermediaryLogin(
     authenticationDescription: AccountProviderAuthenticationDescription.OAuthWithIntermediary
   ) {
     this.viewModel.tryLogin(
@@ -509,6 +511,29 @@ class AccountDetailFragment : Fragment(R.layout.account) {
       Basic(
         accountId = this.viewModel.account.id,
         description = description,
+        password = accountPassword,
+        username = accountUsername
+      )
+
+    this.viewModel.tryLogin(request)
+  }
+
+  private fun onTryOAuthClientCredentialsLogin(
+    description: AccountProviderAuthenticationDescription.OAuthClientCredentials
+  ) {
+    val accountPassword: AccountPassword =
+      this.authenticationViews.getBasicPassword()
+    val accountUsername: AccountUsername =
+      this.authenticationViews.getBasicUser()
+
+    val request =
+      Basic(
+        accountId = this.viewModel.account.id,
+        description = AccountProviderAuthenticationDescription.Basic(
+          description = description.description,
+          formDescription = description.formDescription,
+          logoURI = description.logoURI
+        ),
         password = accountPassword,
         username = accountUsername
       )
@@ -901,10 +926,11 @@ class AccountDetailFragment : Fragment(R.layout.account) {
       is AccountProviderAuthenticationDescription.SAML2_0 ->
         this.onTrySAML2Login(description)
       is AccountProviderAuthenticationDescription.OAuthWithIntermediary ->
-        this.onTryOAuthLogin(description)
+        this.onTryOAuthWithIntermediaryLogin(description)
       is AccountProviderAuthenticationDescription.Basic ->
         this.onTryBasicLogin(description)
-
+      is AccountProviderAuthenticationDescription.OAuthClientCredentials ->
+        this.onTryOAuthClientCredentialsLogin(description)
       is AccountProviderAuthenticationDescription.Anonymous,
       is AccountProviderAuthenticationDescription.COPPAAgeGate ->
         throw UnreachableCodeException()

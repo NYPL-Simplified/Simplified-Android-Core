@@ -1,6 +1,6 @@
 package org.nypl.simplified.reader.bookmarks.api
 
-import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
+import org.nypl.simplified.accounts.api.AccountReadableType
 import java.io.IOException
 import java.net.URI
 
@@ -13,7 +13,7 @@ interface ReaderBookmarkHTTPCallsType {
   @Throws(IOException::class)
   fun syncingIsEnabled(
     settingsURI: URI,
-    credentials: AccountAuthenticationCredentials
+    account: AccountReadableType
   ): Boolean
 
   /**
@@ -23,7 +23,7 @@ interface ReaderBookmarkHTTPCallsType {
   @Throws(IOException::class)
   fun syncingEnable(
     settingsURI: URI,
-    credentials: AccountAuthenticationCredentials,
+    account: AccountReadableType,
     enabled: Boolean
   )
 
@@ -38,7 +38,7 @@ interface ReaderBookmarkHTTPCallsType {
   @Throws(IOException::class)
   fun bookmarksGet(
     annotationsURI: URI,
-    credentials: AccountAuthenticationCredentials
+    account: AccountReadableType
   ): List<BookmarkAnnotation>
 
   /**
@@ -52,8 +52,8 @@ interface ReaderBookmarkHTTPCallsType {
   @Throws(IOException::class)
   fun bookmarkAdd(
     annotationsURI: URI,
-    credentials: AccountAuthenticationCredentials,
-    bookmark: BookmarkAnnotation
+    bookmark: BookmarkAnnotation,
+    account: AccountReadableType
   )
 
   /**
@@ -67,6 +67,6 @@ interface ReaderBookmarkHTTPCallsType {
   @Throws(IOException::class)
   fun bookmarkDelete(
     bookmarkURI: URI,
-    credentials: AccountAuthenticationCredentials
+    account: AccountReadableType
   )
 }

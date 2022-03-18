@@ -1,7 +1,7 @@
 package org.nypl.simplified.analytics.api
 
 import org.joda.time.LocalDateTime
-import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
+import org.nypl.simplified.accounts.api.AccountReadableType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import java.net.URI
 import java.util.SortedMap
@@ -17,7 +17,7 @@ sealed class AnalyticsEvent {
    * The credentials of the account to which the event belongs.
    */
 
-  abstract val credentials: AccountAuthenticationCredentials?
+  abstract val account: AccountReadableType?
 
   /**
    * The timestamp of the event.
@@ -31,7 +31,7 @@ sealed class AnalyticsEvent {
 
   data class ApplicationOpened(
     override val timestamp: LocalDateTime = LocalDateTime.now(),
-    override val credentials: AccountAuthenticationCredentials? = null,
+    override val account: AccountReadableType? = null,
 
     /**
      * The name of the application package.
@@ -58,7 +58,7 @@ sealed class AnalyticsEvent {
 
   data class ProfileLoggedIn(
     override val timestamp: LocalDateTime = LocalDateTime.now(),
-    override val credentials: AccountAuthenticationCredentials? = null,
+    override val account: AccountReadableType? = null,
 
     /**
      * The UUID of the profile.
@@ -91,7 +91,7 @@ sealed class AnalyticsEvent {
 
   data class ProfileCreated(
     override val timestamp: LocalDateTime = LocalDateTime.now(),
-    override val credentials: AccountAuthenticationCredentials? = null,
+    override val account: AccountReadableType? = null,
 
     /**
      * The UUID of the profile.
@@ -124,7 +124,7 @@ sealed class AnalyticsEvent {
 
   data class ProfileDeleted(
     override val timestamp: LocalDateTime = LocalDateTime.now(),
-    override val credentials: AccountAuthenticationCredentials? = null,
+    override val account: AccountReadableType? = null,
 
     /**
      * The UUID of the profile.
@@ -157,7 +157,7 @@ sealed class AnalyticsEvent {
 
   data class ProfileUpdated(
     override val timestamp: LocalDateTime = LocalDateTime.now(),
-    override val credentials: AccountAuthenticationCredentials? = null,
+    override val account: AccountReadableType? = null,
 
     /**
      * The UUID of the profile.
@@ -190,7 +190,7 @@ sealed class AnalyticsEvent {
 
   data class ProfileLoggedOut(
     override val timestamp: LocalDateTime = LocalDateTime.now(),
-    override val credentials: AccountAuthenticationCredentials? = null,
+    override val account: AccountReadableType? = null,
 
     /**
      * The UUID of the profile.
@@ -211,7 +211,7 @@ sealed class AnalyticsEvent {
 
   data class CatalogSearched(
     override val timestamp: LocalDateTime = LocalDateTime.now(),
-    override val credentials: AccountAuthenticationCredentials?,
+    override val account: AccountReadableType?,
 
     /**
      * The UUID of the profile.
@@ -244,7 +244,7 @@ sealed class AnalyticsEvent {
 
   data class BookOpened(
     override val timestamp: LocalDateTime = LocalDateTime.now(),
-    override val credentials: AccountAuthenticationCredentials?,
+    override val account: AccountReadableType?,
 
     /**
      * The UUID of the profile.
@@ -289,7 +289,7 @@ sealed class AnalyticsEvent {
 
   data class BookPageTurned(
     override val timestamp: LocalDateTime = LocalDateTime.now(),
-    override val credentials: AccountAuthenticationCredentials?,
+    override val account: AccountReadableType?,
 
     /**
      * The UUID of the profile.
@@ -340,7 +340,7 @@ sealed class AnalyticsEvent {
 
   data class BookClosed(
     override val timestamp: LocalDateTime = LocalDateTime.now(),
-    override val credentials: AccountAuthenticationCredentials?,
+    override val account: AccountReadableType?,
 
     /**
      * The UUID of the profile.
@@ -373,6 +373,6 @@ sealed class AnalyticsEvent {
 
   data class SyncRequested(
     override val timestamp: LocalDateTime = LocalDateTime.now(),
-    override val credentials: AccountAuthenticationCredentials?
+    override val account: AccountReadableType?
   ) : AnalyticsEvent()
 }

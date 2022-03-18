@@ -11,6 +11,7 @@ dependencies {
   api libs.joda.time
   api libs.nypl.drm.core
   api libs.nypl.http.api
+  api libs.nypl.http.oauth.client.credentials
 
   implementation project(':simplified-opds-core')
 

@@ -12,7 +12,7 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import org.nypl.simplified.accounts.api.AccountPassword
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
-import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.Basic
+import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.FormDescription
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.KeyboardInput.EMAIL_ADDRESS
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.KeyboardInput.NO_INPUT
@@ -194,7 +194,7 @@ sealed class AccountAuthenticationViewBindings {
       this.pass.setText(password, EDITABLE)
     }
 
-    fun isSatisfied(description: Basic): Boolean {
+    fun isSatisfied(description: FormDescription): Boolean {
       val noUserRequired =
         description.keyboard == NO_INPUT
       val noPasswordRequired =
@@ -206,7 +206,7 @@ sealed class AccountAuthenticationViewBindings {
       return userOk && passOk
     }
 
-    fun configureFor(description: Basic) {
+    fun configureFor(description: FormDescription) {
       val res = this.viewGroup.resources
 
       // Set input labels

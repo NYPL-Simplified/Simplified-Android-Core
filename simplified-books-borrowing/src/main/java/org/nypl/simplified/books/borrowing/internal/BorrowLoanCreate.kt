@@ -7,6 +7,7 @@ import one.irradia.mime.api.MIMEType
 import org.librarysimplified.http.api.LSHTTPRequestBuilderType.Method.Put
 import org.librarysimplified.http.api.LSHTTPResponseStatus
 import org.nypl.simplified.accounts.api.AccountReadableType
+import org.nypl.simplified.accounts.api.setAuthentication
 import org.nypl.simplified.books.book_registry.BookStatus.Held.HeldInQueue
 import org.nypl.simplified.books.book_registry.BookStatus.Held.HeldReady
 import org.nypl.simplified.books.book_registry.BookStatus.Loaned.LoanedNotDownloaded
@@ -17,7 +18,6 @@ import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.opdsFeedEnt
 import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.opdsFeedEntryLoanable
 import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.opdsFeedEntryNoNext
 import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.opdsFeedEntryParseError
-import org.nypl.simplified.books.borrowing.internal.BorrowHTTP.authorizationOf
 import org.nypl.simplified.books.borrowing.internal.BorrowHTTP.isMimeTypeAcceptable
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskException
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskException.BorrowSubtaskFailed
@@ -86,7 +86,7 @@ class BorrowLoanCreate private constructor() : BorrowSubtaskType {
       val request =
         context.httpClient.newRequest(currentURI)
           .setMethod(Put(ByteArray(0), applicationOctetStream))
-          .setAuthorization(authorizationOf(context.account))
+          .setAuthentication(context.account)
           .build()
 
       return request.execute().use { response ->

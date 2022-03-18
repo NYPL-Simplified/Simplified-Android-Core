@@ -34,6 +34,15 @@ sealed class AccountProviderAuthenticationDescription : Serializable {
       "http://librarysimplified.org/rel/auth/anonymous"
 
     /**
+     * The type used to identify the authentication type where we provide the server with
+     * basic auth credentials to get a temporary token. This authentication is used by projects
+     * such as Open eBooks.
+     */
+
+    const val OAUTH_CLIENT_CREDENTIALS =
+      "http://librarysimplified.org/authtype/OAuth-Client-Credentials"
+
+    /**
      * The type used to identify OAuth with an intermediary. This is the authentication used
      * by projects such as Open eBooks.
      */
@@ -128,12 +137,10 @@ sealed class AccountProviderAuthenticationDescription : Serializable {
   }
 
   /**
-   * Basic authentication is required.
+   * Information about how an authentication form should look like and behave.
    */
 
-  data class Basic(
-    override val description: String,
-
+  data class FormDescription(
     /**
      * The barcode format, if specified, such as "CODABAR". If this is unspecified, then
      * barcode scanning and displaying is not supported.
@@ -173,6 +180,27 @@ sealed class AccountProviderAuthenticationDescription : Serializable {
      */
 
     val labels: Map<String, String>,
+  ) {
+    init {
+      Preconditions.checkArgument(
+        this.barcodeFormat?.all { c -> c.isUpperCase() || c.isWhitespace() } ?: true,
+        "Barcode format ${this.barcodeFormat} must be uppercase"
+      )
+    }
+  }
+
+  /**
+   * Basic authentication is required.
+   */
+
+  data class Basic(
+    override val description: String,
+
+    /**
+     * Information about how the authentication form should look like and behave.
+     */
+
+    val formDescription: FormDescription,
 
     /**
      * The URI of the authentication logo.
@@ -183,13 +211,32 @@ sealed class AccountProviderAuthenticationDescription : Serializable {
 
     override val isLoginPossible: Boolean =
       true
+  }
 
-    init {
-      Preconditions.checkArgument(
-        this.barcodeFormat?.all { c -> c.isUpperCase() || c.isWhitespace() } ?: true,
-        "Barcode format ${this.barcodeFormat} must be uppercase"
-      )
-    }
+  data class OAuthClientCredentials(
+    override val description: String,
+
+    /**
+     * Information about how the authentication form should look like and behave.
+     */
+
+    val formDescription: FormDescription,
+
+    /**
+     * The URI used to perform authentication.
+     */
+
+    val authenticate: URI,
+
+    /**
+     * The URI of the authentication logo.
+     */
+
+    val logoURI: URI?
+  ) : AccountProviderAuthenticationDescription() {
+
+    override val isLoginPossible: Boolean =
+      true
   }
 
   /**

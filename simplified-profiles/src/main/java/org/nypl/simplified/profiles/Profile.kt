@@ -199,7 +199,7 @@ internal class Profile internal constructor(
     this.analytics.publishEvent(
       AnalyticsEvent.ProfileDeleted(
         timestamp = LocalDateTime.now(),
-        credentials = null,
+        account = null,
         profileUUID = this.id.uuid,
         displayName = this.displayName,
         birthDate = this.preferences().dateOfBirth?.date?.toString(),
@@ -212,7 +212,7 @@ internal class Profile internal constructor(
     this.analytics.publishEvent(
       AnalyticsEvent.ProfileUpdated(
         timestamp = LocalDateTime.now(),
-        credentials = null,
+        account = null,
         profileUUID = this.id.uuid,
         displayName = this.displayName,
         birthDate = this.preferences().dateOfBirth?.date?.toString(),

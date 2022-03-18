@@ -16,12 +16,30 @@ class OEIAccountFallback : AccountProviderFallbackType {
   private val basicAuth =
     AccountProviderAuthenticationDescription.Basic(
       description = "First Book - JWT",
-      barcodeFormat = null,
-      keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
-      passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
-      passwordMaximumLength = -1,
-      labels = mapOf(),
+      formDescription =
+        AccountProviderAuthenticationDescription.FormDescription(
+          barcodeFormat = null,
+          keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
+          passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
+          passwordMaximumLength = -1,
+          labels = mapOf(),
+        ),
       logoURI = URI.create("https://circulation.openebooks.us/images/FirstBookLoginButton280.png")
+    )
+
+  private val oauthClientCredentialsAuth =
+    AccountProviderAuthenticationDescription.OAuthClientCredentials(
+      description = "First Book - JWT",
+      formDescription =
+        AccountProviderAuthenticationDescription.FormDescription(
+          barcodeFormat = null,
+          keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
+          passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
+          passwordMaximumLength = -1,
+          labels = mapOf(),
+        ),
+      logoURI = URI.create("https://circulation.openebooks.us/images/FirstBookLoginButton280.png"),
+      authenticate = URI.create("https://circulation.openebooks.us/http_basic_auth_token")
     )
 
   private val cleverAuth =
@@ -36,7 +54,7 @@ class OEIAccountFallback : AccountProviderFallbackType {
       addAutomatically = true,
       authenticationDocumentURI = URI.create("https://circulation.openebooks.us/USOEI/authentication_document"),
       authentication = this.basicAuth,
-      authenticationAlternatives = listOf(this.cleverAuth),
+      authenticationAlternatives = listOf(this.oauthClientCredentialsAuth, this.cleverAuth),
       cardCreatorURI = null,
       catalogURI = URI.create("https://circulation.openebooks.us/USOEI/groups"),
       displayName = "Open eBooks",

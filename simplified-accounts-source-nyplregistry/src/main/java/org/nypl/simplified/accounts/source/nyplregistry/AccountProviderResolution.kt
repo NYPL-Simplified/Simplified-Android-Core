@@ -10,6 +10,7 @@ import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.Companion.ANONYMOUS_TYPE
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.Companion.BASIC_TYPE
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.Companion.COPPA_TYPE
+import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.Companion.OAUTH_CLIENT_CREDENTIALS
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.Companion.OAUTH_INTERMEDIARY_TYPE
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.Companion.SAML_2_0_TYPE
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.KeyboardInput
@@ -219,6 +220,11 @@ class AccountProviderResolution(
             this.extractAuthenticationDescriptionBasic(authObject)
           )
         }
+        OAUTH_CLIENT_CREDENTIALS -> {
+          authObjects.add(
+            this.extractAuthenticationDescriptionOAuthClientCredentials(taskRecorder, authObject)
+          )
+        }
         COPPA_TYPE -> {
           authObjects.add(
             this.extractAuthenticationDescriptionCOPPA(taskRecorder, authObject)
@@ -299,20 +305,57 @@ class AccountProviderResolution(
   private fun extractAuthenticationDescriptionBasic(
     authObject: AuthenticationObject
   ): AccountProviderAuthenticationDescription.Basic {
+    val logo =
+      authObject.links.find { link -> link.relation == "logo" }
+        ?.hrefURI
+    val formDescription =
+      this.extractFormDescription(authObject)
+
+    return AccountProviderAuthenticationDescription.Basic(
+      description = authObject.description,
+      formDescription = formDescription,
+      logoURI = logo,
+    )
+  }
+
+  private fun extractAuthenticationDescriptionOAuthClientCredentials(
+    taskRecorder: TaskRecorderType,
+    authObject: AuthenticationObject
+  ): AccountProviderAuthenticationDescription.OAuthClientCredentials {
+    val authenticate =
+      authObject.links.find { link -> link.relation == "authenticate" }
+    val logo =
+      authObject.links.find { link -> link.relation == "logo" }
+        ?.hrefURI
+    val formDescription =
+      this.extractFormDescription(authObject)
+    val authenticateURI = authenticate?.hrefURI
+    if (authenticateURI == null) {
+      val message = this.stringResources.resolvingAuthDocumentOAuthMalformed
+      taskRecorder.currentStepFailed(message, authDocumentUnusable(this.description))
+      throw IOException(message)
+    }
+
+    return AccountProviderAuthenticationDescription.OAuthClientCredentials(
+      description = authObject.description,
+      formDescription = formDescription,
+      logoURI = logo,
+      authenticate = authenticateURI
+    )
+  }
+
+  private fun extractFormDescription(
+    authObject: AuthenticationObject
+  ): AccountProviderAuthenticationDescription.FormDescription {
     val loginRestrictions =
       authObject.inputs[LABEL_LOGIN]
     val passwordRestrictions =
       authObject.inputs[LABEL_PASSWORD]
-    val logo =
-      authObject.links.find { link -> link.relation == "logo" }
-        ?.hrefURI
 
-    return AccountProviderAuthenticationDescription.Basic(
+    return AccountProviderAuthenticationDescription.FormDescription(
       barcodeFormat = loginRestrictions?.barcodeFormat,
-      description = authObject.description,
       keyboard = this.parseKeyboardType(loginRestrictions?.keyboardType),
       labels = authObject.labels,
-      logoURI = logo,
       passwordKeyboard = this.parseKeyboardType(passwordRestrictions?.keyboardType),
       passwordMaximumLength = passwordRestrictions?.maximumLength ?: 0
     )

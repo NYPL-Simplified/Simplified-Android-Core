@@ -202,12 +202,14 @@ object MockAccountProviders {
     return fakeProvider(uri, host, port)
       .copy(
         authentication = AccountProviderAuthenticationDescription.Basic(
-          barcodeFormat = "CODABAR",
-          keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
-          passwordMaximumLength = 4,
-          passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
+          formDescription = AccountProviderAuthenticationDescription.FormDescription(
+            barcodeFormat = "CODABAR",
+            keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
+            passwordMaximumLength = 4,
+            passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
+            labels = mapOf()
+          ),
           description = "Stuff!",
-          labels = mapOf(),
           logoURI = null
         )
       )

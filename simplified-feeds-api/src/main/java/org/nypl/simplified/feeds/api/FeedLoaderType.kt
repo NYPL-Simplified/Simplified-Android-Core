@@ -1,8 +1,7 @@
 package org.nypl.simplified.feeds.api
 
 import com.google.common.util.concurrent.FluentFuture
-import org.librarysimplified.http.api.LSHTTPAuthorizationType
-import org.nypl.simplified.accounts.api.AccountID
+import org.nypl.simplified.accounts.api.AccountReadableType
 import java.net.URI
 
 /**
@@ -20,6 +19,7 @@ interface FeedLoaderType {
   /**
    * Load a feed from the given URI.
    *
+   * @param account  The account the URI is associated with
    * @param uri      The URI
    * @param auth     HTTP authentication details, if any
    *
@@ -27,9 +27,9 @@ interface FeedLoaderType {
    */
 
   fun fetchURI(
-    account: AccountID,
+    account: AccountReadableType,
     uri: URI,
-    auth: LSHTTPAuthorizationType?,
-    method: String
+    method: String,
+    authenticate: Boolean = true
   ): FluentFuture<FeedLoaderResult>
 }

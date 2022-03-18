@@ -1148,8 +1148,8 @@ class BookRevokeTaskTest {
       feedLoader.fetchURI(
         account = this.anyNonNull(),
         uri = this.anyNonNull(),
-        auth = Mockito.any(),
-        method = this.anyNonNull()
+        method = this.anyNonNull(),
+        authenticate = Mockito.anyBoolean()
       )
     ).thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
 
@@ -1637,8 +1637,8 @@ class BookRevokeTaskTest {
       feedLoader.fetchURI(
         account = this.anyNonNull(),
         uri = this.anyNonNull(),
-        auth = Mockito.any(),
-        method = this.anyNonNull()
+        method = this.anyNonNull(),
+        authenticate = Mockito.anyBoolean()
       )
     ).thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
 
@@ -1754,8 +1754,8 @@ class BookRevokeTaskTest {
       feedLoader.fetchURI(
         account = this.anyNonNull(),
         uri = this.anyNonNull(),
-        auth = Mockito.any(),
-        method = this.anyNonNull()
+        method = this.anyNonNull(),
+        authenticate = Mockito.anyBoolean()
       )
     ).thenReturn(FluentFuture.from(Futures.immediateFuture(feedResult as FeedLoaderResult)))
 
@@ -1863,8 +1863,8 @@ class BookRevokeTaskTest {
       feedLoader.fetchURI(
         account = this.anyNonNull(),
         uri = this.anyNonNull(),
-        auth = Mockito.any(),
-        method = this.anyNonNull()
+        method = this.anyNonNull(),
+        authenticate = Mockito.anyBoolean()
       )
     ).thenReturn(FluentFuture.from(SettableFuture.create()))
 
@@ -2186,8 +2186,8 @@ class BookRevokeTaskTest {
       feedLoader.fetchURI(
         account = this.anyNonNull(),
         uri = this.anyNonNull(),
-        auth = Mockito.any(),
-        method = this.anyNonNull()
+        method = this.anyNonNull(),
+        authenticate = Mockito.anyBoolean()
       )
     ).thenReturn(FluentFuture.from(Futures.immediateFailedFuture(UniqueException())))
 
@@ -2298,8 +2298,8 @@ class BookRevokeTaskTest {
       feedLoader.fetchURI(
         account = this.anyNonNull(),
         uri = this.anyNonNull(),
-        auth = Mockito.any(),
-        method = this.anyNonNull()
+        method = this.anyNonNull(),
+        authenticate = Mockito.anyBoolean()
       )
     ).thenReturn(FluentFuture.from(Futures.immediateFailedFuture(UniqueException())))
 

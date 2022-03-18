@@ -140,11 +140,13 @@ class AccountDetailFragmentTest {
 
     testProviderBasicAuthDescription = AccountProviderAuthenticationDescription.Basic(
       "description",
-      "BARCODEFORMAT",
-      keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
-      passwordMaximumLength = 10,
-      passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
-      emptyMap(),
+      formDescription = AccountProviderAuthenticationDescription.FormDescription(
+        barcodeFormat = "BARCODEFORMAT",
+        keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
+        passwordMaximumLength = 10,
+        passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
+        labels = emptyMap(),
+      ),
       URI.create("logoURI")
     )
     every { mockAccountDetailViewModel.account.provider.authentication } returns testProviderBasicAuthDescription

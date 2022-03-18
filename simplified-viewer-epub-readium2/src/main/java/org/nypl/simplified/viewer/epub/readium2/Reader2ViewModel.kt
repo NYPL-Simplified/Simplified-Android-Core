@@ -109,7 +109,7 @@ internal class Reader2ViewModel(
     this.analyticsService.publishEvent(
       AnalyticsEvent.BookClosed(
         timestamp = LocalDateTime.now(),
-        credentials = this.account.loginState.credentials,
+        account = this.account,
         profileUUID = this.profile.id.uuid,
         accountProvider = this.account.provider.id,
         accountUUID = this.account.id.uuid,

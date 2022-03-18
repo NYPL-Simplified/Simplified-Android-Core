@@ -3,8 +3,8 @@ package org.nypl.simplified.feeds.api
 import com.google.common.util.concurrent.FluentFuture
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.io7m.jfunctional.Some
-import org.librarysimplified.http.api.LSHTTPAuthorizationType
 import org.nypl.simplified.accounts.api.AccountID
+import org.nypl.simplified.accounts.api.AccountReadableType
 import org.nypl.simplified.books.bundled.api.BundledContentResolverType
 import org.nypl.simplified.books.bundled.api.BundledURIs
 import org.nypl.simplified.books.formats.api.BookFormatSupportType
@@ -45,7 +45,7 @@ class FeedLoader private constructor(
   private val exec: ListeningExecutorService,
   private val parser: OPDSFeedParserType,
   private val searchParser: OPDSSearchParserType,
-  private val transport: OPDSFeedTransportType<LSHTTPAuthorizationType?>
+  private val transport: OPDSFeedTransportType<AccountReadableType>
 ) : FeedLoaderType {
 
   private val log = LoggerFactory.getLogger(FeedLoader::class.java)
@@ -60,19 +60,19 @@ class FeedLoader private constructor(
     }
 
   override fun fetchURI(
-    account: AccountID,
+    account: AccountReadableType,
     uri: URI,
-    auth: LSHTTPAuthorizationType?,
     method: String,
+    authenticate: Boolean
   ): FluentFuture<FeedLoaderResult> {
     return FluentFuture.from(
       this.exec.submit(
         Callable {
           this.fetchSynchronously(
-            accountId = account,
+            account = account,
             uri = uri,
-            auth = auth,
-            method = method
+            method = method,
+            authenticate = authenticate
           )
         }
       )
@@ -80,10 +80,10 @@ class FeedLoader private constructor(
   }
 
   private fun fetchSynchronously(
-    accountId: AccountID,
+    account: AccountReadableType,
     uri: URI,
-    auth: LSHTTPAuthorizationType?,
-    method: String
+    method: String,
+    authenticate: Boolean
   ): FeedLoaderResult {
     try {
       /*
@@ -92,7 +92,7 @@ class FeedLoader private constructor(
        */
 
       if (BundledURIs.isBundledURI(uri)) {
-        return this.parseFromBundledContent(accountId, uri)
+        return this.parseFromBundledContent(account.id, uri)
       }
 
       /*
@@ -101,7 +101,7 @@ class FeedLoader private constructor(
        */
 
       if (uri.scheme == "content") {
-        return this.parseFromContentResolver(accountId, uri)
+        return this.parseFromContentResolver(account.id, uri)
       }
 
       /*
@@ -109,12 +109,13 @@ class FeedLoader private constructor(
        */
 
       val opdsFeed =
-        this.transport.getStream(auth, uri, method).use { stream -> this.parser.parse(uri, stream) }
+        this.transport.getStream(account, uri, method, authenticate)
+          .use { stream -> this.parser.parse(uri, stream) }
       val search =
-        this.fetchSearchLink(opdsFeed, auth, method)
+        this.fetchSearchLink(opdsFeed, account, method, authenticate)
       val feed =
         Feed.fromAcquisitionFeed(
-          accountId = accountId,
+          accountId = account.id,
           feed = opdsFeed,
           filter = this::isEntrySupported,
           search = search
@@ -238,13 +239,14 @@ class FeedLoader private constructor(
 
   private fun fetchSearchLink(
     opdsFeed: OPDSAcquisitionFeed,
-    auth: LSHTTPAuthorizationType?,
-    method: String
+    account: AccountReadableType,
+    method: String,
+    authenticate: Boolean
   ): OPDSOpenSearch1_1? {
     val searchLinkOpt = opdsFeed.feedSearchURI
     return if (searchLinkOpt is Some<OPDSSearchLink>) {
       val searchLink = searchLinkOpt.get()
-      this.transport.getStream(auth, searchLink.uri, method).use { stream ->
+      this.transport.getStream(account, searchLink.uri, method, authenticate).use { stream ->
         return this.searchParser.parse(searchLink.uri, stream)
       }
     } else {
@@ -264,7 +266,7 @@ class FeedLoader private constructor(
       exec: ListeningExecutorService,
       parser: OPDSFeedParserType,
       searchParser: OPDSSearchParserType,
-      transport: OPDSFeedTransportType<LSHTTPAuthorizationType?>,
+      transport: OPDSFeedTransportType<AccountReadableType>,
       bundledContent: BundledContentResolverType
     ): FeedLoaderType {
       return FeedLoader(

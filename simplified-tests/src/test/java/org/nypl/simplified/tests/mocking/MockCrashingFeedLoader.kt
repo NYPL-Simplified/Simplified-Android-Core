@@ -2,8 +2,7 @@ package org.nypl.simplified.tests.mocking
 
 import com.google.common.util.concurrent.FluentFuture
 import com.google.common.util.concurrent.Futures
-import org.librarysimplified.http.api.LSHTTPAuthorizationType
-import org.nypl.simplified.accounts.api.AccountID
+import org.nypl.simplified.accounts.api.AccountReadableType
 import org.nypl.simplified.feeds.api.FeedLoaderResult
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import java.io.IOException
@@ -15,10 +14,10 @@ class MockCrashingFeedLoader : FeedLoaderType {
     false
 
   override fun fetchURI(
-    account: AccountID,
+    account: AccountReadableType,
     uri: URI,
-    auth: LSHTTPAuthorizationType?,
-    method: String
+    method: String,
+    authenticate: Boolean
   ): FluentFuture<FeedLoaderResult> {
     return FluentFuture.from(Futures.immediateFailedFuture(IOException("Ouch!")))
   }

@@ -18,11 +18,14 @@ import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.Companion.ANONYMOUS_TYPE
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.Companion.BASIC_TYPE
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.Companion.COPPA_TYPE
+import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.Companion.OAUTH_CLIENT_CREDENTIALS
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.Companion.OAUTH_INTERMEDIARY_TYPE
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.Companion.SAML_2_0_TYPE
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.KeyboardInput
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.OAuthWithIntermediary
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.SAML2_0
+import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.OAuthClientCredentials
+import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.FormDescription
 import org.nypl.simplified.accounts.api.AccountProviderType
 import org.nypl.simplified.announcements.Announcement
 import org.nypl.simplified.announcements.AnnouncementJSON
@@ -142,12 +145,20 @@ object AccountProvidersJSON {
       is Basic -> {
         val authObject = mapper.createObjectNode()
         authObject.put("type", BASIC_TYPE)
-        this.putConditionally(authObject, "barcodeFormat", authentication.barcodeFormat?.toUpperCase(Locale.ROOT))
         this.putConditionally(authObject, "description", authentication.description)
-        this.putConditionally(authObject, "keyboard", authentication.keyboard.name)
-        this.putConditionally(authObject, "passwordKeyboard", authentication.passwordKeyboard.name)
-        authObject.put("passwordMaximumLength", authentication.passwordMaximumLength)
-        authObject.set<ObjectNode>("labels", this.mapToObject(mapper, authentication.labels))
+        this.serializeFormDescription(authentication.formDescription, authObject, mapper)
+        val logo = authentication.logoURI
+        if (logo != null) {
+          authObject.put("logo", logo.toString())
+        }
+        authObject
+      }
+      is OAuthClientCredentials -> {
+        val authObject = mapper.createObjectNode()
+        authObject.put("type", OAUTH_CLIENT_CREDENTIALS)
+        authObject.put("authenticate", authentication.authenticate.toString())
+        this.putConditionally(authObject, "description", authentication.description)
+        this.serializeFormDescription(authentication.formDescription, authObject, mapper)
         val logo = authentication.logoURI
         if (logo != null) {
           authObject.put("logo", logo.toString())
@@ -171,6 +182,18 @@ object AccountProvidersJSON {
         authObject
       }
     }
+  }
+
+  private fun serializeFormDescription(
+    formDescription: FormDescription,
+    authObject: ObjectNode,
+    mapper: ObjectMapper
+  ) {
+    this.putConditionally(authObject, "barcodeFormat", formDescription.barcodeFormat?.toUpperCase(Locale.ROOT))
+    this.putConditionally(authObject, "keyboard", formDescription.keyboard.name)
+    this.putConditionally(authObject, "passwordKeyboard", formDescription.passwordKeyboard.name)
+    authObject.put("passwordMaximumLength", formDescription.passwordMaximumLength)
+    authObject.set<ObjectNode>("labels", this.mapToObject(mapper, formDescription.labels))
   }
 
   private fun mapToObject(
@@ -401,37 +424,37 @@ object AccountProvidersJSON {
       }
 
       BASIC_TYPE -> {
-        val labels =
-          this.toStringMap(JSONParserUtilities.getObject(container, "labels"))
-        val barcodeFormat =
-          JSONParserUtilities.getStringOrNull(container, "barcodeFormat")
-            ?.toUpperCase(Locale.ROOT)
-        val keyboard =
-          this.parseKeyboardType(JSONParserUtilities.getStringOrNull(container, "keyboard"))
-        val passwordMaximumLength =
-          JSONParserUtilities.getIntegerDefault(container, "passwordMaximumLength", 0)
-        val passwordKeyboard =
-          this.parseKeyboardType(
-            JSONParserUtilities.getStringOrNull(
-              container,
-              "passwordKeyboard"
-            )
-          )
         val description =
           JSONParserUtilities.getString(container, "description")
         val logoURI =
           JSONParserUtilities.getURIOrNull(container, "logo")
+        val formDescription =
+          parseFormDescription(container)
 
         Basic(
-          barcodeFormat = barcodeFormat,
           description = description,
-          keyboard = keyboard,
-          labels = labels,
+          formDescription = formDescription,
           logoURI = logoURI,
-          passwordKeyboard = passwordKeyboard,
-          passwordMaximumLength = passwordMaximumLength
         )
       }
+
+      OAUTH_CLIENT_CREDENTIALS -> {
+        val description =
+          JSONParserUtilities.getString(container, "description")
+        val logoURI =
+          JSONParserUtilities.getURIOrNull(container, "logo")
+        val authURI =
+          JSONParserUtilities.getURI(container, "authenticate")
+        val formDescription =
+          parseFormDescription(container)
+        OAuthClientCredentials(
+          description = description,
+          logoURI = logoURI,
+          formDescription = formDescription,
+          authenticate = authURI
+        )
+      }
+
       COPPA_TYPE -> {
         COPPAAgeGate(
           greaterEqual13 =
@@ -445,6 +468,35 @@ object AccountProvidersJSON {
         Anonymous
       }
     }
+  }
+
+  private fun parseFormDescription(
+    container: ObjectNode
+  ): FormDescription {
+    val labels =
+      this.toStringMap(JSONParserUtilities.getObject(container, "labels"))
+    val barcodeFormat =
+      JSONParserUtilities.getStringOrNull(container, "barcodeFormat")
+        ?.toUpperCase(Locale.ROOT)
+    val keyboard =
+      this.parseKeyboardType(JSONParserUtilities.getStringOrNull(container, "keyboard"))
+    val passwordMaximumLength =
+      JSONParserUtilities.getIntegerDefault(container, "passwordMaximumLength", 0)
+    val passwordKeyboard =
+      this.parseKeyboardType(
+        JSONParserUtilities.getStringOrNull(
+          container,
+          "passwordKeyboard"
+        )
+      )
+
+    return FormDescription(
+      barcodeFormat = barcodeFormat,
+      keyboard = keyboard,
+      labels = labels,
+      passwordKeyboard = passwordKeyboard,
+      passwordMaximumLength = passwordMaximumLength
+    )
   }
 
   /**

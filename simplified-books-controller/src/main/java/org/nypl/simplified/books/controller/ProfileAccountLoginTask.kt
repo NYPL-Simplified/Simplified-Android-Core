@@ -6,7 +6,6 @@ import org.librarysimplified.http.api.LSHTTPClientType
 import org.librarysimplified.http.api.LSHTTPRequestBuilderType.Method.Post
 import org.nypl.drm.core.AdobeAdeptExecutorType
 import org.nypl.drm.core.AdobeVendorID
-import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobeClientToken
 import org.nypl.simplified.accounts.api.AccountAuthenticationAdobePreActivationCredentials
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
@@ -21,6 +20,7 @@ import org.nypl.simplified.accounts.api.AccountLoginStringResourcesType
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.OAuthWithIntermediary
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription.SAML2_0
+import org.nypl.simplified.accounts.api.setAuthorization
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.adobe.extensions.AdobeDRMExtensions
 import org.nypl.simplified.patron.api.PatronDRM
@@ -301,7 +301,7 @@ class ProfileAccountLoginTask(
       PatronUserProfiles.runPatronProfileRequest(
         taskRecorder = this.steps,
         patronParsers = this.patronParsers,
-        credentials = this.credentials,
+        authenticate = { setAuthorization(credentials) },
         http = this.http,
         account = this.account
       )
@@ -491,7 +491,7 @@ class ProfileAccountLoginTask(
 
     val request =
       this.http.newRequest(deviceManagerURI)
-        .setAuthorization(AccountAuthenticatedHTTP.createAuthorizationIfPresent(this.credentials))
+        .setAuthorization(this.credentials)
         .setMethod(post)
         .build()
 

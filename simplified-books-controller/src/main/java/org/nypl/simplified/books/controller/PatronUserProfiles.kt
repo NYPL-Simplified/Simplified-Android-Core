@@ -3,9 +3,8 @@ package org.nypl.simplified.books.controller
 import com.io7m.jfunctional.OptionType
 import com.io7m.jfunctional.Some
 import org.librarysimplified.http.api.LSHTTPClientType
+import org.librarysimplified.http.api.LSHTTPRequestBuilderType
 import org.librarysimplified.http.api.LSHTTPResponseStatus
-import org.nypl.simplified.accounts.api.AccountAuthenticatedHTTP
-import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.database.api.AccountType
 import org.nypl.simplified.parser.api.ParseError
 import org.nypl.simplified.parser.api.ParseResult
@@ -31,7 +30,7 @@ internal object PatronUserProfiles {
   fun runPatronProfileRequest(
     taskRecorder: TaskRecorderType,
     patronParsers: PatronUserProfileParsersType,
-    credentials: AccountAuthenticationCredentials,
+    authenticate: (LSHTTPRequestBuilderType).() -> LSHTTPRequestBuilderType,
     http: LSHTTPClientType,
     account: AccountType
   ): PatronUserProfile {
@@ -44,7 +43,7 @@ internal object PatronUserProfiles {
 
     val request =
       http.newRequest(patronSettingsURI)
-        .setAuthorization(AccountAuthenticatedHTTP.createAuthorization(credentials))
+        .authenticate()
         .build()
 
     val response = request.execute()
