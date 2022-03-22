@@ -1,1 +1,1 @@
-This space intentionally left blank.
+OE-215: Switch Firstbook login from Basic Auth to OAuth
