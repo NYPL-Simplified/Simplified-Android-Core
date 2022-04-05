@@ -5,7 +5,11 @@ import androidx.fragment.app.FragmentFactory
 import org.librarysimplified.audiobook.api.PlayerAudioBookType
 import org.librarysimplified.audiobook.api.PlayerSleepTimerType
 import org.librarysimplified.audiobook.api.PlayerType
-import org.librarysimplified.audiobook.views.*
+import org.librarysimplified.audiobook.views.PlayerFragment
+import org.librarysimplified.audiobook.views.PlayerFragmentListenerType
+import org.librarysimplified.audiobook.views.PlayerPlaybackRateFragment
+import org.librarysimplified.audiobook.views.PlayerSleepTimerFragment
+import org.librarysimplified.audiobook.views.PlayerTOCFragment
 import java.util.concurrent.ScheduledExecutorService
 
 class AudiobookFragmentFactory(

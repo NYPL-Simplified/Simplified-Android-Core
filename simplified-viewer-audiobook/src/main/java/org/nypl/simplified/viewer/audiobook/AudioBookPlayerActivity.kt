@@ -10,16 +10,37 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
 import io.reactivex.disposables.Disposable
-import org.librarysimplified.audiobook.api.*
+import org.librarysimplified.audiobook.api.PlayerAudioBookType
+import org.librarysimplified.audiobook.api.PlayerAudioEngineRequest
+import org.librarysimplified.audiobook.api.PlayerAudioEngines
+import org.librarysimplified.audiobook.api.PlayerDownloadProviderType
+import org.librarysimplified.audiobook.api.PlayerEvent
 import org.librarysimplified.audiobook.api.PlayerEvent.PlayerEventError
 import org.librarysimplified.audiobook.api.PlayerEvent.PlayerEventPlaybackRateChanged
-import org.librarysimplified.audiobook.api.PlayerEvent.PlayerEventWithSpineElement.*
+import org.librarysimplified.audiobook.api.PlayerEvent.PlayerEventWithSpineElement.PlayerEventChapterCompleted
+import org.librarysimplified.audiobook.api.PlayerEvent.PlayerEventWithSpineElement.PlayerEventChapterWaiting
+import org.librarysimplified.audiobook.api.PlayerEvent.PlayerEventWithSpineElement.PlayerEventPlaybackBuffering
+import org.librarysimplified.audiobook.api.PlayerEvent.PlayerEventWithSpineElement.PlayerEventPlaybackPaused
+import org.librarysimplified.audiobook.api.PlayerEvent.PlayerEventWithSpineElement.PlayerEventPlaybackProgressUpdate
+import org.librarysimplified.audiobook.api.PlayerEvent.PlayerEventWithSpineElement.PlayerEventPlaybackStarted
+import org.librarysimplified.audiobook.api.PlayerEvent.PlayerEventWithSpineElement.PlayerEventPlaybackStopped
+import org.librarysimplified.audiobook.api.PlayerPosition
+import org.librarysimplified.audiobook.api.PlayerResult
+import org.librarysimplified.audiobook.api.PlayerSleepTimer
+import org.librarysimplified.audiobook.api.PlayerSleepTimerType
 import org.librarysimplified.audiobook.api.PlayerSpineElementDownloadStatus.PlayerSpineElementDownloadExpired
+import org.librarysimplified.audiobook.api.PlayerType
+import org.librarysimplified.audiobook.api.PlayerUserAgent
 import org.librarysimplified.audiobook.api.extensions.PlayerExtensionType
 import org.librarysimplified.audiobook.downloads.DownloadProvider
 import org.librarysimplified.audiobook.feedbooks.FeedbooksPlayerExtension
 import org.librarysimplified.audiobook.manifest.api.PlayerManifest
-import org.librarysimplified.audiobook.views.*
+import org.librarysimplified.audiobook.views.PlayerAccessibilityEvent
+import org.librarysimplified.audiobook.views.PlayerFragment
+import org.librarysimplified.audiobook.views.PlayerFragmentListenerType
+import org.librarysimplified.audiobook.views.PlayerPlaybackRateFragment
+import org.librarysimplified.audiobook.views.PlayerSleepTimerFragment
+import org.librarysimplified.audiobook.views.PlayerTOCFragment
 import org.librarysimplified.http.api.LSHTTPClientType
 import org.librarysimplified.services.api.ServiceDirectoryType
 import org.librarysimplified.services.api.Services
@@ -132,6 +153,7 @@ class AudioBookPlayerActivity :
       playerScheduledExecutor,
       sleepTimer
     )
+    supportFragmentManager.fragmentFactory = fragmentFactory
 
     super.onCreate(null)
 
