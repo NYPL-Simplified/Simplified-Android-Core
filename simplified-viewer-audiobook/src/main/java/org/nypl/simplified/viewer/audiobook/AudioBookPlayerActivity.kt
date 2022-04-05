@@ -9,39 +9,17 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
-import org.librarysimplified.audiobook.api.PlayerAudioBookType
-import org.librarysimplified.audiobook.api.PlayerAudioEngineRequest
-import org.librarysimplified.audiobook.api.PlayerAudioEngines
-import org.librarysimplified.audiobook.api.PlayerDownloadProviderType
-import org.librarysimplified.audiobook.api.PlayerEvent
+import io.reactivex.disposables.Disposable
+import org.librarysimplified.audiobook.api.*
 import org.librarysimplified.audiobook.api.PlayerEvent.PlayerEventError
 import org.librarysimplified.audiobook.api.PlayerEvent.PlayerEventPlaybackRateChanged
-import org.librarysimplified.audiobook.api.PlayerEvent.PlayerEventWithSpineElement.PlayerEventChapterCompleted
-import org.librarysimplified.audiobook.api.PlayerEvent.PlayerEventWithSpineElement.PlayerEventChapterWaiting
-import org.librarysimplified.audiobook.api.PlayerEvent.PlayerEventWithSpineElement.PlayerEventPlaybackBuffering
-import org.librarysimplified.audiobook.api.PlayerEvent.PlayerEventWithSpineElement.PlayerEventPlaybackPaused
-import org.librarysimplified.audiobook.api.PlayerEvent.PlayerEventWithSpineElement.PlayerEventPlaybackProgressUpdate
-import org.librarysimplified.audiobook.api.PlayerEvent.PlayerEventWithSpineElement.PlayerEventPlaybackStarted
-import org.librarysimplified.audiobook.api.PlayerEvent.PlayerEventWithSpineElement.PlayerEventPlaybackStopped
-import org.librarysimplified.audiobook.api.PlayerPosition
-import org.librarysimplified.audiobook.api.PlayerResult
-import org.librarysimplified.audiobook.api.PlayerSleepTimer
-import org.librarysimplified.audiobook.api.PlayerSleepTimerType
+import org.librarysimplified.audiobook.api.PlayerEvent.PlayerEventWithSpineElement.*
 import org.librarysimplified.audiobook.api.PlayerSpineElementDownloadStatus.PlayerSpineElementDownloadExpired
-import org.librarysimplified.audiobook.api.PlayerType
-import org.librarysimplified.audiobook.api.PlayerUserAgent
 import org.librarysimplified.audiobook.api.extensions.PlayerExtensionType
 import org.librarysimplified.audiobook.downloads.DownloadProvider
 import org.librarysimplified.audiobook.feedbooks.FeedbooksPlayerExtension
 import org.librarysimplified.audiobook.manifest.api.PlayerManifest
-import org.librarysimplified.audiobook.views.PlayerAccessibilityEvent
-import org.librarysimplified.audiobook.views.PlayerFragment
-import org.librarysimplified.audiobook.views.PlayerFragmentListenerType
-import org.librarysimplified.audiobook.views.PlayerFragmentParameters
-import org.librarysimplified.audiobook.views.PlayerPlaybackRateFragment
-import org.librarysimplified.audiobook.views.PlayerSleepTimerFragment
-import org.librarysimplified.audiobook.views.PlayerTOCFragment
-import org.librarysimplified.audiobook.views.PlayerTOCFragmentParameters
+import org.librarysimplified.audiobook.views.*
 import org.librarysimplified.http.api.LSHTTPClientType
 import org.librarysimplified.services.api.ServiceDirectoryType
 import org.librarysimplified.services.api.Services
@@ -61,7 +39,6 @@ import org.nypl.simplified.ui.screen.ScreenSizeInformationType
 import org.nypl.simplified.ui.thread.api.UIThreadServiceType
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import rx.Subscription
 import java.io.IOException
 import java.util.ServiceLoader
 import java.util.concurrent.Executors
@@ -109,7 +86,7 @@ class AudioBookPlayerActivity :
   private lateinit var book: PlayerAudioBookType
   private lateinit var bookAuthor: String
   private lateinit var books: BooksControllerType
-  private lateinit var bookSubscription: Subscription
+  private lateinit var bookSubscription: Disposable
   private lateinit var bookTitle: String
   private lateinit var covers: BookCoverProviderType
   private lateinit var downloadExecutor: ListeningExecutorService
@@ -120,9 +97,8 @@ class AudioBookPlayerActivity :
   private lateinit var networkConnectivity: NetworkConnectivityType
   private lateinit var parameters: AudioBookPlayerParameters
   private lateinit var player: PlayerType
-  private lateinit var playerFragment: PlayerFragment
   private lateinit var playerScheduledExecutor: ScheduledExecutorService
-  private lateinit var playerSubscription: Subscription
+  private lateinit var playerSubscription: Disposable
   private lateinit var profiles: ProfilesControllerType
   private lateinit var screenSize: ScreenSizeInformationType
   private lateinit var sleepTimer: PlayerSleepTimerType
@@ -131,11 +107,32 @@ class AudioBookPlayerActivity :
   private var playerInitialized: Boolean = false
   private val reloadingManifest = AtomicBoolean(false)
 
+  private lateinit var fragmentFactory: AudiobookFragmentFactory
+
   @Volatile
   private var destroying: Boolean = false
 
   override fun onCreate(savedInstanceState: Bundle?) {
     this.log.debug("onCreate")
+
+    /*
+    * Create a sleep timer.
+    */
+
+    this.sleepTimer = PlayerSleepTimer.create()
+    this.playerScheduledExecutor = Executors.newSingleThreadScheduledExecutor()
+    fragmentFactory = AudiobookFragmentFactory(
+      /*
+      Using lazy delegates here because we don't have access to book or player
+      until we've progressed past the loadingFragment
+       */
+      lazy { player },
+      lazy { book },
+      this,
+      playerScheduledExecutor,
+      sleepTimer
+    )
+
     super.onCreate(null)
 
     val i = this.intent!!
@@ -149,7 +146,6 @@ class AudioBookPlayerActivity :
     this.log.debug("entry id:      {}", this.parameters.opdsEntry.id)
 
     this.setContentView(R.layout.audio_book_player_base)
-    this.playerScheduledExecutor = Executors.newSingleThreadScheduledExecutor()
 
     /*
     * Create a new downloader that is solely used to fetch audio book manifests.
@@ -210,12 +206,6 @@ class AudioBookPlayerActivity :
 
     this.downloadProvider =
       DownloadProvider.create(this.downloadExecutor)
-
-    /*
-     * Create a sleep timer.
-     */
-
-    this.sleepTimer = PlayerSleepTimer.create()
 
     /*
      * Show a loading fragment.
@@ -280,8 +270,8 @@ class AudioBookPlayerActivity :
         this.log.error("error closing player: ", e)
       }
 
-      this.bookSubscription.unsubscribe()
-      this.playerSubscription.unsubscribe()
+      this.bookSubscription.dispose()
+      this.playerSubscription.dispose()
 
       try {
         this.book.close()
@@ -411,11 +401,9 @@ class AudioBookPlayerActivity :
       // Sanity check; Verify the state of the lifecycle before continuing as it's possible the
       // activity could be finishing.
       if (!this.isFinishing && !this.supportFragmentManager.isDestroyed) {
-        this.playerFragment = PlayerFragment.newInstance(PlayerFragmentParameters())
-
         this.supportFragmentManager
           .beginTransaction()
-          .replace(R.id.audio_book_player_fragment_holder, this.playerFragment, "PLAYER")
+          .replace(R.id.audio_book_player_fragment_holder, PlayerFragment::class.java, null, "PLAYER")
           .commitAllowingStateLoss()
       }
     }
@@ -643,9 +631,9 @@ class AudioBookPlayerActivity :
      */
 
     this.uiThread.runOnUIThread {
-      val fragment =
-        PlayerPlaybackRateFragment.newInstance(PlayerFragmentParameters())
-      fragment.show(this.supportFragmentManager, "PLAYER_RATE")
+      supportFragmentManager.beginTransaction()
+        .add(PlayerPlaybackRateFragment::class.java, null, "PLAYER_RATE")
+        .commit()
     }
   }
 
@@ -655,9 +643,9 @@ class AudioBookPlayerActivity :
      */
 
     this.uiThread.runOnUIThread {
-      val fragment =
-        PlayerSleepTimerFragment.newInstance(PlayerFragmentParameters())
-      fragment.show(this.supportFragmentManager, "PLAYER_SLEEP_TIMER")
+      supportFragmentManager.beginTransaction()
+        .add(PlayerSleepTimerFragment::class.java, null, "PLAYER_SLEEP_TIMER")
+        .commit()
     }
   }
 
@@ -669,19 +657,12 @@ class AudioBookPlayerActivity :
 
     this.uiThread.runOnUIThread {
       this.supportActionBar?.setTitle(R.string.audiobook_player_toc_title)
-
-      val fragment = PlayerTOCFragment.newInstance(PlayerTOCFragmentParameters())
-
       this.supportFragmentManager
         .beginTransaction()
-        .replace(R.id.audio_book_player_fragment_holder, fragment, "PLAYER_TOC")
+        .replace(R.id.audio_book_player_fragment_holder, PlayerTOCFragment::class.java, null, "PLAYER_TOC")
         .addToBackStack(null)
         .commit()
     }
-  }
-
-  override fun onPlayerTOCWantsBook(): PlayerAudioBookType {
-    return this.book
   }
 
   override fun onPlayerTOCWantsClose() {
@@ -718,20 +699,8 @@ class AudioBookPlayerActivity :
     )
   }
 
-  override fun onPlayerWantsPlayer(): PlayerType {
-    return this.player
-  }
-
-  override fun onPlayerWantsSleepTimer(): PlayerSleepTimerType {
-    return this.sleepTimer
-  }
-
   override fun onPlayerWantsTitle(): String {
     return this.parameters.opdsEntry.title
-  }
-
-  override fun onPlayerWantsScheduledExecutor(): ScheduledExecutorService {
-    return this.playerScheduledExecutor
   }
 
   override fun onPlayerAccessibilityEvent(event: PlayerAccessibilityEvent) {
