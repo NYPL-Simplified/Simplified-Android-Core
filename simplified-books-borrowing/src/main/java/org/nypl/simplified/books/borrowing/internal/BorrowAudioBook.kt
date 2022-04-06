@@ -8,7 +8,9 @@ import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountReadableType
 import org.nypl.simplified.books.audio.AudioBookCredentials
 import org.nypl.simplified.books.audio.AudioBookManifestRequest
-import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle
+import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
+import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB
+import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandlePDF
 import org.nypl.simplified.books.borrowing.BorrowContextType
 import org.nypl.simplified.books.borrowing.internal.BorrowErrorCodes.audioStrategyFailed
 import org.nypl.simplified.books.borrowing.subtasks.BorrowSubtaskException.BorrowSubtaskFailed
@@ -165,15 +167,15 @@ class BorrowAudioBook private constructor() : BorrowSubtaskType {
     context.taskRecorder.beginNewStep("Saving book...")
 
     return when (val formatHandle = context.bookDatabaseEntry.findFormatHandleForContentType(context.currentAcquisitionPathElement.mimeType)) {
-      is BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook -> {
+      is BookDatabaseEntryFormatHandleAudioBook -> {
         formatHandle.copyInManifestAndURI(
           data = data.file.readBytes(),
           manifestURI = data.sourceURI
         )
         context.bookDownloadSucceeded()
       }
-      is BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandlePDF,
-      is BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleEPUB,
+      is BookDatabaseEntryFormatHandlePDF,
+      is BookDatabaseEntryFormatHandleEPUB,
       null ->
         throw UnreachableCodeException()
     }
