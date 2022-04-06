@@ -114,7 +114,6 @@ class AudioBookPlayerActivity :
   private lateinit var downloadProvider: PlayerDownloadProviderType
   private lateinit var formatHandle: BookDatabaseEntryFormatHandleAudioBook
   private lateinit var http: LSHTTPClientType
-  private lateinit var loadingFragment: AudioBookLoadingFragment
   private lateinit var networkConnectivity: NetworkConnectivityType
   private lateinit var parameters: AudioBookPlayerParameters
   private lateinit var player: PlayerType
@@ -135,26 +134,6 @@ class AudioBookPlayerActivity :
 
   override fun onCreate(savedInstanceState: Bundle?) {
     this.log.debug("onCreate")
-
-    /*
-    * Create a sleep timer.
-    */
-
-    this.sleepTimer = PlayerSleepTimer.create()
-    this.playerScheduledExecutor = Executors.newSingleThreadScheduledExecutor()
-    fragmentFactory = AudiobookFragmentFactory(
-      /*
-      Using lazy delegates here because we don't have access to book or player
-      until we've progressed past the loadingFragment
-       */
-      lazy { player },
-      lazy { book },
-      this,
-      playerScheduledExecutor,
-      sleepTimer
-    )
-    supportFragmentManager.fragmentFactory = fragmentFactory
-
     super.onCreate(null)
 
     val i = this.intent!!
@@ -177,6 +156,12 @@ class AudioBookPlayerActivity :
       MoreExecutors.listeningDecorator(
         NamedThreadPools.namedThreadPool(1, "audiobook-player", 19)
       )
+    this.playerScheduledExecutor = Executors.newSingleThreadScheduledExecutor()
+
+    /*
+    * Create a sleep timer.
+    */
+    this.sleepTimer = PlayerSleepTimer.create()
 
     this.supportActionBar?.setDisplayHomeAsUpEnabled(false)
 
@@ -232,12 +217,8 @@ class AudioBookPlayerActivity :
     /*
      * Show a loading fragment.
      */
-
-    this.loadingFragment =
-      AudioBookLoadingFragment.newInstance(AudioBookLoadingFragmentParameters())
-
     this.supportFragmentManager.beginTransaction()
-      .replace(R.id.audio_book_player_fragment_holder, this.loadingFragment, "LOADING")
+      .replace(R.id.audio_book_player_fragment_holder, AudioBookLoadingFragment::class.java, null, "LOADING")
       .commit()
 
     /*
@@ -422,10 +403,19 @@ class AudioBookPlayerActivity :
     this.uiThread.runOnUIThread {
       // Sanity check; Verify the state of the lifecycle before continuing as it's possible the
       // activity could be finishing.
+      fragmentFactory = AudiobookFragmentFactory(
+        player, book, this, playerScheduledExecutor, sleepTimer
+      )
+      this.supportFragmentManager.fragmentFactory = fragmentFactory
       if (!this.isFinishing && !this.supportFragmentManager.isDestroyed) {
         this.supportFragmentManager
           .beginTransaction()
-          .replace(R.id.audio_book_player_fragment_holder, PlayerFragment::class.java, null, "PLAYER")
+          .replace(
+            R.id.audio_book_player_fragment_holder,
+            PlayerFragment::class.java,
+            null,
+            "PLAYER"
+          )
           .commitAllowingStateLoss()
       }
     }
@@ -681,7 +671,12 @@ class AudioBookPlayerActivity :
       this.supportActionBar?.setTitle(R.string.audiobook_player_toc_title)
       this.supportFragmentManager
         .beginTransaction()
-        .replace(R.id.audio_book_player_fragment_holder, PlayerTOCFragment::class.java, null, "PLAYER_TOC")
+        .replace(
+          R.id.audio_book_player_fragment_holder,
+          PlayerTOCFragment::class.java,
+          null,
+          "PLAYER_TOC"
+        )
         .addToBackStack(null)
         .commit()
     }
