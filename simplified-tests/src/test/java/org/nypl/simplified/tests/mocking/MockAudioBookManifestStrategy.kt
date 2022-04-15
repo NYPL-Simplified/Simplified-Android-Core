@@ -1,10 +1,10 @@
 package org.nypl.simplified.tests.mocking
 
+import io.reactivex.Observable
+import io.reactivex.subjects.PublishSubject
 import org.nypl.simplified.books.audio.AudioBookManifestData
 import org.nypl.simplified.books.audio.AudioBookManifestStrategyType
 import org.nypl.simplified.taskrecorder.api.TaskResult
-import rx.Observable
-import rx.subjects.PublishSubject
 
 class MockAudioBookManifestStrategy : AudioBookManifestStrategyType {
 

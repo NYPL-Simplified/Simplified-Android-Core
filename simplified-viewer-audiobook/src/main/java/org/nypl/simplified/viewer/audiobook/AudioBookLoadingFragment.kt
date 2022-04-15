@@ -43,7 +43,6 @@ class AudioBookLoadingFragment : Fragment() {
 
   private lateinit var ioExecutor: ListeningExecutorService
   private lateinit var listener: AudioBookLoadingFragmentListenerType
-  private lateinit var loadingParameters: AudioBookLoadingFragmentParameters
   private lateinit var playerParameters: AudioBookPlayerParameters
   private lateinit var profiles: ProfilesControllerType
   private lateinit var progress: ProgressBar
@@ -71,10 +70,6 @@ class AudioBookLoadingFragment : Fragment() {
     this.log.debug("onCreate")
 
     super.onCreate(state)
-
-    this.loadingParameters =
-      this.arguments!!.getSerializable(parametersKey)
-      as AudioBookLoadingFragmentParameters
 
     val services = Services.serviceDirectory()
 

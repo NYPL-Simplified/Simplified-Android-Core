@@ -1,7 +1,7 @@
 package org.nypl.simplified.books.audio
 
+import io.reactivex.Observable
 import org.nypl.simplified.taskrecorder.api.TaskResult
-import rx.Observable
 
 /**
  * A strategy for downloading, parsing, and license-checking an audio book manifest. A given

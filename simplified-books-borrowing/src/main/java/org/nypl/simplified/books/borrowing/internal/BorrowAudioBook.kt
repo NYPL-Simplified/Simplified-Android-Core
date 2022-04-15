@@ -156,7 +156,7 @@ class BorrowAudioBook private constructor() : BorrowSubtaskType {
         }
       }
     } finally {
-      subscription.unsubscribe()
+      subscription.dispose()
     }
   }
 
