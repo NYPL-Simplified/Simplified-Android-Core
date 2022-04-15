@@ -28,7 +28,7 @@ class AudiobookFragmentFactory(
       PlayerPlaybackRateFragment::class.java.name ->
         PlayerPlaybackRateFragment(listener, player)
       PlayerSleepTimerFragment::class.java.name ->
-        PlayerSleepTimerFragment(listener, sleepTimer)
+        PlayerSleepTimerFragment(listener, player, sleepTimer)
       PlayerTOCFragment::class.java.name ->
         PlayerTOCFragment(listener, book, player)
       else -> super.instantiate(classLoader, className)
