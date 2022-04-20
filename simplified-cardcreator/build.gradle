@@ -10,6 +10,7 @@ android {
 
 dependencies {
   implementation project(':simplified-webview')
+  implementation project(":simplified-android-ktx")
 
   implementation libs.slf4j
   implementation libs.androidx.legacy.support.v4
@@ -27,6 +28,9 @@ dependencies {
   implementation libs.retrofit2
   implementation libs.retrofit2.moshi
   implementation libs.okhttp3.logging.interceptor
+
+  implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.4.1'
+
 
   // Temporary workaround to force databinding codegen in Robolectric tests
   // https://github.com/robolectric/robolectric/issues/3789
