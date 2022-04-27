@@ -48,7 +48,7 @@ class ConfirmationViewModelTest {
       emitted = subject.events.first()
     }
 
-    subject.confirmCard()
+    subject.prepareToSaveCard()
 
     emitted shouldBe ConfirmationEvent.SaveCardPermissionsCheck
   }

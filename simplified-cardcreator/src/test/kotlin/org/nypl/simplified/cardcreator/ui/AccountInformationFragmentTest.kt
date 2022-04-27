@@ -45,11 +45,12 @@ class AccountInformationFragmentTest {
       ApplicationProvider.getApplicationContext()
     )
 
-    scenario = launchFragmentInContainer()
-    {
-      AccountInformationFragment { mockk {
-        every { create(AccountInformationViewModel::class.java) } returns mockViewModel
-      } }.also { fragment ->
+    scenario = launchFragmentInContainer() {
+      AccountInformationFragment {
+        mockk {
+          every { create(AccountInformationViewModel::class.java) } returns mockViewModel
+        }
+      }.also { fragment ->
         fragment.viewLifecycleOwnerLiveData.observeForever {
           if (it != null) {
             testNavController.setGraph(R.navigation.nav_graph)

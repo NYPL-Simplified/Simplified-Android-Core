@@ -159,7 +159,7 @@ class ConfirmationFragmentTest {
   fun `on AddSavedCardToGallery event launches intent to do so`() = runBlockingTest {
     var expectedIntent: Intent? = null
     InstrumentationRegistry.getInstrumentation().targetContext.registerReceiver(
-      object: BroadcastReceiver() {
+      object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
           expectedIntent = intent
         }

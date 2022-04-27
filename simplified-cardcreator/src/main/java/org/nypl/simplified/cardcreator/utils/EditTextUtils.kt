@@ -8,6 +8,6 @@ import kotlinx.coroutines.flow.callbackFlow
 
 @ExperimentalCoroutinesApi
 fun EditText.textChanges() = callbackFlow {
-  val listener = doOnTextChanged { text, _, _, _ ->  trySend(text) }
+  val listener = doOnTextChanged { text, _, _, _ -> trySend(text) }
   awaitClose { removeTextChangedListener(listener) }
 }

@@ -19,7 +19,7 @@ import java.io.FileOutputStream
 
 class ConfirmationViewModel(
   initialState: ConfirmationData,
-): ViewModel() {
+) : ViewModel() {
   private val logger = LoggerFactory.getLogger(ConfirmationViewModel::class.java)
 
   private val _events = MutableSharedFlow<ConfirmationEvent>()
@@ -56,9 +56,9 @@ class ConfirmationViewModel(
 }
 
 sealed class ConfirmationEvent {
-  object SaveCardPermissionsCheck: ConfirmationEvent()
-  data class AddSavedCardToGallery(val fileUri: Uri): ConfirmationEvent()
-  object CardConfirmed: ConfirmationEvent()
+  object SaveCardPermissionsCheck : ConfirmationEvent()
+  data class AddSavedCardToGallery(val fileUri: Uri) : ConfirmationEvent()
+  object CardConfirmed : ConfirmationEvent()
 }
 
 data class ConfirmationData(

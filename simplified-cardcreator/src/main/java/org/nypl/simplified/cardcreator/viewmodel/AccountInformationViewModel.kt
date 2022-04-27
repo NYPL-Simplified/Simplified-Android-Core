@@ -38,7 +38,7 @@ class AccountInformationViewModel(
     _state.value = _state.value.copy(validUsername = username.matches(usernameRegex))
   }
 
-  data class State (
+  data class State(
     val validPassword: Boolean = false,
     val validUsername: Boolean = false,
     val pendingRequest: Boolean = false
