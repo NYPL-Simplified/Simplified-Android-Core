@@ -2,6 +2,7 @@ package org.nypl.simplified.cardcreator.viewmodel
 
 import io.mockk.MockKAnnotations
 import io.mockk.impl.annotations.MockK
+import org.amshove.kluent.shouldBe
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -25,12 +26,27 @@ class AccountInformationViewModelTest {
   }
 
   @Test
-  fun `validate password emits success`() {
-    subject.validatePassword("goodPassword")
+  fun `validatePassword causes validPassword state if between 8 and 32 alphanumeric characters`() {
+    listOf(
+      "goodPassword" to true,
+      "badCharacters!@#$" to false,
+      "shortpw" to false,
+      "wayTooLongPasswordItGoesOnForever" to false
+    ).forEach { (password, expectedValidity) ->
+      subject.validatePassword(password)
+      subject.state.value.validPassword shouldBe expectedValidity
+    }
   }
 
   @Test
-  fun `validate password emits failure`() {
-    subject.validatePassword("badPassword!@#$%")
+  fun `validateUsername causes validUsername state if between 5 and 25 characters`() {
+    listOf(
+      "goodUsername" to true,
+      "nope" to false,
+      "wayTooLongUsernameIsInvalid" to false,
+    ).forEach { (password, expectedValidity) ->
+      subject.validateUsername(password)
+      subject.state.value.validUsername shouldBe expectedValidity
+    }
   }
 }
