@@ -16,7 +16,7 @@ class CardCreatorViewModelFactory(
       AddressViewModel::class.java -> AddressViewModel(cardCreatorService) as T
       DependentEligibilityViewModel::class.java -> DependentEligibilityViewModel(cardCreatorService) as T
       PatronViewModel::class.java -> PatronViewModel(cardCreatorService) as T
-      UsernameViewModel::class.java -> UsernameViewModel(cardCreatorService) as T
+      AccountInformationViewModel::class.java -> AccountInformationViewModel(cardCreatorService) as T
       else -> throw IllegalStateException("Can't create values of $modelClass")
     }
   }

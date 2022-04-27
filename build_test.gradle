@@ -35,10 +35,13 @@ dependencies {
 
   // Espresso
   testImplementation libs.androidx.test.espresso.core
-  testImplementation 'androidx.test.espresso:espresso-intents:3.5.0-alpha03'
+  testImplementation libs.androidx.test.espresso.intents
 
   // Coroutines
   testImplementation libs.kotlin.coroutines.test
+
+  // AndroidX Navigation
+  testImplementation libs.androidx.navigation.testing
 
   // Assertions
   testImplementation libs.kluent.android
