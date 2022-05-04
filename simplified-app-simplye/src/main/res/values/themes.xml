@@ -12,4 +12,9 @@
         <item name="simplifiedColorPrimary">@color/seColorPrimary</item>
         <item name="simplifiedColorPrimaryDark">@color/seColorPrimaryDark</item>
     </style>
+
+    <style name="SimplyE_Startup_NoActionBar" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenAnimatedIcon">@drawable/stock_icon_round</item>
+        <item name="postSplashScreenTheme">@style/SimplyE_NoActionBar</item>
+    </style>
 </resources>

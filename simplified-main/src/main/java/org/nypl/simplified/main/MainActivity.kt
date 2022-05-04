@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
@@ -50,6 +51,8 @@ class MainActivity : AppCompatActivity(R.layout.main_host) {
   }
 
   override fun onCreate(savedInstanceState: Bundle?) {
+    val splash = installSplashScreen()
+    // splash.setKeepOnScreenCondition { true }
     this.logger.debug("onCreate (recreating {})", savedInstanceState != null)
     super.onCreate(savedInstanceState)
     this.logger.debug("onCreate (super completed)")

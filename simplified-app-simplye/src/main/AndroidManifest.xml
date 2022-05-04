@@ -25,6 +25,7 @@
       android:contentDescription="@string/appName"
       android:launchMode="singleTop"
       android:exported="true"
+      android:theme="@style/SimplyE_Startup_NoActionBar"
       android:label="@string/appName">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />

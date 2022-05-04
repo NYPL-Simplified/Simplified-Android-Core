@@ -20,6 +20,8 @@ dependencies {
   //to force fragment-ktx to use the latest viewModel-ktx and avoid duplicate class collisions
   implementation libs.androidx.lifecycle.viewmodel.ktx
 
+  api 'androidx.core:core-splashscreen:1.0.0-beta02'
+
   implementation libs.google.material
   implementation libs.io7m.jfunctional
   implementation libs.io7m.junreachable

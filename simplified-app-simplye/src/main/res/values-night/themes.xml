@@ -3,4 +3,9 @@
 <resources>
     <style name="SimplyE_NoActionBar" parent="SimplifiedTheme.NoActionBar" />
     <style name="SimplyE_ActionBar" parent="SimplifiedTheme.ActionBar" />
+    <style name="SimplyE_Startup_NoActionBar" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/red</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/stock_icon_test</item>
+        <item name="postSplashScreenTheme">@style/SimplyE_NoActionBar</item>
+    </style>
 </resources>
