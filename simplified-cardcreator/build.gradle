@@ -21,6 +21,7 @@ dependencies {
   implementation libs.androidx.navigation.ui
   implementation libs.kotlin.stdlib
   implementation libs.kotlin.reflect
+  implementation libs.kotlin.coroutines
   implementation libs.joda.time
   implementation libs.moshi
   implementation libs.moshi.kotlin

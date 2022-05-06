@@ -44,7 +44,7 @@
                 android:layout_marginBottom="8dp"
                 android:fontFamily="sans-serif"
                 android:gravity="center"
-                android:text="@{viewModel.state.message}"
+                android:text="@{viewModel.state.data.message}"
                 android:textSize="16sp" />
         </LinearLayout>
 
@@ -79,7 +79,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="16dp"
-                    android:text="@{viewModel.state.name}"
+                    android:text="@{viewModel.state.data.name}"
                     android:textSize="22sp"
                     android:textStyle="bold"
                     tools:text="John Doe" />
@@ -92,7 +92,7 @@
                     android:layout_margin="16dp"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    app:formatCardBarcode="@{viewModel.state.barcode}"
+                    app:formatCardBarcode="@{viewModel.state.data.barcode}"
                     tools:text="Card Number: 3423 24242 24242 24242" />
 
                 <TextView
@@ -103,7 +103,7 @@
                     android:layout_margin="16dp"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    app:formatCardPin="@{viewModel.state.password}"
+                    app:formatCardPin="@{viewModel.state.data.password}"
                     tools:text="Password: 3423 " />
 
                 <TextView

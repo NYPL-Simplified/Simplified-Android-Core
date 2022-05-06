@@ -54,7 +54,9 @@ class ConfirmationFragment : Fragment() {
     super.onViewCreated(view, savedInstanceState)
 
     lifecycleScope.launch {
-      viewModel.events.flowWithLifecycle(lifecycle).collect { handleEvent(it) }
+      viewModel.state.flowWithLifecycle(lifecycle).collect {
+        it.events.firstOrNull()?.let { event -> handleEvent(event) }
+      }
     }
   }
 
@@ -64,6 +66,7 @@ class ConfirmationFragment : Fragment() {
       ConfirmationEvent.SaveCardPermissionsCheck -> checkAndRequestPermissions()
       is ConfirmationEvent.AddSavedCardToGallery -> addCardToGallery(event.fileUri)
     }
+    viewModel.eventHasBeenHandled(event.id)
   }
 
   private fun checkAndRequestPermissions() {
@@ -100,7 +103,7 @@ class ConfirmationFragment : Fragment() {
   }
 
   /**
-   * Listen for result from location permission request, this method is a callback provided by
+   * Listen for result from storage permission request, this method is a callback provided by
    * Android for the requestPermissions() method
    *
    * @param requestCode - String user defined request code to identify the request
@@ -128,8 +131,8 @@ class ConfirmationFragment : Fragment() {
 
   private fun returnResult() {
     val bundle = CardCreatorContract.resultBundle(
-      viewModel.state.value.barcode,
-      viewModel.state.value.password
+      viewModel.state.value.data.barcode,
+      viewModel.state.value.data.password
     )
     val intent = Intent().apply {
       putExtras(bundle)

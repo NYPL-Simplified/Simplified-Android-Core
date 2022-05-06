@@ -26,8 +26,8 @@ import io.mockk.justRun
 import io.mockk.mockkConstructor
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.test.runBlockingTest
 import org.amshove.kluent.fail
 import org.amshove.kluent.shouldBe
@@ -40,9 +40,11 @@ import org.nypl.simplified.cardcreator.CardCreatorActivity
 import org.nypl.simplified.cardcreator.R
 import org.nypl.simplified.cardcreator.utils.Cache
 import org.nypl.simplified.cardcreator.viewmodel.ConfirmationData
-import org.nypl.simplified.cardcreator.viewmodel.ConfirmationEvent
+import org.nypl.simplified.cardcreator.viewmodel.ConfirmationEvent.AddSavedCardToGallery
+import org.nypl.simplified.cardcreator.viewmodel.ConfirmationEvent.CardConfirmed
 import org.nypl.simplified.cardcreator.viewmodel.ConfirmationViewModel
 import org.nypl.simplified.cardcreator.viewmodel.ConfirmationViewModelFactory
+import org.nypl.simplified.cardcreator.viewmodel.State
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -55,7 +57,7 @@ class ConfirmationFragmentTest {
   @MockK
   private lateinit var mockConfirmationViewModel: ConfirmationViewModel
 
-  private lateinit var testEventsFlow: MutableSharedFlow<ConfirmationEvent>
+  private lateinit var testViewModelState: MutableStateFlow<State>
 
   @Before
   fun setUp() {
@@ -74,10 +76,8 @@ class ConfirmationFragmentTest {
       message = "testMessage"
     )
 
-    val testStateFlow = MutableStateFlow(testData)
-    testEventsFlow = MutableSharedFlow()
-    every { mockConfirmationViewModel.state } returns testStateFlow
-    every { mockConfirmationViewModel.events } returns testEventsFlow
+    testViewModelState = MutableStateFlow(State(testData))
+    every { mockConfirmationViewModel.state } returns testViewModelState
 
     scenario = launchFragmentInContainer(
       fragmentArgs = bundleOf(
@@ -110,7 +110,7 @@ class ConfirmationFragmentTest {
 
   @Test
   fun `on CardConfirmed event sets CardCreated activity result`() = runBlockingTest {
-    testEventsFlow.emit(ConfirmationEvent.CardConfirmed)
+    testViewModelState.update { it.copy(events = it.events + CardConfirmed) }
 
     scenario.getActivityResult()?.resultCode shouldBeEqualTo CardCreatorActivity.CARD_CREATED
     scenario.getActivityResult()?.resultData?.extras?.run {
@@ -120,18 +120,19 @@ class ConfirmationFragmentTest {
   }
 
   @Test
-  fun `on CardConfirmed event sets ChildCardCreated activity result if user is logged in`() = runBlockingTest {
-    val loggedInIntent = Intent().apply { putExtra("isLoggedIn", true) }
-    scenario.setActivityIntent(loggedInIntent)
+  fun `on CardConfirmed event sets ChildCardCreated activity result if user is logged in`() =
+    runBlockingTest {
+      val loggedInIntent = Intent().apply { putExtra("isLoggedIn", true) }
+      scenario.setActivityIntent(loggedInIntent)
 
-    testEventsFlow.emit(ConfirmationEvent.CardConfirmed)
+      testViewModelState.update { it.copy(events = it.events + CardConfirmed) }
 
-    scenario.getActivityResult()?.resultCode shouldBeEqualTo CardCreatorActivity.CHILD_CARD_CREATED
-  }
+      scenario.getActivityResult()?.resultCode shouldBeEqualTo CardCreatorActivity.CHILD_CARD_CREATED
+    }
 
   @Test
   fun `on CardConfirmed event clears cache and finishes activity`() = runBlockingTest {
-    testEventsFlow.emit(ConfirmationEvent.CardConfirmed)
+    testViewModelState.update { it.copy(events = it.events + CardConfirmed) }
 
     scenario.onFragment {
       it.activity?.isFinishing shouldBe true
@@ -140,6 +141,14 @@ class ConfirmationFragmentTest {
         constructedWith<Cache>(EqMatcher(it.requireContext())).clear()
       }
     }
+  }
+
+  @Test
+  fun `handling CardConfirmed event signals eventHasBeenHandled`() {
+    val event = CardConfirmed
+    testViewModelState.update { it.copy(events = it.events + event) }
+
+    verify { mockConfirmationViewModel.eventHasBeenHandled(event.id) }
   }
 
   @Test
@@ -156,7 +165,7 @@ class ConfirmationFragmentTest {
   }
 
   @Test
-  fun `on AddSavedCardToGallery event launches intent to do so`() = runBlockingTest {
+  fun `on AddSavedCardToGallery event launches intent to do so and calls eventHasBeenHandled`() = runBlockingTest {
     var expectedIntent: Intent? = null
     InstrumentationRegistry.getInstrumentation().targetContext.registerReceiver(
       object : BroadcastReceiver() {
@@ -168,11 +177,14 @@ class ConfirmationFragmentTest {
     )
 
     val fileUri = Uri.parse("fileUri")
-    testEventsFlow.emit(ConfirmationEvent.AddSavedCardToGallery(fileUri))
+    val event = AddSavedCardToGallery(fileUri)
+    testViewModelState.update { it.copy(events = it.events + event) }
 
     expectedIntent?.let {
       it.data shouldBe fileUri
     }
+
+    verify { mockConfirmationViewModel.eventHasBeenHandled(event.id) }
   }
 }
 

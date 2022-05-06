@@ -1,10 +1,8 @@
 package org.nypl.simplified.cardcreator.viewmodel
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.runBlockingTest
 import org.amshove.kluent.shouldBe
+import org.amshove.kluent.shouldBeEqualTo
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Rule
@@ -30,27 +28,21 @@ class ConfirmationViewModelTest {
   }
 
   @Test
-  fun `confirmCard emits confirmCard event`() = runBlockingTest {
-    var emitted: ConfirmationEvent? = null
-    launch {
-      emitted = subject.events.first()
-    }
-
+  fun `confirmCard emits confirmCard event`() {
+    subject.state.value.events.isEmpty() shouldBe true
     subject.confirmCard()
-
-    emitted shouldBe ConfirmationEvent.CardConfirmed
+    val events = subject.state.value.events
+    events.first() shouldBe ConfirmationEvent.CardConfirmed
+    events.size shouldBeEqualTo 1
   }
 
   @Test
-  fun `prepareCardForSave emits permissions check event`() = runBlockingTest {
-    var emitted: ConfirmationEvent? = null
-    launch {
-      emitted = subject.events.first()
-    }
-
+  fun `prepareCardForSave emits permissions check event`() {
+    subject.state.value.events.isEmpty() shouldBe true
     subject.prepareToSaveCard()
-
-    emitted shouldBe ConfirmationEvent.SaveCardPermissionsCheck
+    val events = subject.state.value.events
+    events.first() shouldBe ConfirmationEvent.SaveCardPermissionsCheck
+    events.size shouldBeEqualTo 1
   }
 
   @Ignore
