@@ -2,13 +2,12 @@ package org.nypl.simplified.cardcreator.model
 
 import com.squareup.moshi.Json
 import org.nypl.simplified.cardcreator.utils.checkFieldNotNull
-import java.lang.Exception
 
-sealed class ValidateUsernameResponse {
+sealed class UsernameVerificationResponse {
 
-  data class ValidateUsernameData(
+  data class UsernameVerificationSuccess(
     @field:Json(name = "type") val type: String,
-  ) : ValidateUsernameResponse() {
+  ) : UsernameVerificationResponse() {
 
     /**
      * Moshi might have set some missing fields to null instead of throwing an exception,
@@ -16,16 +15,16 @@ sealed class ValidateUsernameResponse {
      * no-one would expect them.
      */
 
-    fun validate(): ValidateUsernameData =
+    fun validate(): UsernameVerificationSuccess =
       this.apply {
         checkFieldNotNull(type, "type")
       }
   }
 
-  data class ValidateUsernameError(
+  data class UsernameVerificationError(
     @field:Json(name = "status") val status: Int,
     @field:Json(name = "type") val type: String
-  ) : ValidateUsernameResponse() {
+  ) : UsernameVerificationResponse() {
 
     val isInvalidUsername: Boolean
       get() = type == "invalid-username"
@@ -39,14 +38,14 @@ sealed class ValidateUsernameResponse {
      * no-one would expect them.
      */
 
-    fun validate(): ValidateUsernameError =
+    fun validate(): UsernameVerificationError =
       this.apply {
         checkFieldNotNull(status, "status")
         checkFieldNotNull(type, "type")
       }
   }
 
-  data class ValidateUsernameException(
+  data class UsernameVerificationException(
     val exception: Exception
-  ) : ValidateUsernameResponse()
+  ) : UsernameVerificationResponse()
 }

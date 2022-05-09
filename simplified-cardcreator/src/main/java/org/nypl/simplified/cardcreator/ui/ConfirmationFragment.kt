@@ -3,41 +3,37 @@ package org.nypl.simplified.cardcreator.ui
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.flowWithLifecycle
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import org.nypl.simplified.android.ktx.viewLifecycleAware
 import org.nypl.simplified.cardcreator.CardCreatorActivity
 import org.nypl.simplified.cardcreator.CardCreatorContract
-import org.nypl.simplified.cardcreator.R
 import org.nypl.simplified.cardcreator.databinding.FragmentConfirmationBinding
 import org.nypl.simplified.cardcreator.utils.Cache
+import org.nypl.simplified.cardcreator.viewmodel.ConfirmationEvent
+import org.nypl.simplified.cardcreator.viewmodel.ConfirmationViewModel
+import org.nypl.simplified.cardcreator.viewmodel.ConfirmationViewModelFactory
 import org.slf4j.LoggerFactory
-import java.io.File
-import java.io.FileOutputStream
-import java.text.SimpleDateFormat
-import java.util.Locale
-import java.util.Date
 
 class ConfirmationFragment : Fragment() {
 
   private val logger = LoggerFactory.getLogger(ConfirmationFragment::class.java)
-  private val confirmationFragmentArgs by lazy {
-    ConfirmationFragmentArgs.fromBundle(requireArguments())
-  }
 
-  private var _binding: FragmentConfirmationBinding? = null
-  private val binding get() = _binding!!
+  private val args by lazy { ConfirmationFragmentArgs.fromBundle(requireArguments()) }
+
+  private val viewModel by viewModels<ConfirmationViewModel> { ConfirmationViewModelFactory(args) }
+  private var binding by viewLifecycleAware<FragmentConfirmationBinding>()
 
   private val storageRequestCode = 203
   private val dateFormat = "dd-MM-yyyy"
@@ -47,90 +43,67 @@ class ConfirmationFragment : Fragment() {
     container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View {
-    _binding = FragmentConfirmationBinding.inflate(inflater, container, false)
+    binding = FragmentConfirmationBinding.inflate(inflater, container, false)
+    binding.viewModel = viewModel
+    binding.format = dateFormat
+    binding.lifecycleOwner = viewLifecycleOwner
     return binding.root
   }
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
 
-    binding.nameCard.text = confirmationFragmentArgs.name
-    binding.cardBarcode.text =
-      getString(R.string.user_card_number, confirmationFragmentArgs.barcode)
-    binding.cardPin.text = getString(R.string.user_password, confirmationFragmentArgs.password)
-    binding.headerStatusDescTv.text = confirmationFragmentArgs.message
-
-    val currentDate: String = SimpleDateFormat(dateFormat, Locale.getDefault()).format(Date())
-    binding.issued.text = getString(R.string.issued_date, currentDate)
-
-    // Go to next screen
-    binding.nextBtn.setOnClickListener {
-      logger.debug("User created card")
-      returnResult()
-    }
-
-    // Go to previous screen
-    binding.prevBtn.setOnClickListener {
-      if (ContextCompat.checkSelfPermission(
-          requireContext(),
-          Manifest.permission.WRITE_EXTERNAL_STORAGE
-        )
-        != PackageManager.PERMISSION_GRANTED
-      ) {
-        logger.debug("Requesting storage permission")
-        ActivityCompat.requestPermissions(
-          requireActivity(),
-          arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
-          storageRequestCode
-        )
-      } else {
-        createDigitalCard()
+    lifecycleScope.launch {
+      viewModel.state.flowWithLifecycle(lifecycle).collect {
+        it.events.firstOrNull()?.let { event -> handleEvent(event) }
       }
     }
   }
 
-  /**
-   * Create library card from ImageView
-   */
-  private fun createDigitalCard() {
-    GlobalScope.launch(Dispatchers.Main) {
-      val card = binding.libraryCard
-      card.isDrawingCacheEnabled = true
-      val bitmap = card.drawingCache
-      val f: File
-      try {
-        if (Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED) {
-          val file = File(Environment.getExternalStorageDirectory(), Environment.DIRECTORY_PICTURES)
-          if (!file.exists()) {
-            file.mkdirs()
-          }
-          f = File(file.absolutePath, "library-card.png")
-          val outStream = FileOutputStream(f)
-          bitmap.compress(Bitmap.CompressFormat.PNG, 10, outStream)
-          outStream.close()
-          addCardToGallery(f)
-
-          Toast.makeText(requireContext(), getString(R.string.card_saved), Toast.LENGTH_SHORT)
-            .show()
-        }
-      } catch (e: Exception) {
-        logger.error("Error creating digital card", e)
-      }
+  private fun handleEvent(event: ConfirmationEvent) {
+    when (event) {
+      ConfirmationEvent.CardConfirmed -> returnResult()
+      ConfirmationEvent.SaveCardPermissionsCheck -> checkAndRequestPermissions()
+      is ConfirmationEvent.AddSavedCardToGallery -> addCardToGallery(event.fileUri)
     }
+    viewModel.eventHasBeenHandled(event.id)
+  }
+
+  private fun checkAndRequestPermissions() {
+    if (ContextCompat.checkSelfPermission(
+        requireContext(),
+        Manifest.permission.WRITE_EXTERNAL_STORAGE
+      )
+      != PackageManager.PERMISSION_GRANTED
+    ) {
+      logger.debug("Requesting storage permission")
+      ActivityCompat.requestPermissions(
+        requireActivity(),
+        arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
+        storageRequestCode
+      )
+    } else {
+      saveLibraryCardImage()
+    }
+  }
+
+  private fun saveLibraryCardImage() {
+    val card = binding.libraryCard
+    card.isDrawingCacheEnabled = true
+    viewModel.createAndStoreDigitalCard(card.drawingCache)
   }
 
   /**
    * Adds library card image to device photo gallery
    */
-  private fun addCardToGallery(card: File) {
+  private fun addCardToGallery(fileUri: Uri) {
     val mediaScanIntent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
-    val contentUri = Uri.fromFile(card)
-    mediaScanIntent.data = contentUri
+    mediaScanIntent.data = fileUri
     requireActivity().sendBroadcast(mediaScanIntent)
   }
 
   /**
-   * Listen for result from location permission request, this method is a callback provided by
+   * Listen for result from storage permission request, this method is a callback provided by
    * Android for the requestPermissions() method
    *
    * @param requestCode - String user defined request code to identify the request
@@ -147,7 +120,7 @@ class ConfirmationFragment : Fragment() {
         // If request is cancelled, the result arrays are empty.
         if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
           logger.debug("Storage permission granted")
-          createDigitalCard()
+          saveLibraryCardImage()
         } else {
           logger.debug("Storage permission NOT granted")
         }
@@ -156,32 +129,20 @@ class ConfirmationFragment : Fragment() {
     }
   }
 
-  /**
-   * Returns result to caller with card details
-   */
   private fun returnResult() {
-    val bundle = CardCreatorContract.createResult(
-      confirmationFragmentArgs.barcode,
-      confirmationFragmentArgs.password
+    val bundle = CardCreatorContract.resultBundle(
+      viewModel.state.value.data.barcode,
+      viewModel.state.value.data.password
     )
-      .apply {
-        putString("username", confirmationFragmentArgs.username)
-        putString("message", confirmationFragmentArgs.message)
-      }
-    val data = Intent().apply {
+    val intent = Intent().apply {
       putExtras(bundle)
     }
     if (requireActivity().intent.getBooleanExtra("isLoggedIn", false)) {
-      requireActivity().setResult(CardCreatorActivity.CHILD_CARD_CREATED, data)
+      requireActivity().setResult(CardCreatorActivity.CHILD_CARD_CREATED, intent)
     } else {
-      requireActivity().setResult(CardCreatorActivity.CARD_CREATED, data)
+      requireActivity().setResult(CardCreatorActivity.CARD_CREATED, intent)
     }
     Cache(requireContext()).clear()
     requireActivity().finish()
-  }
-
-  override fun onDestroyView() {
-    super.onDestroyView()
-    _binding = null
   }
 }

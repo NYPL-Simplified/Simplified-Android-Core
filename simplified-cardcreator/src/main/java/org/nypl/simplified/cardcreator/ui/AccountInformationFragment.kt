@@ -1,8 +1,6 @@
 package org.nypl.simplified.cardcreator.ui
 
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,33 +9,35 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.NavDirections
-import androidx.navigation.Navigation
+import androidx.navigation.fragment.findNavController
+import org.nypl.simplified.android.ktx.viewLifecycleAware
 import org.nypl.simplified.cardcreator.R
 import org.nypl.simplified.cardcreator.databinding.FragmentAccountInformationBinding
-import org.nypl.simplified.cardcreator.model.ValidateUsernameResponse
+import org.nypl.simplified.cardcreator.model.UsernameVerificationResponse
+import org.nypl.simplified.cardcreator.model.UsernameVerificationResponse.UsernameVerificationError
+import org.nypl.simplified.cardcreator.model.UsernameVerificationResponse.UsernameVerificationException
+import org.nypl.simplified.cardcreator.model.UsernameVerificationResponse.UsernameVerificationSuccess
 import org.nypl.simplified.cardcreator.utils.Cache
 import org.nypl.simplified.cardcreator.utils.hideKeyboard
-import org.nypl.simplified.cardcreator.viewmodel.UsernameViewModel
+import org.nypl.simplified.cardcreator.viewmodel.AccountInformationViewModel
 import org.slf4j.LoggerFactory
 
-class AccountInformationFragment : Fragment() {
+class AccountInformationFragment(
+  // Needed to enable isolated fragment testing with an activityViewModel
+  activityVMFactory: (() -> ViewModelProvider.Factory)? = null
+) : Fragment() {
 
   private val logger = LoggerFactory.getLogger(AccountInformationFragment::class.java)
 
-  private var _binding: FragmentAccountInformationBinding? = null
-  private val binding get() = _binding!!
+  private var binding by viewLifecycleAware<FragmentAccountInformationBinding>()
 
   private lateinit var navController: NavController
   private lateinit var nextAction: NavDirections
 
-  private val minPinChars = 8
-  private val maxPinChars = 32
-  private val usernameMinChars = 5
-  private val usernameMaxChars = 25
-
-  private val viewModel: UsernameViewModel by activityViewModels()
+  private val viewModel: AccountInformationViewModel by activityViewModels(activityVMFactory)
 
   private var dialog: AlertDialog? = null
 
@@ -46,61 +46,37 @@ class AccountInformationFragment : Fragment() {
     container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View {
-    _binding = FragmentAccountInformationBinding.inflate(inflater, container, false)
+    binding = FragmentAccountInformationBinding.inflate(inflater, container, false)
+    binding.lifecycleOwner = viewLifecycleOwner
+    binding.viewModel = viewModel
     return binding.root
   }
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
 
-    navController = Navigation.findNavController(requireActivity(), R.id.card_creator_nav_host_fragment)
-
-    binding.passwordEt.addTextChangedListener(object : TextWatcher {
-      override fun afterTextChanged(s: Editable?) {
-        validateForm()
-      }
-
-      override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-      override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-    })
-
-    binding.usernameEt.addTextChangedListener(object : TextWatcher {
-      override fun afterTextChanged(s: Editable?) {
-        validateForm()
-      }
-
-      override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-      override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-    })
+    navController = findNavController()
 
     // Go to next screen
     binding.nextBtn.setOnClickListener {
       hideKeyboard()
-      validateUsername()
+      verifyUsername()
     }
 
     // Go to previous screen
-    binding.prevBtn.setOnClickListener {
-      navController.popBackStack()
-    }
+    binding.prevBtn.setOnClickListener { navController.popBackStack() }
 
     viewModel.validateUsernameResponse
       .receive(viewLifecycleOwner, this::handleValidateUsernameResponse)
 
-    viewModel.pendingRequest.observe(viewLifecycleOwner, this::showLoading)
-
     restoreViewData()
   }
 
-  private fun validateUsername() {
-    viewModel.validateUsername(
-      binding.usernameEt.text.toString()
-    )
-  }
+  private fun verifyUsername() = viewModel.verifyUsername(binding.usernameEt.text.toString())
 
-  private fun handleValidateUsernameResponse(response: ValidateUsernameResponse) {
+  private fun handleValidateUsernameResponse(response: UsernameVerificationResponse) {
     when (response) {
-      is ValidateUsernameResponse.ValidateUsernameData -> {
+      is UsernameVerificationSuccess -> {
         logger.debug("Username is valid")
         Cache(requireContext()).setAccountInformation(
           binding.usernameEt.text.toString(),
@@ -109,7 +85,7 @@ class AccountInformationFragment : Fragment() {
         nextAction = AccountInformationFragmentDirections.actionNext()
         navController.navigate(nextAction)
       }
-      is ValidateUsernameResponse.ValidateUsernameError -> {
+      is UsernameVerificationError -> {
         if (response.isUnavailableUsername) {
           val message = getString(R.string.unavailable_username)
           Toast.makeText(activity, message, Toast.LENGTH_SHORT).show()
@@ -118,7 +94,7 @@ class AccountInformationFragment : Fragment() {
           showTryAgainDialog(message)
         }
       }
-      is ValidateUsernameResponse.ValidateUsernameException -> {
+      is UsernameVerificationException -> {
         val message = getString(R.string.validate_username_general_error)
         showTryAgainDialog(message)
       }
@@ -130,7 +106,7 @@ class AccountInformationFragment : Fragment() {
     dialogBuilder.setMessage(message)
       .setCancelable(false)
       .setPositiveButton(getString(R.string.try_again)) { _, _ ->
-        validateUsername()
+        verifyUsername()
       }
       .setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
         dialog.cancel()
@@ -139,29 +115,6 @@ class AccountInformationFragment : Fragment() {
       dialog = dialogBuilder.create()
     }
     dialog?.show()
-  }
-
-  private fun validateForm() {
-    binding.nextBtn.isEnabled =
-      binding.passwordEt.text.length in minPinChars..maxPinChars &&
-      binding.usernameEt.text.length in usernameMinChars..usernameMaxChars
-  }
-
-  /**
-   * Show loading screen
-   */
-  private fun showLoading(show: Boolean) {
-    logger.debug("Toggling loading screen")
-    if (show) {
-      binding.loading.visibility = View.VISIBLE
-    } else {
-      binding.loading.visibility = View.GONE
-    }
-  }
-
-  override fun onDestroyView() {
-    super.onDestroyView()
-    _binding = null
   }
 
   /**

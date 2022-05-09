@@ -3,6 +3,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <data>
+        <variable
+            name="viewModel"
+            type="org.nypl.simplified.cardcreator.viewmodel.AccountInformationViewModel" />
+
+        <import type="android.view.View" />
+    </data>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -47,6 +55,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+                    android:onTextChanged="@{(text, start, before, count) -> viewModel.validateUsername(String.valueOf(text))}"
                     android:hint="@string/required"
                     android:maxLength="25" />
 
@@ -61,6 +70,7 @@
                     style="@style/WizardFormEditText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:onTextChanged="@{(text, start, before, count) -> viewModel.validatePassword(String.valueOf(text))}"
                     android:hint="@string/required"
                     android:maxLength="32"
                     tools:ignore="TextFields" />
@@ -108,7 +118,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="50dp"
                     android:layout_weight="1"
-                    android:enabled="false"
+                    android:enabled="@{viewModel.state.readyToVerify}"
                     android:text="@string/next"
                     android:textAllCaps="true" />
             </LinearLayout>
@@ -119,7 +129,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@color/trans_white"
-            android:visibility="gone">
+            android:visibility="@{viewModel.state.pendingRequest ? View.VISIBLE : View.GONE}">
 
             <TextView
                 android:id="@+id/loading_tv"

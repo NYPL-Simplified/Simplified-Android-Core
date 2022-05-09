@@ -13,7 +13,7 @@ import org.nypl.simplified.cardcreator.model.Patron
 import org.nypl.simplified.cardcreator.model.Username
 import org.nypl.simplified.cardcreator.model.ValidateAddressRequest
 import org.nypl.simplified.cardcreator.model.ValidateAddressResponse
-import org.nypl.simplified.cardcreator.model.ValidateUsernameResponse
+import org.nypl.simplified.cardcreator.model.UsernameVerificationResponse
 import org.slf4j.LoggerFactory
 
 class CardCreatorService(
@@ -47,7 +47,7 @@ class CardCreatorService(
     return timedPlatformToken!!.first.access_token
   }
 
-  suspend fun validateUsername(username: Username): ValidateUsernameResponse {
+  suspend fun validateUsername(username: Username): UsernameVerificationResponse {
     return try {
       val token = getToken()
       val nyplPlatformService = NYPLPlatformService(token)
@@ -57,12 +57,12 @@ class CardCreatorService(
       } else {
         val errorBody = response.errorBody()!!.string()
         logger.error("validateUsername call returned an error!\n$errorBody")
-        val adapter = moshi.adapter(ValidateUsernameResponse.ValidateUsernameError::class.java)
+        val adapter = moshi.adapter(UsernameVerificationResponse.UsernameVerificationError::class.java)
         adapter.fromJson(errorBody)!!.validate()
       }
     } catch (e: Exception) {
       logger.error("an unexpected exception occurred while trying to validate username", e)
-      ValidateUsernameResponse.ValidateUsernameException(e)
+      UsernameVerificationResponse.UsernameVerificationException(e)
     }
   }
 

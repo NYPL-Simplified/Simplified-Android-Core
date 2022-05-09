@@ -1,5 +1,6 @@
 package org.nypl.simplified.tests.books.audio
 
+import io.reactivex.Observable
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -20,7 +21,6 @@ import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.tests.MutableServiceDirectory
 import org.nypl.simplified.tests.TestDirectories
 import org.slf4j.LoggerFactory
-import rx.Observable
 import java.io.File
 import java.net.URI
 

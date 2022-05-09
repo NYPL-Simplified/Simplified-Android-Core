@@ -11,9 +11,9 @@ import org.nypl.simplified.cardcreator.model.IdentifierParent
 import org.nypl.simplified.cardcreator.model.JuvenilePatronResponse
 import org.nypl.simplified.cardcreator.model.Patron
 import org.nypl.simplified.cardcreator.model.Username
+import org.nypl.simplified.cardcreator.model.UsernameVerificationResponse
 import org.nypl.simplified.cardcreator.model.ValidateAddressRequest
 import org.nypl.simplified.cardcreator.model.ValidateAddressResponse
-import org.nypl.simplified.cardcreator.model.ValidateUsernameResponse
 import org.nypl.simplified.cardcreator.utils.Constants
 import retrofit2.Response
 import retrofit2.Retrofit
@@ -34,7 +34,7 @@ internal interface NYPLPlatformService {
   @POST("validations/username")
   suspend fun validateUsername(
     @Body username: Username
-  ): Response<ValidateUsernameResponse.ValidateUsernameData>
+  ): Response<UsernameVerificationResponse.UsernameVerificationSuccess>
 
   /**
    * Validates the patron's address.
