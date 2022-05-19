@@ -416,9 +416,12 @@ _The above table is generated with [ReadMe.java](src/misc/ReadMe.java)._
 
 The codebase uses [ktlint](https://ktlint.github.io/) to enforce a consistent 
 code style. It's possible to ensure that any changes you've made to the code
-continue to pass `ktlint` checks by running the `ktlintFormat` task to reformat
-source code:
+continue to pass `ktlint` checks by running:
 
+```
+$ ./gradlew ktlint
+```
+To auto-format code style shortcomings with ktlint, run:
 ```
 $ ./gradlew ktlintFormat
 ```
