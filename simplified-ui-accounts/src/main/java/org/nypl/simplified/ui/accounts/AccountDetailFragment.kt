@@ -383,7 +383,7 @@ class AccountDetailFragment : Fragment(R.layout.account) {
 
   private fun instantiateAlternativeAuthenticationViews() {
     for (alternative in this.viewModel.account.provider.authenticationAlternatives) {
-      return when (alternative) {
+      when (alternative) {
         is AccountProviderAuthenticationDescription.COPPAAgeGate ->
           this.logger.warn("COPPA age gate is not currently supported as an alternative.")
         is AccountProviderAuthenticationDescription.Basic ->
