@@ -237,10 +237,6 @@ class CatalogFeedFragment : Fragment(), AgeGateDialog.BirthYearSelectedListener 
         }
         true
       }
-      R.id.catalogMenuActionReload -> {
-        viewModel.syncAccounts()
-        true
-      }
       android.R.id.home -> {
         if (viewModel.isAccountCatalogRoot()) {
           openAccountPickerDialog()

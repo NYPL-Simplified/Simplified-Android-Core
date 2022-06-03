@@ -36,8 +36,6 @@ class CatalogFeedViewModelFactory(
       modelClass.isAssignableFrom(CatalogFeedViewModel::class.java) -> {
         val feedLoader: FeedLoaderType =
           this.services.requireService(FeedLoaderType::class.java)
-        val booksController: BooksControllerType =
-          this.services.requireService(BooksControllerType::class.java)
         val profilesController: ProfilesControllerType =
           this.services.requireService(ProfilesControllerType::class.java)
         val bookRegistry =
@@ -51,7 +49,6 @@ class CatalogFeedViewModelFactory(
           this.application.resources,
           profilesController,
           feedLoader,
-          booksController,
           bookRegistry,
           buildConfig,
           analytics,
