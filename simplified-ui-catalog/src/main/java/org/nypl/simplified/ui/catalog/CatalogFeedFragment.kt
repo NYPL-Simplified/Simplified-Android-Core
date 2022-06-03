@@ -160,10 +160,9 @@ class CatalogFeedFragment : Fragment(), AgeGateDialog.BirthYearSelectedListener 
 
     val withGroupsSwipeContainer = binding.feedWithGroups.feedWithGroupsSwipeContainer
     withGroupsSwipeContainer.setOnRefreshListener {
-      viewModel.reloadFeed()
       withGroupsSwipeContainer.isRefreshing = false
+      viewModel.reloadFeed()
     }
-    withGroupsSwipeContainer.setProgressViewEndTarget(false, 0)
 
     feedWithGroupsList.addItemDecoration(
       CatalogFeedWithGroupsDecorator(screenInformation.dpToPixels(16).toInt())
@@ -186,10 +185,9 @@ class CatalogFeedFragment : Fragment(), AgeGateDialog.BirthYearSelectedListener 
 
     val withoutGroupsSwipeContainer = binding.feedWithoutGroups.feedWithoutGroupsSwipeContainer
     withoutGroupsSwipeContainer.setOnRefreshListener {
-      viewModel.reloadFeed()
       withoutGroupsSwipeContainer.isRefreshing = false
+      viewModel.reloadFeed()
     }
-    // withoutGroupsSwipeContainer.setProgressViewEndTarget(false, 0)
 
     withoutGroupsAdapter = CatalogPagedAdapter(
       context = requireActivity(),
