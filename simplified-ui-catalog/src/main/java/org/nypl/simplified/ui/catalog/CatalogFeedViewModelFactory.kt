@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModelProvider
 import org.librarysimplified.services.api.ServiceDirectoryType
 import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.books.book_registry.BookRegistryType
-import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.listeners.api.FragmentListenerType
