@@ -18,6 +18,7 @@ import org.nypl.simplified.books.book_database.api.BookFormats.BookFormatDefinit
 import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.covers.BookCoverProviderType
+import org.nypl.simplified.buildconfig.api.BuildConfigurationCatalogType
 import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryCorrupt
 import org.nypl.simplified.feeds.api.FeedEntry.FeedEntryOPDS
@@ -33,6 +34,7 @@ class CatalogPagedViewHolder(
   private val parent: View,
   private val buttonCreator: CatalogButtons,
   private val bookCovers: BookCoverProviderType,
+  private val config: BuildConfigurationCatalogType
 ) : RecyclerView.ViewHolder(parent) {
 
   private var thumbnailLoading: FluentFuture<Unit>? = null
@@ -123,14 +125,18 @@ class CatalogPagedViewHolder(
     this.idleAuthor.text = item.feedEntry.authorsCommaSeparated
     this.errorTitle.text = item.feedEntry.title
 
-    this.idleMeta.text = when (item.probableFormat) {
-      BOOK_FORMAT_EPUB ->
-        context.getString(R.string.catalogBookFormatEPUB)
-      BOOK_FORMAT_AUDIO ->
-        context.getString(R.string.catalogBookFormatAudioBook)
-      BOOK_FORMAT_PDF ->
-        context.getString(R.string.catalogBookFormatPDF)
-      null -> ""
+    if (config.showFormatLabel) {
+      this.idleMeta.text = when (item.probableFormat) {
+        BOOK_FORMAT_EPUB ->
+          context.getString(R.string.catalogBookFormatEPUB)
+        BOOK_FORMAT_AUDIO ->
+          context.getString(R.string.catalogBookFormatAudioBook)
+        BOOK_FORMAT_PDF ->
+          context.getString(R.string.catalogBookFormatPDF)
+        null -> ""
+      }
+    } else {
+      idleMeta.visibility = View.GONE
     }
 
     val targetHeight =

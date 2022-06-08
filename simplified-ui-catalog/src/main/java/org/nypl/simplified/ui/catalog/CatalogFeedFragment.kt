@@ -182,6 +182,7 @@ class CatalogFeedFragment : Fragment(), AgeGateDialog.BirthYearSelectedListener 
       listener = viewModel,
       buttonCreator = buttonCreator,
       bookCovers = bookCoverProvider,
+      config = configService
     )
 
     feedWithoutGroupsList.adapter = withoutGroupsAdapter
