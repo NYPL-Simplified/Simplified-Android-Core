@@ -6,9 +6,4 @@
     android:icon="@drawable/search"
     android:title="@string/catalogSearch"
     app:showAsAction="ifRoom" />
-  <item
-    android:id="@+id/catalogMenuActionReload"
-    android:icon="@drawable/refresh"
-    android:title="@string/catalogReload"
-    app:showAsAction="never" />
 </menu>
