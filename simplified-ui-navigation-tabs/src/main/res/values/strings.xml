@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
 <resources>
-  <string name="tabBooks">Books</string>
+  <string name="tabBooks">My Books</string>
   <string name="tabCatalog">Catalog</string>
   <string name="tabHolds">Holds</string>
   <string name="tabProfile">Profile</string>
