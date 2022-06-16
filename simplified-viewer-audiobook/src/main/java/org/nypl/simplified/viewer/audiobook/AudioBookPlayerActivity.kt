@@ -39,6 +39,7 @@ import org.librarysimplified.audiobook.manifest.api.PlayerManifest
 import org.librarysimplified.audiobook.views.PlayerAccessibilityEvent
 import org.librarysimplified.audiobook.views.PlayerFragment
 import org.librarysimplified.audiobook.views.PlayerFragmentListenerType
+import org.librarysimplified.audiobook.views.PlayerFragmentParameters
 import org.librarysimplified.audiobook.views.PlayerPlaybackRateFragment
 import org.librarysimplified.audiobook.views.PlayerSleepTimerFragment
 import org.librarysimplified.audiobook.views.PlayerTOCFragment
@@ -409,7 +410,7 @@ class AudioBookPlayerActivity :
       )
       this.supportFragmentManager.fragmentFactory = fragmentFactory
       if (!this.isFinishing && !this.supportFragmentManager.isDestroyed) {
-        val fallbackArgs = bundleOf(Pair(PlayerFragment.parametersKey, null))
+        val fallbackArgs = bundleOf(Pair(PlayerFragment.parametersKey, PlayerFragmentParameters(null)))
         this.supportFragmentManager
           .beginTransaction()
           .replace(
