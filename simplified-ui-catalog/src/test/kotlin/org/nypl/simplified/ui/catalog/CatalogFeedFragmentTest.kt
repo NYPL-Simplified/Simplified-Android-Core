@@ -56,6 +56,9 @@ import org.nypl.simplified.feeds.api.FeedGroup
 import org.nypl.simplified.feeds.api.FeedLoaderResult
 import org.nypl.simplified.listeners.api.FragmentListenerFinder
 import org.nypl.simplified.listeners.api.FragmentListenerType
+import org.nypl.simplified.testUtils.robolectricSwipeToRefresh
+import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithGroups
+import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithoutGroups
 import org.nypl.simplified.ui.catalog.RecyclerViewEspressoUtils.atPositionOnView
 import org.nypl.simplified.ui.catalog.RecyclerViewEspressoUtils.hasAdapterItemCount
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
@@ -181,12 +184,7 @@ class CatalogFeedFragmentTest {
 
   @Test
   fun `on CatalogFeedWithGroups state shows WithGroups view and hides others`() {
-    val mockWithGroupsFeed: Feed.FeedWithGroups = buildMockFeedWithGroups()
-
-    testFeedStateLiveData.value = CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithGroups(
-      mockk(), // Pass in mock FeedArguments as it is not used when handling state
-      mockWithGroupsFeed
-    )
+    testFeedStateLiveData.value = buildMockFeedStateWithGroups()
 
     onView(withId(R.id.feedWithGroups)).check(matches(isDisplayed()))
 
@@ -199,14 +197,9 @@ class CatalogFeedFragmentTest {
 
   @Test
   fun `on CatalogFeedWithGroups state updates adapter with FeedGroup data`() {
-    val mockWithGroupsFeed = buildMockFeedWithGroups()
-
     onView(withId(R.id.feedWithGroupsList)).check(hasAdapterItemCount(0))
 
-    testFeedStateLiveData.value = CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithGroups(
-      mockk(), // Pass in mock FeedArguments as it is not used when handling state
-      mockWithGroupsFeed
-    )
+    testFeedStateLiveData.value = buildMockFeedStateWithGroups()
 
     onView(withId(R.id.feedWithGroupsList)).check(hasAdapterItemCount(2))
     onView(withId(R.id.feedWithGroupsList)).check(
@@ -219,7 +212,17 @@ class CatalogFeedFragmentTest {
     )
   }
 
-  private fun buildMockFeedWithGroups(): Feed.FeedWithGroups {
+  @Test
+  fun `on CatalogFeedWithGroups swipe to refresh reloads feed`() {
+    every { mockCatalogFeedViewModel.reloadFeed() } just runs
+
+    testFeedStateLiveData.value = buildMockFeedStateWithGroups()
+
+    onView(withId(R.id.feedWithGroupsSwipeContainer)).perform(robolectricSwipeToRefresh())
+    verify { mockCatalogFeedViewModel.reloadFeed() }
+  }
+
+  private fun buildMockFeedStateWithGroups(): CatalogFeedWithGroups {
     val testFeedGroupsInOrder = mutableListOf(
       FeedGroup("title1", URI("uri1"), emptyList()),
       FeedGroup("title2", URI("uri2"), emptyList()),
@@ -231,26 +234,16 @@ class CatalogFeedFragmentTest {
     every { mockWithGroupsFeed.feedSearch } returns null
     every { mockWithGroupsFeed.feedTitle } returns "feedTitle"
     every { mockWithGroupsFeed.facetsByGroup } returns emptyMap()
-    return mockWithGroupsFeed
+
+    return CatalogFeedWithGroups(
+      mockk(), // Pass in mock FeedArguments as it is not used when handling state
+      mockWithGroupsFeed
+    )
   }
 
   @Test
   fun `on CatalogFeedWithoutGroups shows WithoutGroups view and hides others`() {
-    // Mock the FeedEntries as there's no easy way to make these
-    // Use Corrupt Feed entries to reduce non-Fragment surface area for this test
-    val testEntriesLiveData = listOf<FeedEntry>(
-      mockk<FeedEntry.FeedEntryCorrupt>(),
-      mockk<FeedEntry.FeedEntryCorrupt>(),
-    ).asPagedList()
-
-    testFeedStateLiveData.value = CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithoutGroups(
-      mockk(), // Pass in mock FeedArguments as it is not used when handling state
-      testEntriesLiveData,
-      emptyList(),
-      emptyMap(),
-      null,
-      "title"
-    )
+    testFeedStateLiveData.value = buildMockFeedStateWithoutGroups()
 
     onView(withId(R.id.feedWithoutGroups)).check(matches(isDisplayed()))
 
@@ -263,16 +256,30 @@ class CatalogFeedFragmentTest {
 
   @Test
   fun `on CatalogFeedWithoutGroups observes CatalogFeedWithoutGroups entries and updates adapter on emission`() {
-    // Mock the FeedEntries as there's no easy way to make these
-    // Use Corrupt Feed entries to reduce non-Fragment surface area for this test
+    onView(withId(R.id.feedWithoutGroupsList)).check(hasAdapterItemCount(0))
+
+    testFeedStateLiveData.value = buildMockFeedStateWithoutGroups()
+
+    onView(withId(R.id.feedWithoutGroupsList)).check(hasAdapterItemCount(2))
+  }
+
+  @Test
+  fun `on CatalogFeedWithoutGroups swipe to refresh reloads feed`() {
+    every { mockCatalogFeedViewModel.reloadFeed() } just runs
+
+    testFeedStateLiveData.value = buildMockFeedStateWithoutGroups()
+
+    onView(withId(R.id.feedWithGroupsSwipeContainer)).perform(robolectricSwipeToRefresh())
+    verify { mockCatalogFeedViewModel.reloadFeed() }
+  }
+
+  private fun buildMockFeedStateWithoutGroups(): CatalogFeedWithoutGroups {
     val testEntriesLiveData = listOf<FeedEntry>(
       mockk<FeedEntry.FeedEntryCorrupt>(),
       mockk<FeedEntry.FeedEntryCorrupt>(),
     ).asPagedList()
 
-    onView(withId(R.id.feedWithoutGroupsList)).check(hasAdapterItemCount(0))
-
-    testFeedStateLiveData.value = CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithoutGroups(
+    return CatalogFeedWithoutGroups(
       mockk(), // Pass in mock FeedArguments as it is not used when handling state
       testEntriesLiveData,
       emptyList(),
@@ -280,8 +287,6 @@ class CatalogFeedFragmentTest {
       null,
       "title"
     )
-
-    onView(withId(R.id.feedWithoutGroupsList)).check(hasAdapterItemCount(2))
   }
 
   @Test

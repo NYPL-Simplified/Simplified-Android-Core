@@ -158,6 +158,12 @@ class CatalogFeedFragment : Fragment(), AgeGateDialog.BirthYearSelectedListener 
 
     sharedListConfiguration(feedWithGroupsList)
 
+    val withGroupsSwipeContainer = binding.feedWithGroups.feedWithGroupsSwipeContainer
+    withGroupsSwipeContainer.setOnRefreshListener {
+      withGroupsSwipeContainer.isRefreshing = false
+      viewModel.reloadFeed()
+    }
+
     feedWithGroupsList.addItemDecoration(
       CatalogFeedWithGroupsDecorator(screenInformation.dpToPixels(16).toInt())
     )
@@ -176,6 +182,12 @@ class CatalogFeedFragment : Fragment(), AgeGateDialog.BirthYearSelectedListener 
     val feedWithoutGroupsList = binding.feedWithoutGroups.feedWithoutGroupsList
 
     sharedListConfiguration(feedWithoutGroupsList)
+
+    val withoutGroupsSwipeContainer = binding.feedWithoutGroups.feedWithoutGroupsSwipeContainer
+    withoutGroupsSwipeContainer.setOnRefreshListener {
+      withoutGroupsSwipeContainer.isRefreshing = false
+      viewModel.reloadFeed()
+    }
 
     withoutGroupsAdapter = CatalogPagedAdapter(
       context = requireActivity(),
@@ -221,10 +233,6 @@ class CatalogFeedFragment : Fragment(), AgeGateDialog.BirthYearSelectedListener 
         viewModel.feedStateLiveData.value?.search?.let { search ->
           openSearchDialog(requireContext(), search)
         }
-        true
-      }
-      R.id.catalogMenuActionReload -> {
-        viewModel.syncAccounts()
         true
       }
       android.R.id.home -> {
