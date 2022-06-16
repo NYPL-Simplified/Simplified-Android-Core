@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.widget.ImageView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.os.bundleOf
 import com.google.common.util.concurrent.ListeningExecutorService
 import com.google.common.util.concurrent.MoreExecutors
 import io.reactivex.disposables.Disposable
@@ -408,12 +409,13 @@ class AudioBookPlayerActivity :
       )
       this.supportFragmentManager.fragmentFactory = fragmentFactory
       if (!this.isFinishing && !this.supportFragmentManager.isDestroyed) {
+        val fallbackArgs = bundleOf(Pair(PlayerFragment.parametersKey, null))
         this.supportFragmentManager
           .beginTransaction()
           .replace(
             R.id.audio_book_player_fragment_holder,
             PlayerFragment::class.java,
-            null,
+            fallbackArgs,
             "PLAYER"
           )
           .commitAllowingStateLoss()
