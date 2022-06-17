@@ -37,6 +37,11 @@ interface BuildConfigurationCatalogType {
   val showBooksFromAllAccounts: Boolean
 
   /**
+   * Should the 'eBooks'/'audiobook'/'pdf' label be shown on book details in the catalog?
+   */
+  val showFormatLabel: Boolean
+
+  /**
    * Enable/disable returning books.
    */
 
