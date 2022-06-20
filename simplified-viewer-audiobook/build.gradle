@@ -1,3 +1,9 @@
+android {
+  buildFeatures {
+    compose true
+  }
+}
+
 dependencies {
   implementation project(":simplified-accounts-api")
   implementation project(":simplified-books-api")
@@ -14,20 +20,32 @@ dependencies {
   implementation project(":simplified-ui-thread-api")
   implementation project(":simplified-viewer-spi")
 
-  api libs.nypl.audiobook.api
-  api libs.nypl.audiobook.downloads
+  api libs.nypl.audiobook.player.api
   api libs.nypl.audiobook.feedbooks
   api libs.nypl.audiobook.manifest.license.check.api
   api libs.nypl.audiobook.manifest.fulfill.api
   api libs.nypl.audiobook.manifest.fulfill.basic
   api libs.nypl.audiobook.manifest.parser.api
   api libs.nypl.audiobook.manifest.parser.webpub
+  api libs.nypl.audiobook.json.web.token
   api libs.nypl.audiobook.open.access
   api libs.nypl.audiobook.rbdigital
-  api libs.nypl.audiobook.views
+
+  implementation libs.r2.shared
+  implementation libs.r2.streamer
+  implementation libs.r2.navigator.media2
 
   implementation libs.androidx.activity
   implementation libs.androidx.app.compat
+  implementation libs.androidx.lifecycle.ext
   implementation libs.kotlin.stdlib
   implementation libs.kotlin.reflect
+  implementation libs.kotlin.coroutines
+
+  implementation libs.androidx.compose.runtime
+  implementation libs.androidx.compose.material
+  implementation libs.androidx.compose.animation
+  implementation libs.androidx.compose.tooling
+  implementation libs.androidx.activity.compose
+  implementation libs.androidx.lifecycle.viewmodel.compose
 }

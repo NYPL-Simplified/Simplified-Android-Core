@@ -74,6 +74,17 @@
       android:label="@string/appName"
       android:theme="@style/SimplyE_ActionBar"/>
 
+    <service
+        android:name="org.nypl.simplified.viewer.audiobook.AudioBookPlayerService"
+        android:enabled="true"
+        android:exported="true"
+        tools:ignore="ExportedService">
+
+      <intent-filter>
+        <action android:name="androidx.media2.session.MediaSessionService" />
+      </intent-filter>
+    </service>
+
     <activity
         android:name="org.nypl.simplified.cardcreator.CardCreatorActivity"
         android:contentDescription="@string/appName"

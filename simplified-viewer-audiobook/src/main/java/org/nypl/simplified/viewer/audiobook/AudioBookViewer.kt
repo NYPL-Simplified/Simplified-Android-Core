@@ -68,6 +68,9 @@ class AudioBookViewer : ViewerProviderType {
         userAgent = httpClient.userAgent()
       )
 
-    AudioBookPlayerActivity.startActivity(activity, params)
+    val intent =
+      AudioBookPlayerContract.createIntent(activity, params)
+
+    activity.startActivity(intent)
   }
 }

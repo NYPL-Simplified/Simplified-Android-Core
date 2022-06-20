@@ -23,6 +23,9 @@ android {
   kotlinOptions {
     jvmTarget = "1.8"
   }
+  composeOptions {
+    kotlinCompilerExtensionVersion compose_kotlin_compiler_extension_version
+  }
 
   testOptions {
     execution 'ANDROIDX_TEST_ORCHESTRATOR'

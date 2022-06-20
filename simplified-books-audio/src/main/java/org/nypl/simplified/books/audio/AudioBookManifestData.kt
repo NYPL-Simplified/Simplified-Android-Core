@@ -16,7 +16,7 @@ data class AudioBookManifestData(
   val manifest: PlayerManifest,
 
   /**
-   * The original fulfillmed manifest, suitable for writing to external storage.
+   * The original fulfilled manifest, suitable for writing to external storage.
    */
 
   val fulfilled: ManifestFulfilled

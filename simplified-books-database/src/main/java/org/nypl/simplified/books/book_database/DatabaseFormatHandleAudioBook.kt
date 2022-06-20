@@ -174,36 +174,6 @@ internal class DatabaseFormatHandleAudioBook internal constructor(
 
           is ParseResult.Success -> {
             this.log.debug("[{}]: selecting audio engine", briefID)
-
-            val engine =
-              PlayerAudioEngines.findBestFor(
-                PlayerAudioEngineRequest(
-                  manifest = manifestResult.result,
-                  filter = { true },
-                  downloadProvider = NullDownloadProvider(),
-                  userAgent = PlayerUserAgent("unused")
-                )
-              )
-
-            if (engine == null) {
-              throw UnsupportedOperationException(
-                "No audio engine is available to process the given request"
-              )
-            }
-
-            this.log.debug(
-              "[{}]: selected audio engine: {} {}",
-              briefID,
-              engine.engineProvider.name(),
-              engine.engineProvider.version()
-            )
-
-            when (val bookResult = engine.bookProvider.create(this.parameters.context)) {
-              is PlayerResult.Success -> bookResult.result.wholeBookDownloadTask.delete()
-              is PlayerResult.Failure -> throw bookResult.failure
-            }
-
-            this.log.debug("[{}]: deleted audio book data", briefID)
           }
         }
       }
