@@ -43,6 +43,7 @@ import org.librarysimplified.audiobook.views.PlayerFragmentParameters
 import org.librarysimplified.audiobook.views.PlayerPlaybackRateFragment
 import org.librarysimplified.audiobook.views.PlayerSleepTimerFragment
 import org.librarysimplified.audiobook.views.PlayerTOCFragment
+import org.librarysimplified.audiobook.views.PlayerTOCFragmentParameters
 import org.librarysimplified.http.api.LSHTTPClientType
 import org.librarysimplified.services.api.ServiceDirectoryType
 import org.librarysimplified.services.api.Services
@@ -410,13 +411,13 @@ class AudioBookPlayerActivity :
       )
       this.supportFragmentManager.fragmentFactory = fragmentFactory
       if (!this.isFinishing && !this.supportFragmentManager.isDestroyed) {
-        val fallbackArgs = bundleOf(Pair(PlayerFragment.parametersKey, PlayerFragmentParameters(null)))
+        val emptyParams = bundleOf(Pair(PlayerFragment.parametersKey, PlayerFragmentParameters(null)))
         this.supportFragmentManager
           .beginTransaction()
           .replace(
             R.id.audio_book_player_fragment_holder,
             PlayerFragment::class.java,
-            fallbackArgs,
+            emptyParams,
             "PLAYER"
           )
           .commitAllowingStateLoss()
@@ -646,8 +647,13 @@ class AudioBookPlayerActivity :
      */
 
     this.uiThread.runOnUIThread {
+      val emptyParams = PlayerFragmentParameters(null)
       supportFragmentManager.beginTransaction()
-        .add(PlayerPlaybackRateFragment::class.java, null, "PLAYER_RATE")
+        .add(
+          PlayerPlaybackRateFragment::class.java,
+          bundleOf(PlayerPlaybackRateFragment.parametersKey to emptyParams),
+          "PLAYER_RATE"
+        )
         .commit()
     }
   }
@@ -658,8 +664,13 @@ class AudioBookPlayerActivity :
      */
 
     this.uiThread.runOnUIThread {
+      val emptyParams = PlayerFragmentParameters(null)
       supportFragmentManager.beginTransaction()
-        .add(PlayerSleepTimerFragment::class.java, null, "PLAYER_SLEEP_TIMER")
+        .add(
+          PlayerSleepTimerFragment::class.java,
+          bundleOf(PlayerSleepTimerFragment.parametersKey to emptyParams),
+          "PLAYER_SLEEP_TIMER"
+        )
         .commit()
     }
   }
@@ -672,12 +683,15 @@ class AudioBookPlayerActivity :
 
     this.uiThread.runOnUIThread {
       this.supportActionBar?.setTitle(R.string.audiobook_player_toc_title)
+      // TODO fix this with 7.1.1+ audiobook-android
+      val emptyParams = PlayerTOCFragmentParameters(null)
+      val key = "org.librarysimplified.audiobook.views.PlayerTOCFragment.parameters"
       this.supportFragmentManager
         .beginTransaction()
         .replace(
           R.id.audio_book_player_fragment_holder,
           PlayerTOCFragment::class.java,
-          null,
+          bundleOf(key to emptyParams),
           "PLAYER_TOC"
         )
         .addToBackStack(null)
