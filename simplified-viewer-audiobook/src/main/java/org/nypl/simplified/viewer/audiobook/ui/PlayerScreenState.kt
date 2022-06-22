@@ -7,6 +7,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.readium.navigator.media2.ExperimentalMedia2
 import org.readium.navigator.media2.MediaNavigator
 import kotlin.time.Duration
@@ -16,16 +17,15 @@ import kotlin.time.ExperimentalTime
 @OptIn(ExperimentalMedia2::class, ExperimentalTime::class)
 class PlayerScreenState(
   private val mediaNavigator: MediaNavigator,
+  private val opdsEntry: OPDSAcquisitionFeedEntry,
   private val navigatorScope: CoroutineScope
 ) {
 
   val title: String =
-    mediaNavigator.publication.metadata.title
+    opdsEntry.title
 
   val author: String? =
-    mediaNavigator.publication.metadata.authors
-      .firstOrNull()
-      ?.name
+    opdsEntry.authors.firstOrNull()
 
   val resource: State<MediaNavigator.Playback.Resource>
     get() = resourceMutable

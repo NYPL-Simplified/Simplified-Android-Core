@@ -206,7 +206,7 @@ class AudioBookPlayerViewModel(
         val loadingState = getSession().fold(
           onSuccess = { session ->
             AudioBookActivityLoadingState.Ready(
-              PlayerScreenState(session.navigator, viewModelScope)
+              PlayerScreenState(session.navigator, parameters.opdsEntry, viewModelScope)
             ) },
           onFailure = { AudioBookActivityLoadingState.Failure(it) }
         )
