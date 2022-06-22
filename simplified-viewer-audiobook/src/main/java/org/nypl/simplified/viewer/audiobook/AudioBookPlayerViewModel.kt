@@ -22,9 +22,11 @@ import org.nypl.simplified.books.audio.AudioBookFeedbooksSecretServiceType
 import org.nypl.simplified.books.audio.AudioBookManifestData
 import org.nypl.simplified.books.audio.AudioBookManifestStrategiesType
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
+import org.nypl.simplified.books.covers.BookCoverProviderType
 import org.nypl.simplified.networkconnectivity.api.NetworkConnectivityType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskResult
+import org.nypl.simplified.viewer.audiobook.ui.PlayerScreenState
 import org.readium.navigator.media2.ExperimentalMedia2
 import org.readium.navigator.media2.MediaNavigator
 import org.readium.r2.shared.publication.Locator
@@ -39,6 +41,7 @@ class AudioBookPlayerViewModel(
   private val strategies: AudioBookManifestStrategiesType,
   private val networkConnectivity: NetworkConnectivityType,
   private val profilesController: ProfilesControllerType,
+  private val covers: BookCoverProviderType,
   private val feedbooksConfigService: AudioBookFeedbooksSecretServiceType?
 ) : ViewModel() {
 
@@ -184,7 +187,7 @@ class AudioBookPlayerViewModel(
     object Loading : AudioBookActivityLoadingState()
 
     data class Ready(
-      val playerState: AudioBookPlayerState
+      val playerState: PlayerScreenState
     ) : AudioBookActivityLoadingState()
 
     data class Failure(
@@ -203,7 +206,7 @@ class AudioBookPlayerViewModel(
         val loadingState = getSession().fold(
           onSuccess = { session ->
             AudioBookActivityLoadingState.Ready(
-              AudioBookPlayerState(session.navigator, viewModelScope)
+              PlayerScreenState(session.navigator, viewModelScope)
             ) },
           onFailure = { AudioBookActivityLoadingState.Failure(it) }
         )
@@ -228,13 +231,18 @@ class AudioBookPlayerViewModel(
       services.requireService(NetworkConnectivityType::class.java)
     private val profiles =
       services.requireService(ProfilesControllerType::class.java)
-    val feedbooksConfigService =
+    private val covers =
+        services.requireService(BookCoverProviderType::class.java)
+    private val feedbooksConfigService =
       services.optionalService(AudioBookFeedbooksSecretServiceType::class.java)
 
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
       return when {
         modelClass.isAssignableFrom(AudioBookPlayerViewModel::class.java) ->
-          AudioBookPlayerViewModel(application, parameters, strategies, networkConnectivity, profiles, feedbooksConfigService) as T
+          AudioBookPlayerViewModel(
+            application, parameters, strategies,
+            networkConnectivity, profiles, covers, feedbooksConfigService
+          ) as T
         else ->
           super.create(modelClass)
       }

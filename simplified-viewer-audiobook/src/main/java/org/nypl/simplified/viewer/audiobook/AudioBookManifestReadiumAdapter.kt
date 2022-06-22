@@ -10,6 +10,7 @@ import org.readium.r2.shared.extensions.toMap
 import org.readium.r2.shared.fetcher.Fetcher
 import org.readium.r2.shared.fetcher.HttpFetcher
 import org.readium.r2.shared.fetcher.RoutingFetcher
+import org.readium.r2.shared.publication.Contributor
 import org.readium.r2.shared.publication.Link
 import org.readium.r2.shared.publication.LocalizedString
 import org.readium.r2.shared.publication.Manifest
@@ -81,7 +82,7 @@ class AudioBookManifestReadiumAdapter(
     Manifest(
       metadata = Metadata(
         identifier = playerManifest.metadata.identifier,
-        localizedTitle = LocalizedString(playerManifest.metadata.title)
+        localizedTitle = LocalizedString(playerManifest.metadata.title),
       ),
       readingOrder = playerManifest.readingOrder
         .filterIsInstance(PlayerManifestLink.LinkBasic::class.java)
