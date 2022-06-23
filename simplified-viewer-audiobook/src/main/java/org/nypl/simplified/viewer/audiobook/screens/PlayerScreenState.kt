@@ -1,4 +1,4 @@
-package org.nypl.simplified.viewer.audiobook.ui
+package org.nypl.simplified.viewer.audiobook.screens
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
@@ -7,9 +7,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.readium.navigator.media2.ExperimentalMedia2
 import org.readium.navigator.media2.MediaNavigator
+import org.readium.r2.shared.publication.Link
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 
@@ -26,6 +29,9 @@ class PlayerScreenState(
 
   val author: String? =
     opdsEntry.authors.firstOrNull()
+
+  val readingOrder: List<Link> =
+    mediaNavigator.publication.readingOrder
 
   val resource: State<MediaNavigator.Playback.Resource>
     get() = resourceMutable
@@ -47,6 +53,9 @@ class PlayerScreenState(
 
   private var preventPlaybackUpdate: Boolean =
     false
+
+  private val commandMutex: Mutex =
+    Mutex()
 
   init {
     mediaNavigator.playback
@@ -77,6 +86,10 @@ class PlayerScreenState(
   }
 
   private fun executeCommand(block: suspend (MediaNavigator).() -> Unit) = navigatorScope.launch {
+   executeCommandAsync(block)
+  }
+
+  private suspend fun executeCommandAsync(block: suspend (MediaNavigator).() -> Unit) = commandMutex.withLock {
     preventPlaybackUpdate = true
     mediaNavigator.block()
     preventPlaybackUpdate = false
@@ -95,6 +108,10 @@ class PlayerScreenState(
     if (currentIndex + 1 < mediaNavigator.publication.readingOrder.size) {
       mediaNavigator.go(mediaNavigator.publication.readingOrder[currentIndex + 1])
     }
+  }
+
+  fun go(link: Link) = executeCommand {
+    mediaNavigator.go(link)
   }
 
   fun seek(position: Duration) = executeCommand {

@@ -5,8 +5,7 @@ import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.State
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -26,10 +25,9 @@ import org.nypl.simplified.books.covers.BookCoverProviderType
 import org.nypl.simplified.networkconnectivity.api.NetworkConnectivityType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskResult
-import org.nypl.simplified.viewer.audiobook.ui.PlayerScreenState
+import org.nypl.simplified.viewer.audiobook.screens.PlayerScreenState
 import org.readium.navigator.media2.ExperimentalMedia2
 import org.readium.navigator.media2.MediaNavigator
-import org.readium.r2.shared.publication.Locator
 import org.readium.r2.shared.util.Try
 import org.slf4j.LoggerFactory
 import java.io.IOException
@@ -162,7 +160,7 @@ class AudioBookPlayerViewModel(
     val player = playerFactory.createPlayer()
 
     val initialLocator =
-      formatHandle?.format?.position
+      formatHandle.format.position
         ?.let {
           val currentLink = publication.readingOrder[it.chapter] //FIXME: what about part?
           publication.locatorFromLink(currentLink)
@@ -182,35 +180,27 @@ class AudioBookPlayerViewModel(
     }
   }
 
-  sealed class AudioBookActivityLoadingState {
+  private val listenerDelegate = AudioBookPlayerListener()
 
-    object Loading : AudioBookActivityLoadingState()
+  val currentScreen: State<AudioBookPlayerListener.Screen>
+    get() = listenerDelegate.currentScreen
 
-    data class Ready(
-      val playerState: PlayerScreenState
-    ) : AudioBookActivityLoadingState()
-
-    data class Failure(
-      val exception: Throwable
-    ) : AudioBookActivityLoadingState()
+  fun popBackstack() {
+    listenerDelegate.popBackstack()
   }
-
-  private val activityStateMutable: MutableState<AudioBookActivityLoadingState> =
-    mutableStateOf(AudioBookActivityLoadingState.Loading)
-
-  val activityState: MutableState<AudioBookActivityLoadingState>
-    get() = activityStateMutable
 
   init {
       viewModelScope.launch {
-        val loadingState = getSession().fold(
+        getSession().fold(
           onSuccess = { session ->
-            AudioBookActivityLoadingState.Ready(
+            listenerDelegate.openPlayer(
               PlayerScreenState(session.navigator, parameters.opdsEntry, viewModelScope)
-            ) },
-          onFailure = { AudioBookActivityLoadingState.Failure(it) }
+            )
+          },
+          onFailure = {
+            listenerDelegate.openError(it)
+          }
         )
-        activityStateMutable.value = loadingState
       }
   }
 

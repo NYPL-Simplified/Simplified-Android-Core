@@ -1,13 +1,12 @@
 package org.nypl.simplified.viewer.audiobook
 
 import android.os.Bundle
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.addCallback
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import org.librarysimplified.services.api.Services
-import org.nypl.simplified.viewer.audiobook.ui.AudioBookPlayerFailureScreen
-import org.nypl.simplified.viewer.audiobook.ui.AudioBookPlayerLoadingScreen
-import org.nypl.simplified.viewer.audiobook.ui.AudioBookPlayerReadyScreen
 import org.readium.navigator.media2.ExperimentalMedia2
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -28,16 +27,12 @@ class AudioBookPlayerActivity : AppCompatActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
+    onBackPressedDispatcher.addCallback(this) {
+      viewModel.popBackstack()
+    }
+
     setContent {
-      when (val loadingState = viewModel.activityState.value) {
-        AudioBookPlayerViewModel.AudioBookActivityLoadingState.Loading -> {
-          AudioBookPlayerLoadingScreen()
-        }
-        is AudioBookPlayerViewModel.AudioBookActivityLoadingState.Failure ->
-          AudioBookPlayerFailureScreen(loadingState.exception)
-        is AudioBookPlayerViewModel.AudioBookActivityLoadingState.Ready ->
-          AudioBookPlayerReadyScreen(loadingState.playerState)
-      }
+      viewModel.currentScreen.value.Screen()
     }
   }
 

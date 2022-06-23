@@ -10,7 +10,6 @@ import org.readium.r2.shared.extensions.toMap
 import org.readium.r2.shared.fetcher.Fetcher
 import org.readium.r2.shared.fetcher.HttpFetcher
 import org.readium.r2.shared.fetcher.RoutingFetcher
-import org.readium.r2.shared.publication.Contributor
 import org.readium.r2.shared.publication.Link
 import org.readium.r2.shared.publication.LocalizedString
 import org.readium.r2.shared.publication.Manifest
@@ -78,16 +77,20 @@ class AudioBookManifestReadiumAdapter(
 
   }
 
-  private fun mapManifest(playerManifest: PlayerManifest): Manifest =
-    Manifest(
+  private fun mapManifest(playerManifest: PlayerManifest): Manifest {
+    val readingOrder = playerManifest.readingOrder
+      .filterIsInstance(PlayerManifestLink.LinkBasic::class.java)
+      .map { it.toLink() }
+
+    return Manifest(
       metadata = Metadata(
         identifier = playerManifest.metadata.identifier,
         localizedTitle = LocalizedString(playerManifest.metadata.title),
       ),
-      readingOrder = playerManifest.readingOrder
-        .filterIsInstance(PlayerManifestLink.LinkBasic::class.java)
-        .map { it.toLink() },
+      readingOrder = readingOrder,
+      tableOfContents = readingOrder
     )
+  }
 
   private fun PlayerManifestLink.toLink(): Link {
     val encryption = properties.encrypted?.let {
@@ -103,10 +106,11 @@ class AudioBookManifestReadiumAdapter(
     }
 
     return Link(
+      title = title,
       href = Href(hrefURI.toString()).string,
       duration = duration,
       type = type?.toString(),
       properties = properties
-      )
+    )
   }
 }

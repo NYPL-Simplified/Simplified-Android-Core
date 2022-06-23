@@ -8,4 +8,5 @@
   <string name="audio_book_player_error_engine_open">Unable to initialize audio engine</string>
   <string name="audio_book_player_return_question">Would you like to return it?</string>
   <string name="audio_book_player_return_title">Your Audiobook Has Finished</string>
+  <string name="audio_book_player_toc_chapter_n">Chapter %1$d</string>
 </resources>

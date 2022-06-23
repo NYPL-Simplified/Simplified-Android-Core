@@ -1,4 +1,4 @@
-package org.nypl.simplified.viewer.audiobook.ui
+package org.nypl.simplified.viewer.audiobook.components
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Arrangement
@@ -11,8 +11,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.nypl.simplified.viewer.audiobook.R
+import org.nypl.simplified.viewer.audiobook.util.CenteredOverlay
+import org.nypl.simplified.viewer.audiobook.util.asTextUnit
 
 @Composable
 fun PlayerControls(
@@ -54,7 +57,7 @@ private fun BackwardButton(
   ControlButton(
     onClick = onClick,
     iconResourceId = R.drawable.circle_arrow_backward,
-    overlay = { Text(text = "15", fontWeight = FontWeight.Bold) },
+    overlay = { SkipTextOverlay() } ,
     contentDescription = "Go backward"
   )
 }
@@ -66,8 +69,18 @@ private fun ForwardButton(
   ControlButton(
     onClick = onClick,
     iconResourceId = R.drawable.circle_arrow_forward,
-    overlay = { Text(text = "15", fontWeight = FontWeight.Bold) },
+    overlay = { SkipTextOverlay() },
     contentDescription = "Go forward"
+  )
+}
+
+@Composable
+private fun SkipTextOverlay() {
+  Text(
+    text = "15",
+    fontWeight = FontWeight.Bold,
+    fontSize = 14.dp.asTextUnit(),
+    textAlign = TextAlign.Center
   )
 }
 
@@ -81,13 +94,12 @@ private fun ControlButton(
   IconButton(
     onClick = onClick
   ) {
-    Icon(
-      modifier = Modifier.size(48.dp),
-      painter = painterResource(id = iconResourceId),
-      contentDescription = contentDescription
-    )
-    overlay?.let {
-      it()
+    CenteredOverlay(overlay = overlay) {
+      Icon(
+        modifier = Modifier.size(48.dp),
+        painter = painterResource(id = iconResourceId),
+        contentDescription = contentDescription
+      )
     }
   }
 }
