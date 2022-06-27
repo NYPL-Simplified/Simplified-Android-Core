@@ -8,7 +8,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
 @Composable
-fun ErrorScreen(exception: Throwable) {
+internal fun ErrorScreen(exception: Throwable) {
   Box(Modifier.fillMaxSize()) {
     Text(
       modifier = Modifier.align(Alignment.Center),

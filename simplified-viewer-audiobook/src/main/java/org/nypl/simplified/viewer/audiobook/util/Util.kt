@@ -9,14 +9,14 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun Dp.asTextUnit(): TextUnit =
+internal fun Dp.asTextUnit(): TextUnit =
   with(LocalDensity.current) {
     val textSize = value / fontScale
     textSize.sp
   }
 
 @Composable
-fun CenteredOverlay(
+internal fun CenteredOverlay(
   overlay: (@Composable () -> Unit)?,
   content: @Composable () -> Unit
 ) {

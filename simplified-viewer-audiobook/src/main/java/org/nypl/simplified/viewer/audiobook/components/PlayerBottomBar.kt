@@ -17,7 +17,7 @@ import org.nypl.simplified.viewer.audiobook.util.CenteredOverlay
 import org.nypl.simplified.viewer.audiobook.util.asTextUnit
 
 @Composable
-fun PlayerBottomBar(
+internal fun PlayerBottomBar(
   onSpeedClicked: () -> Unit,
   onSleepClicked: () -> Unit,
   onChaptersClicked: () -> Unit

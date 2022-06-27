@@ -13,7 +13,7 @@ import org.nypl.simplified.viewer.audiobook.screens.PlayerScreenListener
 import org.nypl.simplified.viewer.audiobook.screens.PlayerScreenState
 import org.readium.r2.shared.publication.Link
 
-class AudioBookPlayerListener
+internal class AudioBookPlayerListener
   : PlayerScreenListener, ContentsScreenListener {
 
   sealed class Screen {
@@ -30,7 +30,7 @@ class AudioBookPlayerListener
     }
 
     class Error(
-      val exception: Throwable
+      private val exception: Throwable
     ) : Screen() {
 
       @Composable
@@ -41,7 +41,7 @@ class AudioBookPlayerListener
 
     class Player(
       val state: PlayerScreenState,
-      val listener: PlayerScreenListener
+      private val listener: PlayerScreenListener
     ) : Screen() {
 
       @Composable
@@ -51,8 +51,8 @@ class AudioBookPlayerListener
     }
 
     class Contents(
-      val links: List<Link>,
-      val listener: ContentsScreenListener
+      private val links: List<Link>,
+      private val listener: ContentsScreenListener
     ) : Screen() {
 
       @Composable
@@ -62,7 +62,7 @@ class AudioBookPlayerListener
     }
   }
 
-  class Backstack(
+  private class Backstack(
     initialScreen: Screen
   ) {
 
@@ -115,8 +115,9 @@ class AudioBookPlayerListener
     backstack.push(contents)
   }
 
-  override fun onGoToLink(link: Link) {
+  override fun onTocItemCLicked(link: Link) {
     backstack.pop()
     playerState.go(link)
+    playerState.play()
   }
 }

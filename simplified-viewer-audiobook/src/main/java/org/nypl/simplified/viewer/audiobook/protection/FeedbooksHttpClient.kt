@@ -4,7 +4,7 @@ import org.librarysimplified.audiobook.feedbooks.FeedbooksPlayerExtensionConfigu
 import org.readium.r2.shared.util.http.DefaultHttpClient
 import org.readium.r2.shared.util.http.HttpClient
 
-class FeedbooksHttpClientFactory(
+internal class FeedbooksHttpClientFactory(
   private val configuration: FeedbooksPlayerExtensionConfiguration,
 ) {
 

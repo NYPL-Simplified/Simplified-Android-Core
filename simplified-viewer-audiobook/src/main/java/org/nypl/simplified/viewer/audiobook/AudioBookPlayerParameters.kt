@@ -69,7 +69,7 @@ data class AudioBookPlayerParameters(
    * Create a manifest strategy for the current parameters.
    */
 
-  fun toManifestStrategy(
+  internal fun toManifestStrategy(
     strategies: AudioBookManifestStrategiesType,
     isNetworkAvailable: () -> Boolean,
     credentials: AccountAuthenticationCredentials?,

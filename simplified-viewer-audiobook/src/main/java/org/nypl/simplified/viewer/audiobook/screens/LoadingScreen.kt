@@ -8,7 +8,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
 @Composable
-fun LoadingScreen() {
+internal fun LoadingScreen() {
   Box(Modifier.fillMaxSize()) {
     CircularProgressIndicator(
       modifier = Modifier.align(Alignment.Center)

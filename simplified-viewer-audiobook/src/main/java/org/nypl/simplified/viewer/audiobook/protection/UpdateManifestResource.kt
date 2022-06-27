@@ -9,7 +9,7 @@ import org.readium.r2.shared.util.Try
 import org.readium.r2.shared.util.flatMap
 import org.readium.r2.shared.util.tryRecover
 
-class UpdateManifestResource(
+internal class UpdateManifestResource(
   private val index: Int,
   private val fallbackLink: Link,
   private val baseFetcher: Fetcher,

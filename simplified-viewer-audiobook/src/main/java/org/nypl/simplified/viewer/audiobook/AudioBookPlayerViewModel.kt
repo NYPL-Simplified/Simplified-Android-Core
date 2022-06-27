@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory
 import java.io.IOException
 
 @OptIn(ExperimentalMedia2::class, ExperimentalCoroutinesApi::class)
-class AudioBookPlayerViewModel(
+internal class AudioBookPlayerViewModel private constructor(
   private val application: Application,
   private val parameters: AudioBookPlayerParameters,
   private val strategies: AudioBookManifestStrategiesType,
@@ -209,7 +209,7 @@ class AudioBookPlayerViewModel(
     serviceBinder.getCompleted().closeNavigator()
   }
 
-  class Factory(
+  internal class Factory(
     private val application: Application,
     private val parameters: AudioBookPlayerParameters,
     services: ServiceDirectoryType

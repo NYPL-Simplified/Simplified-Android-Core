@@ -21,7 +21,7 @@ import org.readium.r2.shared.publication.encryption.encryption
 import org.readium.r2.shared.util.Href
 import org.readium.r2.shared.util.http.DefaultHttpClient
 
-class AudioBookManifestReadiumAdapter(
+internal class AudioBookManifestReadiumAdapter(
   private val feedbooksConfiguration: FeedbooksPlayerExtensionConfiguration?
 ) {
 

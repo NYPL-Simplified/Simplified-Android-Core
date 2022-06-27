@@ -7,7 +7,7 @@ import org.readium.r2.shared.util.http.HttpRequest
 import org.readium.r2.shared.util.http.HttpTry
 import org.slf4j.LoggerFactory
 
-class BearerTokenHttpClientCallback(
+internal class BearerTokenHttpClientCallback(
   private val tokenFactory: (HttpRequest) -> BearerToken,
 ) : DefaultHttpClient.Callback {
 

@@ -18,7 +18,7 @@ import org.nypl.simplified.viewer.audiobook.util.CenteredOverlay
 import org.nypl.simplified.viewer.audiobook.util.asTextUnit
 
 @Composable
-fun PlayerControls(
+internal fun PlayerControls(
   modifier: Modifier,
   showPause: Boolean,
   onSkipForward: () -> Unit,

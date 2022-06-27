@@ -10,7 +10,7 @@ import org.readium.r2.shared.publication.Manifest
 import org.readium.r2.shared.util.Try
 import org.readium.r2.shared.util.getOrDefault
 
-class UpdateManifestFetcher(
+internal class UpdateManifestFetcher(
   private val childFetcher: Fetcher,
   private val downloadManifest: suspend () -> Try<Manifest, Exception>
 ) : Fetcher {

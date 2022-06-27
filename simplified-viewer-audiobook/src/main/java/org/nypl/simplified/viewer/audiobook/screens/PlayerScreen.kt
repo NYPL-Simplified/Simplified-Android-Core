@@ -20,13 +20,13 @@ import org.readium.navigator.media2.ExperimentalMedia2
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 
-interface PlayerScreenListener {
+internal interface PlayerScreenListener {
 
   fun onOpenToc()
 }
 
 @Composable
-fun PlayerScreen(
+internal fun PlayerScreen(
   audioBookPlayerState: PlayerScreenState,
   listener: PlayerScreenListener
 ) {
@@ -57,7 +57,7 @@ fun PlayerScreen(
 
 @OptIn(ExperimentalTime::class, ExperimentalMedia2::class)
 @Composable
-fun PlayerContent(
+internal fun PlayerContent(
   modifier: Modifier,
   audioBookPlayerState: PlayerScreenState,
 ) {
@@ -94,7 +94,7 @@ fun PlayerContent(
 }
 
 @Composable
-fun PlayerMetadata(
+internal fun PlayerMetadata(
   modifier: Modifier,
   title: String,
   author: String?
@@ -112,7 +112,7 @@ fun PlayerMetadata(
 }
 
 @Composable
-fun PlayerCover(
+internal fun PlayerCover(
 
 ) {
 

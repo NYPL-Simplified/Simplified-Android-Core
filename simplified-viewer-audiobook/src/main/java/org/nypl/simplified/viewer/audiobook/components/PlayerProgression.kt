@@ -20,7 +20,7 @@ import kotlin.time.Duration.Companion.seconds
 import kotlin.time.DurationUnit
 
 @Composable
-fun PlayerProgression(
+internal fun PlayerProgression(
   modifier: Modifier,
   position: Duration,
   duration: Duration,

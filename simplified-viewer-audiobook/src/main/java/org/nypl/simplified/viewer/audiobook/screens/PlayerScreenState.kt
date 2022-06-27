@@ -18,7 +18,7 @@ import kotlin.time.ExperimentalTime
 
 
 @OptIn(ExperimentalMedia2::class, ExperimentalTime::class)
-class PlayerScreenState(
+internal class PlayerScreenState(
   private val mediaNavigator: MediaNavigator,
   private val opdsEntry: OPDSAcquisitionFeedEntry,
   private val navigatorScope: CoroutineScope

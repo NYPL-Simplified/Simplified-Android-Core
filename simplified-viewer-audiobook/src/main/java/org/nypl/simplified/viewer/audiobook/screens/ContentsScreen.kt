@@ -19,13 +19,13 @@ import androidx.compose.ui.unit.dp
 import org.nypl.simplified.viewer.audiobook.R
 import org.readium.r2.shared.publication.Link
 
-interface ContentsScreenListener {
+internal interface ContentsScreenListener {
 
-  fun onGoToLink(link: Link)
+  fun onTocItemCLicked(link: Link)
 }
 
 @Composable
-fun ContentsScreen(
+internal fun ContentsScreen(
   links: List<Link>,
   listener: ContentsScreenListener
 ) {
@@ -38,7 +38,7 @@ fun ContentsScreen(
         modifier = Modifier
           .fillMaxSize(),
         links = links,
-        onItemClick = { listener.onGoToLink(it) }
+        onItemClick = { listener.onTocItemCLicked(it) }
       )
     }
   }
