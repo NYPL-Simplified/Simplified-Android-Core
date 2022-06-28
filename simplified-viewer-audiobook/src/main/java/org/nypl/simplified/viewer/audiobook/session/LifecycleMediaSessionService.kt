@@ -1,4 +1,4 @@
-package org.nypl.simplified.viewer.audiobook
+package org.nypl.simplified.viewer.audiobook.session
 
 import androidx.media2.session.MediaSessionService
 import androidx.lifecycle.Lifecycle

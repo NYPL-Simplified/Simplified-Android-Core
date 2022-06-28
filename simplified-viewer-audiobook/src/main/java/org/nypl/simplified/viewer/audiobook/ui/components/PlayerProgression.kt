@@ -1,4 +1,4 @@
-package org.nypl.simplified.viewer.audiobook.components
+package org.nypl.simplified.viewer.audiobook.ui.components
 
 import android.text.format.DateUtils
 import androidx.compose.foundation.layout.Arrangement

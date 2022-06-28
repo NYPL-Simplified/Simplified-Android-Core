@@ -11,10 +11,9 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.sample
 import org.librarysimplified.audiobook.api.PlayerPosition
-import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
+import org.nypl.simplified.viewer.audiobook.session.LifecycleMediaSessionService
 import org.readium.navigator.media2.ExperimentalMedia2
 import org.readium.r2.shared.publication.Locator
-import org.readium.r2.shared.publication.Publication
 import org.readium.r2.shared.publication.indexOfFirstWithHref
 import org.slf4j.LoggerFactory
 import kotlin.time.ExperimentalTime
@@ -32,10 +31,14 @@ class AudioBookPlayerService : LifecycleMediaSessionService() {
 
     private var saveLocationJob: Job? = null
 
-    var sessionHolder: AudioBookPlayerSessionBuilder.SessionHolder? = null
+    internal var sessionHolder: AudioBookPlayerSessionHolder? = null
       private set
 
     fun closeSession() {
+      sessionHolder?.let { holder ->
+        savePlayerPosition(holder.navigator.currentLocator.value, holder)
+      }
+
       stopForeground(true)
       saveLocationJob?.cancel()
       saveLocationJob = null
@@ -45,29 +48,28 @@ class AudioBookPlayerService : LifecycleMediaSessionService() {
 
     @OptIn(FlowPreview::class)
     fun bindNavigator(
-      sessionHolder: AudioBookPlayerSessionBuilder.SessionHolder
+      sessionHolder: AudioBookPlayerSessionHolder
     ) {
       addSession(sessionHolder.mediaSession)
 
       saveLocationJob = sessionHolder.navigator.currentLocator
         .sample(3000)
-        .onEach {  locator -> savePlayerPosition(sessionHolder.formatHandle, locator, sessionHolder.navigator.publication) }
+        .onEach {  locator -> savePlayerPosition(locator, sessionHolder) }
         .launchIn(lifecycleScope)
 
       this.sessionHolder = sessionHolder
     }
 
     private fun savePlayerPosition(
-      formatHandle: BookDatabaseEntryFormatHandleAudioBook,
       locator: Locator,
-      publication: Publication
+      sessionHolder: AudioBookPlayerSessionHolder
     ) {
       val offset =
         locator.locations.fragments.first()
           .substringAfter("t=").toLong()
 
       val chapter =
-        publication.readingOrder.indexOfFirstWithHref(locator.href)!!
+        sessionHolder.navigator.publication.readingOrder.indexOfFirstWithHref(locator.href)!!
 
       val position = PlayerPosition(
         title = locator.title,
@@ -75,7 +77,9 @@ class AudioBookPlayerService : LifecycleMediaSessionService() {
         chapter = chapter ,
         offsetMilliseconds = offset
       )
-      formatHandle.savePlayerPosition(position)
+
+      sessionHolder.formatHandle.savePlayerPosition(position)
+      logger.debug("Position $position saved to the database.")
     }
   }
 
@@ -85,7 +89,7 @@ class AudioBookPlayerService : LifecycleMediaSessionService() {
 
   override fun onCreate() {
     super.onCreate()
-    logger.debug("MediaService created.")
+    logger.debug("AudioBookPlayerService created.")
   }
 
   override fun onBind(intent: Intent): IBinder? {
@@ -121,6 +125,6 @@ class AudioBookPlayerService : LifecycleMediaSessionService() {
   }
 
   companion object {
-    const val SERVICE_INTERFACE = "org.nypl.simplified.viewer.audiobook.AudioBookPlayerService"
+    const val SERVICE_INTERFACE = "org.nypl.simplified.viewer.audiobook.service.AudioBookPlayerService"
   }
 }

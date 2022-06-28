@@ -10,7 +10,7 @@ object AudioBookPlayerContract {
     "org.nypl.simplified.viewer.audiobook.AudioBookPlayerActivity.parameters"
 
   fun createIntent(context: Context, parameters: AudioBookPlayerParameters): Intent {
-    val bundle = bundleOf(this.PARAMETER_ID to parameters)
+    val bundle = bundleOf(PARAMETER_ID to parameters)
     val intent = Intent(context, AudioBookPlayerActivity::class.java)
     intent.putExtras(bundle)
     return intent

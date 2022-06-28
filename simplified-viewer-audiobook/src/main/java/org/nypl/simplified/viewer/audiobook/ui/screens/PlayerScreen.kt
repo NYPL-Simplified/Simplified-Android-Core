@@ -1,4 +1,4 @@
-package org.nypl.simplified.viewer.audiobook.screens
+package org.nypl.simplified.viewer.audiobook.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,9 +13,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import org.nypl.simplified.viewer.audiobook.components.PlayerBottomBar
-import org.nypl.simplified.viewer.audiobook.components.PlayerControls
-import org.nypl.simplified.viewer.audiobook.components.PlayerProgression
+import org.nypl.simplified.viewer.audiobook.ui.components.PlayerBottomBar
+import org.nypl.simplified.viewer.audiobook.ui.components.PlayerControls
+import org.nypl.simplified.viewer.audiobook.ui.components.PlayerProgression
 import org.readium.navigator.media2.ExperimentalMedia2
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime

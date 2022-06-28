@@ -1,25 +1,24 @@
-package org.nypl.simplified.viewer.audiobook.navigation
+package org.nypl.simplified.viewer.audiobook.ui.navigation
 
 import androidx.activity.OnBackPressedCallback
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import org.nypl.simplified.viewer.audiobook.screens.ContentsScreenListener
-import org.nypl.simplified.viewer.audiobook.screens.PlayerScreenListener
-import org.nypl.simplified.viewer.audiobook.screens.PlayerScreenState
-import org.nypl.simplified.viewer.audiobook.util.Backstack
+import org.nypl.simplified.viewer.audiobook.ui.screens.ContentsScreenListener
+import org.nypl.simplified.viewer.audiobook.ui.screens.PlayerScreenListener
+import org.nypl.simplified.viewer.audiobook.ui.screens.PlayerScreenState
 import org.readium.r2.shared.publication.Link
 
-internal class AudioBookPlayerListener
+internal class Listener
   : PlayerScreenListener, ContentsScreenListener {
 
-  private val backstack: Backstack<AudioBookPlayerScreen> =
-    Backstack(AudioBookPlayerScreen.Loading)
+  private val backstack: Backstack<Screen> =
+    Backstack(Screen.Loading)
 
   private val playerState: PlayerScreenState
     get() = backstack.screens
-      .filterIsInstance(AudioBookPlayerScreen.Player::class.java)
+      .filterIsInstance(Screen.Player::class.java)
       .first().state
 
   val onBackPressedCallback = object : OnBackPressedCallback(false) {
@@ -39,20 +38,20 @@ internal class AudioBookPlayerListener
     }
   }
 
-  val currentScreen: StateFlow<AudioBookPlayerScreen>
+  val currentScreen: StateFlow<Screen>
     get() = backstack.current
 
   fun onPlayerReady(state: PlayerScreenState) {
-    backstack.replace(AudioBookPlayerScreen.Player(state, this))
+    backstack.replace(Screen.Player(state, this))
   }
 
   fun onLoadingException(error: Throwable) {
-    backstack.replace(AudioBookPlayerScreen.Error(error))
+    backstack.replace(Screen.Error(error))
   }
 
   override fun onOpenToc() {
     val links = playerState.readingOrder
-    val contents = AudioBookPlayerScreen.Contents(links, this)
+    val contents = Screen.Contents(links, this)
     backstack.add(contents)
   }
 

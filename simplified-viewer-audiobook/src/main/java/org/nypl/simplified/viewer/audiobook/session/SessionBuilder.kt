@@ -1,26 +1,37 @@
-package org.nypl.simplified.viewer.audiobook
+package org.nypl.simplified.viewer.audiobook.session
 
 import android.app.Application
 import android.app.PendingIntent
 import android.content.Intent
-import androidx.media2.session.MediaSession
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.librarysimplified.audiobook.manifest.api.PlayerManifest
+import org.librarysimplified.audiobook.manifest_fulfill.spi.ManifestFulfilled
 import org.librarysimplified.audiobook.player.api.PlayerAudioEngineRequest
 import org.librarysimplified.audiobook.player.api.PlayerAudioEngines
 import org.librarysimplified.audiobook.player.api.PlayerBookID
-import org.librarysimplified.audiobook.player.api.PlayerType
 import org.librarysimplified.audiobook.player.api.PlayerUserAgent
+import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.audio.AudioBookFeedbooksSecretServiceType
 import org.nypl.simplified.books.audio.AudioBookManifestData
 import org.nypl.simplified.books.audio.AudioBookManifestStrategiesType
+import org.nypl.simplified.books.audio.AudioBookManifestStrategyType
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle
 import org.nypl.simplified.networkconnectivity.api.NetworkConnectivityType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskResult
+import org.nypl.simplified.viewer.audiobook.R
+import org.nypl.simplified.viewer.audiobook.AudioBookPlayerContract
+import org.nypl.simplified.viewer.audiobook.AudioBookPlayerParameters
+import org.nypl.simplified.viewer.audiobook.AudioBookPlayerSessionHolder
 import org.readium.navigator.media2.ExperimentalMedia2
 import org.readium.navigator.media2.MediaNavigator
+import org.readium.r2.shared.publication.Locator
 import org.readium.r2.shared.util.Try
+import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.IOException
+import java.net.URI
 
 internal class AudioBookPlayerSessionBuilder(
   private val application: Application,
@@ -31,29 +42,27 @@ internal class AudioBookPlayerSessionBuilder(
   feedbooksConfigService: AudioBookFeedbooksSecretServiceType?
 ) {
 
-  @OptIn(ExperimentalMedia2::class)
-  data class SessionHolder(
-    val parameters: AudioBookPlayerParameters,
-    val navigator: MediaNavigator,
-    val mediaSession: MediaSession,
-    val player: PlayerType,
-    val formatHandle: BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
-  ) {
-
-    fun close() {
-      mediaSession.close()
-      navigator.close()
-      navigator.publication.close()
-      player.close()
-    }
-  }
+  private val logger =
+    LoggerFactory.getLogger(AudioBookPlayerSessionBuilder::class.java)
 
   private val readiumAdapter: AudioBookManifestReadiumAdapter =
     AudioBookManifestReadiumAdapter(feedbooksConfigService?.configuration)
 
-  @OptIn(ExperimentalMedia2::class)
-  suspend fun open(parameters: AudioBookPlayerParameters): Try<SessionHolder, Exception> {
+  suspend fun open(
+    parameters: AudioBookPlayerParameters
+  ): Try<AudioBookPlayerSessionHolder, Exception> {
+    return try {
+        val sessionHolder = openThrowing(parameters)
+        Try.success(sessionHolder)
+    } catch (e: Exception) {
+      Try.failure(e)
+    }
+  }
 
+  @OptIn(ExperimentalMedia2::class)
+  private suspend fun openThrowing(
+    parameters: AudioBookPlayerParameters
+  ): AudioBookPlayerSessionHolder {
     val account =
       profilesController.profileAccountForBook(parameters.bookID)
 
@@ -67,7 +76,7 @@ internal class AudioBookPlayerSessionBuilder(
         .bookDatabase
         .entry(parameters.bookID)
         .findFormatHandle(BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook::class.java)
-        ?: return Try.failure(Exception("Couldn't find a handle for the book."))
+        ?: throw Exception("Couldn't find a handle for the book.")
 
     val strategy =
       parameters.toManifestStrategy(
@@ -77,23 +86,9 @@ internal class AudioBookPlayerSessionBuilder(
         cacheDirectory = cacheDirectory
       )
 
-    val manifestData = when (val strategyResult = strategy.execute()) {
-      is TaskResult.Success -> {
-        AudioBookHelpers.saveManifest(
-          profiles = profilesController,
-          bookId = parameters.bookID,
-          manifestURI = parameters.manifestURI,
-          manifest = strategyResult.result.fulfilled
-        )
-        strategyResult.result
-      }
-      is TaskResult.Failure -> {
-        val exception = IOException(strategyResult.message)
-        return Try.failure(exception)
-      }
-    }
-
-    val playerManifest = manifestData.manifest
+    val playerManifest =
+      getManifest(parameters, strategy)
+        .getOrThrow()
 
     val publication =
       readiumAdapter.createPublication(playerManifest, strategy, parameters.opdsEntry)
@@ -116,7 +111,7 @@ internal class AudioBookPlayerSessionBuilder(
     if (playerFactory == null) {
       val title =
         this.application.resources.getString(R.string.audio_book_player_error_engine_open)
-      return Try.failure(IllegalStateException(title))
+      throw IllegalStateException(title)
     }
 
     val player = playerFactory.createPlayer()
@@ -125,32 +120,90 @@ internal class AudioBookPlayerSessionBuilder(
       formatHandle.format.position
         ?.let {
           val currentLink = publication.readingOrder[it.chapter] //FIXME: what about part?
-          publication.locatorFromLink(currentLink)
-            ?.copyWithLocations(fragments = listOf("t=${it.offsetMilliseconds}"))
+          Locator(
+            href = currentLink.href,
+            type = currentLink.type.orEmpty(),
+            locations = Locator.Locations(fragments = listOf("t=${it.offsetMilliseconds}"))
+          )
         }
 
+    logger.debug("Initial locator is $initialLocator.")
 
-    val navigatorResult =  MediaNavigator.create(
+
+    val navigator = MediaNavigator.create(
       context = application,
       publication = publication,
       initialLocator = initialLocator,
       player = player.sessionPlayer
+    ).getOrThrow()
+
+    val activityIntent = createSessionActivityIntent(parameters)
+    val mediaSession = navigator.session(application, activityIntent)
+
+    return AudioBookPlayerSessionHolder(
+      parameters = parameters,
+      navigator = navigator,
+      mediaSession = mediaSession,
+      player = player,
+      formatHandle = formatHandle
     )
+  }
 
-    val sessionResult = navigatorResult.map { navigator ->
-      val activityIntent = createSessionActivityIntent(parameters)
-      val mediaSession = navigator.session(application, activityIntent)
 
-      SessionHolder(
-        parameters = parameters,
-        navigator = navigator,
-        mediaSession = mediaSession,
-        player = player,
-        formatHandle = formatHandle
-      )
+  private suspend fun getManifest(
+    parameters: AudioBookPlayerParameters,
+    strategy: AudioBookManifestStrategyType
+  ): Try<PlayerManifest, Exception> = withContext(Dispatchers.IO){
+    val manifestData = when (val strategyResult = strategy.execute()) {
+      is TaskResult.Success -> {
+        saveManifest(
+          profiles = profilesController,
+          bookId = parameters.bookID,
+          manifestURI = parameters.manifestURI,
+          manifest = strategyResult.result.fulfilled
+        )
+        strategyResult.result
+      }
+      is TaskResult.Failure -> {
+        val exception = IOException(strategyResult.message)
+        return@withContext Try.failure(exception)
+      }
     }
 
-    return sessionResult
+    return@withContext Try.success(manifestData.manifest)
+  }
+
+  /**
+   * Attempt to save a manifest in the books database.
+   */
+
+  private suspend fun saveManifest(
+    profiles: ProfilesControllerType,
+    bookId: BookID,
+    manifestURI: URI,
+    manifest: ManifestFulfilled
+  ) = withContext(Dispatchers.IO) {
+    val handle =
+      profiles.profileAccountForBook(bookId)
+        .bookDatabase
+        .entry(bookId)
+        .findFormatHandle(BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook::class.java)
+
+    val contentType = manifest.contentType
+    if (handle == null) {
+      logger.error(
+        "Bug: Book database entry has no audio book format handle", IllegalStateException()
+      )
+      return@withContext
+    }
+
+    if (!handle.formatDefinition.supports(contentType)) {
+      logger.error(
+        "Server delivered an unsupported content type: {}: ", contentType, IOException()
+      )
+      return@withContext
+    }
+    handle.copyInManifestAndURI(manifest.data, manifestURI)
   }
 
   private fun createSessionActivityIntent(audioBookPlayerParameters: AudioBookPlayerParameters): PendingIntent {

@@ -1,4 +1,4 @@
-package org.nypl.simplified.viewer.audiobook.components
+package org.nypl.simplified.viewer.audiobook.ui.components
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Arrangement
@@ -14,8 +14,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.nypl.simplified.viewer.audiobook.R
-import org.nypl.simplified.viewer.audiobook.util.CenteredOverlay
-import org.nypl.simplified.viewer.audiobook.util.asTextUnit
+import org.nypl.simplified.viewer.audiobook.ui.util.CenteredOverlay
+import org.nypl.simplified.viewer.audiobook.ui.util.asTextUnit
 
 @Composable
 internal fun PlayerControls(

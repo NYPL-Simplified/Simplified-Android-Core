@@ -1,4 +1,4 @@
-package org.nypl.simplified.viewer.audiobook.util
+package org.nypl.simplified.viewer.audiobook.ui.util
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable

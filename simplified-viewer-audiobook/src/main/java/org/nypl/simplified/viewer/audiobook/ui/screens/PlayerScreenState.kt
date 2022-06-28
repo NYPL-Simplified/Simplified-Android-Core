@@ -1,4 +1,4 @@
-package org.nypl.simplified.viewer.audiobook.screens
+package org.nypl.simplified.viewer.audiobook.ui.screens
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.readium.navigator.media2.ExperimentalMedia2
 import org.readium.navigator.media2.MediaNavigator
 import org.readium.r2.shared.publication.Link

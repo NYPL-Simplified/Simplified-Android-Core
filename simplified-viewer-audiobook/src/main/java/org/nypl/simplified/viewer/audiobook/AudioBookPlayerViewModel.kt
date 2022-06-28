@@ -19,9 +19,10 @@ import org.nypl.simplified.books.audio.AudioBookManifestStrategiesType
 import org.nypl.simplified.books.covers.BookCoverProviderType
 import org.nypl.simplified.networkconnectivity.api.NetworkConnectivityType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
-import org.nypl.simplified.viewer.audiobook.navigation.AudioBookPlayerListener
-import org.nypl.simplified.viewer.audiobook.navigation.AudioBookPlayerScreen
-import org.nypl.simplified.viewer.audiobook.screens.PlayerScreenState
+import org.nypl.simplified.viewer.audiobook.ui.navigation.Listener
+import org.nypl.simplified.viewer.audiobook.ui.navigation.Screen
+import org.nypl.simplified.viewer.audiobook.ui.screens.PlayerScreenState
+import org.nypl.simplified.viewer.audiobook.session.AudioBookPlayerSessionBuilder
 import org.readium.navigator.media2.ExperimentalMedia2
 import org.readium.r2.shared.util.Try
 import org.slf4j.LoggerFactory
@@ -85,7 +86,7 @@ internal class AudioBookPlayerViewModel private constructor(
     }
   }
 
-  private suspend fun getSession(): Try<AudioBookPlayerSessionBuilder.SessionHolder, Exception> {
+  private suspend fun getSession(): Try<AudioBookPlayerSessionHolder, Exception> {
     val binder = serviceBinder.await()
 
     binder.sessionHolder
@@ -105,10 +106,10 @@ internal class AudioBookPlayerViewModel private constructor(
     return sessionHolderTry
   }
 
-  private val listener: AudioBookPlayerListener =
-    AudioBookPlayerListener()
+  private val listener: Listener =
+    Listener()
 
-  val currentScreen: StateFlow<AudioBookPlayerScreen>
+  val currentScreen: StateFlow<Screen>
     get() = listener.currentScreen
 
   val onBackPressedCallback: OnBackPressedCallback

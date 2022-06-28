@@ -1,4 +1,4 @@
-package org.nypl.simplified.viewer.audiobook
+package org.nypl.simplified.viewer.audiobook.session
 
 import org.librarysimplified.audiobook.feedbooks.FeedbooksPlayerExtensionConfiguration
 import org.librarysimplified.audiobook.manifest.api.PlayerManifest
@@ -6,7 +6,6 @@ import org.librarysimplified.audiobook.manifest.api.PlayerManifestLink
 import org.nypl.simplified.books.audio.AudioBookManifestStrategyType
 import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.viewer.audiobook.protection.FeedbooksHttpClientFactory
-import org.nypl.simplified.viewer.audiobook.protection.UpdateManifestFetcher
 import org.readium.r2.shared.extensions.toMap
 import org.readium.r2.shared.fetcher.Fetcher
 import org.readium.r2.shared.fetcher.HttpFetcher

@@ -1,4 +1,4 @@
-package org.nypl.simplified.viewer.audiobook.screens
+package org.nypl.simplified.viewer.audiobook.ui.screens
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box

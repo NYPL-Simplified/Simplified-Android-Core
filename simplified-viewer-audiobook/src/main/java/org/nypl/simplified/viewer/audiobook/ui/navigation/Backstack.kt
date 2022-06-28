@@ -1,4 +1,4 @@
-package org.nypl.simplified.viewer.audiobook.util
+package org.nypl.simplified.viewer.audiobook.ui.navigation
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
