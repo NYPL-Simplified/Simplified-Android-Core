@@ -20,33 +20,13 @@ import kotlin.time.ExperimentalTime
 @OptIn(ExperimentalMedia2::class, ExperimentalTime::class)
 internal class PlayerScreenState(
   private val mediaNavigator: MediaNavigator,
-  private val opdsEntry: OPDSAcquisitionFeedEntry,
   private val navigatorScope: CoroutineScope
 ) {
-
-  val title: String =
-    opdsEntry.title
-
-  val author: String? =
-    opdsEntry.authors.firstOrNull()
-
-  val readingOrder: List<Link> =
-    mediaNavigator.publication.readingOrder
-
-  val resource: State<MediaNavigator.Playback.Resource>
-    get() = resourceMutable
-
-  val paused: State<Boolean>
-    get() = pausedMutable
-
-  val error: State<Exception?>
-    get() = errorMutable
-
   private val resourceMutable: MutableState<MediaNavigator.Playback.Resource> =
     mutableStateOf(mediaNavigator.playback.value.resource)
 
   private val pausedMutable: MutableState<Boolean> =
-    mutableStateOf(mediaNavigator.playback.value.state == MediaNavigator.Playback.State.Paused)
+    mutableStateOf(mediaNavigator.playback.value.state == MediaNavigator.Playback.State.Playing)
 
   private val errorMutable: MutableState<Exception?> =
     mutableStateOf(null)
@@ -61,8 +41,6 @@ internal class PlayerScreenState(
     mediaNavigator.playback
       .onEach(this::onPlaybackChange)
       .launchIn(navigatorScope)
-
-    play()
   }
 
   private fun onPlaybackChange(playback: MediaNavigator.Playback) {
@@ -95,6 +73,43 @@ internal class PlayerScreenState(
     preventPlaybackUpdate = false
     onPlaybackChange(mediaNavigator.playback.value)
   }
+
+
+  /**
+   * The title to display
+   */
+  val title: String =
+    mediaNavigator.publication.metadata.title
+
+  /**
+   * The author to display
+   */
+  val author: String? =
+    mediaNavigator.publication.metadata.authors.firstOrNull()?.name
+
+  /**
+   * The table of contents to display
+   */
+  val readingOrder: List<Link> =
+    mediaNavigator.publication.readingOrder
+
+  /**
+   * The reading item state to display
+   */
+  val resource: State<MediaNavigator.Playback.Resource>
+    get() = resourceMutable
+
+  /**
+   * The play/pause state to display
+   */
+  val paused: State<Boolean>
+    get() = pausedMutable
+
+  /**
+   * An error to display or null if everything's fine
+   */
+  val error: State<Exception?>
+    get() = errorMutable
 
   fun goPrevious() = executeCommand {
     val currentIndex = resource.value.index

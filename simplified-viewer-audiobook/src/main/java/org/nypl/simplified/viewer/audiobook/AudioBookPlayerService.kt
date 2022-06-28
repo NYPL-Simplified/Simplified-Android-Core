@@ -1,6 +1,5 @@
 package org.nypl.simplified.viewer.audiobook
 
-import android.app.PendingIntent
 import android.content.Intent
 import android.os.IBinder
 import androidx.lifecycle.lifecycleScope
@@ -12,10 +11,8 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.sample
 import org.librarysimplified.audiobook.api.PlayerPosition
-import org.librarysimplified.audiobook.player.api.PlayerType
 import org.nypl.simplified.books.book_database.api.BookDatabaseEntryFormatHandle.BookDatabaseEntryFormatHandleAudioBook
 import org.readium.navigator.media2.ExperimentalMedia2
-import org.readium.navigator.media2.MediaNavigator
 import org.readium.r2.shared.publication.Locator
 import org.readium.r2.shared.publication.Publication
 import org.readium.r2.shared.publication.indexOfFirstWithHref
@@ -35,10 +32,10 @@ class AudioBookPlayerService : LifecycleMediaSessionService() {
 
     private var saveLocationJob: Job? = null
 
-    var sessionHolder: AudioBookPlayerSessionHolder? = null
+    var sessionHolder: AudioBookPlayerSessionBuilder.SessionHolder? = null
       private set
 
-    fun closeNavigator() {
+    fun closeSession() {
       stopForeground(true)
       saveLocationJob?.cancel()
       saveLocationJob = null
@@ -48,30 +45,16 @@ class AudioBookPlayerService : LifecycleMediaSessionService() {
 
     @OptIn(FlowPreview::class)
     fun bindNavigator(
-      navigator: MediaNavigator,
-      player: PlayerType, parameters: AudioBookPlayerParameters,
-      formatHandle: BookDatabaseEntryFormatHandleAudioBook
-    ): AudioBookPlayerSessionHolder {
-      val activityIntent = createSessionActivityIntent(parameters)
-      val session = navigator.session(applicationContext, activityIntent)
-      addSession(session)
+      sessionHolder: AudioBookPlayerSessionBuilder.SessionHolder
+    ) {
+      addSession(sessionHolder.mediaSession)
 
-      val sessionHolder = AudioBookPlayerSessionHolder(
-        parameters = parameters,
-        navigator = navigator,
-        session = session,
-        player = player,
-        formatHandle = formatHandle
-      )
-
-      saveLocationJob = navigator.currentLocator
+      saveLocationJob = sessionHolder.navigator.currentLocator
         .sample(3000)
-        .onEach {  locator -> savePlayerPosition(formatHandle, locator, navigator.publication) }
+        .onEach {  locator -> savePlayerPosition(sessionHolder.formatHandle, locator, sessionHolder.navigator.publication) }
         .launchIn(lifecycleScope)
 
       this.sessionHolder = sessionHolder
-
-      return sessionHolder
     }
 
     private fun savePlayerPosition(
@@ -93,17 +76,6 @@ class AudioBookPlayerService : LifecycleMediaSessionService() {
         offsetMilliseconds = offset
       )
       formatHandle.savePlayerPosition(position)
-    }
-
-    private fun createSessionActivityIntent(audioBookPlayerParameters: AudioBookPlayerParameters): PendingIntent {
-      // This intent will be triggered when the notification is clicked.
-      var flags = PendingIntent.FLAG_UPDATE_CURRENT
-      flags = flags or PendingIntent.FLAG_IMMUTABLE
-
-      val intent = AudioBookPlayerContract.createIntent(applicationContext, audioBookPlayerParameters)
-      intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-
-      return PendingIntent.getActivity(applicationContext, 0, intent, flags)
     }
   }
 
@@ -132,7 +104,7 @@ class AudioBookPlayerService : LifecycleMediaSessionService() {
   }
 
   override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? {
-    return binder.sessionHolder?.session
+    return binder.sessionHolder?.mediaSession
   }
 
   override fun onDestroy() {
@@ -144,7 +116,7 @@ class AudioBookPlayerService : LifecycleMediaSessionService() {
     super.onTaskRemoved(rootIntent)
     logger.debug("Task removed. Stopping session and service.")
     // Close the navigator to allow the service to be stopped.
-    binder.closeNavigator()
+    binder.closeSession()
     stopSelf()
   }
 

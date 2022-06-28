@@ -4,12 +4,14 @@ import org.librarysimplified.audiobook.feedbooks.FeedbooksPlayerExtensionConfigu
 import org.librarysimplified.audiobook.manifest.api.PlayerManifest
 import org.librarysimplified.audiobook.manifest.api.PlayerManifestLink
 import org.nypl.simplified.books.audio.AudioBookManifestStrategyType
+import org.nypl.simplified.opds.core.OPDSAcquisitionFeedEntry
 import org.nypl.simplified.viewer.audiobook.protection.FeedbooksHttpClientFactory
 import org.nypl.simplified.viewer.audiobook.protection.UpdateManifestFetcher
 import org.readium.r2.shared.extensions.toMap
 import org.readium.r2.shared.fetcher.Fetcher
 import org.readium.r2.shared.fetcher.HttpFetcher
 import org.readium.r2.shared.fetcher.RoutingFetcher
+import org.readium.r2.shared.publication.Contributor
 import org.readium.r2.shared.publication.Link
 import org.readium.r2.shared.publication.LocalizedString
 import org.readium.r2.shared.publication.Manifest
@@ -25,9 +27,13 @@ internal class AudioBookManifestReadiumAdapter(
   private val feedbooksConfiguration: FeedbooksPlayerExtensionConfiguration?
 ) {
 
-  fun createPublication(playerManifest: PlayerManifest, strategy: AudioBookManifestStrategyType): Publication {
+  fun createPublication(
+    playerManifest: PlayerManifest,
+    strategy: AudioBookManifestStrategyType,
+    opdsEntry: OPDSAcquisitionFeedEntry
+  ): Publication {
     val manifest =
-      mapManifest(playerManifest)
+      mapManifest(playerManifest, opdsEntry)
 
   val fetcher =
     createFetcher(playerManifest, strategy)
@@ -38,7 +44,10 @@ internal class AudioBookManifestReadiumAdapter(
     ).build()
   }
 
-  private fun createFetcher(playerManifest: PlayerManifest, strategy: AudioBookManifestStrategyType): Fetcher {
+  private fun createFetcher(
+    playerManifest: PlayerManifest,
+    strategy: AudioBookManifestStrategyType
+  ): Fetcher {
     val fallbackRoute =
       RoutingFetcher.Route(
         HttpFetcher(
@@ -73,19 +82,28 @@ internal class AudioBookManifestReadiumAdapter(
     return routingFetcher
   }
 
-  private suspend fun downloadManifest(strategy: AudioBookManifestStrategyType) {
+  private suspend fun downloadManifest(
+    strategy: AudioBookManifestStrategyType
+  ) {
 
   }
 
-  private fun mapManifest(playerManifest: PlayerManifest): Manifest {
+  private fun mapManifest(
+    playerManifest: PlayerManifest,
+    opdsEntry: OPDSAcquisitionFeedEntry
+  ): Manifest {
     val readingOrder = playerManifest.readingOrder
       .filterIsInstance(PlayerManifestLink.LinkBasic::class.java)
       .map { it.toLink() }
 
+    val authors = opdsEntry.authors
+      .map { Contributor(it) }
+
     return Manifest(
       metadata = Metadata(
         identifier = playerManifest.metadata.identifier,
-        localizedTitle = LocalizedString(playerManifest.metadata.title),
+        localizedTitle = LocalizedString(opdsEntry.title),
+        authors = authors
       ),
       readingOrder = readingOrder,
       tableOfContents = readingOrder
