@@ -1,127 +1,127 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:app="http://schemas.android.com/apk/res-auto"
-  xmlns:tools="http://schemas.android.com/tools"
-  android:id="@+id/bookCellIdle"
-  android:layout_width="match_parent"
-  android:layout_height="@dimen/catalogFeedCellHeight">
+  xmlns:tools="http://schemas.android.com/tools">
 
-  <ImageView
-    android:id="@+id/bookCellIdleCover"
-    android:layout_width="@dimen/catalogFeedCellImageWidth"
+  <data>
+
+    <variable
+      name="screenSizeInfo"
+      type="org.nypl.simplified.ui.screen.ScreenSizeInformationType" />
+
+    <variable
+      name="idleItem"
+      type="org.nypl.simplified.ui.catalog.withoutGroups.BookItem.Idle" />
+  </data>
+
+  <androidx.constraintlayout.widget.ConstraintLayout
+    android:id="@+id/bookCellIdle"
+    android:layout_width="match_parent"
     android:layout_height="@dimen/catalogFeedCellHeight"
-    android:contentDescription="@null"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent" />
+    android:onClick="@{() -> idleItem.actions.openBookDetail()}">
 
-  <ProgressBar
-    android:id="@+id/bookCellIdleCoverProgress"
-    style="?android:attr/progressBarStyle"
-    android:layout_width="32dp"
-    android:layout_height="32dp"
-    app:layout_constraintBottom_toBottomOf="@id/bookCellIdleCover"
-    app:layout_constraintEnd_toEndOf="@id/bookCellIdleCover"
-    app:layout_constraintStart_toStartOf="@id/bookCellIdleCover"
-    app:layout_constraintTop_toTopOf="@id/bookCellIdleCover" />
+    <ImageView
+      android:id="@+id/bookCellIdleCover"
+      android:layout_width="@dimen/catalogFeedCellImageWidth"
+      android:layout_height="@dimen/catalogFeedCellHeight"
+      android:onClick="@{() -> idleItem.actions.openBookDetail()}"
+      app:coverContentDescriptionForItem="@{idleItem.entry}"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent" />
 
-  <TextView
-    android:id="@+id/bookCellIdleTitle"
-    android:layout_width="0dp"
-    android:layout_height="wrap_content"
-    android:layout_marginStart="16dp"
-    android:layout_marginEnd="16dp"
-    android:layout_marginTop="8dp"
-    android:ellipsize="end"
-    android:maxLines="1"
-    android:textSize="16sp"
-    android:textStyle="bold"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toEndOf="@id/bookCellIdleCover"
-    app:layout_constraintTop_toTopOf="parent"
-    tools:text="The Modern Prometheus" />
+    <ProgressBar
+      android:id="@+id/bookCellIdleCoverProgress"
+      style="?android:attr/progressBarStyle"
+      android:layout_width="32dp"
+      android:layout_height="32dp"
+      app:layout_constraintBottom_toBottomOf="@id/bookCellIdleCover"
+      app:layout_constraintEnd_toEndOf="@id/bookCellIdleCover"
+      app:layout_constraintStart_toStartOf="@id/bookCellIdleCover"
+      app:layout_constraintTop_toTopOf="@id/bookCellIdleCover" />
 
-  <TextView
-    android:id="@+id/bookCellIdleAuthor"
-    android:layout_width="0dp"
-    android:layout_height="wrap_content"
-    android:layout_marginStart="16dp"
-    android:layout_marginEnd="16dp"
-    android:ellipsize="end"
-    android:maxLines="1"
-    android:textSize="14sp"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toEndOf="@id/bookCellIdleCover"
-    app:layout_constraintTop_toBottomOf="@id/bookCellIdleTitle"
-    tools:text="Mary Shelley" />
-
-  <TextView
-    android:id="@+id/bookCellIdleMeta"
-    android:layout_width="0dp"
-    android:layout_height="wrap_content"
-    android:layout_marginStart="16dp"
-    android:layout_marginEnd="16dp"
-    android:ellipsize="end"
-    android:maxLines="1"
-    android:textSize="12sp"
-    android:textStyle="italic"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toEndOf="@id/bookCellIdleCover"
-    app:layout_constraintTop_toBottomOf="@id/bookCellIdleAuthor"
-    tools:text="eBook - The New York Public Library" />
-
-  <LinearLayout
-    android:id="@+id/bookCellIdleButtons"
-    android:layout_width="0dp"
-    android:layout_height="@dimen/catalogFeedCellButtonsHeight"
-    android:layout_marginStart="16dp"
-    android:layout_marginEnd="16dp"
-    android:layout_marginBottom="8dp"
-    android:orientation="horizontal"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toEndOf="@id/bookCellIdleCover"
-    app:layout_constraintBottom_toBottomOf="parent">
-
-    <!-- These views are removed at runtime and are just present for the sake of the UI editor preview -->
-
-    <Button
+    <TextView
+      android:id="@+id/bookCellIdleTitle"
       android:layout_width="0dp"
-      android:layout_height="@dimen/catalogFeedCellButtonsHeight"
-      android:layout_weight="1"
-      android:maxWidth="64dp"
-      android:visibility="gone"
-      tools:text="@string/catalogDismiss"
-      tools:visibility="visible" />
-
-    <Space
-      android:layout_width="16dp"
       android:layout_height="wrap_content"
-      android:visibility="gone"
-      tools:visibility="visible" />
+      android:layout_marginStart="16dp"
+      android:layout_marginTop="8dp"
+      android:layout_marginEnd="16dp"
+      android:ellipsize="end"
+      android:maxLines="1"
+      android:onClick="@{() -> idleItem.actions.openBookDetail()}"
+      android:text="@{idleItem.title}"
+      android:textSize="16sp"
+      android:textStyle="bold"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toEndOf="@id/bookCellIdleCover"
+      app:layout_constraintTop_toTopOf="parent"
+      tools:text="The Modern Prometheus" />
 
-    <Button
+    <TextView
+      android:id="@+id/bookCellIdleAuthor"
       android:layout_width="0dp"
-      android:layout_height="@dimen/catalogFeedCellButtonsHeight"
-      android:layout_weight="1"
-      android:maxWidth="64dp"
-      android:visibility="gone"
-      tools:text="@string/catalogDetails"
-      tools:visibility="visible" />
-
-    <Space
-      android:layout_width="16dp"
       android:layout_height="wrap_content"
-      android:visibility="gone"
-      tools:visibility="visible" />
+      android:layout_marginStart="16dp"
+      android:layout_marginEnd="16dp"
+      android:ellipsize="end"
+      android:maxLines="1"
+      android:text="@{idleItem.author}"
+      android:textSize="14sp"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toEndOf="@id/bookCellIdleCover"
+      app:layout_constraintTop_toBottomOf="@id/bookCellIdleTitle"
+      tools:text="Mary Shelley" />
 
-    <Button
+    <TextView
+      android:id="@+id/bookCellIdleMeta"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="16dp"
+      android:layout_marginEnd="16dp"
+      android:ellipsize="end"
+      android:maxLines="1"
+      android:textSize="12sp"
+      android:textStyle="italic"
+      app:formatLabelForEntry="@{idleItem.entry}"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toEndOf="@id/bookCellIdleCover"
+      app:layout_constraintTop_toBottomOf="@id/bookCellIdleAuthor"
+      tools:text="eBook - The New York Public Library" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+      android:id="@+id/bookCellIdleButtons"
       android:layout_width="0dp"
       android:layout_height="@dimen/catalogFeedCellButtonsHeight"
-      android:layout_weight="1"
-      android:maxWidth="64dp"
-      android:visibility="gone"
-      tools:text="@string/catalogRetry"
-      tools:visibility="visible" />
-  </LinearLayout>
-</androidx.constraintlayout.widget.ConstraintLayout>
+      android:layout_marginStart="16dp"
+      android:layout_marginEnd="16dp"
+      android:layout_marginBottom="8dp"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toEndOf="@id/bookCellIdleCover">
+
+      <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/bookCellIdlePrimaryButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="32dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="get"
+        tools:visibility="visible" />
+
+      <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/bookCellIdleSecondaryButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:paddingHorizontal="32dp"
+        app:layout_constraintStart_toEndOf="@id/bookCellIdlePrimaryButton"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="revoke"
+        tools:visibility="visible" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+  </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

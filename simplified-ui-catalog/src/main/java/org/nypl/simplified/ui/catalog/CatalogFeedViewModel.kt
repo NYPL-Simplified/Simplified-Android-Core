@@ -1,15 +1,25 @@
 package org.nypl.simplified.ui.catalog
 
+import android.content.Context
 import android.content.res.Resources
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.paging.LivePagedListBuilder
-import androidx.paging.PagedList
+import androidx.lifecycle.viewModelScope
+import androidx.paging.LegacyPagingSource
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
+import androidx.paging.map
 import com.google.common.util.concurrent.FluentFuture
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.subjects.PublishSubject
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.map
 import org.joda.time.DateTime
 import org.joda.time.LocalDateTime
 import org.nypl.simplified.accounts.api.AccountEvent
@@ -25,7 +35,6 @@ import org.nypl.simplified.analytics.api.AnalyticsEvent
 import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookFormat
-import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookStatusEvent
@@ -58,6 +67,7 @@ import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedEmpty
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithGroups
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithoutGroups
+import org.nypl.simplified.ui.catalog.withoutGroups.BookItem
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.thread.api.UIExecutor
 import org.slf4j.LoggerFactory
@@ -78,7 +88,10 @@ class CatalogFeedViewModel(
   private val analytics: AnalyticsType,
   private val borrowViewModel: CatalogBorrowViewModel,
   private val feedArguments: CatalogFeedArguments,
-  private val listener: FragmentListenerType<CatalogFeedEvent>
+  private val listener: FragmentListenerType<CatalogFeedEvent>,
+  private val uiExecutor: UIExecutor,
+  private val pagingFetchDispatcher: CoroutineDispatcher = Dispatchers.IO,
+  doInitialLoad: Boolean = true // Adding this temporarily to enable easier testing
 ) : ViewModel(), CatalogPagedViewListener {
 
   private val instanceId =
@@ -87,26 +100,15 @@ class CatalogFeedViewModel(
   private val logger =
     LoggerFactory.getLogger(this.javaClass)
 
-  private val uiExecutor =
-    UIExecutor()
-
   private val stateMutable: MutableLiveData<CatalogFeedState> =
     MutableLiveData(CatalogFeedState.CatalogFeedLoading(this.feedArguments))
 
   init {
-    loadFeed(this.feedArguments)
+    if (doInitialLoad) loadFeed(this.feedArguments)
   }
 
   private val state: CatalogFeedState
     get() = this.feedStateLiveData.value!!
-
-  private class BookModel(
-    val feedEntry: FeedEntry.FeedEntryOPDS,
-    val onBookChanged: MutableList<(BookWithStatus) -> Unit> = mutableListOf()
-  )
-
-  private val bookModels: MutableMap<BookID, BookModel> =
-    mutableMapOf()
 
   private data class LoaderResultWithArguments(
     val arguments: CatalogFeedArguments,
@@ -214,11 +216,18 @@ class CatalogFeedViewModel(
   }
 
   private fun onBookStatusEvent(event: BookStatusEvent) {
-    this.bookModels[event.bookId]?.let { model ->
-      model.onBookChanged.forEach { callback ->
-        this.notifyBookStatus(model.feedEntry, callback)
-      }
-    }
+    /*
+    Emit a new value this LiveData, which will cause the Fragment to 'reconfigureUI' and resubscribe
+    to the book items Pager flow ensuring a fresh emission with updated book statuses. Not a great
+    solution but a temporarily working one until additional refactoring work is done in here.
+
+    Only emit this value if in a WithoutGroups state because the VM is always subscribed to
+    book events, but this is the only state that uses these events to drive a UI state change
+
+    FeedArguments are never locally generated in current builds of the app.
+     */
+    if (stateMutable.hasActiveObservers() &&
+      stateMutable.value is CatalogFeedWithoutGroups) stateMutable.value = stateMutable.value
 
     when (event.statusNow) {
       is BookStatus.Held, is BookStatus.Loaned, is BookStatus.Revoked -> {
@@ -227,17 +236,6 @@ class CatalogFeedViewModel(
         }
       }
     }
-  }
-
-  private fun notifyBookStatus(
-    feedEntry: FeedEntry.FeedEntryOPDS,
-    callback: (BookWithStatus) -> Unit
-  ) {
-    val bookWithStatus =
-      this.bookRegistry.bookOrNull(feedEntry.bookID)
-        ?: this.synthesizeBookWithStatus(feedEntry)
-
-    callback(bookWithStatus)
   }
 
   private fun synthesizeBookWithStatus(
@@ -503,26 +501,47 @@ class CatalogFeedViewModel(
         profilesController = this.profilesController
       )
 
-    val pagedListConfig =
-      PagedList.Config.Builder()
-        .setEnablePlaceholders(true)
-        .setPageSize(50)
-        .setMaxSize(250)
-        .setPrefetchDistance(25)
-        .build()
+    val pagingConfig = PagingConfig(
+      pageSize = 50,
+      maxSize = 250,
+      prefetchDistance = 25,
+      enablePlaceholders = true
+    )
 
-    val pagedList =
-      LivePagedListBuilder(dataSourceFactory, pagedListConfig)
-        .build()
+    val pagingSource = LegacyPagingSource(
+      dataSource = dataSourceFactory.create(),
+      fetchDispatcher = pagingFetchDispatcher
+    )
+
+    val pager = Pager(
+      config = pagingConfig,
+      initialKey = null,
+      pagingSourceFactory = { pagingSource }
+    )
 
     return CatalogFeedWithoutGroups(
       arguments = arguments,
-      entries = pagedList,
+      bookItems = pager.flow
+        .cachedIn(viewModelScope) // Cache before mapping so we always build fresh BookItems
+        .map { buildBookItems(it) },
       facetsInOrder = feed.facetsOrder,
       facetsByGroup = feed.facetsByGroup,
       search = feed.feedSearch,
       title = feed.feedTitle
     )
+  }
+
+  @VisibleForTesting
+  internal fun buildBookItems(entries: PagingData<FeedEntry>): PagingData<BookItem> {
+    return entries.map {
+      when (it) {
+        is FeedEntry.FeedEntryCorrupt -> BookItem.Corrupt(it)
+        is FeedEntry.FeedEntryOPDS -> {
+          val bookWithStatus = bookRegistry.bookOrNull(it.bookID) ?: synthesizeBookWithStatus(it)
+          buildBookItem(it, bookWithStatus, this)
+        }
+      }
+    }
   }
 
   private class CatalogFacetPseudoTitleProvider(
@@ -839,29 +858,6 @@ class CatalogFeedViewModel(
     this.listener.post(CatalogFeedEvent.OpenErrorPage(errorPageParameters))
   }
 
-  override fun registerObserver(
-    feedEntry: FeedEntry.FeedEntryOPDS,
-    callback: (BookWithStatus) -> Unit
-  ) {
-    val defaultValue = { BookModel(feedEntry) }
-    val bookModel = this.bookModels.getOrPut(feedEntry.bookID, defaultValue)
-    bookModel.onBookChanged.add(callback)
-    this.notifyBookStatus(feedEntry, callback)
-  }
-
-  override fun unregisterObserver(
-    feedEntry: FeedEntry.FeedEntryOPDS,
-    callback: (BookWithStatus) -> Unit
-  ) {
-    val model = this.bookModels[feedEntry.bookID]
-    if (model != null) {
-      model.onBookChanged.remove(callback)
-      if (model.onBookChanged.isEmpty()) {
-        this.bookModels.remove(feedEntry.bookID)
-      }
-    }
-  }
-
   override fun dismissBorrowError(feedEntry: FeedEntry.FeedEntryOPDS) {
     this.borrowViewModel.tryDismissBorrowError(feedEntry.accountID, feedEntry.bookID)
   }
@@ -894,6 +890,212 @@ class CatalogFeedViewModel(
       this.listener.post(
         CatalogFeedEvent.LoginRequired(accountID)
       )
+    }
+  }
+
+  @VisibleForTesting
+  internal fun buildBookItem(
+    entry: FeedEntry.FeedEntryOPDS,
+    bookWithStatus: BookWithStatus?,
+    listener: CatalogPagedViewListener
+  ): BookItem {
+    return when (val status = bookWithStatus!!.status) {
+      /*
+      * Error States
+      */
+      is BookStatus.FailedDownload -> {
+        BookItem.Error(
+          entry = entry,
+          failure = status.result,
+          actions = object : BookItem.Error.ErrorActions {
+            override fun dismiss() = listener.dismissBorrowError(entry)
+            override fun details() = listener.showTaskError(bookWithStatus.book, status.result)
+            override fun retry() = listener.borrowMaybeAuthenticated(bookWithStatus.book)
+          }
+        )
+      }
+      is BookStatus.FailedLoan -> {
+        BookItem.Error(
+          entry = entry,
+          failure = status.result,
+          actions = object : BookItem.Error.ErrorActions {
+            override fun dismiss() = listener.dismissBorrowError(entry)
+            override fun details() = listener.showTaskError(bookWithStatus.book, status.result)
+            override fun retry() = listener.borrowMaybeAuthenticated(bookWithStatus.book)
+          }
+        )
+      }
+      is BookStatus.FailedRevoke -> {
+        BookItem.Error(
+          entry = entry,
+          failure = status.result,
+          actions = object : BookItem.Error.ErrorActions {
+            override fun dismiss() = listener.dismissBorrowError(entry)
+            override fun details() = listener.showTaskError(bookWithStatus.book, status.result)
+            override fun retry() = listener.revokeMaybeAuthenticated(bookWithStatus.book)
+          }
+        )
+      }
+
+      /*
+      * Idle States
+      */
+      is BookStatus.Held.HeldInQueue -> {
+        val primaryButton = if (status.isRevocable) {
+          BookItem.Idle.IdleButtonConfig(
+            getText = { context -> context.getString(R.string.catalogCancelHold) },
+            getDescription = { context -> context.getString(R.string.catalogAccessibilityBookRevokeHold) },
+            onClick = { listener.revokeMaybeAuthenticated(bookWithStatus.book) }
+          )
+        } else null
+
+        BookItem.Idle(
+          entry = entry,
+          actions = object : BookItem.Idle.IdleActions {
+            override fun openBookDetail() = listener.openBookDetail(entry)
+            override fun primaryButton() = primaryButton
+            override fun secondaryButton(): BookItem.Idle.IdleButtonConfig? = null
+          }
+        )
+      }
+      is BookStatus.Held.HeldReady -> {
+        val primaryButton = BookItem.Idle.IdleButtonConfig(
+          getText = { context -> context.getString(R.string.catalogCancelHold) },
+          getDescription = { context -> context.getString(R.string.catalogAccessibilityBookRevokeHold) },
+          onClick = { listener.revokeMaybeAuthenticated(bookWithStatus.book) }
+        )
+
+        val secondaryButton = BookItem.Idle.IdleButtonConfig(
+          getText = { context -> context.getString(R.string.catalogGet) },
+          getDescription = { context -> context.getString(R.string.catalogAccessibilityBookBorrow) },
+          onClick = { listener.borrowMaybeAuthenticated(bookWithStatus.book) }
+        )
+
+        val buttons = if (status.isRevocable) {
+          primaryButton to secondaryButton
+        } else secondaryButton to null
+
+        BookItem.Idle(
+          entry = entry,
+          actions = object : BookItem.Idle.IdleActions {
+            override fun openBookDetail() = listener.openBookDetail(entry)
+            override fun primaryButton() = buttons.first
+            override fun secondaryButton() = buttons.second
+          }
+        )
+      }
+      is BookStatus.Holdable -> {
+        BookItem.Idle(
+          entry = entry,
+          actions = object : BookItem.Idle.IdleActions {
+            override fun openBookDetail() = listener.openBookDetail(entry)
+            override fun primaryButton() = BookItem.Idle.IdleButtonConfig(
+              getText = { context -> context.getString(R.string.catalogReserve) },
+              getDescription = { context -> context.getString(R.string.catalogAccessibilityBookReserve) },
+              onClick = { listener.reserveMaybeAuthenticated(bookWithStatus.book) }
+            )
+
+            override fun secondaryButton(): BookItem.Idle.IdleButtonConfig? = null
+          }
+        )
+      }
+      is BookStatus.Loanable -> {
+        BookItem.Idle(
+          entry = entry,
+          actions = object : BookItem.Idle.IdleActions {
+            override fun openBookDetail() = listener.openBookDetail(entry)
+            override fun primaryButton() = BookItem.Idle.IdleButtonConfig(
+              getText = { context -> context.getString(R.string.catalogGet) },
+              getDescription = { context -> context.getString(R.string.catalogAccessibilityBookBorrow) },
+              onClick = { listener.borrowMaybeAuthenticated(bookWithStatus.book) }
+            )
+
+            override fun secondaryButton(): BookItem.Idle.IdleButtonConfig? = null
+          }
+        )
+      }
+      is BookStatus.Revoked -> {
+        BookItem.Idle(
+          entry = entry,
+          actions = object : BookItem.Idle.IdleActions {
+            override fun openBookDetail() = listener.openBookDetail(entry)
+            override fun primaryButton(): BookItem.Idle.IdleButtonConfig? = null
+            override fun secondaryButton(): BookItem.Idle.IdleButtonConfig? = null
+          }
+        )
+      }
+      is BookStatus.Loaned.LoanedDownloaded -> {
+        val textConfig = when (val format = bookWithStatus.book.findPreferredFormat()) {
+          is BookFormat.BookFormatEPUB,
+          is BookFormat.BookFormatPDF -> {
+            Triple(
+              { context: Context -> context.getString(R.string.catalogRead) },
+              { context: Context -> context.getString(R.string.catalogAccessibilityBookRead) },
+              format
+            )
+          }
+          is BookFormat.BookFormatAudioBook ->
+            Triple(
+              { context: Context -> context.getString(R.string.catalogListen) },
+              { context: Context -> context.getString(R.string.catalogAccessibilityBookListen) },
+              format
+            )
+          else -> null
+        }
+
+        val primaryButton = textConfig?.let { (text, description, format) ->
+          BookItem.Idle.IdleButtonConfig(
+            getText = text,
+            getDescription = description,
+            onClick = { listener.openViewer(bookWithStatus.book, format) }
+          )
+        }
+
+        BookItem.Idle(
+          entry = entry,
+          actions = object : BookItem.Idle.IdleActions {
+            override fun openBookDetail() = listener.openBookDetail(entry)
+            override fun primaryButton() = primaryButton
+            override fun secondaryButton(): BookItem.Idle.IdleButtonConfig? = null
+          }
+        )
+      }
+      is BookStatus.Loaned.LoanedNotDownloaded -> {
+        BookItem.Idle(
+          entry = entry,
+          actions = object : BookItem.Idle.IdleActions {
+            override fun openBookDetail() = listener.openBookDetail(entry)
+            override fun primaryButton() = BookItem.Idle.IdleButtonConfig(
+              getText = { context -> context.getString(R.string.catalogDownload) },
+              getDescription = { context -> context.getString(R.string.catalogAccessibilityBookDownload) },
+              onClick = { listener.borrowMaybeAuthenticated(bookWithStatus.book) }
+            )
+
+            override fun secondaryButton(): BookItem.Idle.IdleButtonConfig? = null
+          }
+        )
+      }
+
+      /*
+      * Progress States
+      */
+      is BookStatus.RequestingDownload,
+      is BookStatus.RequestingLoan,
+      is BookStatus.RequestingRevoke,
+      is BookStatus.DownloadExternalAuthenticationInProgress,
+      is BookStatus.DownloadWaitingForExternalAuthentication -> {
+        BookItem.InProgress(
+          title = bookWithStatus.book.entry.title
+        )
+      }
+      is BookStatus.Downloading -> {
+        val knownProgress = status.progressPercent?.toInt()
+        BookItem.InProgress(
+          title = bookWithStatus.book.entry.title,
+          progress = knownProgress ?: 0,
+          isIndeterminate = knownProgress?.let { false } ?: true
+        )
+      }
     }
   }
 }

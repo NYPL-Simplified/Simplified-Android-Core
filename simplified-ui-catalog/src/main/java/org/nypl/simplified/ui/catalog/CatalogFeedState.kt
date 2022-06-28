@@ -1,12 +1,12 @@
 package org.nypl.simplified.ui.catalog
 
-import androidx.lifecycle.LiveData
-import androidx.paging.PagedList
+import androidx.paging.PagingData
+import kotlinx.coroutines.flow.Flow
 import org.nypl.simplified.feeds.api.Feed
-import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.feeds.api.FeedFacet
 import org.nypl.simplified.feeds.api.FeedLoaderResult
 import org.nypl.simplified.feeds.api.FeedSearch
+import org.nypl.simplified.ui.catalog.withoutGroups.BookItem
 
 /**
  * The state of a given feed.
@@ -90,7 +90,7 @@ sealed class CatalogFeedState {
 
     data class CatalogFeedWithoutGroups(
       override val arguments: CatalogFeedArguments,
-      val entries: LiveData<PagedList<FeedEntry>>,
+      val bookItems: Flow<PagingData<BookItem>>,
       val facetsInOrder: List<FeedFacet>,
       val facetsByGroup: Map<String, List<FeedFacet>>,
       override val search: FeedSearch?,

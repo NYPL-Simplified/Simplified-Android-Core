@@ -17,6 +17,7 @@ dependencies {
   testImplementation libs.junit.jupiter.api
   testImplementation libs.junit.jupiter.engine
   testImplementation libs.junit.vintage.engine
+  testImplementation 'org.junit.jupiter:junit-jupiter-params:5.7.1'
 
   // Fragment/Activity Testing in JVM
   testImplementation libs.robolectric
