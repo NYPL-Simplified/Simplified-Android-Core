@@ -227,7 +227,8 @@ class CatalogFeedViewModel(
     FeedArguments are never locally generated in current builds of the app.
      */
     if (stateMutable.hasActiveObservers() &&
-      stateMutable.value is CatalogFeedWithoutGroups) stateMutable.value = stateMutable.value
+      stateMutable.value is CatalogFeedWithoutGroups
+    ) stateMutable.value = stateMutable.value
 
     when (event.statusNow) {
       is BookStatus.Held, is BookStatus.Loaned, is BookStatus.Revoked -> {
@@ -873,7 +874,11 @@ class CatalogFeedViewModel(
   override fun borrowMaybeAuthenticated(book: Book) {
     this.openLoginDialogIfNecessary(book.account)
     this.borrowViewModel.tryBorrowMaybeAuthenticated(book)
+//    isDownloading = true
+//    resubmitList()
   }
+
+  // TODO convert observable<bookevent> stream to flow<boolean> (isDownloading)
 
   override fun reserveMaybeAuthenticated(book: Book) {
     this.openLoginDialogIfNecessary(book.account)

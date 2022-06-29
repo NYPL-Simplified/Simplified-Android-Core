@@ -12,7 +12,6 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
 import io.mockk.verify
 import io.reactivex.Observable
-import io.reactivex.subjects.PublishSubject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
@@ -34,7 +33,6 @@ import org.nypl.simplified.books.api.BookFormat
 import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatus
-import org.nypl.simplified.books.book_registry.BookStatusEvent
 import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.feeds.api.FeedEntry
@@ -43,7 +41,6 @@ import org.nypl.simplified.listeners.api.FragmentListenerType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.testUtils.RxSchedulerJUnit5Extension
-import org.nypl.simplified.testUtils.getOrAwaitValue
 import org.nypl.simplified.ui.catalog.withoutGroups.BookItem
 import org.nypl.simplified.ui.catalog.withoutGroups.CatalogPagedAdapter2Diffing
 import org.nypl.simplified.ui.thread.api.UIExecutor
@@ -114,11 +111,13 @@ class CatalogFeedViewModelTest {
       every { status } returns mockLoanableStatus
     }
 
-    val entries = PagingData.from(listOf(
-      mockEntry1,
-      mockEntry2,
-      mockk<FeedEntry.FeedEntryCorrupt>()
-    ))
+    val entries = PagingData.from(
+      listOf(
+        mockEntry1,
+        mockEntry2,
+        mockk<FeedEntry.FeedEntryCorrupt>()
+      )
+    )
 
     val differ = AsyncPagingDataDiffer(
       diffCallback = CatalogPagedAdapter2Diffing.comparisonCallback,
@@ -323,7 +322,6 @@ class CatalogFeedViewModelTest {
         }
         it.getText(mockContext) shouldBe "catalogCancelHold"
         it.getDescription(mockContext) shouldBe "catalogAccessibilityBookRevokeHold"
-
       } ?: run { fail("Missing primary button") }
 
       result.actions.secondaryButton()?.let {
@@ -338,7 +336,6 @@ class CatalogFeedViewModelTest {
         }
         it.getText(mockContext) shouldBe "catalogGet"
         it.getDescription(mockContext) shouldBe "catalogAccessibilityBookBorrow"
-
       } ?: run { fail("Missing secondary button") }
     } else fail("Provided BookStatus should map to Idle item")
   }
@@ -372,7 +369,6 @@ class CatalogFeedViewModelTest {
         }
         it.getText(mockContext) shouldBe "catalogGet"
         it.getDescription(mockContext) shouldBe "catalogAccessibilityBookBorrow"
-
       } ?: run { fail("Missing primary button") }
 
       result.actions.secondaryButton() shouldBe null
@@ -408,7 +404,6 @@ class CatalogFeedViewModelTest {
         }
         it.getText(mockContext) shouldBe "catalogReserve"
         it.getDescription(mockContext) shouldBe "catalogAccessibilityBookReserve"
-
       } ?: run { fail("Missing primary button") }
 
       result.actions.secondaryButton() shouldBe null
@@ -444,7 +439,6 @@ class CatalogFeedViewModelTest {
         }
         it.getText(mockContext) shouldBe "catalogGet"
         it.getDescription(mockContext) shouldBe "catalogAccessibilityBookBorrow"
-
       } ?: run { fail("Missing primary button") }
 
       result.actions.secondaryButton() shouldBe null
@@ -510,7 +504,6 @@ class CatalogFeedViewModelTest {
           }
           it.getText(mockContext) shouldBe "catalogRead"
           it.getDescription(mockContext) shouldBe "catalogAccessibilityBookRead"
-
         } ?: run { fail("Missing primary button") }
 
         result.actions.secondaryButton() shouldBe null
@@ -549,7 +542,6 @@ class CatalogFeedViewModelTest {
         }
         it.getText(mockContext) shouldBe "catalogListen"
         it.getDescription(mockContext) shouldBe "catalogAccessibilityBookListen"
-
       } ?: run { fail("Missing primary button") }
 
       result.actions.secondaryButton() shouldBe null
@@ -585,7 +577,6 @@ class CatalogFeedViewModelTest {
         }
         it.getText(mockContext) shouldBe "catalogDownload"
         it.getDescription(mockContext) shouldBe "catalogAccessibilityBookDownload"
-
       } ?: run { fail("Missing primary button") }
 
       result.actions.secondaryButton() shouldBe null

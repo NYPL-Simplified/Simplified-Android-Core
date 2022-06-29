@@ -24,7 +24,7 @@ class CatalogPagedAdapter(
   override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
     val item = getItem(position)
     item?.let {
-      //Maybe bookCellItem should have viewHolder type associated with it directly?
+      // Maybe bookCellItem should have viewHolder type associated with it directly?
       when (it) {
         is BookItem.Corrupt -> (holder as BookCorruptViewHolder).bind(it)
         is BookItem.Error -> (holder as BookErrorViewHolder).bind(it)
@@ -32,8 +32,8 @@ class CatalogPagedAdapter(
         is BookItem.InProgress -> (holder as BookInProgressViewHolder).bind(it)
       }
     } ?: run {
-      //probably need to do something if/when item is null as paging is using placeholders
-      //maybe loadingviewholders can take null data for an empty loading state?
+      // probably need to do something if/when item is null as paging is using placeholders
+      // maybe loadingviewholders can take null data for an empty loading state?
     }
   }
 

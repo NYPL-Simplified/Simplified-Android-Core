@@ -27,19 +27,11 @@ sealed class BookItem {
       fun secondaryButton(): IdleButtonConfig?
     }
 
-    companion object {
-      enum class DefaultActions(config: IdleButtonConfig) {
-//        HELD_READY(IdleButtonConfig(
-//          "need context here...or constants somewhere?"
-//        ))
-      }
-    }
-
     data class IdleButtonConfig(
       val getText: (Context) -> String,
       val getDescription: (Context) -> String,
       val onClick: () -> Unit,
-      val lockedByDownload: Boolean = false
+      val locked: Boolean = false
     )
   }
 

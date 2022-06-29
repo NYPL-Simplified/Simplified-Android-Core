@@ -15,7 +15,7 @@ class BookIdleViewHolder(
   private val bookCoverProvider: BookCoverProviderType
 ) : RecyclerView.ViewHolder(binding.root) {
 
-  //need lots of button stuff still
+  // need lots of button stuff still
   fun bind(item: BookItem.Idle) {
     binding.idleItem = item
     binding.executePendingBindings()
@@ -59,7 +59,7 @@ class BookIdleViewHolder(
   }
 }
 
-//Doesn't seem like these exist in current apps, LFA remnant
+// Doesn't seem like these exist in current apps, LFA remnant
 class BookCorruptViewHolder(
   private val binding: BookCellCorruptBinding,
 ) : RecyclerView.ViewHolder(binding.root) {
@@ -75,7 +75,7 @@ class BookErrorViewHolder(
   }
 }
 
-//Progress may need to be reactive?
+// Progress may need to be reactive?
 class BookInProgressViewHolder(
   private val binding: BookCellInProgressBinding,
 ) : RecyclerView.ViewHolder(binding.root) {
