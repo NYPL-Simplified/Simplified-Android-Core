@@ -25,4 +25,3 @@ class TestCoroutineRule constructor(
     dispatcher.cleanupTestCoroutines()
   }
 }
-
