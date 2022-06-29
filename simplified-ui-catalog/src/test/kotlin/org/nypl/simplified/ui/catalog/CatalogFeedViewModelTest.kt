@@ -103,8 +103,8 @@ class CatalogFeedViewModelTest {
   internal fun `buildBookItems retrieves bookStatus and builds items for entries`() = testDispatcher.runBlockingTest {
     val bookId1 = BookID.newFromText("testBook1")
     val bookId2 = BookID.newFromText("testBook2")
-    val mockEntry1 = mockk<FeedEntry.FeedEntryOPDS> { every { bookID } returns bookId1 }
-    val mockEntry2 = mockk<FeedEntry.FeedEntryOPDS> { every { bookID } returns bookId2 }
+    val mockEntry1 = mockk<FeedEntry.FeedEntryOPDS>(relaxed = true) { every { bookID } returns bookId1 }
+    val mockEntry2 = mockk<FeedEntry.FeedEntryOPDS>(relaxed = true) { every { bookID } returns bookId2 }
     val mockLoanableStatus = mockk<BookStatus.Loanable>()
 
     every { mockBookRegistry.bookOrNull(any()) } returns mockk {
@@ -146,6 +146,7 @@ class CatalogFeedViewModelTest {
 
     verify { mockBookRegistry.bookOrNull(bookId1) }
     verify { mockBookRegistry.bookOrNull(bookId2) }
+    verify { mockBookRegistry.bookEvents() } // Verifying this to enable confirmVerified to catch any other calls
     confirmVerified(mockBookRegistry)
   }
 

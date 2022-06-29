@@ -251,11 +251,10 @@ class CatalogFeedFragment : Fragment(), AgeGateDialog.BirthYearSelectedListener 
   }
 
   private fun reconfigureUI(feedState: CatalogFeedState) {
-    logger.debug("[ROB]CatalogFeedFragment: reconfigureUI()")
     if (feedState is CatalogFeedAgeGate) openAgeGateDialog() else dismissAgeGateDialog()
     configureToolbar()
 
-//    pagedWithoutGroupsUpdatesJob?.cancel()
+    pagedWithoutGroupsUpdatesJob?.cancel()
 
     when (feedState) {
       is CatalogFeedWithGroups -> onCatalogFeedWithGroups(feedState)
@@ -279,15 +278,10 @@ class CatalogFeedFragment : Fragment(), AgeGateDialog.BirthYearSelectedListener 
       facetsByGroup = feedState.facetsByGroup
     )
 
-//    feedState.entries.observe(viewLifecycleOwner) { newPagedList ->
-//      logger.debug("received paged list ({} elements)", newPagedList.size)
-//      withoutGroupsAdapter.submitList(newPagedList)
-//    }
     pagedWithoutGroupsUpdatesJob = lifecycleScope.launch {
       feedState.bookItems
         .flowWithLifecycle(lifecycle)
         .collect {
-          logger.debug("[ROB] CatalogFeedFragment: Submitting WithoutGroups data")
           withoutGroupsAdapter.submitData(it)
         }
     }

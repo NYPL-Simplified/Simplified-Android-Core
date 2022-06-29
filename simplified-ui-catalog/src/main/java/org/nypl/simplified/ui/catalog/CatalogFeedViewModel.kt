@@ -20,6 +20,9 @@ import io.reactivex.subjects.PublishSubject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.runningFold
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.rx2.asFlow
 import org.joda.time.DateTime
 import org.joda.time.LocalDateTime
 import org.nypl.simplified.accounts.api.AccountEvent
@@ -879,6 +882,38 @@ class CatalogFeedViewModel(
   }
 
   // TODO convert observable<bookevent> stream to flow<boolean> (isDownloading)
+  suspend fun getIsDownloadingFlow() {
+    bookRegistry.bookEvents().asFlow().stateIn(viewModelScope).runningFold(false) { accumulator, value ->
+      if (value.downloadInProgress()) {
+        true
+      } else {
+        // check previous known download and see if it is now complete
+        false
+      }
+    }
+  }
+
+  fun BookStatusEvent.downloadInProgress(): Boolean {
+    when (statusNow) {
+      is BookStatus.DownloadExternalAuthenticationInProgress -> TODO()
+      is BookStatus.DownloadWaitingForExternalAuthentication -> TODO()
+      is BookStatus.Downloading -> TODO()
+      is BookStatus.FailedDownload -> TODO()
+      is BookStatus.FailedLoan -> TODO()
+      is BookStatus.FailedRevoke -> TODO()
+      is BookStatus.Held.HeldInQueue -> TODO()
+      is BookStatus.Held.HeldReady -> TODO()
+      is BookStatus.Holdable -> TODO()
+      is BookStatus.Loanable -> TODO()
+      is BookStatus.Loaned.LoanedDownloaded -> TODO()
+      is BookStatus.Loaned.LoanedNotDownloaded -> TODO()
+      is BookStatus.RequestingDownload -> TODO()
+      is BookStatus.RequestingLoan -> TODO()
+      is BookStatus.RequestingRevoke -> TODO()
+      is BookStatus.Revoked -> TODO()
+      null -> TODO()
+    }
+  }
 
   override fun reserveMaybeAuthenticated(book: Book) {
     this.openLoginDialogIfNecessary(book.account)

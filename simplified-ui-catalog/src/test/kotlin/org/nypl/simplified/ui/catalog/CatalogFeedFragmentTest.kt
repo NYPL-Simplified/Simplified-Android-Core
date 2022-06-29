@@ -36,7 +36,9 @@ import io.mockk.mockkConstructor
 import io.mockk.mockkObject
 import io.mockk.runs
 import io.mockk.verify
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.test.runBlockingTest
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldBeInstanceOf
 import org.hamcrest.Description
@@ -57,6 +59,7 @@ import org.nypl.simplified.feeds.api.FeedGroup
 import org.nypl.simplified.feeds.api.FeedLoaderResult
 import org.nypl.simplified.listeners.api.FragmentListenerFinder
 import org.nypl.simplified.listeners.api.FragmentListenerType
+import org.nypl.simplified.testUtils.TestCoroutineRule
 import org.nypl.simplified.testUtils.robolectricSwipeToRefresh
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithGroups
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithoutGroups
@@ -66,11 +69,15 @@ import org.nypl.simplified.ui.catalog.withoutGroups.BookItem
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
 import java.net.URI
 
+@ExperimentalCoroutinesApi
 @RunWith(AndroidJUnit4::class)
 class CatalogFeedFragmentTest {
 
   @get: Rule
   val instantExecutorRule = InstantTaskExecutorRule()
+
+  @get:Rule
+  val testCoroutineRule = TestCoroutineRule()
 
   private lateinit var scenario: FragmentScenario<CatalogFeedFragment>
 
@@ -246,10 +253,11 @@ class CatalogFeedFragmentTest {
   }
 
   @Test
-  fun `on CatalogFeedWithoutGroups observes CatalogFeedWithoutGroups entries and updates adapter on emission`() {
+  fun `on CatalogFeedWithoutGroups observes CatalogFeedWithoutGroups bookItems and updates adapter on emission`() = testCoroutineRule.dispatcher.runBlockingTest {
     onView(withId(R.id.feedWithoutGroupsList)).check(hasAdapterItemCount(0))
 
     testFeedStateLiveData.value = buildMockFeedStateWithoutGroups()
+    testCoroutineRule.dispatcher.advanceUntilIdle()
 
     onView(withId(R.id.feedWithoutGroupsList)).check(hasAdapterItemCount(2))
   }
@@ -267,7 +275,7 @@ class CatalogFeedFragmentTest {
   private fun buildMockFeedStateWithoutGroups(): CatalogFeedWithoutGroups {
     return CatalogFeedWithoutGroups(
       mockk(), // Pass in mock FeedArguments as it is not used when handling state
-      flow { PagingData.from(emptyList<BookItem>()) },
+      flow { emit(PagingData.from<BookItem>(listOf(BookItem.Corrupt(mockk()), BookItem.Corrupt(mockk())))) },
       emptyList(),
       emptyMap(),
       null,
