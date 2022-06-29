@@ -12,16 +12,21 @@ import org.nypl.simplified.ui.catalog.databinding.BookCellInProgressBinding
 
 class BookIdleViewHolder(
   private val binding: BookCellIdleBinding,
-  private val bookCoverProvider: BookCoverProviderType
+  private val bookCoverProvider: BookCoverProviderType,
+  private val showFormatLabel: Boolean
 ) : RecyclerView.ViewHolder(binding.root) {
 
-  // need lots of button stuff still
   fun bind(item: BookItem.Idle) {
     binding.idleItem = item
     binding.executePendingBindings()
 
     loadCover(item)
     configureButtons(item)
+    toggleFormatLabelVisibility()
+  }
+
+  private fun toggleFormatLabelVisibility() {
+    if (!showFormatLabel) binding.bookCellIdleMeta.visibility = View.GONE
   }
 
   private fun loadCover(item: BookItem.Idle) {
@@ -59,7 +64,7 @@ class BookIdleViewHolder(
   }
 }
 
-// Doesn't seem like these exist in current apps, LFA remnant
+// Doesn't seem like these exist in current apps - maybe a LFA remnant?
 class BookCorruptViewHolder(
   private val binding: BookCellCorruptBinding,
 ) : RecyclerView.ViewHolder(binding.root) {
@@ -75,7 +80,6 @@ class BookErrorViewHolder(
   }
 }
 
-// Progress may need to be reactive?
 class BookInProgressViewHolder(
   private val binding: BookCellInProgressBinding,
 ) : RecyclerView.ViewHolder(binding.root) {

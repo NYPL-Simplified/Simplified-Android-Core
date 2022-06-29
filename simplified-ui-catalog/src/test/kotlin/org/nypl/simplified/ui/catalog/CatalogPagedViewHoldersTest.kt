@@ -44,6 +44,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.nypl.simplified.books.covers.BookCoverProviderType
+import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.ui.catalog.ProgressBarMatchers.withProgress
@@ -63,12 +64,13 @@ class CatalogPagedViewHoldersTest {
   private lateinit var bookItems: List<BookItem>
 
   @MockK private lateinit var mockBookCoverProviderType: BookCoverProviderType
+  @MockK private lateinit var mockBuildConfig: BuildConfigurationServiceType
 
   private lateinit var testThumbnailFuture: SettableFuture<Unit>
 
   @Before
   fun setUp() {
-    MockKAnnotations.init(this)
+    MockKAnnotations.init(this, relaxed = true)
 
     testThumbnailFuture = SettableFuture.create()
     every {
@@ -77,7 +79,7 @@ class CatalogPagedViewHoldersTest {
 
     scenario = launchFragmentInContainer(
       themeResId = R.style.SimplifiedTheme_NoActionBar,
-      instantiate = { TestFragment(mockBookCoverProviderType) }
+      instantiate = { TestFragment(mockBookCoverProviderType, mockBuildConfig) }
     )
   }
 
@@ -474,6 +476,62 @@ class CatalogPagedViewHoldersTest {
       )
     )
   }
+
+  @Test
+  fun `idle books show or hide format label as specified by buildConfig`() {
+    val mockActions = mockk<IdleActions> {
+      every { primaryButton() } returns null
+      every { secondaryButton() } returns null
+      every { openBookDetail() } just runs
+    }
+
+    bookItems = listOf<BookItem>(
+      BookItem.Idle(
+        CatalogTestUtils.buildTestFeedEntryOPDS(),
+        mockActions
+      )
+    )
+
+    every { mockBuildConfig.showFormatLabel } returns false
+    scenario.recreate()
+    scenario.onFragment {
+      it.submitList(bookItems)
+    }
+
+    onView(withId(TestFragment.listId)).check(
+      matches(
+        atPositionOnView(
+          0,
+          hasDescendant(
+            allOf(
+              withId(R.id.bookCellIdleMeta),
+              withEffectiveVisibility(GONE)
+            )
+          )
+        )
+      )
+    )
+
+    every { mockBuildConfig.showFormatLabel } returns true
+    scenario.recreate()
+    scenario.onFragment {
+      it.submitList(bookItems)
+    }
+
+    onView(withId(TestFragment.listId)).check(
+      matches(
+        atPositionOnView(
+          0,
+          hasDescendant(
+            allOf(
+              withId(R.id.bookCellIdleMeta),
+              withEffectiveVisibility(VISIBLE)
+            )
+          )
+        )
+      )
+    )
+  }
 }
 
 object ProgressBarMatchers {
@@ -492,7 +550,8 @@ object ProgressBarMatchers {
 }
 
 class TestFragment(
-  val bookCoverProvider: BookCoverProviderType
+  private val bookCoverProvider: BookCoverProviderType,
+  private val buildConfig: BuildConfigurationServiceType
 ) : Fragment() {
   lateinit var recyclerView: RecyclerView
   lateinit var withoutGroupsAdapter: CatalogPagedAdapter
@@ -511,7 +570,7 @@ class TestFragment(
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
 
-    withoutGroupsAdapter = CatalogPagedAdapter(bookCoverProvider)
+    withoutGroupsAdapter = CatalogPagedAdapter(bookCoverProvider, buildConfig)
     recyclerView.adapter = withoutGroupsAdapter
   }
 

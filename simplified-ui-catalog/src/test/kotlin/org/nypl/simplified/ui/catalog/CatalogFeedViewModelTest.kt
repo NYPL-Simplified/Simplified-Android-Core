@@ -42,7 +42,7 @@ import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.testUtils.RxSchedulerJUnit5Extension
 import org.nypl.simplified.ui.catalog.withoutGroups.BookItem
-import org.nypl.simplified.ui.catalog.withoutGroups.CatalogPagedAdapter2Diffing
+import org.nypl.simplified.ui.catalog.withoutGroups.CatalogPagedAdapterDiffing
 import org.nypl.simplified.ui.thread.api.UIExecutor
 import java.net.URI
 import java.util.stream.Stream
@@ -120,7 +120,7 @@ class CatalogFeedViewModelTest {
     )
 
     val differ = AsyncPagingDataDiffer(
-      diffCallback = CatalogPagedAdapter2Diffing.comparisonCallback,
+      diffCallback = CatalogPagedAdapterDiffing.comparisonCallback,
       updateCallback = NoopListCallback(),
     )
 

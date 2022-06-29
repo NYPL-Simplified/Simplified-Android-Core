@@ -51,6 +51,7 @@ dependencies {
   implementation libs.rxjava2.extensions
   implementation libs.rxandroid2
   implementation libs.slf4j
+  implementation libs.kotlin.coroutines.rx2
 
   // Temporary workaround to force databinding codegen in Robolectric tests
   // https://github.com/robolectric/robolectric/issues/3789

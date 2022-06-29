@@ -6,6 +6,7 @@ import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import org.nypl.simplified.books.covers.BookCoverProviderType
+import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.ui.catalog.databinding.BookCellCorruptBinding
 import org.nypl.simplified.ui.catalog.databinding.BookCellErrorBinding
 import org.nypl.simplified.ui.catalog.databinding.BookCellIdleBinding
@@ -16,15 +17,15 @@ import org.nypl.simplified.ui.catalog.withoutGroups.BookItem.Type.IDLE
 import org.nypl.simplified.ui.catalog.withoutGroups.BookItem.Type.LOADING
 
 class CatalogPagedAdapter(
-  private val bookCovers: BookCoverProviderType
+  private val bookCovers: BookCoverProviderType,
+  private val buildConfig: BuildConfigurationServiceType
 ) : PagingDataAdapter<BookItem, RecyclerView.ViewHolder>(
-  CatalogPagedAdapter2Diffing.comparisonCallback
+  CatalogPagedAdapterDiffing.comparisonCallback
 ) {
 
   override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
     val item = getItem(position)
     item?.let {
-      // Maybe bookCellItem should have viewHolder type associated with it directly?
       when (it) {
         is BookItem.Corrupt -> (holder as BookCorruptViewHolder).bind(it)
         is BookItem.Error -> (holder as BookErrorViewHolder).bind(it)
@@ -43,7 +44,7 @@ class CatalogPagedAdapter(
     return when (viewType) {
       IDLE.ordinal -> {
         val binding = BookCellIdleBinding.inflate(inflater, parent, false)
-        BookIdleViewHolder(binding, bookCovers)
+        BookIdleViewHolder(binding, bookCovers, buildConfig.showFormatLabel)
       }
       CORRUPT.ordinal -> {
         val binding = BookCellCorruptBinding.inflate(inflater, parent, false)
@@ -66,7 +67,7 @@ class CatalogPagedAdapter(
   }
 }
 
-object CatalogPagedAdapter2Diffing {
+object CatalogPagedAdapterDiffing {
   val comparisonCallback =
     object : DiffUtil.ItemCallback<BookItem>() {
       override fun areItemsTheSame(
@@ -94,21 +95,6 @@ object CatalogPagedAdapter2Diffing {
         oldItem: BookItem,
         newItem: BookItem
       ): Boolean {
-//        return when {
-//          oldItem is BookItem.Idle && newItem is BookItem.Idle -> {
-//            oldItem.entry == newItem.entry
-//          }
-//          oldItem is BookItem.Corrupt && newItem is BookItem.Corrupt -> {
-//            oldItem.entry == newItem.entry
-//          }
-//          oldItem is BookItem.Error && newItem is BookItem.Error -> {
-//            oldItem.entry == newItem.entry && oldItem.failure == newItem.failure
-//          }
-//          oldItem is BookItem.InProgress && newItem is BookItem.InProgress -> {
-//            oldItem.title == newItem.title
-//          }
-//          else -> false
-//        }
         return oldItem == newItem
       }
     }
