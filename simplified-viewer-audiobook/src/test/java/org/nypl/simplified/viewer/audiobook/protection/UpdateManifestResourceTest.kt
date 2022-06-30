@@ -35,19 +35,23 @@ class UpdateManifestResourceTest {
 
     val originalManifest = Manifest(
       metadata = metadata,
-      readingOrder = listOf(
-        Link("chapter1"),
-        Link("chapter2"),
-        Link("chapter3")
+      readingOrder = UpdateManifestFetcher.adaptReadingOrder(
+        listOf(
+          Link("chapter1"),
+          Link("chapter2"),
+          Link("chapter3")
+        )
       )
     )
 
     val newManifest = Manifest(
       metadata = metadata,
-      readingOrder = listOf(
-        Link("newLinkToChapter1"),
-        Link("newLinkToChapter2"),
-        Link("newLinkToChapter3")
+      readingOrder = UpdateManifestFetcher.adaptReadingOrder(
+        listOf(
+          Link("newLinkToChapter1"),
+          Link("newLinkToChapter2"),
+          Link("newLinkToChapter3")
+        )
       )
     )
 
@@ -85,12 +89,12 @@ class UpdateManifestResourceTest {
 
     val getManifest = {
       manifestCallCount +=1
-      val manifest = if (manifestCallCount == 1) {
-        originalManifest
-      } else {
-        newManifest
+
+      when (manifestCallCount) {
+        1 -> Try.success(originalManifest)
+        2 -> Try.success(newManifest)
+        else -> Try.Failure(Exception("Cannot get a fresh manifest"))
       }
-      Try.success(manifest)
     }
 
     val updateResource = UpdateManifestResource(
@@ -101,7 +105,7 @@ class UpdateManifestResourceTest {
       invalidateManifest = {}
     )
 
-    for (i in 0..10) {
+    for (i in 0 until 6) {
       val response = runBlocking { updateResource.readAsString().getOrNull() }
       Assert.assertEquals( "Good", response)
     }

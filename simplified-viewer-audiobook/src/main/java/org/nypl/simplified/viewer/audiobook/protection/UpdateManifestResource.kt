@@ -30,7 +30,7 @@ internal class UpdateManifestResource(
           baseFetcher.get(it.readingOrder[index].href)
         },
         onFailure = {
-          val exception = Resource.Exception.Other(Exception("Couldn't get a fresh manifest."))
+          val exception = Resource.Exception.Other(Exception("Couldn't get a fresh manifest.", it))
           FailureResource(fallbackLink, exception)
         }
       ).also { baseResource = it }
@@ -41,6 +41,7 @@ internal class UpdateManifestResource(
   ): ResourceTry<S> =
     runnable().tryRecover {
       invalidateManifest()
+      baseResource = null
       runnable()
     }
 

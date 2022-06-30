@@ -15,20 +15,26 @@ class ExpiringResource(
 
   override suspend fun link(): Link = link
 
-  override suspend fun length(): ResourceTry<Long> =
-    if (callCount > validCalls) {
+  override suspend fun length(): ResourceTry<Long> {
+    callCount++
+
+    return if (callCount > validCalls) {
       Try.failure(Resource.Exception.NotFound())
     } else {
       Try.success(content.size.toLong())
     }
+  }
 
 
-  override suspend fun read(range: LongRange?): ResourceTry<ByteArray> =
-    if (callCount > validCalls) {
+  override suspend fun read(range: LongRange?): ResourceTry<ByteArray> {
+    callCount++
+
+    return if (callCount > validCalls) {
       Try.failure(Resource.Exception.NotFound())
     } else {
       Try.success(content)
     }
+  }
 
   override suspend fun close() {}
 }
