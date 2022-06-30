@@ -65,15 +65,13 @@ dependencies {
   api project(":simplified-webview")
 
   api libs.nypl.audiobook.api
-  api libs.nypl.audiobook.downloads
+  api libs.nypl.audiobook.player.api
   api libs.nypl.audiobook.feedbooks
   api libs.nypl.audiobook.manifest.license.check.api
   api libs.nypl.audiobook.manifest.fulfill.api
   api libs.nypl.audiobook.manifest.fulfill.basic
   api libs.nypl.audiobook.manifest.parser.webpub
-  api libs.nypl.audiobook.open.access
-  api libs.nypl.audiobook.rbdigital
-  api libs.nypl.audiobook.views
+  api libs.nypl.audiobook.exoplayer
 
   implementation libs.io7m.jfunctional
   implementation libs.io7m.jnull

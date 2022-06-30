@@ -20,7 +20,7 @@ import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.tests.MutableServiceDirectory
 import org.nypl.simplified.tests.TestDirectories
 import org.slf4j.LoggerFactory
-import rx.Observable
+import io.reactivex.Observable
 import java.io.File
 import java.net.URI
 

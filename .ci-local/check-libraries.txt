@@ -100,7 +100,7 @@ edu.umn.minitex.pdf:edu.umn.minitex.pdf.pdfviewer
 org.librarysimplified.audiobook.audioengine:org.librarysimplified.audiobook.audioengine.core
 org.librarysimplified.audiobook.overdrive:org.librarysimplified.audiobook.overdrive.main
 org.librarysimplified.audiobook:org.librarysimplified.audiobook.api
-org.librarysimplified.audiobook:org.librarysimplified.audiobook.downloads
+org.librarysimplified.audiobook:org.librarysimplified.audiobook.player.api
 org.librarysimplified.audiobook:org.librarysimplified.audiobook.feedbooks
 org.librarysimplified.audiobook:org.librarysimplified.audiobook.http
 org.librarysimplified.audiobook:org.librarysimplified.audiobook.license_check.api
@@ -110,10 +110,8 @@ org.librarysimplified.audiobook:org.librarysimplified.audiobook.manifest_fulfill
 org.librarysimplified.audiobook:org.librarysimplified.audiobook.manifest_fulfill.spi
 org.librarysimplified.audiobook:org.librarysimplified.audiobook.manifest_parser.api
 org.librarysimplified.audiobook:org.librarysimplified.audiobook.manifest_parser.webpub
-org.librarysimplified.audiobook:org.librarysimplified.audiobook.open_access
+org.librarysimplified.audiobook:org.librarysimplified.audiobook.exoplayer
 org.librarysimplified.audiobook:org.librarysimplified.audiobook.parser.api
-org.librarysimplified.audiobook:org.librarysimplified.audiobook.rbdigital
-org.librarysimplified.audiobook:org.librarysimplified.audiobook.views
 org.librarysimplified.drm.axis:org.librarysimplified.drm.axis.provider
 org.librarysimplified.drm:org.librarysimplified.drm.core
 org.librarysimplified.http:org.librarysimplified.http.api

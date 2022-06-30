@@ -1,6 +1,7 @@
 package org.nypl.simplified.viewer.audiobook
 
 import android.os.Bundle
+import androidx.activity.addCallback
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -24,19 +25,16 @@ class AudioBookPlayerActivity : AppCompatActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
-    onBackPressedDispatcher.addCallback(this, viewModel.onBackPressedCallback)
+    onBackPressedDispatcher.addCallback(this) {
+      val shouldFinish = viewModel.onBackstackPressed()
+      if (shouldFinish) {
+        finish()
+      }
+    }
 
     setContent {
       val screen by viewModel.currentScreen.collectAsState()
       screen.Screen()
-    }
-  }
-
-  override fun onDestroy() {
-    super.onDestroy()
-
-    if (isFinishing) {
-      viewModel.onActivityFinishing()
     }
   }
 }

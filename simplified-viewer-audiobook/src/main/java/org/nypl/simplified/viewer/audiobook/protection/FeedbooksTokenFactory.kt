@@ -1,11 +1,11 @@
 package org.nypl.simplified.viewer.audiobook.protection
 
-import org.librarysimplified.audiobook.api.PlayerDownloadRequestCredentials.BearerToken
 import org.librarysimplified.audiobook.feedbooks.FeedbooksPlayerExtensionConfiguration
 import org.librarysimplified.audiobook.json_web_token.JOSEHeader
 import org.librarysimplified.audiobook.json_web_token.JSONWebSignature
 import org.librarysimplified.audiobook.json_web_token.JSONWebSignatureAlgorithmHMACSha256
 import org.librarysimplified.audiobook.json_web_token.JSONWebTokenClaims
+import org.nypl.simplified.books.audio.AudioBookCredentials
 import org.readium.r2.shared.util.http.HttpRequest
 import java.util.UUID
 
@@ -13,7 +13,7 @@ internal class FeedbooksTokenFactory(
   private val configuration: FeedbooksPlayerExtensionConfiguration
 ) {
 
-  fun createToken(request: HttpRequest): BearerToken {
+  fun createToken(request: HttpRequest): AudioBookCredentials.BearerToken {
 
     val tokenHeader =
       JOSEHeader(
@@ -41,6 +41,6 @@ internal class FeedbooksTokenFactory(
         payload = tokenClaims
       )
 
-    return BearerToken(token.encode())
+    return AudioBookCredentials.BearerToken(token.encode())
   }
 }

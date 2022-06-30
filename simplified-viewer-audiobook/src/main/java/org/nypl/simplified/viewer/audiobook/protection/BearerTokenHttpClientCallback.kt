@@ -1,6 +1,6 @@
 package org.nypl.simplified.viewer.audiobook.protection
 
-import org.librarysimplified.audiobook.api.PlayerDownloadRequestCredentials.BearerToken
+import org.nypl.simplified.books.audio.AudioBookCredentials
 import org.readium.r2.shared.util.Try
 import org.readium.r2.shared.util.http.DefaultHttpClient
 import org.readium.r2.shared.util.http.HttpRequest
@@ -8,7 +8,7 @@ import org.readium.r2.shared.util.http.HttpTry
 import org.slf4j.LoggerFactory
 
 internal class BearerTokenHttpClientCallback(
-  private val tokenFactory: (HttpRequest) -> BearerToken,
+  private val tokenFactory: (HttpRequest) -> AudioBookCredentials.BearerToken,
 ) : DefaultHttpClient.Callback {
 
   private val logger =
@@ -22,7 +22,7 @@ internal class BearerTokenHttpClientCallback(
 
     return Try.success(
       request.buildUpon()
-        .setHeader("Authorization", token.token)
+        .setHeader("Authorization", token.accessToken)
         .build()
     )
   }

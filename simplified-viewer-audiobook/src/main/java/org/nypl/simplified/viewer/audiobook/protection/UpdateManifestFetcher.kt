@@ -33,23 +33,22 @@ internal class UpdateManifestFetcher(
     getManifest()
       .map { it.readingOrder }
       .getOrDefault(emptyList())
-      .mapIndexed { index, link -> link.copy(href = "/chapter$index") }
-
 
   override fun get(link: Link): Resource {
-    return if (link.properties["expires"] == true) {
-      val index = link.href.substringAfter("chapter").toIntOrNull()
-        ?: return failureResource(link)
+    if (!link.expires) {
+      return childFetcher.get(link)
+    }
 
-      UpdateManifestResource(
-        index,
-        link,
-        childFetcher,
-        ::getManifest,
-        ::invalidateManifest
-      )
-    } else
-      childFetcher.get(link)
+    val index = link.readingOrderIndex
+      ?: return failureResource(link)
+
+    return UpdateManifestResource(
+      index,
+      link,
+      childFetcher,
+      ::getManifest,
+      ::invalidateManifest
+    )
   }
 
   override suspend fun close() {
@@ -60,7 +59,23 @@ internal class UpdateManifestFetcher(
     FailureResource(
       link,
       Resource.Exception.NotFound(
-        IllegalStateException("Unexpected href ${link.href}")
+        IllegalStateException("Expiring link with no readingOrder index.")
       )
     )
+
+  private val Link.readingOrderIndex: Int?
+    get() = properties["readingOrderIndex"] as? Int
+
+  private val Link.expires: Boolean
+    get() = (properties["expires"] as? Boolean) ?: false
+
+  companion object {
+
+    fun adaptReadingOrder(links: List<Link>): List<Link> {
+      return links.mapIndexed { index, link ->
+        val additionalProperties = mapOf("readingOrderIndex" to index)
+        link.addProperties(additionalProperties)
+      }
+    }
+  }
 }

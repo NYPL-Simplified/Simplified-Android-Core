@@ -15,9 +15,6 @@ dependencies {
   implementation project(":simplified-networkconnectivity-api")
   implementation project(":simplified-profiles-controller-api")
   implementation project(":simplified-services-api")
-  implementation project(":simplified-threads")
-  implementation project(":simplified-ui-screen")
-  implementation project(":simplified-ui-thread-api")
   implementation project(":simplified-viewer-spi")
 
   api libs.nypl.audiobook.player.api
@@ -28,8 +25,7 @@ dependencies {
   api libs.nypl.audiobook.manifest.parser.api
   api libs.nypl.audiobook.manifest.parser.webpub
   api libs.nypl.audiobook.json.web.token
-  api libs.nypl.audiobook.open.access
-  api libs.nypl.audiobook.rbdigital
+  api libs.nypl.audiobook.exoplayer
 
   implementation libs.r2.shared
   implementation libs.r2.streamer
@@ -48,4 +44,11 @@ dependencies {
   implementation libs.androidx.compose.tooling
   implementation libs.androidx.activity.compose
   implementation libs.androidx.lifecycle.viewmodel.compose
+
+  androidTestImplementation libs.junit
+  androidTestImplementation libs.androidx.test.espresso.core
+  androidTestImplementation libs.androidx.test.ext.junit.ktx
+  androidTestImplementation libs.androidx.test.rules
+  androidTestImplementation libs.androidx.test.runner
+  androidTestImplementation libs.androidx.fragment.testing
 }

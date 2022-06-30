@@ -22,7 +22,7 @@ import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
 import org.nypl.simplified.viewer.audiobook.ui.navigation.Listener
 import org.nypl.simplified.viewer.audiobook.ui.navigation.Screen
 import org.nypl.simplified.viewer.audiobook.ui.screens.PlayerScreenState
-import org.nypl.simplified.viewer.audiobook.session.AudioBookPlayerSessionBuilder
+import org.nypl.simplified.viewer.audiobook.session.SessionBuilder
 import org.readium.navigator.media2.ExperimentalMedia2
 import org.readium.r2.shared.util.Try
 import org.slf4j.LoggerFactory
@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory
 internal class AudioBookPlayerViewModel private constructor(
   private val application: Application,
   private val parameters: AudioBookPlayerParameters,
-  private val sessionBuilder: AudioBookPlayerSessionBuilder
+  private val sessionBuilder: SessionBuilder
 ) : ViewModel() {
 
   private val logger =
@@ -112,10 +112,16 @@ internal class AudioBookPlayerViewModel private constructor(
   val currentScreen: StateFlow<Screen>
     get() = listener.currentScreen
 
-  val onBackPressedCallback: OnBackPressedCallback
-    get() = listener.onBackPressedCallback
+  fun onBackstackPressed(): Boolean {
+    val hasNavigated = listener.onBackstackPressed()
+    val shouldFinish = !hasNavigated
+    if (shouldFinish) {
+      onCloseActivity()
+    }
+    return shouldFinish
+  }
 
-  fun onActivityFinishing() {
+  private fun onCloseActivity() {
     if (serviceBinder.isCompleted)
       serviceBinder.getCompleted().closeSession()
   }
@@ -137,8 +143,8 @@ internal class AudioBookPlayerViewModel private constructor(
     private val feedbooksConfigService =
       services.optionalService(AudioBookFeedbooksSecretServiceType::class.java)
 
-    private val sessionBuilder : AudioBookPlayerSessionBuilder =
-      AudioBookPlayerSessionBuilder(
+    private val sessionBuilder : SessionBuilder =
+      SessionBuilder(
         application,
         profiles,
         strategies,

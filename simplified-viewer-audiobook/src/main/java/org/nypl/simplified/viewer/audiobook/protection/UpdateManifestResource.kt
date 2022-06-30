@@ -25,15 +25,12 @@ internal class UpdateManifestResource(
     }
 
   private suspend fun<S> invalidateManifestOnFailure(
-    runnable: suspend Resource.() -> ResourceTry<S>
+    runnable: suspend () -> ResourceTry<S>
   ): ResourceTry<S> =
-    getBaseResource()
-      .flatMap {
-        it.runnable().tryRecover {
-          invalidateManifest()
-          getBaseResource().flatMap { runnable() }
-        }
-      }
+    runnable().tryRecover {
+      invalidateManifest()
+      runnable()
+    }
 
   override suspend fun link(): Link =
     getBaseResource().fold(
@@ -42,10 +39,10 @@ internal class UpdateManifestResource(
     )
 
   override suspend fun length(): ResourceTry<Long> =
-    invalidateManifestOnFailure { length() }
+    invalidateManifestOnFailure { getBaseResource().flatMap {  it.length() } }
 
   override suspend fun read(range: LongRange?): ResourceTry<ByteArray> =
-    invalidateManifestOnFailure { read(range) }
+    invalidateManifestOnFailure { getBaseResource().flatMap { it.read() } }
 
   override suspend fun close() {}
 }

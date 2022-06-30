@@ -1,9 +1,9 @@
 package org.nypl.simplified.tests.mocking
 
-import org.librarysimplified.audiobook.api.PlayerAudioBookProviderType
-import org.librarysimplified.audiobook.api.PlayerAudioEngineProviderType
-import org.librarysimplified.audiobook.api.PlayerAudioEngineRequest
+import org.librarysimplified.audiobook.player.api.PlayerAudioEngineProviderType
+import org.librarysimplified.audiobook.player.api.PlayerAudioEngineRequest
 import org.librarysimplified.audiobook.api.PlayerVersion
+import org.librarysimplified.audiobook.player.api.PlayerFactoryType
 import org.slf4j.LoggerFactory
 
 /**
@@ -22,7 +22,7 @@ class MockedAudioEngineProvider : PlayerAudioEngineProviderType {
     return "mocked"
   }
 
-  override fun tryRequest(request: PlayerAudioEngineRequest): PlayerAudioBookProviderType? {
+  override fun tryRequest(request: PlayerAudioEngineRequest): PlayerFactoryType? {
     this.logger.debug("trying request: {}", request)
 
     val next = onNextRequest
@@ -38,6 +38,6 @@ class MockedAudioEngineProvider : PlayerAudioEngineProviderType {
 
   companion object {
 
-    var onNextRequest: ((PlayerAudioEngineRequest) -> PlayerAudioBookProviderType?)? = null
+    var onNextRequest: ((PlayerAudioEngineRequest) -> PlayerFactoryType?)? = null
   }
 }
