@@ -220,9 +220,9 @@ class CatalogFeedViewModel(
 
   private fun onBookStatusEvent(event: BookStatusEvent) {
     /*
-    Emit a new value this LiveData, which will cause the Fragment to 'reconfigureUI' and resubscribe
-    to the book items Pager flow ensuring a fresh emission with updated book statuses. Not a great
-    solution but a temporarily working one until additional refactoring work is done in here.
+    Re-emit a the existing state, which will cause the observing CatalogFragment to 'reconfigureUI'
+    and resubscribe to the book items Pager flow ensuring a fresh emission with updated book statuses.
+    Not a great setup but a temporarily working one until additional refactoring work is done in here.
 
     Only emit this value if in a WithoutGroups state because the VM is always subscribed to
     book events, but this is the only state that uses these events to drive a UI state change
