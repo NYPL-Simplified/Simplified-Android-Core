@@ -20,9 +20,6 @@ import io.reactivex.subjects.PublishSubject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.runningFold
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.rx2.asFlow
 import org.joda.time.DateTime
 import org.joda.time.LocalDateTime
 import org.nypl.simplified.accounts.api.AccountEvent
@@ -101,17 +98,17 @@ class CatalogFeedViewModel(
     UUID.randomUUID()
 
   private val logger =
-    LoggerFactory.getLogger(this.javaClass)
+    LoggerFactory.getLogger(javaClass)
 
   private val stateMutable: MutableLiveData<CatalogFeedState> =
-    MutableLiveData(CatalogFeedState.CatalogFeedLoading(this.feedArguments))
+    MutableLiveData(CatalogFeedState.CatalogFeedLoading(feedArguments))
 
   init {
-    if (doInitialLoad) loadFeed(this.feedArguments)
+    if (doInitialLoad) loadFeed(feedArguments)
   }
 
   private val state: CatalogFeedState
-    get() = this.feedStateLiveData.value!!
+    get() = feedStateLiveData.value!!
 
   private data class LoaderResultWithArguments(
     val arguments: CatalogFeedArguments,
@@ -124,27 +121,27 @@ class CatalogFeedViewModel(
 
   private val subscriptions =
     CompositeDisposable(
-      this.profilesController.accountEvents()
+      profilesController.accountEvents()
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(this::onAccountEvent),
-      this.bookRegistry.bookEvents()
+        .subscribe(::onAccountEvent),
+      bookRegistry.bookEvents()
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(this::onBookStatusEvent),
-      this.loaderResults
+        .subscribe(::onBookStatusEvent),
+      loaderResults
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(this::onFeedLoaderResult)
+        .subscribe(::onFeedLoaderResult)
     )
 
   private fun onAccountEvent(event: AccountEvent) {
     when (event) {
       is AccountEventCreation.AccountEventCreationSucceeded,
       is AccountEventDeletion.AccountEventDeletionSucceeded -> {
-        if (this.state.arguments.isLocallyGenerated) {
-          this.reloadFeed()
+        if (state.arguments.isLocallyGenerated) {
+          reloadFeed()
         }
       }
       is AccountEventLoginStateChanged ->
-        this.onLoginStateChanged(event.accountID, event.state)
+        onLoginStateChanged(event.accountID, event.state)
     }
   }
 
@@ -164,8 +161,8 @@ class CatalogFeedViewModel(
           feedState is CatalogFeedState.CatalogFeedLoadFailed &&
           feedState.failure is FeedLoaderResult.FeedLoaderFailure.FeedLoaderFailedAuthentication
         ) {
-          this.logger.debug("reloading feed due to successful login")
-          this.reloadFeed()
+          logger.debug("reloading feed due to successful login")
+          reloadFeed()
         }
       }
       CatalogFeedOwnership.CollectedFromAccounts -> {
@@ -173,8 +170,8 @@ class CatalogFeedViewModel(
           accountState is AccountLoginState.AccountLoggedIn ||
           accountState is AccountLoginState.AccountNotLoggedIn
         ) {
-          this.logger.debug("reloading feed due to successful login or logout")
-          this.reloadFeed()
+          logger.debug("reloading feed due to successful login or logout")
+          reloadFeed()
         }
       }
     }
@@ -183,12 +180,12 @@ class CatalogFeedViewModel(
   private fun onAgeUpdateCompleted(result: ProfileUpdated) {
     when (result) {
       is ProfileUpdated.Succeeded -> {
-        when (val ownership = this.state.arguments.ownership) {
+        when (val ownership = state.arguments.ownership) {
           is CatalogFeedOwnership.OwnedByAccount -> {
             val ageChanged =
               result.newDescription.preferences.dateOfBirth != result.oldDescription.preferences.dateOfBirth
             if (ageChanged) {
-              val account = this.profilesController.profileCurrent().account(ownership.accountId)
+              val account = profilesController.profileCurrent().account(ownership.accountId)
               onAgeUpdateSuccess(account, ownership, result)
             }
           }
@@ -205,22 +202,22 @@ class CatalogFeedViewModel(
     val now = DateTime.now()
     val oldAge = result.oldDescription.preferences.dateOfBirth?.yearsOld(now)
     val newAge = result.newDescription.preferences.dateOfBirth?.yearsOld(now)
-    this.logger.debug("age updated from {} to {}", oldAge, newAge)
+    logger.debug("age updated from {} to {}", oldAge, newAge)
 
     newAge?.let { age ->
       val newParameters = CatalogFeedArgumentsRemote(
-        title = this.state.arguments.title,
+        title = state.arguments.title,
         ownership = ownership,
         feedURI = account.catalogURIForAge(age),
         isSearchResults = false
       )
-      this.loadFeed(newParameters)
+      loadFeed(newParameters)
     }
   }
 
   private fun onBookStatusEvent(event: BookStatusEvent) {
     /*
-    Re-emit a the existing state, which will cause the observing CatalogFragment to 'reconfigureUI'
+    Re-emit the existing state, which will cause the observing CatalogFragment to 'reconfigureUI'
     and resubscribe to the book items Pager flow ensuring a fresh emission with updated book statuses.
     Not a great setup but a temporarily working one until additional refactoring work is done in here.
 
@@ -235,8 +232,8 @@ class CatalogFeedViewModel(
 
     when (event.statusNow) {
       is BookStatus.Held, is BookStatus.Loaned, is BookStatus.Revoked -> {
-        if (this.state.arguments.isLocallyGenerated) {
-          this.reloadFeed()
+        if (state.arguments.isLocallyGenerated) {
+          reloadFeed()
         }
       }
     }
@@ -254,22 +251,22 @@ class CatalogFeedViewModel(
       formats = listOf()
     )
     val status = BookStatus.fromBook(book)
-    this.logger.debug("Synthesizing {} with status {}", book.id, status)
+    logger.debug("Synthesizing {} with status {}", book.id, status)
     return BookWithStatus(book, status)
   }
 
   override fun onCleared() {
     super.onCleared()
-    this.logger.debug("[{}]: deleting viewmodel", this.instanceId)
-    this.subscriptions.clear()
-    this.uiExecutor.dispose()
+    logger.debug("[{}]: deleting viewmodel", instanceId)
+    subscriptions.clear()
+    uiExecutor.dispose()
   }
 
   val feedStateLiveData: LiveData<CatalogFeedState>
     get() = stateMutable
 
   fun reloadFeed() {
-    this.loadFeed(state.arguments)
+    loadFeed(state.arguments)
   }
 
   private fun loadFeed(
@@ -277,9 +274,9 @@ class CatalogFeedViewModel(
   ) {
     return when (arguments) {
       is CatalogFeedArgumentsRemote ->
-        this.doLoadRemoteFeed(arguments)
+        doLoadRemoteFeed(arguments)
       is CatalogFeedArgumentsLocalBooks ->
-        this.doLoadLocalFeed(arguments)
+        doLoadLocalFeed(arguments)
     }
   }
 
@@ -290,13 +287,13 @@ class CatalogFeedViewModel(
   private fun doLoadLocalFeed(
     arguments: CatalogFeedArgumentsLocalBooks
   ) {
-    this.logger.debug("[{}]: loading local feed {}", this.instanceId, arguments.selection)
+    logger.debug("[{}]: loading local feed {}", instanceId, arguments.selection)
 
     val booksUri = URI.create("Books")
 
     val request =
       ProfileFeedRequest(
-        facetTitleProvider = CatalogFacetPseudoTitleProvider(this.resources),
+        facetTitleProvider = CatalogFacetPseudoTitleProvider(resources),
         feedSelection = arguments.selection,
         filterByAccountID = arguments.filterAccount,
         search = arguments.searchTerms,
@@ -305,11 +302,11 @@ class CatalogFeedViewModel(
         uri = booksUri
       )
 
-    val future = this.profilesController.profileFeed(request)
+    val future = profilesController.profileFeed(request)
       .map { f -> FeedLoaderResult.FeedLoaderSuccess(f) as FeedLoaderResult }
       .onAnyError { ex -> FeedLoaderResult.wrapException(booksUri, ex) }
 
-    this.createNewStatus(
+    createNewStatus(
       arguments = arguments,
       future = future
     )
@@ -322,10 +319,10 @@ class CatalogFeedViewModel(
   private fun doLoadRemoteFeed(
     arguments: CatalogFeedArgumentsRemote
   ) {
-    this.logger.debug("[{}]: loading remote feed {}", this.instanceId, arguments.feedURI)
+    logger.debug("[{}]: loading remote feed {}", instanceId, arguments.feedURI)
 
     val profile =
-      this.profilesController.profileCurrent()
+      profilesController.profileCurrent()
     val account =
       profile.account(arguments.ownership.accountId)
 
@@ -335,20 +332,20 @@ class CatalogFeedViewModel(
      */
 
     if (shouldDisplayAgeGate(account.provider.authentication, profile.preferences())) {
-      this.logger.debug("[{}]: showing age gate", this.instanceId)
+      logger.debug("[{}]: showing age gate", instanceId)
       val newState = CatalogFeedState.CatalogFeedAgeGate(arguments)
-      this.stateMutable.value = newState
+      stateMutable.value = newState
       return
     }
 
     val future =
-      this.feedLoader.fetchURI(
+      feedLoader.fetchURI(
         account = account,
         uri = arguments.feedURI,
         method = "GET"
       )
 
-    this.createNewStatus(
+    createNewStatus(
       arguments = arguments,
       future = future
     )
@@ -374,7 +371,7 @@ class CatalogFeedViewModel(
     val newState =
       CatalogFeedState.CatalogFeedLoading(arguments)
 
-    this.stateMutable.value = newState
+    stateMutable.value = newState
 
     /*
      * Register a callback that updates the feed status when the future completes.
@@ -383,22 +380,22 @@ class CatalogFeedViewModel(
     future.map { feedLoaderResult ->
       synchronized(loaderResults) {
         val resultWithArguments = LoaderResultWithArguments(arguments, feedLoaderResult)
-        this.loaderResults.onNext(resultWithArguments)
+        loaderResults.onNext(resultWithArguments)
       }
     }
   }
 
   private fun onFeedLoaderResult(resultWithArguments: LoaderResultWithArguments) {
-    this.onFeedStatusUpdated(resultWithArguments.result, resultWithArguments.arguments)
+    onFeedStatusUpdated(resultWithArguments.result, resultWithArguments.arguments)
   }
 
   private fun onFeedStatusUpdated(
     result: FeedLoaderResult,
     arguments: CatalogFeedArguments
   ) {
-    this.logger.debug("[{}]: feed status updated: {}", this.instanceId, result.javaClass)
+    logger.debug("[{}]: feed status updated: {}", instanceId, result.javaClass)
 
-    this.stateMutable.value = this.feedLoaderResultToFeedState(arguments, result)
+    stateMutable.value = feedLoaderResultToFeedState(arguments, result)
   }
 
   private fun feedLoaderResultToFeedState(
@@ -409,12 +406,12 @@ class CatalogFeedViewModel(
       is FeedLoaderResult.FeedLoaderSuccess ->
         when (val feed = result.feed) {
           is Feed.FeedWithoutGroups ->
-            this.onReceivedFeedWithoutGroups(arguments, feed)
+            onReceivedFeedWithoutGroups(arguments, feed)
           is Feed.FeedWithGroups ->
-            this.onReceivedFeedWithGroups(arguments, feed)
+            onReceivedFeedWithGroups(arguments, feed)
         }
       is FeedLoaderResult.FeedLoaderFailure ->
-        this.onReceivedFeedFailure(arguments, result)
+        onReceivedFeedFailure(arguments, result)
     }
   }
 
@@ -432,10 +429,10 @@ class CatalogFeedViewModel(
         // Display the error.
       }
       is FeedLoaderResult.FeedLoaderFailure.FeedLoaderFailedAuthentication -> {
-        when (val ownership = this.state.arguments.ownership) {
+        when (val ownership = state.arguments.ownership) {
           is CatalogFeedOwnership.OwnedByAccount -> {
             val shouldAuthenticate =
-              this.profilesController.profileCurrent()
+              profilesController.profileCurrent()
                 .account(ownership.accountId)
                 .requiresCredentials
 
@@ -447,7 +444,7 @@ class CatalogFeedViewModel(
                * for the navigator library.
                */
 
-              this.listener.post(CatalogFeedEvent.LoginRequired(ownership.accountId))
+              listener.post(CatalogFeedEvent.LoginRequired(ownership.accountId))
             }
           }
           CatalogFeedOwnership.CollectedFromAccounts -> {
@@ -499,10 +496,10 @@ class CatalogFeedViewModel(
 
     val dataSourceFactory =
       CatalogPagedDataSourceFactory(
-        feedLoader = this.feedLoader,
+        feedLoader = feedLoader,
         initialFeed = feed,
-        ownership = this.feedArguments.ownership,
-        profilesController = this.profilesController
+        ownership = feedArguments.ownership,
+        profilesController = profilesController
       )
 
     val pagingConfig = PagingConfig(
@@ -552,23 +549,23 @@ class CatalogFeedViewModel(
     val resources: Resources
   ) : FeedFacetPseudoTitleProviderType {
     override val sortByTitle: String
-      get() = this.resources.getString(R.string.feedByTitle)
+      get() = resources.getString(R.string.feedByTitle)
     override val sortByAuthor: String
-      get() = this.resources.getString(R.string.feedByAuthor)
+      get() = resources.getString(R.string.feedByAuthor)
     override val collection: String
-      get() = this.resources.getString(R.string.feedCollection)
+      get() = resources.getString(R.string.feedCollection)
     override val collectionAll: String
-      get() = this.resources.getString(R.string.feedCollectionAll)
+      get() = resources.getString(R.string.feedCollectionAll)
     override val sortBy: String
-      get() = this.resources.getString(R.string.feedSortBy)
+      get() = resources.getString(R.string.feedSortBy)
   }
 
   val accountProvider: AccountProviderType?
     get() =
       try {
-        when (val ownership = this.feedArguments.ownership) {
+        when (val ownership = feedArguments.ownership) {
           is CatalogFeedOwnership.OwnedByAccount ->
-            this.profilesController.profileCurrent()
+            profilesController.profileCurrent()
               .account(ownership.accountId)
               .provider
           is CatalogFeedOwnership.CollectedFromAccounts ->
@@ -579,18 +576,18 @@ class CatalogFeedViewModel(
       }
 
   fun isAccountCatalogRoot(): Boolean {
-    val parameters = this.feedArguments
+    val parameters = feedArguments
     if (parameters !is CatalogFeedArgumentsRemote) {
       return false
     }
 
-    val ownership = this.feedArguments.ownership
+    val ownership = feedArguments.ownership
     if (ownership !is CatalogFeedOwnership.OwnedByAccount) {
       return false
     }
 
     val account =
-      this.profilesController.profileCurrent()
+      profilesController.profileCurrent()
         .account(ownership.accountId)
 
     return account.feedIsRoot(parameters.feedURI)
@@ -603,8 +600,8 @@ class CatalogFeedViewModel(
   fun updateBirthYear(over13: Boolean) {
     profilesController.profileUpdate { description ->
       val years = if (over13) 14 else 0
-      this.synthesizeDateOfBirthDescription(description, years)
-    }.map(this::onAgeUpdateCompleted, this.uiExecutor)
+      synthesizeDateOfBirthDescription(description, years)
+    }.map(::onAgeUpdateCompleted, uiExecutor)
   }
 
   private fun synthesizeDateOfBirthDescription(
@@ -612,7 +609,7 @@ class CatalogFeedViewModel(
     years: Int
   ): ProfileDescription {
     val newPreferences =
-      description.preferences.copy(dateOfBirth = this.synthesizeDateOfBirth(years))
+      description.preferences.copy(dateOfBirth = synthesizeDateOfBirth(years))
     return description.copy(preferences = newPreferences)
   }
 
@@ -624,9 +621,9 @@ class CatalogFeedViewModel(
   }
 
   fun showFeedErrorDetails(failure: FeedLoaderResult.FeedLoaderFailure) {
-    this.listener.post(
+    listener.post(
       CatalogFeedEvent.OpenErrorPage(
-        this.errorPageParameters(failure)
+        errorPageParameters(failure)
       )
     )
   }
@@ -635,40 +632,40 @@ class CatalogFeedViewModel(
     failure: FeedLoaderResult.FeedLoaderFailure
   ): ErrorPageParameters {
     val taskRecorder = TaskRecorder.create()
-    taskRecorder.beginNewStep(this.resources.getString(R.string.catalogFeedLoading))
+    taskRecorder.beginNewStep(resources.getString(R.string.catalogFeedLoading))
     taskRecorder.addAttributes(failure.attributes)
     taskRecorder.currentStepFailed(failure.message, "feedLoadingFailed", failure.exception)
     val taskFailure = taskRecorder.finishFailure<Unit>()
 
     return ErrorPageParameters(
-      emailAddress = this.buildConfiguration.supportErrorReportEmailAddress,
+      emailAddress = buildConfiguration.supportErrorReportEmailAddress,
       body = "",
-      subject = this.buildConfiguration.supportErrorReportSubject,
+      subject = buildConfiguration.supportErrorReportSubject,
       attributes = taskFailure.attributes.toSortedMap(),
       taskSteps = taskFailure.steps
     )
   }
 
   fun performSearch(search: FeedSearch, query: String) {
-    this.logSearchToAnalytics(query)
-    val feedArguments = this.resolveSearch(search, query)
-    this.listener.post(
+    logSearchToAnalytics(query)
+    val feedArguments = resolveSearch(search, query)
+    listener.post(
       CatalogFeedEvent.OpenFeed(feedArguments)
     )
   }
 
   private fun logSearchToAnalytics(query: String) {
     try {
-      val profile = this.profilesController.profileCurrent()
+      val profile = profilesController.profileCurrent()
       val accountId =
-        when (val ownership = this.feedArguments.ownership) {
+        when (val ownership = feedArguments.ownership) {
           is CatalogFeedOwnership.OwnedByAccount -> ownership.accountId
           is CatalogFeedOwnership.CollectedFromAccounts -> null
         }
 
       if (accountId != null) {
         val account = profile.account(accountId)
-        this.analytics.publishEvent(
+        analytics.publishEvent(
           AnalyticsEvent.CatalogSearched(
             timestamp = LocalDateTime.now(),
             account = account,
@@ -680,7 +677,7 @@ class CatalogFeedViewModel(
         )
       }
     } catch (e: Exception) {
-      this.logger.error("could not log to analytics: ", e)
+      logger.error("could not log to analytics: ", e)
     }
   }
 
@@ -692,7 +689,7 @@ class CatalogFeedViewModel(
     search: FeedSearch,
     query: String
   ): CatalogFeedArguments {
-    return when (val currentArguments = this.feedArguments) {
+    return when (val currentArguments = feedArguments) {
       is CatalogFeedArgumentsRemote -> {
         when (search) {
           FeedSearch.FeedSearchLocal -> {
@@ -742,8 +739,8 @@ class CatalogFeedViewModel(
   }
 
   fun openFeed(title: String, uri: URI) {
-    val feedArguments = this.resolveFeed(title, uri, false)
-    this.listener.post(
+    val feedArguments = resolveFeed(title, uri, false)
+    listener.post(
       CatalogFeedEvent.OpenFeed(feedArguments)
     )
   }
@@ -762,7 +759,7 @@ class CatalogFeedViewModel(
     uri: URI,
     isSearchResults: Boolean
   ): CatalogFeedArguments {
-    return when (val arguments = this.feedArguments) {
+    return when (val arguments = feedArguments) {
       is CatalogFeedArgumentsRemote ->
         CatalogFeedArgumentsRemote(
           feedURI = arguments.feedURI.resolve(uri).normalize(),
@@ -773,15 +770,15 @@ class CatalogFeedViewModel(
 
       is CatalogFeedArgumentsLocalBooks -> {
         throw IllegalStateException(
-          "Can't transition local to remote feed: ${this.feedArguments.title} -> $title"
+          "Can't transition local to remote feed: ${feedArguments.title} -> $title"
         )
       }
     }
   }
 
   fun openFacet(facet: FeedFacet) {
-    val feedArguments = this.resolveFacet(facet)
-    this.listener.post(
+    val feedArguments = resolveFacet(facet)
+    listener.post(
       CatalogFeedEvent.OpenFeed(feedArguments)
     )
   }
@@ -795,7 +792,7 @@ class CatalogFeedViewModel(
   private fun resolveFacet(
     facet: FeedFacet
   ): CatalogFeedArguments {
-    return when (val currentArguments = this.feedArguments) {
+    return when (val currentArguments = feedArguments) {
       is CatalogFeedArgumentsRemote ->
         when (facet) {
           is FeedFacet.FeedFacetOPDS ->
@@ -840,57 +837,43 @@ class CatalogFeedViewModel(
   }
 
   override fun openBookDetail(opdsEntry: FeedEntry.FeedEntryOPDS) {
-    this.listener.post(
-      CatalogFeedEvent.OpenBookDetail(this.feedArguments, opdsEntry)
+    listener.post(
+      CatalogFeedEvent.OpenBookDetail(feedArguments, opdsEntry)
     )
   }
 
   override fun openViewer(book: Book, format: BookFormat) {
-    this.listener.post(CatalogFeedEvent.OpenViewer(book, format))
+    listener.post(CatalogFeedEvent.OpenViewer(book, format))
   }
 
   override fun showTaskError(book: Book, result: TaskResult.Failure<*>) {
-    this.logger.debug("showing error: {}", book.id)
+    logger.debug("showing error: {}", book.id)
 
     val errorPageParameters = ErrorPageParameters(
-      emailAddress = this.buildConfiguration.supportErrorReportEmailAddress,
+      emailAddress = buildConfiguration.supportErrorReportEmailAddress,
       body = "",
-      subject = this.buildConfiguration.supportErrorReportSubject,
+      subject = buildConfiguration.supportErrorReportSubject,
       attributes = result.attributes.toSortedMap(),
       taskSteps = result.steps
     )
-    this.listener.post(CatalogFeedEvent.OpenErrorPage(errorPageParameters))
+    listener.post(CatalogFeedEvent.OpenErrorPage(errorPageParameters))
   }
 
   override fun dismissBorrowError(feedEntry: FeedEntry.FeedEntryOPDS) {
-    this.borrowViewModel.tryDismissBorrowError(feedEntry.accountID, feedEntry.bookID)
+    borrowViewModel.tryDismissBorrowError(feedEntry.accountID, feedEntry.bookID)
   }
 
   override fun dismissRevokeError(feedEntry: FeedEntry.FeedEntryOPDS) {
-    this.borrowViewModel.tryDismissRevokeError(feedEntry.accountID, feedEntry.bookID)
+    borrowViewModel.tryDismissRevokeError(feedEntry.accountID, feedEntry.bookID)
   }
 
   override fun delete(feedEntry: FeedEntry.FeedEntryOPDS) {
-    this.borrowViewModel.tryDelete(feedEntry.accountID, feedEntry.bookID)
+    borrowViewModel.tryDelete(feedEntry.accountID, feedEntry.bookID)
   }
 
   override fun borrowMaybeAuthenticated(book: Book) {
-    this.openLoginDialogIfNecessary(book.account)
-    this.borrowViewModel.tryBorrowMaybeAuthenticated(book)
-//    isDownloading = true
-//    resubmitList()
-  }
-
-  // TODO convert observable<bookevent> stream to flow<boolean> (isDownloading)
-  suspend fun getIsDownloadingFlow() {
-    bookRegistry.bookEvents().asFlow().stateIn(viewModelScope).runningFold(false) { accumulator, value ->
-      if (value.downloadInProgress()) {
-        true
-      } else {
-        // check previous known download and see if it is now complete
-        false
-      }
-    }
+    openLoginDialogIfNecessary(book.account)
+    borrowViewModel.tryBorrowMaybeAuthenticated(book)
   }
 
   fun BookStatusEvent.downloadInProgress(): Boolean {
@@ -916,18 +899,18 @@ class CatalogFeedViewModel(
   }
 
   override fun reserveMaybeAuthenticated(book: Book) {
-    this.openLoginDialogIfNecessary(book.account)
-    this.borrowViewModel.tryReserveMaybeAuthenticated(book)
+    openLoginDialogIfNecessary(book.account)
+    borrowViewModel.tryReserveMaybeAuthenticated(book)
   }
 
   override fun revokeMaybeAuthenticated(book: Book) {
-    this.openLoginDialogIfNecessary(book.account)
-    this.borrowViewModel.tryRevokeMaybeAuthenticated(book)
+    openLoginDialogIfNecessary(book.account)
+    borrowViewModel.tryRevokeMaybeAuthenticated(book)
   }
 
   private fun openLoginDialogIfNecessary(accountID: AccountID) {
-    if (this.borrowViewModel.isLoginRequired(accountID)) {
-      this.listener.post(
+    if (borrowViewModel.isLoginRequired(accountID)) {
+      listener.post(
         CatalogFeedEvent.LoginRequired(accountID)
       )
     }
