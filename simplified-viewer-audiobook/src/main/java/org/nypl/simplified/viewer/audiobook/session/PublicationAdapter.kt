@@ -50,9 +50,11 @@ internal class PublicationAdapter(
     parameters: AudioBookPlayerParameters,
     credentials: AccountAuthenticationCredentials?
   ): Publication.Builder {
+    val manifest =
+      createOverdriveManifest(playerManifest, parameters.opdsEntry)
     return Publication.Builder(
-      manifest = createOverdriveManifest(playerManifest, parameters.opdsEntry),
-      fetcher = createRegularFetcher() //createOverdriveFetcher(parameters, credentials)
+      manifest = manifest,
+      fetcher = createOverdriveFetcher(manifest, parameters, credentials)
     )
   }
 
@@ -74,13 +76,15 @@ internal class PublicationAdapter(
   }
 
   private fun createOverdriveFetcher(
+    manifest: Manifest,
     parameters: AudioBookPlayerParameters,
     credentials: AccountAuthenticationCredentials?
   ): Fetcher {
     return UpdateManifestFetcher(
       HttpFetcher(
         client = DefaultHttpClient()
-      )
+      ),
+      manifest
     ) {
       manifestDownloader.downloadManifest(parameters, credentials)
         .map { createOverdriveManifest(it, parameters.opdsEntry) }

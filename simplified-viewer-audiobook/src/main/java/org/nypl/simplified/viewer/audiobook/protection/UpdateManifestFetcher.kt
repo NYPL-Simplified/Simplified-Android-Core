@@ -8,14 +8,14 @@ import org.readium.r2.shared.fetcher.Resource
 import org.readium.r2.shared.publication.Link
 import org.readium.r2.shared.publication.Manifest
 import org.readium.r2.shared.util.Try
-import org.readium.r2.shared.util.getOrDefault
 
 internal class UpdateManifestFetcher(
   private val childFetcher: Fetcher,
+  private val initialManifest: Manifest,
   private val downloadManifest: suspend () -> Try<Manifest, Exception>
 ) : Fetcher {
 
-  private var manifest: Try<Manifest, Exception>? = null
+  private var manifest: Try<Manifest, Exception>? = Try.success(initialManifest)
 
   private val mutex = Mutex()
 
@@ -30,9 +30,7 @@ internal class UpdateManifestFetcher(
   }
 
   override suspend fun links(): List<Link> =
-    getManifest()
-      .map { it.readingOrder }
-      .getOrDefault(emptyList())
+    initialManifest.readingOrder
 
   override fun get(link: Link): Resource {
     if (!link.expires) {
