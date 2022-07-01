@@ -37,6 +37,6 @@ internal fun TextView.formatOptionalExpiryInfo(dateTime: DateTime?) {
     val format = DateTimeFormat.forPattern("E, MMM d").withLocale(locale)
     text = context.resources.getString(R.string.catalogBookAvailabilityAvailableUntil, dateTime.toString(format))
   } ?: run {
-    visibility = View.GONE
+    visibility = View.INVISIBLE
   }
 }
