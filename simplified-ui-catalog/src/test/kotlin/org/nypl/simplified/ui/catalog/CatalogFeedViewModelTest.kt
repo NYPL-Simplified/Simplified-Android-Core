@@ -21,6 +21,8 @@ import kotlinx.coroutines.test.setMain
 import org.amshove.kluent.fail
 import org.amshove.kluent.shouldBe
 import org.amshove.kluent.shouldBeInstanceOf
+import org.joda.time.DateTime
+import org.joda.time.format.DateTimeFormat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -483,7 +485,7 @@ class CatalogFeedViewModelTest {
       val mockListener = mockk<CatalogPagedViewListener>(relaxed = true)
       val bookWithStatus = BookWithStatus(
         mockBook,
-        mockk<BookStatus.Loaned.LoanedDownloaded>()
+        mockk<BookStatus.Loaned.LoanedDownloaded>(relaxed = true)
       )
       val result = subject.buildBookItem(testEntry, bookWithStatus, mockListener)
 
@@ -520,7 +522,7 @@ class CatalogFeedViewModelTest {
     }
     val bookWithStatus = BookWithStatus(
       mockBook,
-      mockk<BookStatus.Loaned.LoanedDownloaded>()
+      mockk<BookStatus.Loaned.LoanedDownloaded>(relaxed = true)
     )
     val mockListener = mockk<CatalogPagedViewListener>(relaxed = true)
     val result = subject.buildBookItem(testEntry, bookWithStatus, mockListener)
@@ -555,7 +557,7 @@ class CatalogFeedViewModelTest {
     val mockBook = mockk<Book>(relaxed = true)
     val bookWithStatus = BookWithStatus(
       mockBook,
-      mockk<BookStatus.Loaned.LoanedNotDownloaded>()
+      mockk<BookStatus.Loaned.LoanedNotDownloaded>(relaxed = true)
     )
     val mockListener = mockk<CatalogPagedViewListener>(relaxed = true)
     val result = subject.buildBookItem(testEntry, bookWithStatus, mockListener)
@@ -581,6 +583,41 @@ class CatalogFeedViewModelTest {
       } ?: run { fail("Missing primary button") }
 
       result.actions.secondaryButton() shouldBe null
+    } else fail("Provided BookStatus should map to Idle item")
+  }
+
+  @Test
+  internal fun `buildBookItem when LoanedDownloaded or LoanedNotDownloaded builds item with loanExpiry`() {
+    val testEntry = CatalogTestUtils.buildTestFeedEntryOPDS()
+    val mockBook = mockk<Book>(relaxed = true)
+    val mockListener = mockk<CatalogPagedViewListener>(relaxed = true)
+
+    val format = DateTimeFormat.forPattern("M/d/y")
+    val testExpiry = DateTime.parse("07/01/2022", format)
+
+    val loanedNotDownloaded = BookWithStatus(
+      mockBook,
+      mockk<BookStatus.Loaned.LoanedNotDownloaded> {
+        every { loanExpiryDate } returns testExpiry
+      }
+    )
+    var result = subject.buildBookItem(testEntry, loanedNotDownloaded, mockListener)
+
+    if (result is BookItem.Idle) {
+      result.loanExpiry shouldBe testExpiry
+    } else fail("Provided BookStatus should map to Idle item")
+
+    val loanedDownloaded = BookWithStatus(
+      mockBook,
+      mockk<BookStatus.Loaned.LoanedNotDownloaded> {
+        every { loanExpiryDate } returns testExpiry
+      }
+    )
+
+    result = subject.buildBookItem(testEntry, loanedDownloaded, mockListener)
+
+    if (result is BookItem.Idle) {
+      result.loanExpiry shouldBe testExpiry
     } else fail("Provided BookStatus should map to Idle item")
   }
 

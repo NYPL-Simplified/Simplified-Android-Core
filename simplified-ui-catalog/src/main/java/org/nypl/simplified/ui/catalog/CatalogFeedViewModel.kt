@@ -1080,7 +1080,8 @@ class CatalogFeedViewModel(
             override fun openBookDetail() = listener.openBookDetail(entry)
             override fun primaryButton() = primaryButton
             override fun secondaryButton(): BookItem.Idle.IdleButtonConfig? = null
-          }
+          },
+          loanExpiry = status.loanExpiryDate
         )
       }
       is BookStatus.Loaned.LoanedNotDownloaded -> {
@@ -1095,7 +1096,8 @@ class CatalogFeedViewModel(
             )
 
             override fun secondaryButton(): BookItem.Idle.IdleButtonConfig? = null
-          }
+          },
+          loanExpiry = status.loanExpiryDate
         )
       }
 

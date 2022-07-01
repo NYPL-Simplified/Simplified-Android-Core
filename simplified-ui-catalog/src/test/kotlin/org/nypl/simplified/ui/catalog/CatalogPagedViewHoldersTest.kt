@@ -39,6 +39,8 @@ import io.mockk.verify
 import kotlinx.coroutines.launch
 import org.hamcrest.CoreMatchers.allOf
 import org.hamcrest.Description
+import org.joda.time.DateTime
+import org.joda.time.format.DateTimeFormat
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -526,6 +528,61 @@ class CatalogPagedViewHoldersTest {
             allOf(
               withId(R.id.bookCellIdleMeta),
               withEffectiveVisibility(VISIBLE)
+            )
+          )
+        )
+      )
+    )
+  }
+
+  @Test
+  fun `idle books show expiry info when present on item, otherwise expiry info is hidden`() {
+    val mockActions = mockk<IdleActions> {
+      every { primaryButton() } returns null
+      every { secondaryButton() } returns null
+      every { openBookDetail() } just runs
+    }
+
+    val format = DateTimeFormat.forPattern("M/d/y")
+    val testExpiry = DateTime.parse("07/01/2022", format)
+
+    bookItems = listOf<BookItem>(
+      BookItem.Idle(
+        CatalogTestUtils.buildTestFeedEntryOPDS(),
+        mockActions,
+        testExpiry
+      ),
+      BookItem.Idle(
+        CatalogTestUtils.buildTestFeedEntryOPDS(),
+        mockActions
+      ),
+    )
+
+    scenario.onFragment {
+      it.submitList(bookItems)
+    }
+
+    onView(withId(TestFragment.listId)).check(
+      matches(
+        atPositionOnView(
+          0,
+          hasDescendant(
+            allOf(
+              withId(R.id.bookCellIdleExpiryInfo),
+              withText("Available until Fri, Jul 1")
+            )
+          )
+        )
+      )
+    )
+    onView(withId(TestFragment.listId)).check(
+      matches(
+        atPositionOnView(
+          1,
+          hasDescendant(
+            allOf(
+              withId(R.id.bookCellIdleExpiryInfo),
+              withEffectiveVisibility(GONE)
             )
           )
         )

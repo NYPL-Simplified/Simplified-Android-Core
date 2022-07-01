@@ -1,9 +1,12 @@
 package org.nypl.simplified.ui.catalog.withoutGroups
 
-import android.content.Context
+import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.os.ConfigurationCompat
 import androidx.databinding.BindingAdapter
+import org.joda.time.DateTime
+import org.joda.time.format.DateTimeFormat
 import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.ui.catalog.CatalogBookAccessibilityStrings
@@ -27,7 +30,13 @@ internal fun TextView.formatLabelForEntry(entry: FeedEntry.FeedEntryOPDS) {
   }
 }
 
-@BindingAdapter("setupThumbnail")
-internal fun ImageView.setupThumbnail(loadThumbnail: (Context) -> Unit) {
-  loadThumbnail(context)
+@BindingAdapter("formatOptionalExpiryInfo")
+internal fun TextView.formatOptionalExpiryInfo(dateTime: DateTime?) {
+  dateTime?.let {
+    val locale = ConfigurationCompat.getLocales(context.resources.configuration).get(0)
+    val format = DateTimeFormat.forPattern("E, MMM d").withLocale(locale)
+    text = context.resources.getString(R.string.catalogBookAvailabilityAvailableUntil, dateTime.toString(format))
+  } ?: run {
+    visibility = View.GONE
+  }
 }
