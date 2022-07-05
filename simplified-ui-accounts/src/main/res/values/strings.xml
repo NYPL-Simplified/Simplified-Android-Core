@@ -46,4 +46,24 @@
   <string name="accountSearchHint">Search accounts&#8230;</string>
   <string name="accountMore">More options</string>
   <string name="accountReportFailed">Sorry, we weren\'t able to find a usable email app. Please send email to %1$s if you need to report an issue.</string>
+
+  <string name="oeLoginGetStarted">Get Started</string>
+  <string name="oeLoginAccessCollection">Login to access the collection.</string>
+  <string name="and"> and </string>
+  <string name="signInWithClever">Sign in with Clever</string>
+  <string name="signInWithFirstBook">Sign in with First Book</string>
+  <string name="signIn">Sign In</string>
+  <string name="accessCode">Access Code</string>
+  <string name="terms">Terms of Use and Privacy Notice</string>
+  <string name="termsOfUse">Terms of Use</string>
+  <string name="privacyNotice">Privacy Notice</string>
+  <string name="faq"><u>Frequently asked questions</u></string>
+  <string name="troubleSigningIn"><u>Having trouble signing in?</u></string>
+  <string name="pin">PIN</string>
+
+  <!-- Content Descriptions -->
+  <string name="contentDescOpenEbooksLogo">Open eBooks logo</string>
+  <string name="contentDescFirstBookLogo">First Book logo</string>
+  <string name="contentDescProgressLoader">Progress loader</string>
+  <string name="contentDescBackButton">Back button</string>
 </resources>

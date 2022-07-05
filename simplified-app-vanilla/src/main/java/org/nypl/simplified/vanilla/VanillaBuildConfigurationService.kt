@@ -40,4 +40,6 @@ class VanillaBuildConfigurationService : BuildConfigurationServiceType {
     get() = true
   override val showAgeGateUi: Boolean
     get() = true
+  override val showOELogin: Boolean
+    get() = false
 }
