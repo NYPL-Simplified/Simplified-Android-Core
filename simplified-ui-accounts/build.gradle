@@ -44,9 +44,9 @@ dependencies {
   implementation libs.rxjava2.extensions
   implementation libs.rxandroid2
   implementation libs.slf4j
-  implementation 'androidx.appcompat:appcompat:1.4.2'
-  implementation 'com.google.android.material:material:1.6.1'
-  implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+  implementation libs.google.material
+  implementation libs.androidx.constraint.layout
+  implementation libs.androidx.app.compat
 
   // Temporary workaround to force databinding codegen in Robolectric tests
   // https://github.com/robolectric/robolectric/issues/3789
