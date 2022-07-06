@@ -61,7 +61,6 @@ import org.nypl.simplified.ui.images.ImageAccountIcons
 import org.nypl.simplified.ui.images.ImageLoaderType
 import org.slf4j.LoggerFactory
 import java.net.URI
-import java.util.Locale
 import org.nypl.simplified.ui.accounts.utils.makeLinks
 
 /**
@@ -102,7 +101,8 @@ class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
   private lateinit var accountSubtitle: TextView
   private lateinit var accountTitle: TextView
   private lateinit var authentication: ViewGroup
-  //private lateinit var authenticationAlternatives: ViewGroup
+
+  // private lateinit var authenticationAlternatives: ViewGroup
   private lateinit var authenticationViews: AccountAuthenticationViews
   private lateinit var bookmarkSync: ViewGroup
   private lateinit var bookmarkSyncCheck: SwitchCompat
@@ -116,7 +116,8 @@ class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
   private lateinit var reportIssueGroup: ViewGroup
   private lateinit var reportIssueItem: View
   private lateinit var signUpButton: Button
-  //private lateinit var signUpLabel: TextView
+
+  // private lateinit var signUpLabel: TextView
   private lateinit var accountMain: LinearLayout
   private lateinit var oeLogin: ConstraintLayout
   private lateinit var firstBookLogin: ConstraintLayout
@@ -247,12 +248,18 @@ class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
     }
 
     this.terms.makeLinks(
-      Pair(getString(R.string.termsOfUse), View.OnClickListener {
-        launchWebView(WebViewActivity.TERMS_OF_USE)
-      }),
-      Pair(getString(R.string.privacyNotice), View.OnClickListener {
-        launchWebView(WebViewActivity.PRIVACY_NOTICE)
-      })
+      Pair(
+        getString(R.string.termsOfUse),
+        View.OnClickListener {
+          launchWebView(WebViewActivity.TERMS_OF_USE)
+        }
+      ),
+      Pair(
+        getString(R.string.privacyNotice),
+        View.OnClickListener {
+          launchWebView(WebViewActivity.PRIVACY_NOTICE)
+        }
+      )
     )
 
     this.firstBookBtn.setOnClickListener {
@@ -812,14 +819,14 @@ class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
 
     return when (status) {
       is AsLoginButtonEnabled -> {
-        //this.signUpLabel.setText(R.string.accountCardCreatorLabel)
-        //this.signUpLabel.isEnabled = true
-        //this.signUpButton.isEnabled = true
+        // this.signUpLabel.setText(R.string.accountCardCreatorLabel)
+        // this.signUpLabel.isEnabled = true
+        // this.signUpButton.isEnabled = true
       }
       is AsLoginButtonDisabled -> {
-        //this.signUpLabel.setText(R.string.accountCardCreatorLabel)
-        //this.signUpLabel.isEnabled = true
-        ///this.signUpButton.isEnabled = true
+        // this.signUpLabel.setText(R.string.accountCardCreatorLabel)
+        // this.signUpLabel.isEnabled = true
+        // this.signUpButton.isEnabled = true
       }
       is AsLogoutButtonEnabled -> {
 //        if (true) {
@@ -907,12 +914,12 @@ class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
 
   private fun authenticationAlternativesShow() {
     if (this.viewModel.account.provider.authenticationAlternatives.isNotEmpty()) {
-      //this.authenticationAlternatives.visibility = VISIBLE
+      // this.authenticationAlternatives.visibility = VISIBLE
     }
   }
 
   private fun authenticationAlternativesHide() {
-    //this.authenticationAlternatives.visibility = GONE
+    // this.authenticationAlternatives.visibility = GONE
   }
 
   private fun tryLogin() {
