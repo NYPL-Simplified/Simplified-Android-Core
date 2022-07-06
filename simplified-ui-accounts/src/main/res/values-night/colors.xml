@@ -7,4 +7,18 @@
     <color name="white">#fff</color>
     <color name="black">#000</color>
     <color name="linkBlue">#0576D3</color>
+
+    <color name="buttonBackground">#222222</color>
+    <color name="headerColor">#000000</color>
+    <color name="textColor">#ffffff</color>
+    <color name="linkColor">#34CFD8</color>
+    <color name="firstBookBtnPressed">#34CFD8</color>
+    <color name="firstBookSignIn">#F41666</color>
+    <color name="firstBookTextColor">@color/white</color>
+    <color name="cleverTextColor">@color/white</color>
+    <color name="screenBackground">#222222</color>
+    <color name="hintTextColor">@color/white</color>
+    <color name="inputLine">#BDBDBD</color>
+    <color name="passwordToggle">@color/white</color>
+
 </resources>
