@@ -24,6 +24,8 @@ class VanillaBuildConfigurationService : BuildConfigurationServiceType {
     get() = true
   override val showBooksFromAllAccounts: Boolean
     get() = true
+  override val showFormatLabel: Boolean
+    get() = true
   override val vcsCommit: String
     get() = BuildConfig.GIT_COMMIT
   override val simplifiedVersion: String

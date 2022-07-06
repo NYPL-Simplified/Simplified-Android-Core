@@ -41,7 +41,7 @@ class CatalogBookDetailFragment : Fragment(R.layout.book_detail) {
 
   companion object {
 
-    private const val PARAMETERS_ID =
+    const val PARAMETERS_ID =
       "org.nypl.simplified.ui.catalog.CatalogFragmentBookDetail.parameters"
 
     /**
@@ -239,15 +239,17 @@ class CatalogBookDetailFragment : Fragment(R.layout.book_detail) {
     this.title.text = opds.title
     this.authors.text = opds.authorsCommaSeparated
 
-    this.format.text = when (feedEntry.probableFormat) {
-      BookFormats.BookFormatDefinition.BOOK_FORMAT_EPUB ->
-        context.getString(R.string.catalogBookFormatEPUB)
-      BookFormats.BookFormatDefinition.BOOK_FORMAT_AUDIO ->
-        context.getString(R.string.catalogBookFormatAudioBook)
-      BookFormats.BookFormatDefinition.BOOK_FORMAT_PDF ->
-        context.getString(R.string.catalogBookFormatPDF)
-      null -> ""
-    }
+    if (buildConfig.showFormatLabel) {
+      this.format.text = when (feedEntry.probableFormat) {
+        BookFormats.BookFormatDefinition.BOOK_FORMAT_EPUB ->
+          context.getString(R.string.catalogBookFormatEPUB)
+        BookFormats.BookFormatDefinition.BOOK_FORMAT_AUDIO ->
+          context.getString(R.string.catalogBookFormatAudioBook)
+        BookFormats.BookFormatDefinition.BOOK_FORMAT_PDF ->
+          context.getString(R.string.catalogBookFormatPDF)
+        null -> ""
+      }
+    } else format.visibility = View.GONE
 
     this.cover.contentDescription =
       CatalogBookAccessibilityStrings.coverDescription(this.resources, feedEntry)

@@ -22,6 +22,8 @@ class SimplyEBuildConfigurationService : BuildConfigurationServiceType {
     get() = true
   override val showBooksFromAllAccounts: Boolean
     get() = false
+  override val showFormatLabel: Boolean
+    get() = true
   override val showChangeAccountsUi: Boolean
     get() = true
   override val showDebugBookDetailStatus: Boolean

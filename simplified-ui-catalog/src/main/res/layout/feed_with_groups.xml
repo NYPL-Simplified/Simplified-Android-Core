@@ -18,15 +18,25 @@
             android:id="@+id/feedWithGroupsHeader"
             layout="@layout/feed_header" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/feedWithGroupsList"
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/feedWithGroupsSwipeContainer"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:clipChildren="false"
-            android:clipToPadding="false"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/feedWithGroupsHeader" />
+            app:layout_constraintTop_toBottomOf="@id/feedWithGroupsHeader">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/feedWithGroupsList"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:clipChildren="false"
+                android:clipToPadding="false"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

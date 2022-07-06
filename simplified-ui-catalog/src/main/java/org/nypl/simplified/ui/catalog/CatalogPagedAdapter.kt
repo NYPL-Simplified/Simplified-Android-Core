@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import org.nypl.simplified.books.covers.BookCoverProviderType
+import org.nypl.simplified.buildconfig.api.BuildConfigurationCatalogType
 import org.nypl.simplified.feeds.api.FeedEntry
 import org.slf4j.LoggerFactory
 
@@ -19,6 +20,7 @@ class CatalogPagedAdapter(
   private val listener: CatalogPagedViewListener,
   private val buttonCreator: CatalogButtons,
   private val bookCovers: BookCoverProviderType,
+  private val config: BuildConfigurationCatalogType
 ) : PagedListAdapter<FeedEntry, CatalogPagedViewHolder>(CatalogPagedAdapterDiffing.comparisonCallback) {
 
   private val logger =
@@ -39,6 +41,7 @@ class CatalogPagedAdapter(
       parent = LayoutInflater.from(parent.context).inflate(R.layout.book_cell, parent, false),
       buttonCreator = this.buttonCreator,
       bookCovers = this.bookCovers,
+      config = config
     )
   }
 

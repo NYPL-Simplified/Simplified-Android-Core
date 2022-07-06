@@ -30,7 +30,6 @@ import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookStatusEvent
 import org.nypl.simplified.books.book_registry.BookWithStatus
-import org.nypl.simplified.books.controller.api.BooksControllerType
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.feeds.api.Feed
 import org.nypl.simplified.feeds.api.FeedEntry
@@ -74,7 +73,6 @@ class CatalogFeedViewModel(
   private val resources: Resources,
   private val profilesController: ProfilesControllerType,
   private val feedLoader: FeedLoaderType,
-  private val booksController: BooksControllerType,
   private val bookRegistry: BookRegistryType,
   private val buildConfiguration: BuildConfigurationServiceType,
   private val analytics: AnalyticsType,
@@ -267,37 +265,6 @@ class CatalogFeedViewModel(
 
   val feedStateLiveData: LiveData<CatalogFeedState>
     get() = stateMutable
-
-  fun syncAccounts() {
-    when (val arguments = state.arguments) {
-      is CatalogFeedArgumentsLocalBooks -> {
-        this.syncAccounts(arguments)
-      }
-      is CatalogFeedArgumentsRemote -> {
-      }
-    }
-  }
-
-  private fun syncAccounts(arguments: CatalogFeedArgumentsLocalBooks) {
-    val profile =
-      this.profilesController.profileCurrent()
-    val accountsToSync =
-      if (arguments.filterAccount == null) {
-        // Sync all accounts
-        this.logger.debug("[{}]: syncing all accounts", this.instanceId)
-        profile.accounts()
-      } else {
-        // Sync the account we're filtering on
-        this.logger.debug("[{}]: syncing account {}", this.instanceId, arguments.filterAccount)
-        profile.accounts().filterKeys { it == arguments.filterAccount }
-      }
-
-    for (account in accountsToSync.keys) {
-      this.booksController.booksSync(account)
-    }
-
-    // Feed will be automatically reloaded if necessary in response to BookStatus change.
-  }
 
   fun reloadFeed() {
     this.loadFeed(state.arguments)

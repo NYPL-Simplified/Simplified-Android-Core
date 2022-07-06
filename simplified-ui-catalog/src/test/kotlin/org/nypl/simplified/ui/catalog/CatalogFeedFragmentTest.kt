@@ -18,14 +18,18 @@ import androidx.test.espresso.action.ViewActions.replaceText
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.BoundedMatcher
 import androidx.test.espresso.matcher.RootMatchers.isDialog
+import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.espresso.matcher.ViewMatchers.assertThat
 import androidx.test.espresso.matcher.ViewMatchers.hasDescendant
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.isEnabled
 import androidx.test.espresso.matcher.ViewMatchers.isNotEnabled
+import androidx.test.espresso.matcher.ViewMatchers.withEffectiveVisibility
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.google.common.util.concurrent.FluentFuture
+import com.google.common.util.concurrent.SettableFuture
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -34,6 +38,7 @@ import io.mockk.mockk
 import io.mockk.mockkConstructor
 import io.mockk.mockkObject
 import io.mockk.runs
+import io.mockk.slot
 import io.mockk.verify
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldBeInstanceOf
@@ -48,6 +53,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountID
+import org.nypl.simplified.books.api.Book
+import org.nypl.simplified.books.book_registry.BookStatus
+import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.covers.BookCoverProviderType
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.feeds.api.Feed
@@ -56,6 +64,9 @@ import org.nypl.simplified.feeds.api.FeedGroup
 import org.nypl.simplified.feeds.api.FeedLoaderResult
 import org.nypl.simplified.listeners.api.FragmentListenerFinder
 import org.nypl.simplified.listeners.api.FragmentListenerType
+import org.nypl.simplified.testUtils.robolectricSwipeToRefresh
+import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithGroups
+import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithoutGroups
 import org.nypl.simplified.ui.catalog.RecyclerViewEspressoUtils.atPositionOnView
 import org.nypl.simplified.ui.catalog.RecyclerViewEspressoUtils.hasAdapterItemCount
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
@@ -69,23 +80,12 @@ class CatalogFeedFragmentTest {
 
   private lateinit var scenario: FragmentScenario<CatalogFeedFragment>
 
-  @MockK
-  private lateinit var mockBookCoversProvider: BookCoverProviderType
-
-  @MockK
-  private lateinit var mockScreenInformation: ScreenSizeInformationType
-
-  @MockK
-  private lateinit var mockBuildConfigService: BuildConfigurationServiceType
-
-  @MockK
-  private lateinit var mockCatalogBorrowViewModel: CatalogBorrowViewModel
-
-  @MockK
-  private lateinit var mockCatalogFeedViewModel: CatalogFeedViewModel
-
-  @MockK
-  private lateinit var mockCatalogFeedEventListener: FragmentListenerType<CatalogFeedEvent>
+  @MockK private lateinit var mockBookCoversProvider: BookCoverProviderType
+  @MockK private lateinit var mockScreenInformation: ScreenSizeInformationType
+  @MockK private lateinit var mockBuildConfigService: BuildConfigurationServiceType
+  @MockK private lateinit var mockCatalogBorrowViewModel: CatalogBorrowViewModel
+  @MockK private lateinit var mockCatalogFeedViewModel: CatalogFeedViewModel
+  @MockK private lateinit var mockCatalogFeedEventListener: FragmentListenerType<CatalogFeedEvent>
 
   private var testFeedStateLiveData = MutableLiveData<CatalogFeedState>()
 
@@ -122,7 +122,7 @@ class CatalogFeedFragmentTest {
       anyConstructed<CatalogFeedViewModelFactory>().create(CatalogFeedViewModel::class.java)
     } returns mockCatalogFeedViewModel
 
-    // Mock feedViewModel to return test-controlled LiveData
+    // Stub feedViewModel to return test-controlled LiveData
     every { mockCatalogFeedViewModel.feedStateLiveData } returns testFeedStateLiveData
 
     // Stub this for decorator configuration
@@ -181,12 +181,7 @@ class CatalogFeedFragmentTest {
 
   @Test
   fun `on CatalogFeedWithGroups state shows WithGroups view and hides others`() {
-    val mockWithGroupsFeed: Feed.FeedWithGroups = buildMockFeedWithGroups()
-
-    testFeedStateLiveData.value = CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithGroups(
-      mockk(), // Pass in mock FeedArguments as it is not used when handling state
-      mockWithGroupsFeed
-    )
+    testFeedStateLiveData.value = buildMockFeedStateWithGroups()
 
     onView(withId(R.id.feedWithGroups)).check(matches(isDisplayed()))
 
@@ -199,14 +194,9 @@ class CatalogFeedFragmentTest {
 
   @Test
   fun `on CatalogFeedWithGroups state updates adapter with FeedGroup data`() {
-    val mockWithGroupsFeed = buildMockFeedWithGroups()
-
     onView(withId(R.id.feedWithGroupsList)).check(hasAdapterItemCount(0))
 
-    testFeedStateLiveData.value = CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithGroups(
-      mockk(), // Pass in mock FeedArguments as it is not used when handling state
-      mockWithGroupsFeed
-    )
+    testFeedStateLiveData.value = buildMockFeedStateWithGroups()
 
     onView(withId(R.id.feedWithGroupsList)).check(hasAdapterItemCount(2))
     onView(withId(R.id.feedWithGroupsList)).check(
@@ -219,7 +209,17 @@ class CatalogFeedFragmentTest {
     )
   }
 
-  private fun buildMockFeedWithGroups(): Feed.FeedWithGroups {
+  @Test
+  fun `on CatalogFeedWithGroups swipe to refresh reloads feed`() {
+    every { mockCatalogFeedViewModel.reloadFeed() } just runs
+
+    testFeedStateLiveData.value = buildMockFeedStateWithGroups()
+
+    onView(withId(R.id.feedWithGroupsSwipeContainer)).perform(robolectricSwipeToRefresh())
+    verify { mockCatalogFeedViewModel.reloadFeed() }
+  }
+
+  private fun buildMockFeedStateWithGroups(): CatalogFeedWithGroups {
     val testFeedGroupsInOrder = mutableListOf(
       FeedGroup("title1", URI("uri1"), emptyList()),
       FeedGroup("title2", URI("uri2"), emptyList()),
@@ -231,26 +231,16 @@ class CatalogFeedFragmentTest {
     every { mockWithGroupsFeed.feedSearch } returns null
     every { mockWithGroupsFeed.feedTitle } returns "feedTitle"
     every { mockWithGroupsFeed.facetsByGroup } returns emptyMap()
-    return mockWithGroupsFeed
+
+    return CatalogFeedWithGroups(
+      mockk(), // Pass in mock FeedArguments as it is not used when handling state
+      mockWithGroupsFeed
+    )
   }
 
   @Test
   fun `on CatalogFeedWithoutGroups shows WithoutGroups view and hides others`() {
-    // Mock the FeedEntries as there's no easy way to make these
-    // Use Corrupt Feed entries to reduce non-Fragment surface area for this test
-    val testEntriesLiveData = listOf<FeedEntry>(
-      mockk<FeedEntry.FeedEntryCorrupt>(),
-      mockk<FeedEntry.FeedEntryCorrupt>(),
-    ).asPagedList()
-
-    testFeedStateLiveData.value = CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithoutGroups(
-      mockk(), // Pass in mock FeedArguments as it is not used when handling state
-      testEntriesLiveData,
-      emptyList(),
-      emptyMap(),
-      null,
-      "title"
-    )
+    testFeedStateLiveData.value = buildMockFeedStateWithoutGroups()
 
     onView(withId(R.id.feedWithoutGroups)).check(matches(isDisplayed()))
 
@@ -263,14 +253,70 @@ class CatalogFeedFragmentTest {
 
   @Test
   fun `on CatalogFeedWithoutGroups observes CatalogFeedWithoutGroups entries and updates adapter on emission`() {
-    // Mock the FeedEntries as there's no easy way to make these
-    // Use Corrupt Feed entries to reduce non-Fragment surface area for this test
+    onView(withId(R.id.feedWithoutGroupsList)).check(hasAdapterItemCount(0))
+
+    testFeedStateLiveData.value = buildMockFeedStateWithoutGroups()
+
+    onView(withId(R.id.feedWithoutGroupsList)).check(hasAdapterItemCount(2))
+  }
+
+  @Test
+  fun `on CatalogFeedWithoutGroups swipe to refresh reloads feed`() {
+    every { mockCatalogFeedViewModel.reloadFeed() } just runs
+
+    testFeedStateLiveData.value = buildMockFeedStateWithoutGroups()
+
+    onView(withId(R.id.feedWithGroupsSwipeContainer)).perform(robolectricSwipeToRefresh())
+    verify { mockCatalogFeedViewModel.reloadFeed() }
+  }
+
+  private fun buildMockFeedStateWithoutGroups(): CatalogFeedWithoutGroups {
     val testEntriesLiveData = listOf<FeedEntry>(
       mockk<FeedEntry.FeedEntryCorrupt>(),
       mockk<FeedEntry.FeedEntryCorrupt>(),
     ).asPagedList()
 
-    onView(withId(R.id.feedWithoutGroupsList)).check(hasAdapterItemCount(0))
+    return CatalogFeedWithoutGroups(
+      mockk(), // Pass in mock FeedArguments as it is not used when handling state
+      testEntriesLiveData,
+      emptyList(),
+      emptyMap(),
+      null,
+      "title"
+    )
+  }
+
+  @Test
+  fun `on CatalogFeedWithoutGroups shows correct format label when required by build configuration`() {
+    val entry = CatalogTestUtils.buildTestFeedEntryOPDS()
+    val testEntriesLiveData = listOf<FeedEntry>(entry).asPagedList()
+
+    // Configure Catalog to show format labels
+    every { mockBuildConfigService.showFormatLabel } returns true
+
+    // We rely on an invocation of the provided callback on registration in order to
+    // reach a valid state in the ViewHolder. So we capture and invoke it here
+    val bookWithStatusCallbackSlot = slot<(BookWithStatus) -> Unit>()
+    every {
+      mockCatalogFeedViewModel.registerObserver(any(), capture(bookWithStatusCallbackSlot))
+    } answers {
+      bookWithStatusCallbackSlot.captured.invoke(
+        BookWithStatus(
+          Book(mockk(), AccountID.generate(), null, null, entry.feedEntry, emptyList()),
+          BookStatus.Loanable(mockk())
+        )
+      )
+    }
+
+    val ignoredFuture = FluentFuture.from(SettableFuture.create<Unit>())
+    every {
+      mockBookCoversProvider.loadThumbnailInto(
+        any(),
+        any(),
+        any(),
+        any()
+      )
+    } returns ignoredFuture
 
     testFeedStateLiveData.value = CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithoutGroups(
       mockk(), // Pass in mock FeedArguments as it is not used when handling state
@@ -281,7 +327,76 @@ class CatalogFeedFragmentTest {
       "title"
     )
 
-    onView(withId(R.id.feedWithoutGroupsList)).check(hasAdapterItemCount(2))
+    onView(withId(R.id.feedWithoutGroupsList)).check(
+      matches(
+        atPositionOnView(
+          0,
+          hasDescendant(
+            allOf(
+              withId(R.id.bookCellIdleMeta),
+              withText("eBook"),
+              withEffectiveVisibility(ViewMatchers.Visibility.VISIBLE)
+            )
+          )
+        )
+      )
+    )
+  }
+
+  @Test
+  fun `on CatalogFeedWithoutGroups hides format label when required by build configuration`() {
+    val entry = CatalogTestUtils.buildTestFeedEntryOPDS()
+    val testEntriesLiveData = listOf<FeedEntry>(entry).asPagedList()
+
+    // Configure Catalog to show format labels
+    every { mockBuildConfigService.showFormatLabel } returns false
+
+    // We rely on an invocation of the provided callback on registration in order to
+    // reach a valid state in the ViewHolder. So we capture and invoke it here
+    val bookWithStatusCallbackSlot = slot<(BookWithStatus) -> Unit>()
+    every {
+      mockCatalogFeedViewModel.registerObserver(any(), capture(bookWithStatusCallbackSlot))
+    } answers {
+      bookWithStatusCallbackSlot.captured.invoke(
+        BookWithStatus(
+          Book(mockk(), AccountID.generate(), null, null, entry.feedEntry, emptyList()),
+          BookStatus.Loanable(mockk())
+        )
+      )
+    }
+
+    val ignoredFuture = FluentFuture.from(SettableFuture.create<Unit>())
+    every {
+      mockBookCoversProvider.loadThumbnailInto(
+        any(),
+        any(),
+        any(),
+        any()
+      )
+    } returns ignoredFuture
+
+    testFeedStateLiveData.value = CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithoutGroups(
+      mockk(), // Pass in mock FeedArguments as it is not used when handling state
+      testEntriesLiveData,
+      emptyList(),
+      emptyMap(),
+      null,
+      "title"
+    )
+
+    onView(withId(R.id.feedWithoutGroupsList)).check(
+      matches(
+        atPositionOnView(
+          0,
+          hasDescendant(
+            allOf(
+              withId(R.id.bookCellIdleMeta),
+              withEffectiveVisibility(ViewMatchers.Visibility.GONE)
+            )
+          )
+        )
+      )
+    )
   }
 
   @Test
