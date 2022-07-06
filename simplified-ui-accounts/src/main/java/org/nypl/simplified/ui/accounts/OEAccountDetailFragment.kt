@@ -23,7 +23,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import com.io7m.junreachable.UnimplementedCodeException
+// import com.io7m.junreachable.UnimplementedCodeException
 import com.io7m.junreachable.UnreachableCodeException
 import io.reactivex.disposables.CompositeDisposable
 import org.librarysimplified.services.api.Services
@@ -45,22 +45,19 @@ import org.nypl.simplified.listeners.api.fragmentListeners
 import org.nypl.simplified.oauth.OAuthCallbackIntentParsing
 import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest
 import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest.Basic
-import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest.OAuthWithIntermediaryCancel
+// import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest.OAuthWithIntermediaryCancel
 import org.nypl.simplified.profiles.controller.api.ProfileAccountLoginRequest.OAuthWithIntermediaryInitiate
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkSyncEnableResult.SYNC_DISABLED
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkSyncEnableResult.SYNC_ENABLED
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkSyncEnableResult.SYNC_ENABLE_NOT_SUPPORTED
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkSyncEnableStatus
-import org.nypl.simplified.ui.accounts.AccountLoginButtonStatus.AsCancelButtonDisabled
-import org.nypl.simplified.ui.accounts.AccountLoginButtonStatus.AsCancelButtonEnabled
 import org.nypl.simplified.ui.accounts.AccountLoginButtonStatus.AsLoginButtonDisabled
 import org.nypl.simplified.ui.accounts.AccountLoginButtonStatus.AsLoginButtonEnabled
-import org.nypl.simplified.ui.accounts.AccountLoginButtonStatus.AsLogoutButtonDisabled
-import org.nypl.simplified.ui.accounts.AccountLoginButtonStatus.AsLogoutButtonEnabled
 import org.nypl.simplified.ui.images.ImageAccountIcons
 import org.nypl.simplified.ui.images.ImageLoaderType
 import org.slf4j.LoggerFactory
 import java.net.URI
+import org.nypl.simplified.ui.accounts.utils.hideSoftInput
 import org.nypl.simplified.ui.accounts.utils.makeLinks
 
 /**
@@ -102,22 +99,18 @@ class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
   private lateinit var accountTitle: TextView
   private lateinit var authentication: ViewGroup
 
-  // private lateinit var authenticationAlternatives: ViewGroup
   private lateinit var authenticationViews: AccountAuthenticationViews
   private lateinit var bookmarkSync: ViewGroup
   private lateinit var bookmarkSyncCheck: SwitchCompat
   private lateinit var bookmarkSyncProgress: ProgressBar
-  private lateinit var loginButtonErrorDetails: Button
-  private lateinit var loginProgress: ViewGroup
-  private lateinit var loginProgressBar: ProgressBar
-  private lateinit var loginProgressText: TextView
+  private lateinit var oeLoginButtonErrorDetails: Button
+  private lateinit var oeAccountLoginProgress: ViewGroup
+  private lateinit var oeLoginProgressText: TextView
   private lateinit var loginTitle: ViewGroup
   private lateinit var reportIssueEmail: TextView
   private lateinit var reportIssueGroup: ViewGroup
   private lateinit var reportIssueItem: View
-  private lateinit var signUpButton: Button
 
-  // private lateinit var signUpLabel: TextView
   private lateinit var accountMain: LinearLayout
   private lateinit var oeLogin: ConstraintLayout
   private lateinit var firstBookLogin: ConstraintLayout
@@ -130,6 +123,7 @@ class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
   private lateinit var firstBookAcccessCode: EditText
   private lateinit var firstBookPin: EditText
   private lateinit var firstBookSignIn: Button
+  private lateinit var firstBookLoginProgressBar: ProgressBar
 
   private val imageButtonLoadingTag = "IMAGE_BUTTON_LOADING"
 
@@ -176,14 +170,16 @@ class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
 
     this.loginTitle =
       view.findViewById(R.id.accountTitleAnnounce)
-    this.loginProgress =
-      view.findViewById(R.id.accountLoginProgress)
-    this.loginProgressBar =
-      view.findViewById(R.id.accountLoginProgressBar)
-    this.loginProgressText =
-      view.findViewById(R.id.accountLoginProgressText)
-    this.loginButtonErrorDetails =
-      view.findViewById(R.id.accountLoginButtonErrorDetails)
+    this.oeAccountLoginProgress =
+      view.findViewById(R.id.oeAccountLoginProgress)
+    this.firstBookLoginProgressBar =
+      view.findViewById(R.id.firstBookLoginProgressBar)
+    this.firstBookLoginProgressBar =
+      view.findViewById(R.id.firstBookLoginProgressBar)
+    this.oeLoginProgressText =
+      view.findViewById(R.id.oeLoginProgressText)
+    this.oeLoginButtonErrorDetails =
+      view.findViewById(R.id.oeLoginButtonErrorDetails)
 
     this.accountCustomOPDS =
       view.findViewById(R.id.accountCustomOPDS)
@@ -231,7 +227,7 @@ class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
     )
 
     this.viewModel.accountLive.observe(this.viewLifecycleOwner) {
-      this.reconfigureAccountUI()
+      this.reconfigureOEUI()
     }
 
     this.viewModel.accountSyncingSwitchStatus.observe(this.viewLifecycleOwner) { status ->
@@ -270,6 +266,7 @@ class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
     this.firstBookBack.setOnClickListener {
       this.oeLogin.visibility = VISIBLE
       this.firstBookLogin.visibility = GONE
+      oeAccountLoginProgress.visibility = GONE
     }
 
     this.loginTrouble.setOnClickListener {
@@ -282,6 +279,8 @@ class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
 
     this.firstBookSignIn.setOnClickListener {
       logger.debug("Logging into First Book")
+      oeAccountLoginProgress.visibility = GONE
+      hideSoftInput()
       val accountUsername = AccountUsername(this.firstBookAcccessCode.toString().trim())
       val accountPassword = AccountPassword(this.firstBookPin.toString().trim())
       val description = AccountProviderAuthenticationDescription.Basic(
@@ -372,7 +371,6 @@ class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
     username: AccountUsername,
     password: AccountPassword
   ) {
-    this.setLoginButtonStatus(this.determineLoginIsSatisfied())
   }
 
   private fun determineLoginIsSatisfied(): AccountLoginButtonStatus {
@@ -394,16 +392,6 @@ class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
     super.onStart()
 
     this.configureToolbar(requireActivity())
-
-    /*
-     * Configure the COPPA age gate switch. If the user changes their age, a log out
-     * is required.
-     */
-
-    this.authenticationViews.setCOPPAState(
-      isOver13 = this.viewModel.isOver13,
-      onAgeCheckboxClicked = this.onAgeCheckboxClicked()
-    )
 
     /*
      * Configure the bookmark syncing switch to enable/disable syncing permissions.
@@ -616,38 +604,13 @@ class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
     this.subscriptions.clear()
   }
 
-  private fun reconfigureAccountUI() {
+  private fun reconfigureOEUI() {
     this.authenticationViews.showFor(this.viewModel.account.provider.authentication)
-
-    this.accountTitle.text =
-      this.viewModel.account.provider.displayName
-    this.accountSubtitle.text =
-      this.viewModel.account.provider.subtitle
-
-    /*
-     * Show/hide the custom OPDS feed section.
-     */
-
-    val catalogURIOverride = this.viewModel.account.preferences.catalogURIOverride
-    this.accountCustomOPDSField.text = catalogURIOverride?.toString() ?: ""
-    this.accountCustomOPDS.visibility =
-      if (catalogURIOverride != null) {
-        VISIBLE
-      } else {
-        GONE
-      }
-
     this.disableSyncSwitchForLoginState(this.viewModel.account.loginState)
 
     return when (val loginState = this.viewModel.account.loginState) {
       AccountNotLoggedIn -> {
-        this.loginProgress.visibility = GONE
-        this.setLoginButtonStatus(
-          AsLoginButtonEnabled {
-            this.loginFormLock()
-            this.tryLogin()
-          }
-        )
+        this.oeAccountLoginProgress.visibility = GONE
 
         if (this.viewModel.pendingLogout) {
           this.authenticationViews.setBasicUserAndPass("", "")
@@ -657,56 +620,29 @@ class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
       }
 
       is AccountLoggingIn -> {
-        this.loginProgress.visibility = VISIBLE
-        this.loginProgressBar.visibility = VISIBLE
-        this.loginProgressText.text = loginState.status
-        this.loginButtonErrorDetails.visibility = GONE
+        this.oeAccountLoginProgress.visibility = VISIBLE
+        this.firstBookLoginProgressBar.visibility = VISIBLE
+        this.oeLoginProgressText.text = loginState.status
+        this.oeLoginButtonErrorDetails.visibility = GONE
         this.loginFormLock()
-
-        if (loginState.cancellable) {
-          this.setLoginButtonStatus(
-            AsCancelButtonEnabled {
-              // We don't really support this yet.
-              throw UnimplementedCodeException()
-            }
-          )
-        } else {
-          this.setLoginButtonStatus(AsCancelButtonDisabled)
-        }
       }
 
       is AccountLoggingInWaitingForExternalAuthentication -> {
-        this.loginProgress.visibility = VISIBLE
-        this.loginProgressBar.visibility = VISIBLE
-        this.loginProgressText.text = loginState.status
-        this.loginButtonErrorDetails.visibility = GONE
+        this.oeAccountLoginProgress.visibility = VISIBLE
+        this.firstBookLoginProgressBar.visibility = VISIBLE
+        this.oeLoginProgressText.text = loginState.status
+        this.oeLoginButtonErrorDetails.visibility = GONE
         this.loginFormLock()
-        this.setLoginButtonStatus(
-          AsCancelButtonEnabled {
-            this.viewModel.tryLogin(
-              OAuthWithIntermediaryCancel(
-                accountId = this.viewModel.account.id,
-                description = loginState.description as AccountProviderAuthenticationDescription.OAuthWithIntermediary
-              )
-            )
-          }
-        )
       }
 
       is AccountLoginFailed -> {
-        this.loginProgress.visibility = VISIBLE
-        this.loginProgressBar.visibility = GONE
-        this.loginProgressText.text = loginState.taskResult.steps.last().resolution.message
+        this.oeAccountLoginProgress.visibility = VISIBLE
+        this.firstBookLoginProgressBar.visibility = GONE
+        this.oeLoginProgressText.text = loginState.taskResult.steps.last().resolution.message
         this.loginFormUnlock()
         this.cancelImageButtonLoading()
-        this.setLoginButtonStatus(
-          AsLoginButtonEnabled {
-            this.loginFormLock()
-            this.tryLogin()
-          }
-        )
-        this.loginButtonErrorDetails.visibility = VISIBLE
-        this.loginButtonErrorDetails.setOnClickListener {
+        this.oeLoginButtonErrorDetails.visibility = VISIBLE
+        this.oeLoginButtonErrorDetails.setOnClickListener {
           this.viewModel.openErrorPage(loginState.taskResult.steps)
         }
         this.authenticationAlternativesShow()
@@ -725,15 +661,9 @@ class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
           }
         }
 
-        this.loginProgress.visibility = GONE
+        this.oeAccountLoginProgress.visibility = GONE
         this.loginFormLock()
-        this.loginButtonErrorDetails.visibility = GONE
-        this.setLoginButtonStatus(
-          AsLogoutButtonEnabled {
-            this.loginFormLock()
-            this.viewModel.tryLogout()
-          }
-        )
+        this.oeLoginButtonErrorDetails.visibility = GONE
         this.authenticationAlternativesHide()
       }
 
@@ -750,12 +680,11 @@ class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
           }
         }
 
-        this.loginProgress.visibility = VISIBLE
-        this.loginButtonErrorDetails.visibility = GONE
-        this.loginProgressBar.visibility = VISIBLE
-        this.loginProgressText.text = loginState.status
+        this.oeAccountLoginProgress.visibility = VISIBLE
+        this.oeLoginButtonErrorDetails.visibility = GONE
+        this.firstBookLoginProgressBar.visibility = VISIBLE
+        this.oeLoginProgressText.text = loginState.status
         this.loginFormLock()
-        this.setLoginButtonStatus(AsLogoutButtonDisabled)
       }
 
       is AccountLogoutFailed -> {
@@ -771,20 +700,14 @@ class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
           }
         }
 
-        this.loginProgress.visibility = VISIBLE
-        this.loginProgressBar.visibility = GONE
-        this.loginProgressText.text = loginState.taskResult.steps.last().resolution.message
+        this.oeAccountLoginProgress.visibility = VISIBLE
+        this.firstBookLoginProgressBar.visibility = GONE
+        this.oeLoginProgressText.text = loginState.taskResult.steps.last().resolution.message
         this.cancelImageButtonLoading()
         this.loginFormLock()
-        this.setLoginButtonStatus(
-          AsLogoutButtonEnabled {
-            this.loginFormLock()
-            this.viewModel.tryLogout()
-          }
-        )
 
-        this.loginButtonErrorDetails.visibility = VISIBLE
-        this.loginButtonErrorDetails.setOnClickListener {
+        this.oeLoginButtonErrorDetails.visibility = VISIBLE
+        this.oeLoginButtonErrorDetails.setOnClickListener {
           this.viewModel.openErrorPage(loginState.taskResult.steps)
         }
       }
@@ -810,45 +733,6 @@ class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
 
   private fun cancelImageButtonLoading() {
     this.imageLoader.loader.cancelTag(this.imageButtonLoadingTag)
-  }
-
-  private fun setLoginButtonStatus(
-    status: AccountLoginButtonStatus
-  ) {
-    this.authenticationViews.setLoginButtonStatus(status)
-
-    return when (status) {
-      is AsLoginButtonEnabled -> {
-        // this.signUpLabel.setText(R.string.accountCardCreatorLabel)
-        // this.signUpLabel.isEnabled = true
-        // this.signUpButton.isEnabled = true
-      }
-      is AsLoginButtonDisabled -> {
-        // this.signUpLabel.setText(R.string.accountCardCreatorLabel)
-        // this.signUpLabel.isEnabled = true
-        // this.signUpButton.isEnabled = true
-      }
-      is AsLogoutButtonEnabled -> {
-//        if (true) {
-//          this.signUpLabel.setText(R.string.accountWantChildCard)
-//          this.signUpLabel.isEnabled = true
-//          this.signUpButton.isEnabled = true
-//        } else {
-//          this.signUpLabel.setText(R.string.accountCardCreatorLabel)
-//          this.signUpLabel.isEnabled = false
-//          this.signUpButton.isEnabled = false
-//        }
-      }
-      is AsLogoutButtonDisabled -> {
-//        this.signUpLabel.isEnabled = false
-//        this.signUpButton.isEnabled = false
-      }
-      is AsCancelButtonEnabled,
-      AsCancelButtonDisabled -> {
-//        this.signUpLabel.isEnabled = false
-//        this.signUpButton.isEnabled = false
-      }
-    }
   }
 
   private fun loadAuthenticationLogoIfNecessary(
@@ -879,27 +763,17 @@ class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
   }
 
   private fun loginFormLock() {
-    this.authenticationViews.setCOPPAState(
-      isOver13 = this.viewModel.isOver13,
-      onAgeCheckboxClicked = this.onAgeCheckboxClicked()
-    )
 
     this.authenticationViews.lock()
 
-    this.setLoginButtonStatus(AsLoginButtonDisabled)
     this.authenticationAlternativesHide()
   }
 
   private fun loginFormUnlock() {
-    this.authenticationViews.setCOPPAState(
-      isOver13 = this.viewModel.isOver13,
-      onAgeCheckboxClicked = this.onAgeCheckboxClicked()
-    )
 
     this.authenticationViews.unlock()
 
     val loginSatisfied = this.determineLoginIsSatisfied()
-    this.setLoginButtonStatus(loginSatisfied)
     this.authenticationAlternativesShow()
   }
 
@@ -936,30 +810,5 @@ class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
       is AccountProviderAuthenticationDescription.COPPAAgeGate ->
         throw UnreachableCodeException()
     }
-  }
-
-  /**
-   * A click listener for the age checkbox. If the user wants to change their age, then
-   * this must trigger an account logout.
-   */
-
-  private fun onAgeCheckboxClicked(): (View) -> Unit = {
-    val isOver13 = this.viewModel.isOver13
-    AlertDialog.Builder(this.requireContext())
-      .setTitle(R.string.accountCOPPADeleteBooks)
-      .setMessage(R.string.accountCOPPADeleteBooksConfirm)
-      .setNegativeButton(R.string.accountCancel) { _, _ ->
-        this.authenticationViews.setCOPPAState(
-          isOver13 = isOver13,
-          onAgeCheckboxClicked = this.onAgeCheckboxClicked()
-        )
-      }
-      .setPositiveButton(R.string.accountDelete) { _, _ ->
-        this.loginFormLock()
-        this.viewModel.isOver13 = !isOver13
-        this.viewModel.tryLogout()
-      }
-      .create()
-      .show()
   }
 }
