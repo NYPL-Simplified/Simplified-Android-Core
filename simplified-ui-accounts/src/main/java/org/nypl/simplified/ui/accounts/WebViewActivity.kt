@@ -27,7 +27,7 @@ class WebViewActivity : AppCompatActivity() {
 
   private val privacyNotice = "https://www.openebooks.org/policies"
   private val loginTrouble = "https://www.openebooks.org/signin-help"
-  private val termsOfUse = "http://www.librarysimplified.org/EULA.html"
+  private val termsOfUse = "file:///android_asset/oe-eula.html"
   private val default = "https://www.openebooks.org"
   private val faq = "https://www.openebooks.org/faq"
   private lateinit var url: String
