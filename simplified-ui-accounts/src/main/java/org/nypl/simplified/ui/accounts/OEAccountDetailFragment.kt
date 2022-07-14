@@ -315,11 +315,11 @@ class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
     }
 
     this.firstBookHeader.setOnClickListener {
-      showLoggedOutUI()
+      showLoggedOutUI() // TODO: Remove
     }
 
     this.firstBookLogo.setOnClickListener {
-      showLoggedInUI()
+      showLoggedInUI() // TODO: Remove
     }
 
     this.firstBookPin.doOnTextChanged { _, _, _, _ ->
@@ -727,6 +727,7 @@ class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
         this.loginFormLock()
         this.oeLoginButtonErrorDetails.visibility = GONE
         this.authenticationAlternativesHide()
+        showLoggedInUI()
       }
 
       is AccountLoggingOut -> {
