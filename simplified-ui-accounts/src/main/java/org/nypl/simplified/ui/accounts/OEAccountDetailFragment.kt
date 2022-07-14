@@ -58,7 +58,8 @@ import org.nypl.simplified.ui.images.ImageLoaderType
 import org.slf4j.LoggerFactory
 import java.net.URI
 import org.nypl.simplified.ui.accounts.utils.hideSoftInput
-import org.nypl.simplified.ui.accounts.utils.makeLinks
+import android.view.ViewGroup.MarginLayoutParams
+import androidx.core.widget.doOnTextChanged
 
 /**
  * A fragment that shows settings for a single account.
@@ -115,6 +116,7 @@ class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
   private lateinit var oeLogin: ConstraintLayout
   private lateinit var firstBookLogin: ConstraintLayout
   private lateinit var terms: TextView
+  private lateinit var privacyNotice: TextView
   private lateinit var faq: TextView
   private lateinit var loginTrouble: TextView
   private lateinit var cleverBtn: Button
@@ -124,6 +126,13 @@ class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
   private lateinit var firstBookPin: EditText
   private lateinit var firstBookSignIn: Button
   private lateinit var firstBookLoginProgressBar: ProgressBar
+  private lateinit var firstBookHeader: TextView
+  private lateinit var firstBookLogo: ImageView
+  private lateinit var oeLoggedIn: ConstraintLayout
+  private lateinit var loginForm: ConstraintLayout
+  private lateinit var supportEmail: TextView
+  private val firstBookAccessCodeMin = 10
+  private val firstBookPinMin = 4
 
   private val imageButtonLoadingTag = "IMAGE_BUTTON_LOADING"
 
@@ -199,6 +208,7 @@ class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
     this.firstBookBtn = view.findViewById(R.id.firstbook)
     this.cleverBtn = view.findViewById(R.id.clever)
     this.terms = view.findViewById(R.id.terms)
+    this.privacyNotice = view.findViewById(R.id.privacyNotice)
     this.faq = view.findViewById(R.id.faq)
     this.loginTrouble = view.findViewById(R.id.loginTrouble)
     this.firstBookBack = view.findViewById(R.id.firstBookBack)
@@ -206,6 +216,11 @@ class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
     this.firstBookPin = view.findViewById(R.id.et_pin)
     this.firstBookAcccessCode.filters += InputFilter.AllCaps()
     this.firstBookSignIn = view.findViewById(R.id.sign_in)
+    this.firstBookHeader = view.findViewById(R.id.firstBookHeader)
+    this.firstBookLogo = view.findViewById(R.id.firstBookLogo)
+    this.oeLoggedIn = view.findViewById(R.id.oe_logged_in)
+    this.loginForm = view.findViewById(R.id.loginForm)
+    this.supportEmail = view.findViewById(R.id.supportEmail)
 
     if (this.parameters.showPleaseLogInTitle) {
       this.loginTitle.visibility = VISIBLE
@@ -243,20 +258,13 @@ class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
       it.supportActionBar?.hide()
     }
 
-    this.terms.makeLinks(
-      Pair(
-        getString(R.string.termsOfUse),
-        View.OnClickListener {
-          launchWebView(WebViewActivity.TERMS_OF_USE)
-        }
-      ),
-      Pair(
-        getString(R.string.privacyNotice),
-        View.OnClickListener {
-          launchWebView(WebViewActivity.PRIVACY_NOTICE)
-        }
-      )
-    )
+    this.terms.setOnClickListener {
+      launchWebView(WebViewActivity.TERMS_OF_USE)
+    }
+
+    this.privacyNotice.setOnClickListener {
+      launchWebView(WebViewActivity.PRIVACY_NOTICE)
+    }
 
     this.firstBookBtn.setOnClickListener {
       this.oeLogin.visibility = GONE
@@ -264,6 +272,7 @@ class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
     }
 
     this.firstBookBack.setOnClickListener {
+      hideSoftInput()
       this.oeLogin.visibility = VISIBLE
       this.firstBookLogin.visibility = GONE
       oeAccountLoginProgress.visibility = GONE
@@ -304,6 +313,59 @@ class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
         )
       this.viewModel.tryLogin(request)
     }
+
+    this.firstBookHeader.setOnClickListener {
+      showLoggedOutUI()
+    }
+
+    this.firstBookLogo.setOnClickListener {
+      showLoggedInUI()
+    }
+
+    this.firstBookPin.doOnTextChanged { _, _, _, _ ->
+      updateLoginButton()
+    }
+
+    this.firstBookAcccessCode.doOnTextChanged { _, _, _, _ ->
+      updateLoginButton()
+    }
+  }
+
+  /**
+   * Locks sign in form and shows bookmark & server buttons
+   */
+  private fun showLoggedInUI() {
+    val params = loginForm.layoutParams as MarginLayoutParams
+    params.topMargin = 16
+    this.firstBookHeader.text = getString(R.string.settings)
+    this.firstBookLogo.visibility = GONE
+    this.loginTrouble.visibility = INVISIBLE
+    this.faq.visibility = INVISIBLE
+    this.oeLoggedIn.visibility = VISIBLE
+    this.firstBookSignIn.text = getString(R.string.signOut)
+    this.firstBookAcccessCode.isEnabled = false
+    this.firstBookPin.isEnabled = false
+  }
+
+  /**
+   * Unlocks sign in form and hides bookmark & server buttons
+   */
+  private fun showLoggedOutUI() {
+    this.firstBookHeader.text = getString(R.string.signInHeader)
+    this.firstBookLogo.visibility = VISIBLE
+    this.loginTrouble.visibility = VISIBLE
+    this.faq.visibility = VISIBLE
+    this.oeLoggedIn.visibility = INVISIBLE
+    this.firstBookSignIn.text = getString(R.string.signIn)
+    this.firstBookAcccessCode.isEnabled = true
+    this.firstBookPin.isEnabled = true
+  }
+
+  /**
+   * Enable/Disable login button if form is valid
+   */
+  private fun updateLoginButton() {
+    this.firstBookSignIn.isEnabled = this.firstBookAcccessCode.text.toString().trim().length == firstBookAccessCodeMin && this.firstBookPin.text.toString().trim().length == firstBookPinMin
   }
 
   /**

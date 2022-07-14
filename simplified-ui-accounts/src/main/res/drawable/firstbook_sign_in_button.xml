@@ -10,5 +10,7 @@
         android:state_pressed="true"
         android:drawable="@drawable/ic_first_book_sign_in_pressed" />
 
+    <item android:state_enabled="false" android:drawable="@drawable/ic_first_book_sign_in_disabled"/>
+
     <item android:drawable="@drawable/ic_first_book_sign_in_focused" />
 </selector>

@@ -34,6 +34,7 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/loginForm"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
@@ -43,21 +44,21 @@
         app:layout_constraintTop_toBottomOf="@id/toolbar">
 
         <ImageView
-            android:id="@+id/firstbook"
-            android:layout_width="72dp"
+            android:id="@+id/firstBookLogo"
+            android:layout_width="50dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="48dp"
             android:contentDescription="@string/contentDescFirstBookLogo"
             android:src="@drawable/ic_firstbook"
             app:layout_constraintBottom_toTopOf="@id/ti_access_code"
-            app:layout_constraintEnd_toStartOf="@id/header" />
+            app:layout_constraintEnd_toStartOf="@id/firstBookHeader" />
 
         <TextView
-            android:id="@+id/header"
+            android:id="@+id/firstBookHeader"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="32dp"
-            android:text="@string/signIn"
+            android:text="@string/signInHeader"
             android:textColor="@color/textColor"
             android:textSize="24sp"
             android:textStyle="bold"
@@ -73,7 +74,9 @@
             android:theme="@style/Theme.MaterialComponents.Light"
             app:errorEnabled="false"
             app:errorIconDrawable="@null"
-            app:hintEnabled="false"
+            android:hint="@string/accessCode"
+            app:hintTextColor="@color/textColor"
+            android:layout_marginBottom="16sp"
             app:layout_constraintBottom_toTopOf="@id/ti_pin"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent">
@@ -82,7 +85,7 @@
                 android:id="@+id/et_access_code"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="16dp"
+                android:layout_margin="12dp"
                 android:autofillHints="null"
                 android:digits="0123456789qwertzuiopasdfghjklyxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM"
                 android:hint="@string/accessCode"
@@ -104,12 +107,13 @@
             android:theme="@style/Theme.MaterialComponents.Light"
             app:errorEnabled="false"
             app:errorIconDrawable="@null"
-            app:hintEnabled="false"
+            android:hint="@string/pin"
+            app:hintTextColor="@color/textColor"
             app:layout_constraintBottom_toTopOf="@id/sign_in"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:passwordToggleEnabled="true"
-            app:passwordToggleTint="@color/passwordToggle">
+            app:passwordToggleTint="@color/darkGrey">
 
             <EditText
                 android:id="@+id/et_pin"
@@ -130,10 +134,12 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <Button
+            android:enabled="false"
             android:id="@+id/sign_in"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
+            android:layout_height="58dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
             android:background="@drawable/firstbook_sign_in_button"
             android:padding="8dp"
             android:text="@string/signIn"
@@ -188,6 +194,92 @@
             app:layout_constraintTop_toBottomOf="@+id/loginTrouble" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/oe_logged_in"
+            android:layout_marginTop="48dp"
+            android:visibility="gone"
+            tools:visibility="visible"
+            android:layout_width="match_parent"
+            app:layout_constraintTop_toBottomOf="@+id/sign_in"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp">
+
+            <View
+                android:id="@+id/divider1"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/darkGrey"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/bookmarksLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:text="@string/accountSyncBookmarks"
+                android:textSize="20sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/divider1" />
+
+            <Switch
+                android:id="@+id/switch1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="16dp"
+                app:layout_constraintBottom_toBottomOf="@id/divider2"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/divider1" />
+
+            <View
+                android:id="@+id/divider2"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="16dp"
+                android:background="@color/darkGrey"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/bookmarksLabel" />
+
+            <TextView
+                android:id="@+id/reportAnIssue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="@string/reportAnIssue"
+                android:textSize="20sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/divider2" />
+
+            <TextView
+                android:layout_marginTop="8dp"
+                android:id="@+id/supportEmail"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:clickable="true"
+                android:textColor="@color/teal"
+                android:focusable="true"
+                android:text="@string/supportEmail"
+                android:textSize="14sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/reportAnIssue" />
+
+            <View
+                android:id="@+id/divider4"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="16dp"
+                android:background="@color/darkGrey"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/supportEmail" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/oeAccountLoginProgress"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -195,8 +287,7 @@
             android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/faq"
-            tools:visibility="visible">
+            app:layout_constraintTop_toBottomOf="@id/faq">
 
             <TextView
                 android:id="@+id/oeLoginProgressText"

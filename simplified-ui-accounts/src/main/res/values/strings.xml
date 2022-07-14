@@ -50,13 +50,14 @@
   <string name="oeLoginGetStarted">Get Started</string>
   <string name="oeLoginAccessCollection">Login to access the collection.</string>
   <string name="and"> and </string>
-  <string name="signInWithClever">Sign in with Clever</string>
-  <string name="signInWithFirstBook">Sign in with First Book</string>
-  <string name="signIn">Sign In</string>
+  <string name="signInWithClever">&#160;&#160;&#160;Sign in with Clever</string>
+  <string name="signInWithFirstBook">&#160;&#160;&#160;Sign in with First Book</string>
+  <string name="signIn">Sign in</string>
+  <string name="signInHeader">Sign In</string>
+  <string name="signOut">Sign out</string>
   <string name="accessCode">Access Code</string>
-  <string name="terms">Terms of Use and Privacy Notice</string>
-  <string name="termsOfUse">Terms of Use</string>
-  <string name="privacyNotice">Privacy Notice</string>
+  <string name="termsOfUse"><u>Terms of Use</u></string>
+  <string name="privacyNotice"><u>Privacy Notice</u></string>
   <string name="faq"><u>Frequently asked questions</u></string>
   <string name="troubleSigningIn"><u>Having trouble signing in?</u></string>
   <string name="pin">PIN</string>
@@ -66,4 +67,7 @@
   <string name="contentDescFirstBookLogo">First Book logo</string>
   <string name="contentDescProgressLoader">Progress loader</string>
   <string name="contentDescBackButton">Back button</string>
+  <string name="reportAnIssue">Report an issue</string>
+  <string name="supportEmail"><u>info@openebooks.org</u></string>
+  <string name="settings">Settings</string>
 </resources>

@@ -47,14 +47,15 @@
         <Button
             android:id="@+id/clever"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginBottom="16dp"
+            android:layout_height="58dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="22dp"
             android:background="@drawable/clever_launch_button"
             android:drawableStart="@drawable/ic_clever"
-            android:elevation="6dp"
+            android:elevation="3dp"
             android:enabled="true"
+            android:gravity="center_vertical"
             android:paddingStart="30dip"
             android:paddingTop="8dp"
             android:paddingEnd="0dip"
@@ -77,15 +78,15 @@
 
         <Button
             android:id="@+id/firstbook"
+            android:gravity="center_vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="8dp"
+            android:layout_height="58sp"
+            android:layout_marginTop="22dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
             android:background="@drawable/firstbook_launch_button"
             android:drawableStart="@drawable/ic_firstbook_alt"
-            android:elevation="6dp"
+            android:elevation="3dp"
             android:enabled="true"
             android:paddingStart="30dip"
             android:paddingTop="8dp"
@@ -99,17 +100,28 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/guideline" />
 
-        <TextView
-            android:id="@+id/terms"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:text="@string/terms"
-            android:textColor="@color/textColor"
-            android:textColorLink="@color/linkBlue"
-            android:textSize="14sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/firstbook" />
+    <TextView
+        android:id="@+id/terms"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="@string/termsOfUse"
+        android:textColor="@color/linkColor"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/firstbook" />
+
+    <TextView
+        android:id="@+id/privacyNotice"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="@string/privacyNotice"
+        android:textColor="@color/linkColor"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/terms" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
