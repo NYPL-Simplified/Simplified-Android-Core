@@ -1,95 +1,108 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-  xmlns:app="http://schemas.android.com/apk/res-auto"
-  android:id="@+id/bookCellError"
-  android:layout_width="match_parent"
-  android:layout_height="@dimen/catalogFeedCellHeight"
-  android:background="?attr/simplifiedColorPrimaryDark">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto">
 
-  <ImageView
-    android:id="@+id/bookCellErrorIcon"
-    android:layout_width="64dp"
-    android:layout_height="64dp"
-    android:layout_marginStart="16dp"
-    android:layout_marginTop="16dp"
-    android:contentDescription="@string/catalogOperationFailed"
-    android:src="@drawable/corrupted"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent" />
+  <data>
 
-  <TextView
-    android:id="@+id/bookCellErrorTitle"
-    android:layout_width="0dp"
-    android:layout_height="wrap_content"
-    android:layout_marginStart="16dp"
-    android:layout_marginTop="16dp"
-    android:layout_marginEnd="16dp"
-    android:ellipsize="end"
-    android:maxLines="1"
-    android:text="@string/catalogPlaceholder"
-    android:textColor="?attr/simplifiedColorBackground"
-    android:textSize="16sp"
-    android:textStyle="bold"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toEndOf="@id/bookCellErrorIcon"
-    app:layout_constraintTop_toTopOf="parent" />
+    <variable
+      name="errorItem"
+      type="org.nypl.simplified.ui.catalog.withoutGroups.BookItem.Error" />
+  </data>
 
-  <TextView
-    android:id="@+id/bookCellErrorMessage"
-    android:layout_width="0dp"
-    android:layout_height="wrap_content"
-    android:layout_marginStart="16dp"
-    android:layout_marginEnd="16dp"
-    android:ellipsize="end"
-    android:maxLines="1"
-    android:text="@string/catalogOperationFailed"
-    android:textColor="?attr/simplifiedColorBackground"
-    android:textStyle="bold"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toEndOf="@id/bookCellErrorIcon"
-    app:layout_constraintTop_toBottomOf="@id/bookCellErrorTitle" />
+  <androidx.constraintlayout.widget.ConstraintLayout
+    android:id="@+id/bookCellError"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/catalogFeedCellHeight"
+    android:background="?attr/simplifiedColorPrimaryDark">
 
-  <LinearLayout
-    android:id="@+id/bookCellErrorButtons"
-    android:layout_width="0dp"
-    android:layout_height="@dimen/catalogFeedCellButtonsHeight"
-    android:layout_marginStart="16dp"
-    android:layout_marginEnd="16dp"
-    android:layout_marginBottom="16dp"
-    android:orientation="horizontal"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toEndOf="@id/bookCellErrorIcon">
+    <ImageView
+      android:id="@+id/bookCellErrorIcon"
+      android:layout_width="64dp"
+      android:layout_height="64dp"
+      android:layout_marginStart="16dp"
+      android:layout_marginTop="16dp"
+      android:contentDescription="@string/catalogOperationFailed"
+      android:src="@drawable/corrupted"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent" />
 
-    <Button
-      android:id="@+id/bookCellErrorButtonDismiss"
+    <TextView
+      android:id="@+id/bookCellErrorTitle"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="16dp"
+      android:layout_marginTop="16dp"
+      android:layout_marginEnd="16dp"
+      android:ellipsize="end"
+      android:maxLines="1"
+      android:text="@{errorItem.title}"
+      android:textColor="?attr/simplifiedColorBackground"
+      android:textSize="16sp"
+      android:textStyle="bold"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toEndOf="@id/bookCellErrorIcon"
+      app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+      android:id="@+id/bookCellErrorMessage"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="16dp"
+      android:layout_marginEnd="16dp"
+      android:ellipsize="end"
+      android:maxLines="1"
+      android:text="@string/catalogOperationFailed"
+      android:textColor="?attr/simplifiedColorBackground"
+      android:textStyle="bold"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toEndOf="@id/bookCellErrorIcon"
+      app:layout_constraintTop_toBottomOf="@id/bookCellErrorTitle" />
+
+    <LinearLayout
+      android:id="@+id/bookCellErrorButtons"
       android:layout_width="0dp"
       android:layout_height="@dimen/catalogFeedCellButtonsHeight"
-      android:layout_weight="1"
-      android:text="@string/catalogDismiss" />
+      android:layout_marginStart="16dp"
+      android:layout_marginEnd="16dp"
+      android:layout_marginBottom="16dp"
+      android:orientation="horizontal"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toEndOf="@id/bookCellErrorIcon">
 
-    <Space
-      android:layout_width="16dp"
-      android:layout_height="wrap_content" />
+      <Button
+        android:id="@+id/bookCellErrorButtonDismiss"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/catalogFeedCellButtonsHeight"
+        android:layout_weight="1"
+        android:onClick="@{() -> errorItem.actions.dismiss()}"
+        android:text="@string/catalogDismiss" />
 
-    <Button
-      android:id="@+id/bookCellErrorButtonDetails"
-      android:layout_width="0dp"
-      android:layout_height="@dimen/catalogFeedCellButtonsHeight"
-      android:layout_weight="1"
-      android:text="@string/catalogDetails" />
+      <Space
+        android:layout_width="16dp"
+        android:layout_height="wrap_content" />
 
-    <Space
-      android:layout_width="16dp"
-      android:layout_height="wrap_content" />
+      <Button
+        android:id="@+id/bookCellErrorButtonDetails"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/catalogFeedCellButtonsHeight"
+        android:layout_weight="1"
+        android:onClick="@{() -> errorItem.actions.details()}"
+        android:text="@string/catalogDetails" />
 
-    <Button
-      android:id="@+id/bookCellErrorButtonRetry"
-      android:layout_width="0dp"
-      android:layout_height="@dimen/catalogFeedCellButtonsHeight"
-      android:layout_weight="1"
-      android:text="@string/catalogRetry" />
-  </LinearLayout>
+      <Space
+        android:layout_width="16dp"
+        android:layout_height="wrap_content" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+      <Button
+        android:id="@+id/bookCellErrorButtonRetry"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/catalogFeedCellButtonsHeight"
+        android:layout_weight="1"
+        android:onClick="@{() -> errorItem.actions.retry()}"
+        android:text="@string/catalogRetry" />
+    </LinearLayout>
+
+  </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

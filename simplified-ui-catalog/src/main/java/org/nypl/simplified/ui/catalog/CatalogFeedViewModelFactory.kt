@@ -10,6 +10,7 @@ import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.feeds.api.FeedLoaderType
 import org.nypl.simplified.listeners.api.FragmentListenerType
 import org.nypl.simplified.profiles.controller.api.ProfilesControllerType
+import org.nypl.simplified.ui.thread.api.UIExecutor
 import org.slf4j.LoggerFactory
 
 /**
@@ -53,7 +54,8 @@ class CatalogFeedViewModelFactory(
           analytics,
           this.borrowViewModel,
           this.feedArguments,
-          this.listener
+          this.listener,
+          UIExecutor()
         ) as T
       }
       else ->

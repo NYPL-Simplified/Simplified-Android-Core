@@ -15,15 +15,19 @@ object CatalogTestUtils {
   * https://github.com/mockk/mockk/issues/473
   * so here's a quick way to get a relatively-useable epub FeedEntry
   */
-  fun buildTestFeedEntryOPDS(): FeedEntry.FeedEntryOPDS {
-    val entry = FeedEntry.FeedEntryOPDS(
+  fun buildTestFeedEntryOPDS(
+    title: String? = null,
+    author: String? = null
+  ): FeedEntry.FeedEntryOPDS {
+    return FeedEntry.FeedEntryOPDS(
       AccountID.generate(),
       OPDSAcquisitionFeedEntry.newBuilder(
         "in_id",
-        "in_title",
+        title ?: "in_title",
         DateTime.now(),
         OPDSAvailabilityLoanable.get(),
       )
+        .addAuthor(author ?: "arthur author")
         .addAcquisition(
           OPDSAcquisition(
             OPDSAcquisition.Relation.ACQUISITION_BORROW,
@@ -38,6 +42,5 @@ object CatalogTestUtils {
         )
         .build()
     )
-    return entry
   }
 }

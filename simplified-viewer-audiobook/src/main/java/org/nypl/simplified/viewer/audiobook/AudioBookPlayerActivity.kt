@@ -38,6 +38,7 @@ import org.librarysimplified.audiobook.manifest.api.PlayerManifest
 import org.librarysimplified.audiobook.views.PlayerAccessibilityEvent
 import org.librarysimplified.audiobook.views.PlayerFragment
 import org.librarysimplified.audiobook.views.PlayerFragmentListenerType
+import org.librarysimplified.audiobook.views.PlayerFragmentParameters
 import org.librarysimplified.audiobook.views.PlayerPlaybackRateFragment
 import org.librarysimplified.audiobook.views.PlayerSleepTimerFragment
 import org.librarysimplified.audiobook.views.PlayerTOCFragment
@@ -407,13 +408,16 @@ class AudioBookPlayerActivity :
         player, book, this, playerScheduledExecutor, sleepTimer
       )
       this.supportFragmentManager.fragmentFactory = fragmentFactory
+      val emptyParameters = PlayerFragmentParameters(null)
+      val bundle = Bundle()
+      bundle.putSerializable(PlayerFragment.parametersKey, emptyParameters)
       if (!this.isFinishing && !this.supportFragmentManager.isDestroyed) {
         this.supportFragmentManager
           .beginTransaction()
           .replace(
             R.id.audio_book_player_fragment_holder,
             PlayerFragment::class.java,
-            null,
+            bundle,
             "PLAYER"
           )
           .commitAllowingStateLoss()

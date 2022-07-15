@@ -9,6 +9,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.paging.Config
 import androidx.paging.DataSource
 import androidx.paging.LivePagedListBuilder
+import androidx.paging.PagingData
 import androidx.paging.PositionalDataSource
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.Espresso.onView
@@ -18,18 +19,14 @@ import androidx.test.espresso.action.ViewActions.replaceText
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.BoundedMatcher
 import androidx.test.espresso.matcher.RootMatchers.isDialog
-import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.espresso.matcher.ViewMatchers.assertThat
 import androidx.test.espresso.matcher.ViewMatchers.hasDescendant
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.isEnabled
 import androidx.test.espresso.matcher.ViewMatchers.isNotEnabled
-import androidx.test.espresso.matcher.ViewMatchers.withEffectiveVisibility
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.google.common.util.concurrent.FluentFuture
-import com.google.common.util.concurrent.SettableFuture
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -38,8 +35,10 @@ import io.mockk.mockk
 import io.mockk.mockkConstructor
 import io.mockk.mockkObject
 import io.mockk.runs
-import io.mockk.slot
 import io.mockk.verify
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.test.runBlockingTest
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldBeInstanceOf
 import org.hamcrest.Description
@@ -53,30 +52,32 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountID
-import org.nypl.simplified.books.api.Book
-import org.nypl.simplified.books.book_registry.BookStatus
-import org.nypl.simplified.books.book_registry.BookWithStatus
 import org.nypl.simplified.books.covers.BookCoverProviderType
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.feeds.api.Feed
-import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.feeds.api.FeedGroup
 import org.nypl.simplified.feeds.api.FeedLoaderResult
 import org.nypl.simplified.listeners.api.FragmentListenerFinder
 import org.nypl.simplified.listeners.api.FragmentListenerType
+import org.nypl.simplified.testUtils.TestCoroutineRule
 import org.nypl.simplified.testUtils.robolectricSwipeToRefresh
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithGroups
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithoutGroups
 import org.nypl.simplified.ui.catalog.RecyclerViewEspressoUtils.atPositionOnView
 import org.nypl.simplified.ui.catalog.RecyclerViewEspressoUtils.hasAdapterItemCount
+import org.nypl.simplified.ui.catalog.withoutGroups.BookItem
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
 import java.net.URI
 
+@ExperimentalCoroutinesApi
 @RunWith(AndroidJUnit4::class)
 class CatalogFeedFragmentTest {
 
   @get: Rule
   val instantExecutorRule = InstantTaskExecutorRule()
+
+  @get:Rule
+  val testCoroutineRule = TestCoroutineRule()
 
   private lateinit var scenario: FragmentScenario<CatalogFeedFragment>
 
@@ -252,10 +253,11 @@ class CatalogFeedFragmentTest {
   }
 
   @Test
-  fun `on CatalogFeedWithoutGroups observes CatalogFeedWithoutGroups entries and updates adapter on emission`() {
+  fun `on CatalogFeedWithoutGroups observes CatalogFeedWithoutGroups bookItems and updates adapter on emission`() = testCoroutineRule.dispatcher.runBlockingTest {
     onView(withId(R.id.feedWithoutGroupsList)).check(hasAdapterItemCount(0))
 
     testFeedStateLiveData.value = buildMockFeedStateWithoutGroups()
+    testCoroutineRule.dispatcher.advanceUntilIdle()
 
     onView(withId(R.id.feedWithoutGroupsList)).check(hasAdapterItemCount(2))
   }
@@ -271,131 +273,13 @@ class CatalogFeedFragmentTest {
   }
 
   private fun buildMockFeedStateWithoutGroups(): CatalogFeedWithoutGroups {
-    val testEntriesLiveData = listOf<FeedEntry>(
-      mockk<FeedEntry.FeedEntryCorrupt>(),
-      mockk<FeedEntry.FeedEntryCorrupt>(),
-    ).asPagedList()
-
     return CatalogFeedWithoutGroups(
       mockk(), // Pass in mock FeedArguments as it is not used when handling state
-      testEntriesLiveData,
+      flow { emit(PagingData.from<BookItem>(listOf(BookItem.Corrupt(mockk()), BookItem.Corrupt(mockk())))) },
       emptyList(),
       emptyMap(),
       null,
       "title"
-    )
-  }
-
-  @Test
-  fun `on CatalogFeedWithoutGroups shows correct format label when required by build configuration`() {
-    val entry = CatalogTestUtils.buildTestFeedEntryOPDS()
-    val testEntriesLiveData = listOf<FeedEntry>(entry).asPagedList()
-
-    // Configure Catalog to show format labels
-    every { mockBuildConfigService.showFormatLabel } returns true
-
-    // We rely on an invocation of the provided callback on registration in order to
-    // reach a valid state in the ViewHolder. So we capture and invoke it here
-    val bookWithStatusCallbackSlot = slot<(BookWithStatus) -> Unit>()
-    every {
-      mockCatalogFeedViewModel.registerObserver(any(), capture(bookWithStatusCallbackSlot))
-    } answers {
-      bookWithStatusCallbackSlot.captured.invoke(
-        BookWithStatus(
-          Book(mockk(), AccountID.generate(), null, null, entry.feedEntry, emptyList()),
-          BookStatus.Loanable(mockk())
-        )
-      )
-    }
-
-    val ignoredFuture = FluentFuture.from(SettableFuture.create<Unit>())
-    every {
-      mockBookCoversProvider.loadThumbnailInto(
-        any(),
-        any(),
-        any(),
-        any()
-      )
-    } returns ignoredFuture
-
-    testFeedStateLiveData.value = CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithoutGroups(
-      mockk(), // Pass in mock FeedArguments as it is not used when handling state
-      testEntriesLiveData,
-      emptyList(),
-      emptyMap(),
-      null,
-      "title"
-    )
-
-    onView(withId(R.id.feedWithoutGroupsList)).check(
-      matches(
-        atPositionOnView(
-          0,
-          hasDescendant(
-            allOf(
-              withId(R.id.bookCellIdleMeta),
-              withText("eBook"),
-              withEffectiveVisibility(ViewMatchers.Visibility.VISIBLE)
-            )
-          )
-        )
-      )
-    )
-  }
-
-  @Test
-  fun `on CatalogFeedWithoutGroups hides format label when required by build configuration`() {
-    val entry = CatalogTestUtils.buildTestFeedEntryOPDS()
-    val testEntriesLiveData = listOf<FeedEntry>(entry).asPagedList()
-
-    // Configure Catalog to show format labels
-    every { mockBuildConfigService.showFormatLabel } returns false
-
-    // We rely on an invocation of the provided callback on registration in order to
-    // reach a valid state in the ViewHolder. So we capture and invoke it here
-    val bookWithStatusCallbackSlot = slot<(BookWithStatus) -> Unit>()
-    every {
-      mockCatalogFeedViewModel.registerObserver(any(), capture(bookWithStatusCallbackSlot))
-    } answers {
-      bookWithStatusCallbackSlot.captured.invoke(
-        BookWithStatus(
-          Book(mockk(), AccountID.generate(), null, null, entry.feedEntry, emptyList()),
-          BookStatus.Loanable(mockk())
-        )
-      )
-    }
-
-    val ignoredFuture = FluentFuture.from(SettableFuture.create<Unit>())
-    every {
-      mockBookCoversProvider.loadThumbnailInto(
-        any(),
-        any(),
-        any(),
-        any()
-      )
-    } returns ignoredFuture
-
-    testFeedStateLiveData.value = CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithoutGroups(
-      mockk(), // Pass in mock FeedArguments as it is not used when handling state
-      testEntriesLiveData,
-      emptyList(),
-      emptyMap(),
-      null,
-      "title"
-    )
-
-    onView(withId(R.id.feedWithoutGroupsList)).check(
-      matches(
-        atPositionOnView(
-          0,
-          hasDescendant(
-            allOf(
-              withId(R.id.bookCellIdleMeta),
-              withEffectiveVisibility(ViewMatchers.Visibility.GONE)
-            )
-          )
-        )
-      )
     )
   }
 

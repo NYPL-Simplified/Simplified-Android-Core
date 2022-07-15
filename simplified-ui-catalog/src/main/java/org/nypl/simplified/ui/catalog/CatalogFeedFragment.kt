@@ -26,10 +26,15 @@ import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.flowWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import com.google.android.material.textfield.TextInputEditText
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import org.librarysimplified.services.api.Services
 import org.nypl.simplified.android.ktx.supportActionBar
 import org.nypl.simplified.android.ktx.viewLifecycleAware
@@ -50,6 +55,7 @@ import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.Catalog
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithoutGroups
 import org.nypl.simplified.ui.catalog.databinding.FeedBinding
 import org.nypl.simplified.ui.catalog.databinding.FeedHeaderBinding
+import org.nypl.simplified.ui.catalog.withoutGroups.CatalogPagedAdapter
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
 import org.slf4j.LoggerFactory
 
@@ -121,6 +127,8 @@ class CatalogFeedFragment : Fragment(), AgeGateDialog.BirthYearSelectedListener 
   private var ageGateDialog: DialogFragment? = null
   private val feedWithGroupsData: MutableList<FeedGroup> = mutableListOf()
 
+  private var pagedWithoutGroupsUpdatesJob: Job? = null
+
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setHasOptionsMenu(true)
@@ -183,19 +191,13 @@ class CatalogFeedFragment : Fragment(), AgeGateDialog.BirthYearSelectedListener 
 
     sharedListConfiguration(feedWithoutGroupsList)
 
+    withoutGroupsAdapter = CatalogPagedAdapter(bookCovers = bookCoverProvider, configService)
+
     val withoutGroupsSwipeContainer = binding.feedWithoutGroups.feedWithoutGroupsSwipeContainer
     withoutGroupsSwipeContainer.setOnRefreshListener {
       withoutGroupsSwipeContainer.isRefreshing = false
       viewModel.reloadFeed()
     }
-
-    withoutGroupsAdapter = CatalogPagedAdapter(
-      context = requireActivity(),
-      listener = viewModel,
-      buttonCreator = buttonCreator,
-      bookCovers = bookCoverProvider,
-      config = configService
-    )
 
     feedWithoutGroupsList.adapter = withoutGroupsAdapter
   }
@@ -252,6 +254,8 @@ class CatalogFeedFragment : Fragment(), AgeGateDialog.BirthYearSelectedListener 
     if (feedState is CatalogFeedAgeGate) openAgeGateDialog() else dismissAgeGateDialog()
     configureToolbar()
 
+    pagedWithoutGroupsUpdatesJob?.cancel()
+
     when (feedState) {
       is CatalogFeedWithGroups -> onCatalogFeedWithGroups(feedState)
       is CatalogFeedWithoutGroups -> onCatalogFeedWithoutGroups(feedState)
@@ -274,9 +278,12 @@ class CatalogFeedFragment : Fragment(), AgeGateDialog.BirthYearSelectedListener 
       facetsByGroup = feedState.facetsByGroup
     )
 
-    feedState.entries.observe(viewLifecycleOwner) { newPagedList ->
-      logger.debug("received paged list ({} elements)", newPagedList.size)
-      withoutGroupsAdapter.submitList(newPagedList)
+    pagedWithoutGroupsUpdatesJob = lifecycleScope.launch {
+      feedState.bookItems
+        .flowWithLifecycle(lifecycle)
+        .collect {
+          withoutGroupsAdapter.submitData(it)
+        }
     }
   }
 
