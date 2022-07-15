@@ -78,6 +78,7 @@
                 app:errorIconDrawable="@null"
                 android:hint="@string/accessCode"
                 app:hintTextColor="@color/textColor"
+                android:textColorHint="@color/textColor"
                 android:layout_marginBottom="16sp"
                 app:layout_constraintBottom_toTopOf="@id/ti_pin"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -95,7 +96,7 @@
                     android:maxLength="10"
                     android:maxLines="1"
                     android:textColor="@color/textColor"
-                    android:textColorHint="@color/hintTextColor"
+                    android:textColorHint="@color/textColor"
                     android:textSize="18sp"
                     app:backgroundTint="@color/inputLine" />
 
@@ -111,6 +112,7 @@
                 app:errorIconDrawable="@null"
                 android:hint="@string/pin"
                 app:hintTextColor="@color/textColor"
+                android:textColorHint="@color/textColor"
                 app:layout_constraintBottom_toTopOf="@id/sign_in"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -129,7 +131,7 @@
                     android:maxLength="4"
                     android:maxLines="1"
                     android:textColor="@color/textColor"
-                    android:textColorHint="@color/hintTextColor"
+                    android:textColorHint="@color/textColor"
                     android:textSize="18sp"
                     app:backgroundTint="@color/inputLine" />
 

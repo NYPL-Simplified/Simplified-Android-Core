@@ -284,31 +284,39 @@ class OEAccountDetailFragment : Fragment() {
     }
 
     binding.firstBookLogin.signIn.setOnClickListener {
-      logger.debug("Logging into First Book")
-      binding.firstBookLogin.oeAccountLoginProgress.visibility = GONE
-      hideSoftInput()
-      val accountUsername = AccountUsername(binding.firstBookLogin.etAccessCode.toString().trim())
-      val accountPassword = AccountPassword(binding.firstBookLogin.etPin.toString().trim())
-      val description = AccountProviderAuthenticationDescription.Basic(
-        description = "First Book",
-        formDescription = AccountProviderAuthenticationDescription.FormDescription(
-          barcodeFormat = null,
-          keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
-          passwordMaximumLength = 0,
-          passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
-          labels = linkedMapOf("LOGIN" to "First Book Access Code", "PASSWORD" to "First Book PIN")
-        ),
-        logoURI = URI.create("https://circulation.openebooks.us/images/FirstBookLoginButton280.png")
-      )
-
-      val request =
-        Basic(
-          accountId = this.viewModel.account.id,
-          description = description,
-          password = accountPassword,
-          username = accountUsername
+      if (binding.firstBookLogin.signIn.text == getString(R.string.signIn)) {
+        logger.debug("Logging into First Book")
+        binding.firstBookLogin.oeAccountLoginProgress.visibility = GONE
+        hideSoftInput()
+        val accountUsername = AccountUsername(binding.firstBookLogin.etAccessCode.toString().trim())
+        val accountPassword = AccountPassword(binding.firstBookLogin.etPin.toString().trim())
+        val description = AccountProviderAuthenticationDescription.Basic(
+          description = "First Book",
+          formDescription = AccountProviderAuthenticationDescription.FormDescription(
+            barcodeFormat = null,
+            keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
+            passwordMaximumLength = 0,
+            passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
+            labels = linkedMapOf(
+              "LOGIN" to "First Book Access Code",
+              "PASSWORD" to "First Book PIN"
+            )
+          ),
+          logoURI = URI.create("https://circulation.openebooks.us/images/FirstBookLoginButton280.png")
         )
-      this.viewModel.tryLogin(request)
+
+        val request =
+          Basic(
+            accountId = this.viewModel.account.id,
+            description = description,
+            password = accountPassword,
+            username = accountUsername
+          )
+        this.viewModel.tryLogin(request)
+      } else {
+        logger.debug("Logging out of First Book")
+        this.viewModel.tryLogout()
+      }
     }
 
 //    this.firstBookHeader.setOnClickListener {
@@ -439,6 +447,7 @@ class OEAccountDetailFragment : Fragment() {
    * Locks sign in form and shows bookmark & server buttons
    */
   private fun showLoggedInUI() {
+    binding.firstBookLogin.signIn.isEnabled = true
     binding.firstBookLogin.signIn.text = getString(R.string.signOut)
     binding.firstBookLogin.etAccessCode.isEnabled = false
     binding.firstBookLogin.etPin.isEnabled = false
@@ -448,6 +457,8 @@ class OEAccountDetailFragment : Fragment() {
     binding.firstBookLogin.faq.visibility = INVISIBLE
     binding.firstBookLogin.loggedIn.visibility = VISIBLE
     binding.oeLoginLanding.oeLogin.visibility = GONE
+    binding.firstBookLogin.firstBookLoginCl.visibility = VISIBLE
+    binding.firstBookLogin.firstBookBack.visibility = GONE
   }
 
   /**
@@ -463,6 +474,8 @@ class OEAccountDetailFragment : Fragment() {
     binding.firstBookLogin.etAccessCode.isEnabled = true
     binding.firstBookLogin.etPin.isEnabled = true
     binding.oeLoginLanding.oeLogin.visibility = VISIBLE
+    binding.firstBookLogin.firstBookLoginCl.visibility = GONE
+    binding.firstBookLogin.firstBookBack.visibility = VISIBLE
   }
 
   /**
@@ -679,6 +692,7 @@ class OEAccountDetailFragment : Fragment() {
           this.viewModel.pendingLogout = false
         }
         this.loginFormUnlock()
+        showLoggedOutUI()
       }
 
       is AccountLoggingIn -> {
@@ -861,7 +875,6 @@ class OEAccountDetailFragment : Fragment() {
   fun loginFormLock() {
     binding.firstBookLogin.etAccessCode.isEnabled = false
     binding.firstBookLogin.etPin.isEnabled = false
-    binding.firstBookLogin.signIn.isEnabled = false
   }
 
   /**
@@ -870,7 +883,6 @@ class OEAccountDetailFragment : Fragment() {
   fun loginFormUnlock() {
     binding.firstBookLogin.etPin.isEnabled = true
     binding.firstBookLogin.etPin.isEnabled = true
-    binding.firstBookLogin.signIn.isEnabled = true
   }
 
   /**
