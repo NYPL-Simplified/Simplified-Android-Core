@@ -11,6 +11,7 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/toolbar"
+            android:background="@color/toolbarBackground"
             android:layout_width="match_parent"
             android:layout_height="?android:attr/actionBarSize"
             app:layout_constraintEnd_toEndOf="parent"

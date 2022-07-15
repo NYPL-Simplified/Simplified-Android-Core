@@ -19,5 +19,6 @@
     <color name="screenBackground">#222222</color>
     <color name="hintTextColor">@color/white</color>
     <color name="inputLine">#BDBDBD</color>
+    <color name="toolbarBackground">@color/black</color>
 
 </resources>

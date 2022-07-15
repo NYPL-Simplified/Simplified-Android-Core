@@ -17,6 +17,7 @@
     <color name="firstBookTextColor">@color/firstBookBlue</color>
     <color name="cleverTextColor">@color/cleverBlue</color>
     <color name="screenBackground">@color/white</color>
+    <color name="toolbarBackground">#F5F5F5</color>
     <color name="hintTextColor">#BDBDBD</color>
     <color name="inputLine">#BDBDBD</color>
     <color name="darkGrey">#8A8A8A</color>
