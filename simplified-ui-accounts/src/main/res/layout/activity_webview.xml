@@ -13,11 +13,9 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?android:attr/actionBarSize"
-            android:background="@android:color/white"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:titleTextColor="@android:color/white">
+            app:layout_constraintTop_toTopOf="parent">
 
             <ImageView
                 android:id="@+id/back"
@@ -25,6 +23,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:contentDescription="@string/contentDescBackButton"
+                android:backgroundTint="@color/textColor"
                 android:src="@drawable/ic_arrow_back"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -34,7 +33,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:contentDescription="@string/contentDescOpenEbooksLogo"
-                android:src="@drawable/ic_oeb_logo"
+                android:background="@drawable/ic_oe_top_bar"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
