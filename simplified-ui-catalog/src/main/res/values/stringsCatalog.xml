@@ -19,6 +19,7 @@
   <string name="catalogAccessibilityCoverPdf">%1$s, pdf, by %2$s</string>
   <string name="catalogAccessibilityCoverUnknownFormat">%1$s, by %2$s</string>
   <string name="catalogAccounts">Choose another library catalog…</string>
+  <string name="catalogBookAvailabilityAvailableUntil">Available until %1s</string>
   <string name="catalogBookAvailabilityHeldIndefinite">You have this book on hold.</string>
   <string name="catalogBookAvailabilityHeldQueue">You are at position %1$d in the queue for this book.</string>
   <string name="catalogBookAvailabilityHeldTimed">You will be able to borrow this book in %1$s.</string>

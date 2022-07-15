@@ -1,6 +1,7 @@
 package org.nypl.simplified.ui.catalog.withoutGroups
 
 import android.content.Context
+import org.joda.time.DateTime
 import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.ui.catalog.withoutGroups.BookItem.Type.CORRUPT
@@ -16,6 +17,7 @@ sealed class BookItem {
   data class Idle(
     val entry: FeedEntry.FeedEntryOPDS,
     val actions: IdleActions,
+    val loanExpiry: DateTime? = null
   ) : BookItem() {
     override val type = IDLE
     val title: String? = entry.feedEntry.title
