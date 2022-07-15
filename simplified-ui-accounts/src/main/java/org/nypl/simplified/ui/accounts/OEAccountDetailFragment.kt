@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.text.InputFilter
+import android.view.LayoutInflater
 import android.view.View
 import android.view.View.GONE
 import android.view.View.INVISIBLE
@@ -60,12 +61,16 @@ import java.net.URI
 import org.nypl.simplified.ui.accounts.utils.hideSoftInput
 import android.view.ViewGroup.MarginLayoutParams
 import androidx.core.widget.doOnTextChanged
+import org.nypl.simplified.android.ktx.viewLifecycleAware
+import org.nypl.simplified.ui.accounts.databinding.OeAccountBinding
 
 /**
  * A fragment that shows settings for a single account.
  */
 
-class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
+class OEAccountDetailFragment : Fragment() {
+
+  private var binding by viewLifecycleAware<OeAccountBinding>()
 
   private val logger =
     LoggerFactory.getLogger(OEAccountDetailFragment::class.java)
@@ -93,44 +98,44 @@ class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
   private val imageLoader: ImageLoaderType =
     services.requireService(ImageLoaderType::class.java)
 
-  private lateinit var accountCustomOPDS: ViewGroup
-  private lateinit var accountCustomOPDSField: TextView
-  private lateinit var accountIcon: ImageView
-  private lateinit var accountSubtitle: TextView
-  private lateinit var accountTitle: TextView
-  private lateinit var authentication: ViewGroup
-
-  private lateinit var authenticationViews: AccountAuthenticationViews
-  private lateinit var bookmarkSync: ViewGroup
-  private lateinit var bookmarkSyncCheck: SwitchCompat
-  private lateinit var bookmarkSyncProgress: ProgressBar
-  private lateinit var oeLoginButtonErrorDetails: Button
-  private lateinit var oeAccountLoginProgress: ViewGroup
-  private lateinit var oeLoginProgressText: TextView
-  private lateinit var loginTitle: ViewGroup
-  private lateinit var reportIssueEmail: TextView
-  private lateinit var reportIssueGroup: ViewGroup
-  private lateinit var reportIssueItem: View
-
-  private lateinit var accountMain: LinearLayout
-  private lateinit var oeLogin: ConstraintLayout
-  private lateinit var firstBookLogin: ConstraintLayout
-  private lateinit var terms: TextView
-  private lateinit var privacyNotice: TextView
-  private lateinit var faq: TextView
-  private lateinit var loginTrouble: TextView
-  private lateinit var cleverBtn: Button
-  private lateinit var firstBookBtn: Button
-  private lateinit var firstBookBack: ImageView
-  private lateinit var firstBookAcccessCode: EditText
-  private lateinit var firstBookPin: EditText
-  private lateinit var firstBookSignIn: Button
-  private lateinit var firstBookLoginProgressBar: ProgressBar
-  private lateinit var firstBookHeader: TextView
-  private lateinit var firstBookLogo: ImageView
-  private lateinit var oeLoggedIn: ConstraintLayout
-  private lateinit var loginForm: ConstraintLayout
-  private lateinit var supportEmail: TextView
+//  private lateinit var accountCustomOPDS: ViewGroup
+//  private lateinit var accountCustomOPDSField: TextView
+//  private lateinit var accountIcon: ImageView
+//  private lateinit var accountSubtitle: TextView
+//  private lateinit var accountTitle: TextView
+//  private lateinit var authentication: ViewGroup
+//
+//  private lateinit var authenticationViews: AccountAuthenticationViews
+//  private lateinit var bookmarkSync: ViewGroup
+//  private lateinit var bookmarkSyncCheck: SwitchCompat
+//  private lateinit var bookmarkSyncProgress: ProgressBar
+//  private lateinit var oeLoginButtonErrorDetails: Button
+//  private lateinit var oeAccountLoginProgress: ViewGroup
+//  private lateinit var oeLoginProgressText: TextView
+//  private lateinit var loginTitle: ViewGroup
+//  private lateinit var reportIssueEmail: TextView
+//  private lateinit var reportIssueGroup: ViewGroup
+//  private lateinit var reportIssueItem: View
+//
+//  private lateinit var accountMain: LinearLayout
+//  private lateinit var oeLogin: ConstraintLayout
+//  private lateinit var firstBookLogin: ConstraintLayout
+//  private lateinit var terms: TextView
+//  private lateinit var privacyNotice: TextView
+//  private lateinit var faq: TextView
+//  private lateinit var loginTrouble: TextView
+//  private lateinit var cleverBtn: Button
+//  private lateinit var firstBookBtn: Button
+//  private lateinit var firstBookBack: ImageView
+//  private lateinit var firstBookAcccessCode: EditText
+//  private lateinit var firstBookPin: EditText
+//  private lateinit var firstBookSignIn: Button
+//  private lateinit var firstBookLoginProgressBar: ProgressBar
+//  private lateinit var firstBookHeader: TextView
+//  private lateinit var firstBookLogo: ImageView
+//  private lateinit var oeLoggedIn: ConstraintLayout
+//  private lateinit var loginForm: ConstraintLayout
+//  private lateinit var supportEmail: TextView
   private val firstBookAccessCodeMin = 10
   private val firstBookPinMin = 4
 
@@ -152,94 +157,89 @@ class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
     }
   }
 
+  override fun onCreateView(
+    inflater: LayoutInflater,
+    container: ViewGroup?,
+    savedInstanceState: Bundle?
+  ): View {
+    binding = OeAccountBinding.inflate(inflater, container, false)
+    return binding.root
+  }
+
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
 
-    this.accountTitle =
-      view.findViewById(R.id.accountCellTitle)
-    this.accountSubtitle =
-      view.findViewById(R.id.accountCellSubtitle)
-    this.accountIcon =
-      view.findViewById(R.id.accountCellIcon)
+//    this.accountTitle =
+//      view.findViewById(R.id.accountCellTitle)
+//    this.accountSubtitle =
+//      view.findViewById(R.id.accountCellSubtitle)
+//    this.accountIcon =
+//      view.findViewById(R.id.accountCellIcon)
+//
+//    this.authentication =
+//      view.findViewById(R.id.auth)
+//    this.authenticationViews =
+//      AccountAuthenticationViews(
+//        viewGroup = this.authentication,
+//        onUsernamePasswordChangeListener = this::onBasicUserPasswordChanged
+//      )
+//
+//    this.bookmarkSyncProgress =
+//      view.findViewById(R.id.accountSyncProgress)
+//    this.bookmarkSync =
+//      view.findViewById(R.id.accountSyncBookmarks)
+//    this.bookmarkSyncCheck =
+//      this.bookmarkSync.findViewById(R.id.accountSyncBookmarksCheck)
+//
+//    this.loginTitle =
+//      view.findViewById(R.id.accountTitleAnnounce)
+//    this.oeAccountLoginProgress =
+//      view.findViewById(R.id.oeAccountLoginProgress)
+//    this.firstBookLoginProgressBar =
+//      view.findViewById(R.id.firstBookLoginProgressBar)
+//    this.firstBookLoginProgressBar =
+//      view.findViewById(R.id.firstBookLoginProgressBar)
+//    this.oeLoginProgressText =
+//      view.findViewById(R.id.oeLoginProgressText)
+//    this.oeLoginButtonErrorDetails =
+//      view.findViewById(R.id.oeLoginButtonErrorDetails)
+//
+//    this.accountCustomOPDS =
+//      view.findViewById(R.id.accountCustomOPDS)
+//    this.accountCustomOPDSField =
+//      this.accountCustomOPDS.findViewById(R.id.accountCustomOPDSField)
+//
+//    this.reportIssueGroup =
+//      view.findViewById(R.id.accountReportIssue)
+//    this.reportIssueItem =
+//      this.reportIssueGroup.findViewById(R.id.accountReportIssueText)
+//    this.reportIssueEmail =
+//      this.reportIssueGroup.findViewById(R.id.accountReportIssueEmail)
 
-    this.authentication =
-      view.findViewById(R.id.auth)
-    this.authenticationViews =
-      AccountAuthenticationViews(
-        viewGroup = this.authentication,
-        onUsernamePasswordChangeListener = this::onBasicUserPasswordChanged
-      )
-
-    this.bookmarkSyncProgress =
-      view.findViewById(R.id.accountSyncProgress)
-    this.bookmarkSync =
-      view.findViewById(R.id.accountSyncBookmarks)
-    this.bookmarkSyncCheck =
-      this.bookmarkSync.findViewById(R.id.accountSyncBookmarksCheck)
-
-    this.loginTitle =
-      view.findViewById(R.id.accountTitleAnnounce)
-    this.oeAccountLoginProgress =
-      view.findViewById(R.id.oeAccountLoginProgress)
-    this.firstBookLoginProgressBar =
-      view.findViewById(R.id.firstBookLoginProgressBar)
-    this.firstBookLoginProgressBar =
-      view.findViewById(R.id.firstBookLoginProgressBar)
-    this.oeLoginProgressText =
-      view.findViewById(R.id.oeLoginProgressText)
-    this.oeLoginButtonErrorDetails =
-      view.findViewById(R.id.oeLoginButtonErrorDetails)
-
-    this.accountCustomOPDS =
-      view.findViewById(R.id.accountCustomOPDS)
-    this.accountCustomOPDSField =
-      this.accountCustomOPDS.findViewById(R.id.accountCustomOPDSField)
-
-    this.reportIssueGroup =
-      view.findViewById(R.id.accountReportIssue)
-    this.reportIssueItem =
-      this.reportIssueGroup.findViewById(R.id.accountReportIssueText)
-    this.reportIssueEmail =
-      this.reportIssueGroup.findViewById(R.id.accountReportIssueEmail)
-
-    this.accountMain = view.findViewById(R.id.accountMain)
-    this.oeLogin = view.findViewById(R.id.oe_login)
-    this.firstBookLogin = view.findViewById(R.id.first_book_login)
-    this.firstBookBtn = view.findViewById(R.id.firstbook)
-    this.cleverBtn = view.findViewById(R.id.clever)
-    this.terms = view.findViewById(R.id.terms)
-    this.privacyNotice = view.findViewById(R.id.privacyNotice)
-    this.faq = view.findViewById(R.id.faq)
-    this.loginTrouble = view.findViewById(R.id.loginTrouble)
-    this.firstBookBack = view.findViewById(R.id.firstBookBack)
-    this.firstBookAcccessCode = view.findViewById(R.id.et_access_code)
-    this.firstBookPin = view.findViewById(R.id.et_pin)
-    this.firstBookAcccessCode.filters += InputFilter.AllCaps()
-    this.firstBookSignIn = view.findViewById(R.id.sign_in)
-    this.firstBookHeader = view.findViewById(R.id.firstBookHeader)
-    this.firstBookLogo = view.findViewById(R.id.firstBookLogo)
-    this.oeLoggedIn = view.findViewById(R.id.oe_logged_in)
-    this.loginForm = view.findViewById(R.id.loginForm)
-    this.supportEmail = view.findViewById(R.id.supportEmail)
-
-    if (this.parameters.showPleaseLogInTitle) {
-      this.loginTitle.visibility = VISIBLE
-    } else {
-      this.loginTitle.visibility = GONE
-    }
+//    this.oeLogin = view.findViewById(R.id.oe_login)
+//    this.firstBookLogin = view.findViewById(R.id.first_book_login)
+//    this.firstBookBtn = view.findViewById(R.id.firstbook)
+//    this.cleverBtn = view.findViewById(R.id.clever)
+//    this.terms = view.findViewById(R.id.terms)
+//    this.privacyNotice = view.findViewById(R.id.privacyNotice)
+//    this.faq = view.findViewById(R.id.faq)
+//    this.loginTrouble = view.findViewById(R.id.loginTrouble)
+//    this.firstBookBack = view.findViewById(R.id.firstBookBack)
+//    this.firstBookAcccessCode = view.findViewById(R.id.et_access_code)
+//    this.firstBookPin = view.findViewById(R.id.et_pin)
+//    this.firstBookAcccessCode.filters += InputFilter.AllCaps()
+//    this.firstBookSignIn = view.findViewById(R.id.sign_in)
+//    this.firstBookHeader = view.findViewById(R.id.firstBookHeader)
+//    this.firstBookLogo = view.findViewById(R.id.firstBookLogo)
+//    this.oeLoggedIn = view.findViewById(R.id.oe_logged_in)
+//    this.loginForm = view.findViewById(R.id.loginForm)
+//    this.supportEmail = view.findViewById(R.id.supportEmail)
 
     /*
      * Instantiate views for alternative authentication methods.
      */
 
-    this.authenticationAlternativesMake()
-
-    ImageAccountIcons.loadAccountLogoIntoView(
-      this.imageLoader.loader,
-      this.viewModel.account.provider.toDescription(),
-      R.drawable.account_default,
-      this.accountIcon
-    )
+//    this.authenticationAlternativesMake()
 
     this.viewModel.accountLive.observe(this.viewLifecycleOwner) {
       this.reconfigureOEUI()
@@ -248,50 +248,47 @@ class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
     this.viewModel.accountSyncingSwitchStatus.observe(this.viewLifecycleOwner) { status ->
       this.reconfigureBookmarkSyncingSwitch(status)
     }
-  }
 
-  override fun onResume() {
-    super.onResume()
-    this.oeLogin.visibility = VISIBLE
-    this.accountMain.visibility = GONE
+    // this.oeLogin.visibility = VISIBLE
+    // this.accountMain.visibility = GONE
     (activity as AppCompatActivity).let {
       it.supportActionBar?.hide()
     }
 
-    this.terms.setOnClickListener {
+    binding.oeLoginLanding.terms.setOnClickListener {
       launchWebView(WebViewActivity.TERMS_OF_USE)
     }
 
-    this.privacyNotice.setOnClickListener {
+    binding.oeLoginLanding.privacyNotice.setOnClickListener {
       launchWebView(WebViewActivity.PRIVACY_NOTICE)
     }
 
-    this.firstBookBtn.setOnClickListener {
-      this.oeLogin.visibility = GONE
-      this.firstBookLogin.visibility = VISIBLE
+    binding.oeLoginLanding.firstBookBtn.setOnClickListener {
+      binding.oeLoginLanding.oeLogin.visibility = GONE
+      binding.firstBookLogin.firstBookLoginCl.visibility = VISIBLE
     }
 
-    this.firstBookBack.setOnClickListener {
+    binding.firstBookLogin.firstBookBack.setOnClickListener {
       hideSoftInput()
-      this.oeLogin.visibility = VISIBLE
-      this.firstBookLogin.visibility = GONE
-      oeAccountLoginProgress.visibility = GONE
+      binding.oeLoginLanding.oeLogin.visibility = VISIBLE
+      binding.firstBookLogin.firstBookLoginCl.visibility = GONE
+      binding.firstBookLogin.oeAccountLoginProgress.visibility = GONE
     }
 
-    this.loginTrouble.setOnClickListener {
+    binding.firstBookLogin.loginTrouble.setOnClickListener {
       launchWebView(WebViewActivity.LOGIN_TROUBLE)
     }
 
-    this.faq.setOnClickListener {
+    binding.firstBookLogin.faq.setOnClickListener {
       launchWebView(WebViewActivity.FAQ)
     }
 
-    this.firstBookSignIn.setOnClickListener {
+    binding.firstBookLogin.signIn.setOnClickListener {
       logger.debug("Logging into First Book")
-      oeAccountLoginProgress.visibility = GONE
+      binding.firstBookLogin.oeAccountLoginProgress.visibility = GONE
       hideSoftInput()
-      val accountUsername = AccountUsername(this.firstBookAcccessCode.toString().trim())
-      val accountPassword = AccountPassword(this.firstBookPin.toString().trim())
+      val accountUsername = AccountUsername(binding.firstBookLogin.etAccessCode.toString().trim())
+      val accountPassword = AccountPassword(binding.firstBookLogin.etPin.toString().trim())
       val description = AccountProviderAuthenticationDescription.Basic(
         description = "First Book",
         formDescription = AccountProviderAuthenticationDescription.FormDescription(
@@ -314,58 +311,166 @@ class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
       this.viewModel.tryLogin(request)
     }
 
-    this.firstBookHeader.setOnClickListener {
-      showLoggedOutUI() // TODO: Remove
-    }
+//    this.firstBookHeader.setOnClickListener {
+//      showLoggedOutUI() // TODO: Remove
+//    }
 
-    this.firstBookLogo.setOnClickListener {
-      showLoggedInUI() // TODO: Remove
-    }
+//    this.firstBookLogo.setOnClickListener {
+//      showLoggedInUI() // TODO: Remove
+//    }
 
-    this.firstBookPin.doOnTextChanged { _, _, _, _ ->
+    binding.firstBookLogin.etPin.doOnTextChanged { _, _, _, _ ->
       updateLoginButton()
     }
 
-    this.firstBookAcccessCode.doOnTextChanged { _, _, _, _ ->
+    binding.firstBookLogin.etAccessCode.doOnTextChanged { _, _, _, _ ->
       updateLoginButton()
     }
+    reconfigureOEUI()
+
+    val cleverAuth = this.viewModel.account.provider.authenticationAlternatives.filterIsInstance<AccountProviderAuthenticationDescription.OAuthWithIntermediary>().first()
+    cleverAuth.let { provider ->
+      binding.oeLoginLanding.clever.setOnClickListener {
+        this.onTryOAuthWithIntermediaryLogin(provider)
+      }
+    }
+
+    binding.firstBookLogin.supportEmail.setOnClickListener {
+      val emailIntent =
+        Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", getString(R.string.supportEmail), null))
+      val chosenIntent =
+        Intent.createChooser(emailIntent, this.resources.getString(R.string.accountReportIssue))
+
+      try {
+        this.startActivity(chosenIntent)
+      } catch (e: Exception) {
+        this.logger.error("unable to start activity: ", e)
+        val context = this.requireContext()
+        AlertDialog.Builder(context)
+          .setMessage(context.getString(R.string.accountReportFailed, getString(R.string.supportEmail)))
+          .create()
+          .show()
+      }
+    }
+  }
+
+  override fun onResume() {
+    super.onResume()
+//    this.oeLogin.visibility = VISIBLE
+//    this.accountMain.visibility = GONE
+    (activity as AppCompatActivity).let {
+      it.supportActionBar?.hide()
+    }
+//
+//    this.terms.setOnClickListener {
+//      launchWebView(WebViewActivity.TERMS_OF_USE)
+//    }
+//
+//    this.privacyNotice.setOnClickListener {
+//      launchWebView(WebViewActivity.PRIVACY_NOTICE)
+//    }
+//
+//    this.firstBookBtn.setOnClickListener {
+//      this.oeLogin.visibility = GONE
+//      this.firstBookLogin.visibility = VISIBLE
+//    }
+//
+//    this.firstBookBack.setOnClickListener {
+//      hideSoftInput()
+//      this.oeLogin.visibility = VISIBLE
+//      this.firstBookLogin.visibility = GONE
+//      oeAccountLoginProgress.visibility = GONE
+//    }
+//
+//    this.loginTrouble.setOnClickListener {
+//      launchWebView(WebViewActivity.LOGIN_TROUBLE)
+//    }
+//
+//    this.faq.setOnClickListener {
+//      launchWebView(WebViewActivity.FAQ)
+//    }
+//
+//    this.firstBookSignIn.setOnClickListener {
+//      logger.debug("Logging into First Book")
+//      oeAccountLoginProgress.visibility = GONE
+//      hideSoftInput()
+//      val accountUsername = AccountUsername(this.firstBookAcccessCode.toString().trim())
+//      val accountPassword = AccountPassword(this.firstBookPin.toString().trim())
+//      val description = AccountProviderAuthenticationDescription.Basic(
+//        description = "First Book",
+//        formDescription = AccountProviderAuthenticationDescription.FormDescription(
+//          barcodeFormat = null,
+//          keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
+//          passwordMaximumLength = 0,
+//          passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
+//          labels = linkedMapOf("LOGIN" to "First Book Access Code", "PASSWORD" to "First Book PIN")
+//        ),
+//        logoURI = URI.create("https://circulation.openebooks.us/images/FirstBookLoginButton280.png")
+//      )
+//
+//      val request =
+//        Basic(
+//          accountId = this.viewModel.account.id,
+//          description = description,
+//          password = accountPassword,
+//          username = accountUsername
+//        )
+//      this.viewModel.tryLogin(request)
+//    }
+//
+//    this.firstBookHeader.setOnClickListener {
+//      showLoggedOutUI() // TODO: Remove
+//    }
+//
+//    this.firstBookLogo.setOnClickListener {
+//      showLoggedInUI() // TODO: Remove
+//    }
+//
+//    this.firstBookPin.doOnTextChanged { _, _, _, _ ->
+//      updateLoginButton()
+//    }
+//
+//    this.firstBookAcccessCode.doOnTextChanged { _, _, _, _ ->
+//      updateLoginButton()
+//    }
   }
 
   /**
    * Locks sign in form and shows bookmark & server buttons
    */
   private fun showLoggedInUI() {
-    val params = loginForm.layoutParams as MarginLayoutParams
-    params.topMargin = 16
-    this.firstBookHeader.text = getString(R.string.settings)
-    this.firstBookLogo.visibility = GONE
-    this.loginTrouble.visibility = INVISIBLE
-    this.faq.visibility = INVISIBLE
-    this.oeLoggedIn.visibility = VISIBLE
-    this.firstBookSignIn.text = getString(R.string.signOut)
-    this.firstBookAcccessCode.isEnabled = false
-    this.firstBookPin.isEnabled = false
+    binding.firstBookLogin.signIn.text = getString(R.string.signOut)
+    binding.firstBookLogin.etAccessCode.isEnabled = false
+    binding.firstBookLogin.etPin.isEnabled = false
+    binding.firstBookLogin.firstBookHeader.text = getString(R.string.settings)
+    binding.firstBookLogin.firstBookLogo.visibility = GONE
+    binding.firstBookLogin.loginTrouble.visibility = INVISIBLE
+    binding.firstBookLogin.faq.visibility = INVISIBLE
+    binding.firstBookLogin.loggedIn.visibility = VISIBLE
+    binding.oeLoginLanding.oeLogin.visibility = GONE
   }
 
   /**
    * Unlocks sign in form and hides bookmark & server buttons
    */
   private fun showLoggedOutUI() {
-    this.firstBookHeader.text = getString(R.string.signInHeader)
-    this.firstBookLogo.visibility = VISIBLE
-    this.loginTrouble.visibility = VISIBLE
-    this.faq.visibility = VISIBLE
-    this.oeLoggedIn.visibility = INVISIBLE
-    this.firstBookSignIn.text = getString(R.string.signIn)
-    this.firstBookAcccessCode.isEnabled = true
-    this.firstBookPin.isEnabled = true
+    binding.firstBookLogin.firstBookHeader.text = getString(R.string.signInHeader)
+    binding.firstBookLogin.firstBookLogo.visibility = VISIBLE
+    binding.firstBookLogin.loginTrouble.visibility = VISIBLE
+    binding.firstBookLogin.faq.visibility = VISIBLE
+    binding.firstBookLogin.loggedIn.visibility = INVISIBLE
+    binding.firstBookLogin.signIn.text = getString(R.string.signIn)
+    binding.firstBookLogin.etAccessCode.isEnabled = true
+    binding.firstBookLogin.etPin.isEnabled = true
+    binding.oeLoginLanding.oeLogin.visibility = VISIBLE
   }
 
   /**
    * Enable/Disable login button if form is valid
    */
   private fun updateLoginButton() {
-    this.firstBookSignIn.isEnabled = this.firstBookAcccessCode.text.toString().trim().length == firstBookAccessCodeMin && this.firstBookPin.text.toString().trim().length == firstBookPinMin
+    binding.firstBookLogin.signIn.isEnabled = binding.firstBookLogin.etAccessCode.text.toString().trim().length == firstBookAccessCodeMin
+      && binding.firstBookLogin.etPin.text.toString().trim().length == firstBookPinMin
   }
 
   /**
@@ -383,7 +488,7 @@ class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
      * Remove the checked-change listener, because setting `isChecked` will trigger the listener.
      */
 
-    this.bookmarkSyncCheck.setOnCheckedChangeListener(null)
+    binding.firstBookLogin.bookmarkSync.setOnCheckedChangeListener(null)
 
     /*
      * Otherwise, the switch is doing something that interests us...
@@ -392,17 +497,17 @@ class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
     val account = this.viewModel.account
     return when (status) {
       is ReaderBookmarkSyncEnableStatus.Changing -> {
-        this.bookmarkSyncProgress.visibility = VISIBLE
-        this.bookmarkSyncCheck.isEnabled = false
+        binding.firstBookLogin.bookmarkProgress.visibility = VISIBLE
+        binding.firstBookLogin.bookmarkSync.isEnabled = false
       }
 
       is ReaderBookmarkSyncEnableStatus.Idle -> {
-        this.bookmarkSyncProgress.visibility = INVISIBLE
+        binding.firstBookLogin.bookmarkProgress.visibility = INVISIBLE
 
         when (status.status) {
           SYNC_ENABLE_NOT_SUPPORTED -> {
-            this.bookmarkSyncCheck.isChecked = false
-            this.bookmarkSyncCheck.isEnabled = false
+            binding.firstBookLogin.bookmarkSync.isChecked = false
+            binding.firstBookLogin.bookmarkSync.isEnabled = false
           }
 
           SYNC_ENABLED,
@@ -410,10 +515,10 @@ class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
             val isPermitted = account.preferences.bookmarkSyncingPermitted
             val isSupported = account.loginState.credentials?.annotationsURI != null
 
-            this.bookmarkSyncCheck.isChecked = isPermitted
-            this.bookmarkSyncCheck.isEnabled = isSupported
+            binding.firstBookLogin.bookmarkSync.isChecked = isPermitted
+            binding.firstBookLogin.bookmarkSync.isEnabled = isSupported
 
-            this.bookmarkSyncCheck.setOnCheckedChangeListener { _, isChecked ->
+            binding.firstBookLogin.bookmarkSync.setOnCheckedChangeListener { _, isChecked ->
               this.viewModel.enableBookmarkSyncing(isChecked)
             }
           }
@@ -424,9 +529,9 @@ class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
 
   override fun onDestroyView() {
     super.onDestroyView()
-    this.cancelImageButtonLoading()
-    this.imageLoader.loader.cancelRequest(this.accountIcon)
-    this.authenticationViews.clear()
+   // this.cancelImageButtonLoading()
+    //this.imageLoader.loader.cancelRequest(this.accountIcon)
+   // this.authenticationViews.clear()
   }
 
   private fun onBasicUserPasswordChanged(
@@ -435,20 +540,20 @@ class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
   ) {
   }
 
-  private fun determineLoginIsSatisfied(): AccountLoginButtonStatus {
-    val authDescription = this.viewModel.account.provider.authentication
-    val loginPossible = authDescription.isLoginPossible
-    val satisfiedFor = this.authenticationViews.isSatisfiedFor(authDescription)
-
-    return if (loginPossible && satisfiedFor) {
-      AsLoginButtonEnabled {
-        this.loginFormLock()
-        this.tryLogin()
-      }
-    } else {
-      AsLoginButtonDisabled
-    }
-  }
+//  private fun determineLoginIsSatisfied(): AccountLoginButtonStatus {
+//    val authDescription = this.viewModel.account.provider.authentication
+//    val loginPossible = authDescription.isLoginPossible
+//    val satisfiedFor = this.authenticationViews.isSatisfiedFor(authDescription)
+//
+//    return if (loginPossible && satisfiedFor) {
+//      AsLoginButtonEnabled {
+//        this.loginFormLock()
+//        this.tryLogin()
+//      }
+//    } else {
+//      AsLoginButtonDisabled
+//    }
+//  }
 
   override fun onStart() {
     super.onStart()
@@ -459,109 +564,11 @@ class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
      * Configure the bookmark syncing switch to enable/disable syncing permissions.
      */
 
-    this.bookmarkSyncCheck.setOnCheckedChangeListener { _, isChecked ->
+    binding.firstBookLogin.bookmarkSync.setOnCheckedChangeListener { _, isChecked ->
       this.viewModel.enableBookmarkSyncing(isChecked)
     }
-
-    /*
-     * Configure the "Report issue..." item.
-     */
-
-    this.configureReportIssue()
   }
 
-  private fun instantiateAlternativeAuthenticationViews() {
-    for (alternative in this.viewModel.account.provider.authenticationAlternatives) {
-      when (alternative) {
-        is AccountProviderAuthenticationDescription.COPPAAgeGate ->
-          this.logger.warn("COPPA age gate is not currently supported as an alternative.")
-        is AccountProviderAuthenticationDescription.Basic ->
-          this.logger.warn("Basic authentication is not currently supported as an alternative.")
-        AccountProviderAuthenticationDescription.Anonymous ->
-          this.logger.warn("Anonymous authentication makes no sense as an alternative.")
-        is AccountProviderAuthenticationDescription.SAML2_0 ->
-          this.logger.warn("SAML 2.0 is not currently supported as an alternative.")
-        is AccountProviderAuthenticationDescription.OAuthClientCredentials ->
-          this.logger.warn("OAuth Client Credentials is not currently supported as an alternative.")
-
-        is AccountProviderAuthenticationDescription.OAuthWithIntermediary -> {
-          this.cleverBtn.setOnClickListener {
-            this.onTryOAuthWithIntermediaryLogin(alternative)
-          }
-        }
-      }
-    }
-  }
-
-  /**
-   * If there's a support email, enable an option to use it.
-   */
-
-  private fun configureReportIssue() {
-    val email = this.viewModel.account.provider.supportEmail
-    if (email != null) {
-      val address = email.removePrefix("mailto:")
-
-      this.reportIssueGroup.visibility = VISIBLE
-      this.reportIssueEmail.text = address
-      this.reportIssueGroup.setOnClickListener {
-        val emailIntent =
-          Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", address, null))
-        val chosenIntent =
-          Intent.createChooser(emailIntent, this.resources.getString(R.string.accountReportIssue))
-
-        try {
-          this.startActivity(chosenIntent)
-        } catch (e: Exception) {
-          this.logger.error("unable to start activity: ", e)
-          val context = this.requireContext()
-          AlertDialog.Builder(context)
-            .setMessage(context.getString(R.string.accountReportFailed, address))
-            .create()
-            .show()
-        }
-      }
-    } else {
-      this.reportIssueGroup.visibility = GONE
-    }
-  }
-
-  private fun configureImageButton(
-    container: ViewGroup,
-    buttonText: TextView,
-    buttonImage: ImageView,
-    text: String,
-    logoURI: URI?,
-    onClick: () -> Unit
-  ) {
-    buttonText.text = text
-    buttonText.setOnClickListener { onClick.invoke() }
-    buttonImage.setOnClickListener { onClick.invoke() }
-    this.loadAuthenticationLogoIfNecessary(
-      uri = logoURI,
-      view = buttonImage,
-      onSuccess = {
-        container.background = null
-        buttonImage.visibility = VISIBLE
-        buttonText.visibility = GONE
-      }
-    )
-  }
-
-  private fun onTrySAML2Login(
-    authenticationDescription: AccountProviderAuthenticationDescription.SAML2_0
-  ) {
-    this.viewModel.tryLogin(
-      ProfileAccountLoginRequest.SAML20Initiate(
-        accountId = this.parameters.accountId,
-        description = authenticationDescription
-      )
-    )
-
-    this.listener.post(
-      AccountDetailEvent.OpenSAML20Login(this.parameters.accountId, authenticationDescription)
-    )
-  }
 
   private fun onTryOAuthWithIntermediaryLogin(
     authenticationDescription: AccountProviderAuthenticationDescription.OAuthWithIntermediary
@@ -576,11 +583,8 @@ class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
   }
 
   private fun onTryBasicLogin(description: AccountProviderAuthenticationDescription.Basic) {
-    val accountPassword: AccountPassword =
-      this.authenticationViews.getBasicPassword()
-    val accountUsername: AccountUsername =
-      this.authenticationViews.getBasicUser()
-
+    val accountPassword = AccountPassword(binding.firstBookLogin.etPin.text.toString().trim())
+    val accountUsername = AccountUsername(binding.firstBookLogin.etAccessCode.text.toString().trim())
     val request =
       Basic(
         accountId = this.viewModel.account.id,
@@ -595,10 +599,8 @@ class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
   private fun onTryOAuthClientCredentialsLogin(
     description: AccountProviderAuthenticationDescription.OAuthClientCredentials
   ) {
-    val accountPassword: AccountPassword =
-      this.authenticationViews.getBasicPassword()
-    val accountUsername: AccountUsername =
-      this.authenticationViews.getBasicUser()
+    val accountPassword = AccountPassword(binding.firstBookLogin.etPin.text.toString().trim())
+    val accountUsername = AccountUsername(binding.firstBookLogin.etAccessCode.text.toString().trim())
 
     val request =
       Basic(
@@ -662,49 +664,47 @@ class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
     this.logger.debug("broadcasting login state")
     this.viewModel.account.setLoginState(this.viewModel.account.loginState)
 
-    this.accountIcon.setImageDrawable(null)
     this.subscriptions.clear()
   }
 
   private fun reconfigureOEUI() {
-    this.authenticationViews.showFor(this.viewModel.account.provider.authentication)
     this.disableSyncSwitchForLoginState(this.viewModel.account.loginState)
 
     return when (val loginState = this.viewModel.account.loginState) {
       AccountNotLoggedIn -> {
-        this.oeAccountLoginProgress.visibility = GONE
+        binding.firstBookLogin.oeAccountLoginProgress.visibility = GONE
 
         if (this.viewModel.pendingLogout) {
-          this.authenticationViews.setBasicUserAndPass("", "")
+          setBasicUserAndPass("", "")
           this.viewModel.pendingLogout = false
         }
         this.loginFormUnlock()
       }
 
       is AccountLoggingIn -> {
-        this.oeAccountLoginProgress.visibility = VISIBLE
-        this.firstBookLoginProgressBar.visibility = VISIBLE
-        this.oeLoginProgressText.text = loginState.status
-        this.oeLoginButtonErrorDetails.visibility = GONE
+        binding.firstBookLogin.oeAccountLoginProgress.visibility = VISIBLE
+        binding.firstBookLogin.firstBookLoginProgressBar.visibility = VISIBLE
+        binding.firstBookLogin.oeLoginProgressText.text = loginState.status
+        binding.firstBookLogin.oeLoginButtonErrorDetails.visibility = GONE
         this.loginFormLock()
       }
 
       is AccountLoggingInWaitingForExternalAuthentication -> {
-        this.oeAccountLoginProgress.visibility = VISIBLE
-        this.firstBookLoginProgressBar.visibility = VISIBLE
-        this.oeLoginProgressText.text = loginState.status
-        this.oeLoginButtonErrorDetails.visibility = GONE
+        binding.firstBookLogin.oeAccountLoginProgress.visibility = VISIBLE
+        binding.firstBookLogin.firstBookLoginProgressBar.visibility = VISIBLE
+        binding.firstBookLogin.oeLoginProgressText.text = loginState.status
+        binding.firstBookLogin.oeLoginButtonErrorDetails.visibility = GONE
         this.loginFormLock()
       }
 
       is AccountLoginFailed -> {
-        this.oeAccountLoginProgress.visibility = VISIBLE
-        this.firstBookLoginProgressBar.visibility = GONE
-        this.oeLoginProgressText.text = loginState.taskResult.steps.last().resolution.message
+        binding.firstBookLogin.oeAccountLoginProgress.visibility = VISIBLE
+        binding.firstBookLogin.firstBookLoginProgressBar.visibility = GONE
+        binding.firstBookLogin.oeLoginProgressText.text = loginState.taskResult.steps.last().resolution.message
         this.loginFormUnlock()
-        this.cancelImageButtonLoading()
-        this.oeLoginButtonErrorDetails.visibility = VISIBLE
-        this.oeLoginButtonErrorDetails.setOnClickListener {
+        //this.cancelImageButtonLoading()
+        binding.firstBookLogin.oeLoginButtonErrorDetails.visibility = VISIBLE
+        binding.firstBookLogin.oeLoginButtonErrorDetails.setOnClickListener {
           this.viewModel.openErrorPage(loginState.taskResult.steps)
         }
         this.authenticationAlternativesShow()
@@ -713,7 +713,7 @@ class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
       is AccountLoggedIn -> {
         when (val creds = loginState.credentials) {
           is AccountAuthenticationCredentials.Basic -> {
-            this.authenticationViews.setBasicUserAndPass(
+            setBasicUserAndPass(
               user = creds.userName.value,
               password = creds.password.value
             )
@@ -723,9 +723,9 @@ class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
           }
         }
 
-        this.oeAccountLoginProgress.visibility = GONE
+        binding.firstBookLogin.oeAccountLoginProgress.visibility = GONE
         this.loginFormLock()
-        this.oeLoginButtonErrorDetails.visibility = GONE
+        binding.firstBookLogin.oeLoginButtonErrorDetails.visibility = GONE
         this.authenticationAlternativesHide()
         showLoggedInUI()
       }
@@ -733,7 +733,7 @@ class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
       is AccountLoggingOut -> {
         when (val creds = loginState.credentials) {
           is AccountAuthenticationCredentials.Basic -> {
-            this.authenticationViews.setBasicUserAndPass(
+            setBasicUserAndPass(
               user = creds.userName.value,
               password = creds.password.value
             )
@@ -743,17 +743,17 @@ class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
           }
         }
 
-        this.oeAccountLoginProgress.visibility = VISIBLE
-        this.oeLoginButtonErrorDetails.visibility = GONE
-        this.firstBookLoginProgressBar.visibility = VISIBLE
-        this.oeLoginProgressText.text = loginState.status
+        binding.firstBookLogin.oeAccountLoginProgress.visibility = VISIBLE
+        binding.firstBookLogin.oeLoginButtonErrorDetails.visibility = GONE
+        binding.firstBookLogin.firstBookLoginProgressBar.visibility = VISIBLE
+        binding.firstBookLogin.oeLoginProgressText.text = loginState.status
         this.loginFormLock()
       }
 
       is AccountLogoutFailed -> {
         when (val creds = loginState.credentials) {
           is AccountAuthenticationCredentials.Basic -> {
-            this.authenticationViews.setBasicUserAndPass(
+            setBasicUserAndPass(
               user = creds.userName.value,
               password = creds.password.value
             )
@@ -763,14 +763,14 @@ class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
           }
         }
 
-        this.oeAccountLoginProgress.visibility = VISIBLE
-        this.firstBookLoginProgressBar.visibility = GONE
-        this.oeLoginProgressText.text = loginState.taskResult.steps.last().resolution.message
-        this.cancelImageButtonLoading()
+        binding.firstBookLogin.oeAccountLoginProgress.visibility = VISIBLE
+        binding.firstBookLogin.firstBookLoginProgressBar.visibility = GONE
+        binding.firstBookLogin.oeLoginProgressText.text = loginState.taskResult.steps.last().resolution.message
+        //this.cancelImageButtonLoading()
         this.loginFormLock()
 
-        this.oeLoginButtonErrorDetails.visibility = VISIBLE
-        this.oeLoginButtonErrorDetails.setOnClickListener {
+        binding.firstBookLogin.oeLoginButtonErrorDetails.visibility = VISIBLE
+        binding.firstBookLogin.oeLoginButtonErrorDetails.setOnClickListener {
           this.viewModel.openErrorPage(loginState.taskResult.steps)
         }
       }
@@ -787,67 +787,67 @@ class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
       is AccountLoginFailed,
       is AccountLogoutFailed,
       AccountNotLoggedIn -> {
-        this.bookmarkSyncCheck.setOnCheckedChangeListener(null)
-        this.bookmarkSyncCheck.isChecked = false
-        this.bookmarkSyncCheck.isEnabled = false
+        binding.firstBookLogin.bookmarkSync.setOnCheckedChangeListener(null)
+        binding.firstBookLogin.bookmarkSync.isChecked = false
+        binding.firstBookLogin.bookmarkSync.isEnabled = false
       }
     }
   }
 
-  private fun cancelImageButtonLoading() {
-    this.imageLoader.loader.cancelTag(this.imageButtonLoadingTag)
-  }
+//  private fun cancelImageButtonLoading() {
+//    this.imageLoader.loader.cancelTag(this.imageButtonLoadingTag)
+//  }
 
-  private fun loadAuthenticationLogoIfNecessary(
-    uri: URI?,
-    view: ImageView,
-    onSuccess: () -> Unit
-  ) {
-    if (uri != null) {
-      view.setImageDrawable(null)
-      view.visibility = VISIBLE
-      this.imageLoader.loader.load(uri.toString())
-        .fit()
-        .tag(this.imageButtonLoadingTag)
-        .into(
-          view,
-          object : com.squareup.picasso.Callback {
-            override fun onSuccess() {
-              onSuccess.invoke()
-            }
+//  private fun loadAuthenticationLogoIfNecessary(
+//    uri: URI?,
+//    view: ImageView,
+//    onSuccess: () -> Unit
+//  ) {
+//    if (uri != null) {
+//      view.setImageDrawable(null)
+//      view.visibility = VISIBLE
+//      this.imageLoader.loader.load(uri.toString())
+//        .fit()
+//        .tag(this.imageButtonLoadingTag)
+//        .into(
+//          view,
+//          object : com.squareup.picasso.Callback {
+//            override fun onSuccess() {
+//              onSuccess.invoke()
+//            }
+//
+//            override fun onError(e: Exception) {
+//              this@OEAccountDetailFragment.logger.error("failed to load authentication logo: ", e)
+//              view.visibility = GONE
+//            }
+//          }
+//        )
+//    }
+//  }
 
-            override fun onError(e: Exception) {
-              this@OEAccountDetailFragment.logger.error("failed to load authentication logo: ", e)
-              view.visibility = GONE
-            }
-          }
-        )
-    }
-  }
+//  private fun loginFormLock() {
+//
+//    this.authenticationViews.lock()
+//
+//    this.authenticationAlternativesHide()
+//  }
 
-  private fun loginFormLock() {
+//  private fun loginFormUnlock() {
+//
+//    this.authenticationViews.unlock()
+//
+//    val loginSatisfied = this.determineLoginIsSatisfied()
+//    this.authenticationAlternativesShow()
+//  }
 
-    this.authenticationViews.lock()
-
-    this.authenticationAlternativesHide()
-  }
-
-  private fun loginFormUnlock() {
-
-    this.authenticationViews.unlock()
-
-    val loginSatisfied = this.determineLoginIsSatisfied()
-    this.authenticationAlternativesShow()
-  }
-
-  private fun authenticationAlternativesMake() {
-    if (this.viewModel.account.provider.authenticationAlternatives.isEmpty()) {
-      this.authenticationAlternativesHide()
-    } else {
-      this.instantiateAlternativeAuthenticationViews()
-      this.authenticationAlternativesShow()
-    }
-  }
+//  private fun authenticationAlternativesMake() {
+//    if (this.viewModel.account.provider.authenticationAlternatives.isEmpty()) {
+//      this.authenticationAlternativesHide()
+//    } else {
+//      this.instantiateAlternativeAuthenticationViews()
+//      this.authenticationAlternativesShow()
+//    }
+//  }
 
   private fun authenticationAlternativesShow() {
     if (this.viewModel.account.provider.authenticationAlternatives.isNotEmpty()) {
@@ -855,23 +855,49 @@ class OEAccountDetailFragment : Fragment(R.layout.oe_account) {
     }
   }
 
+  /**
+   * Disables form EditTexts and buttons
+   */
+  fun loginFormLock() {
+    binding.firstBookLogin.etAccessCode.isEnabled = false
+    binding.firstBookLogin.etPin.isEnabled = false
+    binding.firstBookLogin.signIn.isEnabled = false
+  }
+
+  /**
+   * Enables form EditTexts and buttons
+   */
+  fun loginFormUnlock() {
+    binding.firstBookLogin.etPin.isEnabled = true
+    binding.firstBookLogin.etPin.isEnabled = true
+    binding.firstBookLogin.signIn.isEnabled = true
+  }
+
+  /**
+   * Sets the username and password text in the input form fields
+   */
+  fun setBasicUserAndPass(user: String, password: String) {
+    binding.firstBookLogin.etAccessCode.setText(user)
+    binding.firstBookLogin.etPin.setText(password)
+  }
+
   private fun authenticationAlternativesHide() {
     // this.authenticationAlternatives.visibility = GONE
   }
 
-  private fun tryLogin() {
-    return when (val description = this.viewModel.account.provider.authentication) {
-      is AccountProviderAuthenticationDescription.SAML2_0 ->
-        this.onTrySAML2Login(description)
-      is AccountProviderAuthenticationDescription.OAuthWithIntermediary ->
-        this.onTryOAuthWithIntermediaryLogin(description)
-      is AccountProviderAuthenticationDescription.Basic ->
-        this.onTryBasicLogin(description)
-      is AccountProviderAuthenticationDescription.OAuthClientCredentials ->
-        this.onTryOAuthClientCredentialsLogin(description)
-      is AccountProviderAuthenticationDescription.Anonymous,
-      is AccountProviderAuthenticationDescription.COPPAAgeGate ->
-        throw UnreachableCodeException()
-    }
-  }
+//  private fun tryLogin() {
+//    return when (val description = this.viewModel.account.provider.authentication) {
+//      is AccountProviderAuthenticationDescription.SAML2_0 ->
+//        this.onTrySAML2Login(description)
+//      is AccountProviderAuthenticationDescription.OAuthWithIntermediary ->
+//        this.onTryOAuthWithIntermediaryLogin(description)
+//      is AccountProviderAuthenticationDescription.Basic ->
+//        this.onTryBasicLogin(description)
+//      is AccountProviderAuthenticationDescription.OAuthClientCredentials ->
+//        this.onTryOAuthClientCredentialsLogin(description)
+//      is AccountProviderAuthenticationDescription.Anonymous,
+//      is AccountProviderAuthenticationDescription.COPPAAgeGate ->
+//        throw UnreachableCodeException()
+//    }
+//  }
 }
