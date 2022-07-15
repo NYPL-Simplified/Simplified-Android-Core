@@ -91,6 +91,7 @@
         android:adjustViewBounds="false"
         android:background="@android:color/transparent"
         android:clickable="false"
+        android:visibility="invisible"
         android:contentDescription="@string/catalogAccessibilityBookDownloadCancel"
         android:src="@drawable/catalog_feed_cancel_download_icon"
         app:layout_constraintBottom_toBottomOf="@id/bookCellInProgressDownloadBar"
