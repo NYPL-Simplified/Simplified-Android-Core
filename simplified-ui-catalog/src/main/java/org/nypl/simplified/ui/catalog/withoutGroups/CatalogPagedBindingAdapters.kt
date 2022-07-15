@@ -11,6 +11,7 @@ import org.nypl.simplified.books.book_database.api.BookFormats
 import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.ui.catalog.CatalogBookAccessibilityStrings
 import org.nypl.simplified.ui.catalog.R
+import java.text.NumberFormat
 
 @BindingAdapter("coverContentDescriptionForItem")
 internal fun ImageView.coverContentDescriptionForItem(entry: FeedEntry.FeedEntryOPDS) {
@@ -36,6 +37,19 @@ internal fun TextView.formatOptionalExpiryInfo(dateTime: DateTime?) {
     val locale = ConfigurationCompat.getLocales(context.resources.configuration).get(0)
     val format = DateTimeFormat.forPattern("E, MMM d").withLocale(locale)
     text = context.resources.getString(R.string.catalogBookAvailabilityAvailableUntil, dateTime.toString(format))
+    visibility = View.VISIBLE
+  } ?: run {
+    visibility = View.INVISIBLE
+  }
+}
+
+@BindingAdapter("formatDownloadPercentage")
+internal fun TextView.formatDownloadPercentage(progress: Int?) {
+  val locale = ConfigurationCompat.getLocales(context.resources.configuration).get(0)
+  val formatter = NumberFormat.getPercentInstance(locale)
+  progress?.let {
+    text = formatter.format(it / 100f)
+    visibility = View.VISIBLE
   } ?: run {
     visibility = View.INVISIBLE
   }

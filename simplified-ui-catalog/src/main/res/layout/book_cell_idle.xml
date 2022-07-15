@@ -97,7 +97,7 @@
       android:layout_marginStart="16dp"
       android:layout_marginTop="4dp"
       android:layout_marginEnd="16dp"
-      android:drawableLeft="@drawable/ic_catalog_feed_expiry_info_clock_icon"
+      android:drawableLeft="@drawable/catalog_feed_expiry_info_clock_icon"
       android:drawablePadding="4dp"
       android:ellipsize="end"
       android:maxLines="1"

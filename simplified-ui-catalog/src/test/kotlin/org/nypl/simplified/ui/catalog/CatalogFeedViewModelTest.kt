@@ -240,7 +240,7 @@ class CatalogFeedViewModelTest {
   }
 
   @Test
-  internal fun `buildBookItem when HeldInQueue and revocable builds item with cancel button`() {
+  internal fun `buildBookItem when HeldInQueue and revocable builds idle item with cancel button`() {
     val testEntry = CatalogTestUtils.buildTestFeedEntryOPDS()
     val mockBook = mockk<Book>(relaxed = true)
     val bookWithStatus = BookWithStatus(
@@ -275,7 +275,7 @@ class CatalogFeedViewModelTest {
   }
 
   @Test
-  internal fun `buildBookItem when HeldInQueue but irrevocable builds item with no buttons`() {
+  internal fun `buildBookItem when HeldInQueue but irrevocable builds idle item with no buttons`() {
     val testEntry = CatalogTestUtils.buildTestFeedEntryOPDS()
     val mockBook = mockk<Book>(relaxed = true)
     val bookWithStatus = BookWithStatus(
@@ -297,7 +297,7 @@ class CatalogFeedViewModelTest {
   }
 
   @Test
-  internal fun `buildBookItem when HeldReady and revocable builds item with revoke and get buttons`() {
+  internal fun `buildBookItem when HeldReady and revocable builds idle item with revoke and get buttons`() {
     val testEntry = CatalogTestUtils.buildTestFeedEntryOPDS()
     val mockBook = mockk<Book>(relaxed = true)
     val bookWithStatus = BookWithStatus(
@@ -344,7 +344,7 @@ class CatalogFeedViewModelTest {
   }
 
   @Test
-  internal fun `buildBookItem when HeldReady and irrevocable builds item with only get button`() {
+  internal fun `buildBookItem when HeldReady and irrevocable builds idle item with only get button`() {
     val testEntry = CatalogTestUtils.buildTestFeedEntryOPDS()
     val mockBook = mockk<Book>(relaxed = true)
     val bookWithStatus = BookWithStatus(
@@ -379,7 +379,7 @@ class CatalogFeedViewModelTest {
   }
 
   @Test
-  internal fun `buildBookItem when Holdable builds item with reserve button`() {
+  internal fun `buildBookItem when Holdable builds idle item with reserve button`() {
     val testEntry = CatalogTestUtils.buildTestFeedEntryOPDS()
     val mockBook = mockk<Book>(relaxed = true)
     val bookWithStatus = BookWithStatus(
@@ -414,7 +414,7 @@ class CatalogFeedViewModelTest {
   }
 
   @Test
-  internal fun `buildBookItem when Loanable builds item with get button`() {
+  internal fun `buildBookItem when Loanable builds idle item with get button`() {
     val testEntry = CatalogTestUtils.buildTestFeedEntryOPDS()
     val mockBook = mockk<Book>(relaxed = true)
     val bookWithStatus = BookWithStatus(
@@ -449,7 +449,7 @@ class CatalogFeedViewModelTest {
   }
 
   @Test
-  internal fun `buildBookItem when Revoked builds item with no buttons`() {
+  internal fun `buildBookItem when Revoked builds idle item with no buttons`() {
     val testEntry = CatalogTestUtils.buildTestFeedEntryOPDS()
     val mockBook = mockk<Book>(relaxed = true)
     val bookWithStatus = BookWithStatus(
@@ -471,7 +471,7 @@ class CatalogFeedViewModelTest {
   }
 
   @Test
-  internal fun `buildBookItem when LoanedDownloaded builds item with read button if epub or pdf format`() {
+  internal fun `buildBookItem when LoanedDownloaded builds idle item with read button if epub or pdf format`() {
     val testEntry = CatalogTestUtils.buildTestFeedEntryOPDS()
 
     val mockBookEPUB = mockk<Book>(relaxed = true) {
@@ -515,7 +515,7 @@ class CatalogFeedViewModelTest {
   }
 
   @Test
-  internal fun `buildBookItem when LoanedDownloaded builds item with listen button if audiobook`() {
+  internal fun `buildBookItem when LoanedDownloaded builds idle item with listen button if audiobook`() {
     val testEntry = CatalogTestUtils.buildTestFeedEntryOPDS()
     val mockBook = mockk<Book>(relaxed = true) {
       every { findPreferredFormat() } returns mockk<BookFormat.BookFormatAudioBook>()
@@ -552,7 +552,7 @@ class CatalogFeedViewModelTest {
   }
 
   @Test
-  internal fun `buildBookItem when LoanedNotDownloaded builds item with download button`() {
+  internal fun `buildBookItem when LoanedNotDownloaded builds idle item with download button`() {
     val testEntry = CatalogTestUtils.buildTestFeedEntryOPDS()
     val mockBook = mockk<Book>(relaxed = true)
     val bookWithStatus = BookWithStatus(
@@ -587,7 +587,7 @@ class CatalogFeedViewModelTest {
   }
 
   @Test
-  internal fun `buildBookItem when LoanedDownloaded or LoanedNotDownloaded builds item with loanExpiry`() {
+  internal fun `buildBookItem when LoanedDownloaded or LoanedNotDownloaded builds idle item with loanExpiry`() {
     val testEntry = CatalogTestUtils.buildTestFeedEntryOPDS()
     val mockBook = mockk<Book>(relaxed = true)
     val mockListener = mockk<CatalogPagedViewListener>(relaxed = true)
@@ -623,11 +623,9 @@ class CatalogFeedViewModelTest {
 
   @Test
   internal fun `buildBookItem when Downloading state builds InProgress item with progress`() {
-    val testEntry = CatalogTestUtils.buildTestFeedEntryOPDS()
+    val testEntry = CatalogTestUtils.buildTestFeedEntryOPDS(title = "testTitle")
     val bookWithStatus = BookWithStatus(
-      mockk(relaxed = true) {
-        every { entry.title } returns "testTitle"
-      },
+      mockk(relaxed = true),
       mockk<BookStatus.Downloading> {
         every { progressPercent } returns 80.0
       }
@@ -636,6 +634,7 @@ class CatalogFeedViewModelTest {
     val result = subject.buildBookItem(testEntry, bookWithStatus, mockListener)
 
     if (result is BookItem.InProgress) {
+      result.entry shouldBe testEntry
       result.title shouldBe "testTitle"
       result.isIndeterminate shouldBe false
       result.progress shouldBe 80
@@ -647,11 +646,9 @@ class CatalogFeedViewModelTest {
   internal fun `buildBookItem builds indeterminate inProgress item for these states`(
     providedStatus: BookStatus
   ) {
-    val testEntry = CatalogTestUtils.buildTestFeedEntryOPDS()
+    val testEntry = CatalogTestUtils.buildTestFeedEntryOPDS(title = "testTitle")
     val bookWithStatus = BookWithStatus(
-      mockk(relaxed = true) {
-        every { entry.title } returns "testTitle"
-      },
+      mockk(relaxed = true),
       providedStatus
     )
 
@@ -659,9 +656,10 @@ class CatalogFeedViewModelTest {
     val result = subject.buildBookItem(testEntry, bookWithStatus, mockListener)
 
     if (result is BookItem.InProgress) {
+      result.entry shouldBe testEntry
       result.title shouldBe "testTitle"
       result.isIndeterminate shouldBe true
-      result.progress shouldBe 0
+      result.progress shouldBe null
     } else fail("Provided BookStatus should map to InProgress item")
   }
 

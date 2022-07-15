@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-  xmlns:app="http://schemas.android.com/apk/res-auto">
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:tools="http://schemas.android.com/tools">
 
   <data>
 
@@ -13,38 +14,135 @@
   <androidx.constraintlayout.widget.ConstraintLayout
     android:id="@+id/bookCellInProgress"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/catalogFeedCellHeight"
-    android:background="?attr/simplifiedColorPrimary">
+    android:layout_height="wrap_content">
+
+    <ImageView
+      android:id="@+id/bookCellInProgressCover"
+      android:layout_width="@dimen/catalogFeedCellImageWidth"
+      android:layout_height="@dimen/catalogFeedCellHeight"
+      app:layout_constraintBottom_toTopOf="@id/bookCellInProgressDownloadFooter"
+      app:layout_constraintEnd_toStartOf="@id/bookCellInProgressTitle"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
       android:id="@+id/bookCellInProgressTitle"
       android:layout_width="0dp"
       android:layout_height="wrap_content"
-      android:layout_margin="16dp"
+      android:layout_marginStart="16dp"
+      android:layout_marginTop="8dp"
+      android:layout_marginEnd="16dp"
       android:ellipsize="end"
-      android:maxLines="2"
+      android:maxLines="1"
       android:text="@{inProgressItem.title}"
-      android:textColor="?attr/simplifiedColorBackground"
+      android:textSize="16sp"
       android:textStyle="bold"
       app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toTopOf="parent" />
+      app:layout_constraintStart_toEndOf="@id/bookCellInProgressCover"
+      app:layout_constraintTop_toTopOf="parent"
+      tools:text="The Modern Prometheus" />
 
-    <ProgressBar
-      android:id="@+id/bookCellInProgressBar"
-      style="?android:attr/progressBarStyleHorizontal"
+    <TextView
+      android:id="@+id/bookCellInProgressAuthor"
       android:layout_width="0dp"
-      android:layout_height="32dp"
-      android:layout_margin="16dp"
-      android:layout_marginBottom="16dp"
-      android:backgroundTint="?attr/simplifiedColorBackground"
-      android:foregroundTint="?attr/simplifiedColorBackground"
-      android:indeterminate="@{inProgressItem.indeterminate}"
-      android:indeterminateTint="?attr/simplifiedColorBackground"
-      android:progress="@{inProgressItem.progress}"
-      app:layout_constraintBottom_toBottomOf="parent"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="16dp"
+      android:layout_marginEnd="16dp"
+      android:ellipsize="end"
+      android:maxLines="1"
+      android:text="@{inProgressItem.author}"
+      android:textSize="14sp"
       app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent" />
+      app:layout_constraintStart_toEndOf="@id/bookCellInProgressCover"
+      app:layout_constraintTop_toBottomOf="@id/bookCellInProgressTitle"
+      tools:text="Mary Shelley" />
 
+    <TextView
+      android:id="@+id/bookCellInProgressMeta"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="16dp"
+      android:layout_marginEnd="16dp"
+      android:ellipsize="end"
+      android:maxLines="1"
+      android:textSize="12sp"
+      android:textStyle="italic"
+      app:formatLabelForEntry="@{inProgressItem.entry}"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toEndOf="@id/bookCellInProgressCover"
+      app:layout_constraintTop_toBottomOf="@id/bookCellInProgressAuthor"
+      tools:text="eBook" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+      android:id="@+id/bookCellInProgressDownloadFooter"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:background="?attr/simplifiedColorText"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/bookCellInProgressCover"
+      tools:background="@color/simplified_material_green_primary">
+
+      <ImageButton
+        android:id="@+id/bookCellInProgressDownloadCancel"
+        android:layout_width="48dp"
+        android:layout_height="24dp"
+        android:layout_marginLeft="16dp"
+        android:adjustViewBounds="false"
+        android:background="@android:color/transparent"
+        android:clickable="false"
+        android:contentDescription="@string/catalogAccessibilityBookDownloadCancel"
+        android:src="@drawable/catalog_feed_cancel_download_icon"
+        app:layout_constraintBottom_toBottomOf="@id/bookCellInProgressDownloadBar"
+        app:layout_constraintEnd_toStartOf="@id/bookCellInProgressDownloadBar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/bookCellInProgressDownloadBar" />
+
+      <com.google.android.material.progressindicator.LinearProgressIndicator
+        android:id="@+id/bookCellInProgressDownloadBar"
+        android:layout_width="0dp"
+        android:layout_height="24dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginHorizontal="16dp"
+        app:indicatorColor="@color/almost_black"
+        app:trackColor="@color/white"
+        android:indeterminate="@{inProgressItem.indeterminate}"
+        android:progress="@{inProgressItem.progress}"
+        app:layout_constraintStart_toEndOf="@id/bookCellInProgressDownloadCancel"
+        app:layout_constraintEnd_toStartOf="@id/bookCellInProgressDownloadPercentage"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bookCellInProgressDownloadDescription"
+        />
+
+      <TextView
+        android:id="@+id/bookCellInProgressDownloadPercentage"
+        android:layout_width="48dp"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="16dp"
+        android:gravity="center"
+        android:textColor="@color/almost_black"
+        app:formatDownloadPercentage="@{inProgressItem.progress}"
+        app:layout_constraintBottom_toBottomOf="@id/bookCellInProgressDownloadBar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/bookCellInProgressDownloadBar"
+        app:layout_constraintTop_toTopOf="@id/bookCellInProgressDownloadBar"
+        tools:text="60%" />
+
+      <TextView
+        android:id="@+id/bookCellInProgressDownloadDescription"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="4dp"
+        android:gravity="center"
+        android:text="@string/catalogDownloading"
+        android:textColor="@color/almost_black"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/bookCellInProgressDownloadBar"
+        app:layout_constraintStart_toStartOf="@id/bookCellInProgressDownloadBar"
+        app:layout_constraintTop_toBottomOf="@id/bookCellInProgressDownloadBar"
+        tools:textColor="@color/almost_black" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
   </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

@@ -17,7 +17,7 @@ import org.nypl.simplified.ui.catalog.withoutGroups.BookItem.Type.IDLE
 import org.nypl.simplified.ui.catalog.withoutGroups.BookItem.Type.LOADING
 
 class CatalogPagedAdapter(
-  private val bookCovers: BookCoverProviderType,
+  private val bookCoverProvider: BookCoverProviderType,
   private val buildConfig: BuildConfigurationServiceType
 ) : PagingDataAdapter<BookItem, RecyclerView.ViewHolder>(
   CatalogPagedAdapterDiffing.comparisonCallback
@@ -44,7 +44,7 @@ class CatalogPagedAdapter(
     return when (viewType) {
       IDLE.ordinal -> {
         val binding = BookCellIdleBinding.inflate(inflater, parent, false)
-        BookIdleViewHolder(binding, bookCovers, buildConfig.showFormatLabel)
+        BookIdleViewHolder(binding, bookCoverProvider, buildConfig.showFormatLabel)
       }
       CORRUPT.ordinal -> {
         val binding = BookCellCorruptBinding.inflate(inflater, parent, false)
@@ -56,7 +56,7 @@ class CatalogPagedAdapter(
       }
       LOADING.ordinal -> {
         val binding = BookCellInProgressBinding.inflate(inflater, parent, false)
-        BookInProgressViewHolder(binding)
+        BookInProgressViewHolder(binding, bookCoverProvider, buildConfig.showFormatLabel)
       }
       else -> throw IllegalStateException("ViewType must match known ViewHolder type")
     }

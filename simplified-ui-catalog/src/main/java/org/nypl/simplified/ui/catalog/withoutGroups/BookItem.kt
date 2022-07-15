@@ -59,10 +59,12 @@ sealed class BookItem {
   }
 
   data class InProgress(
-    val title: String,
-    val progress: Int = 0,
-    val isIndeterminate: Boolean = true
+    val entry: FeedEntry.FeedEntryOPDS,
+    val progress: Int? = null
   ) : BookItem() {
     override val type = LOADING
+    val title: String? = entry.feedEntry.title
+    val author: String? = entry.feedEntry.authorsCommaSeparated
+    val isIndeterminate = progress == null
   }
 }

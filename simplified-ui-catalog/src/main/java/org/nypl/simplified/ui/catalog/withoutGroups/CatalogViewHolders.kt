@@ -82,9 +82,32 @@ class BookErrorViewHolder(
 
 class BookInProgressViewHolder(
   private val binding: BookCellInProgressBinding,
+  private val bookCoverProvider: BookCoverProviderType,
+  private val showFormatLabel: Boolean
 ) : RecyclerView.ViewHolder(binding.root) {
   fun bind(item: BookItem.InProgress) {
     binding.inProgressItem = item
     binding.executePendingBindings()
+
+    loadCover(item)
+    toggleFormatLabelVisibility()
+  }
+
+  private fun toggleFormatLabelVisibility() {
+    if (!showFormatLabel) binding.bookCellInProgressMeta.visibility = View.GONE
+  }
+
+  private fun loadCover(item: BookItem.InProgress) {
+    binding.bookCellInProgressCover.setImageDrawable(null)
+    binding.bookCellInProgressCover.visibility = View.INVISIBLE
+
+    bookCoverProvider.loadThumbnailInto(
+      item.entry,
+      binding.bookCellInProgressCover,
+      0,
+      itemView.context.resources.getDimensionPixelOffset(R.dimen.cover_thumbnail_height)
+    ).map {
+      binding.bookCellInProgressCover.visibility = View.VISIBLE
+    }
   }
 }
