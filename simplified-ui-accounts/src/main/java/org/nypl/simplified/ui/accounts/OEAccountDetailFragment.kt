@@ -267,8 +267,8 @@ class OEAccountDetailFragment : Fragment() {
    * Enable/Disable login button if form is valid
    */
   private fun updateLoginButton() {
-    binding.firstBookLogin.signIn.isEnabled = binding.firstBookLogin.etAccessCode.text.toString().trim().length == firstBookAccessCodeMin
-      && binding.firstBookLogin.etPin.text.toString().trim().length == firstBookPinMin
+    binding.firstBookLogin.signIn.isEnabled = binding.firstBookLogin.etAccessCode.text.toString().trim().length == firstBookAccessCodeMin &&
+      binding.firstBookLogin.etPin.text.toString().trim().length == firstBookPinMin
   }
 
   /**
@@ -338,7 +338,6 @@ class OEAccountDetailFragment : Fragment() {
       this.viewModel.enableBookmarkSyncing(isChecked)
     }
   }
-
 
   private fun onTryOAuthWithIntermediaryLogin(
     authenticationDescription: AccountProviderAuthenticationDescription.OAuthWithIntermediary
