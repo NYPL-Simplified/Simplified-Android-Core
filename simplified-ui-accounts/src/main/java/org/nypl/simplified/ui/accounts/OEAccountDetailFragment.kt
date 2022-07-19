@@ -131,6 +131,7 @@ class OEAccountDetailFragment : Fragment() {
     binding.oeLoginLanding.firstBookBtn.setOnClickListener {
       binding.oeLoginLanding.oeLogin.visibility = GONE
       binding.firstBookLogin.firstBookLoginCl.visibility = VISIBLE
+      binding.firstBookLogin.firstBookLoginProgressBar.visibility = GONE
     }
 
     binding.firstBookLogin.firstBookBack.setOnClickListener {
