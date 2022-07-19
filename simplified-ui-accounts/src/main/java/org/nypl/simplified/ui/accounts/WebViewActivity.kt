@@ -25,7 +25,7 @@ class WebViewActivity : AppCompatActivity() {
 
   private lateinit var binding: ActivityWebviewBinding
 
-  private val privacyNotice = "https://www.openebooks.org/policies"
+  private val privacyNotice = "https://www.openebooks.org/privacy"
   private val loginTrouble = "https://www.openebooks.org/signin-help"
   private val termsOfUse = "file:///android_asset/oe-eula.html"
   private val default = "https://www.openebooks.org"
