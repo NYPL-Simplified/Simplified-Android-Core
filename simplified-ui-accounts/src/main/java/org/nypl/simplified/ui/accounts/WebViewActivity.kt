@@ -1,5 +1,6 @@
 package org.nypl.simplified.ui.accounts
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import android.webkit.WebView
@@ -32,6 +33,7 @@ class WebViewActivity : AppCompatActivity() {
   private val faq = "https://www.openebooks.org/faq"
   private lateinit var url: String
 
+  @SuppressLint("SetJavaScriptEnabled")
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     binding = ActivityWebviewBinding.inflate(layoutInflater)
@@ -51,13 +53,14 @@ class WebViewActivity : AppCompatActivity() {
     /**
      * Load URL
      */
-    binding.page.loadUrl(url)
     binding.page.webViewClient = object : WebViewClient() {
       override fun onPageFinished(view: WebView, url: String) {
         logger.debug("Web page loaded")
         binding.loading.visibility = View.GONE
       }
     }
+    binding.page.settings.javaScriptEnabled = true
+    binding.page.loadUrl(url)
 
     /**
      * Handle back button click
