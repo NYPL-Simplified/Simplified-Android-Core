@@ -16,10 +16,20 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?android:attr/actionBarSize"
-            android:background="@drawable/ic_oe_top_bar"
+            android:background="@color/toolbarBackground"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:contentDescription="@string/contentDescOpenEbooksLogo"
+                android:layout_width="wrap_content"
+                app:layout_constraintTop_toTopOf="@id/toolbar"
+                app:layout_constraintBottom_toBottomOf="@id/toolbar"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                android:src="@drawable/ic_oe_top_bar"
+                android:layout_height="wrap_content"/>
 
             <ImageView
                 android:id="@+id/firstBookBack"
