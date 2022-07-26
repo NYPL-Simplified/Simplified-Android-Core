@@ -282,7 +282,6 @@ class OEAccountDetailFragment : Fragment() {
   }
 
   private fun reconfigureBookmarkSyncingSwitch(status: ReaderBookmarkSyncEnableStatus) {
-
     /*
      * Remove the checked-change listener, because setting `isChecked` will trigger the listener.
      */
