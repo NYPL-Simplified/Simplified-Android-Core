@@ -434,6 +434,9 @@ class OEAccountDetailFragment : Fragment() {
     this.viewModel.account.setLoginState(this.viewModel.account.loginState)
 
     this.subscriptions.clear()
+    (activity as AppCompatActivity).let {
+      it.supportActionBar?.show()
+    }
   }
 
   private fun reconfigureOEUI() {
