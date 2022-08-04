@@ -25,6 +25,7 @@ import org.nypl.simplified.ui.accounts.AccountListFragmentParameters
 import org.nypl.simplified.ui.accounts.AccountListRegistryEvent
 import org.nypl.simplified.ui.accounts.AccountListRegistryFragment
 import org.nypl.simplified.ui.accounts.AccountPickerEvent
+import org.nypl.simplified.ui.accounts.OEAccountDetailFragment
 import org.nypl.simplified.ui.accounts.saml20.AccountSAML20Event
 import org.nypl.simplified.ui.accounts.saml20.AccountSAML20Fragment
 import org.nypl.simplified.ui.accounts.saml20.AccountSAML20FragmentParameters
@@ -170,7 +171,11 @@ internal class MainFragmentListenerDelegate(
   ): MainFragmentState {
     return when (event) {
       is CatalogFeedEvent.LoginRequired -> {
-        this.openSettingsAccount(event.account, showPleaseLogInTitle = true)
+        if (settingsConfiguration.showOELogin) {
+          this.openOESettingsAccount(event.account, showPleaseLogInTitle = true)
+        } else {
+          this.openSettingsAccount(event.account, showPleaseLogInTitle = true)
+        }
         MainFragmentState.CatalogWaitingForLogin
       }
       is CatalogFeedEvent.OpenErrorPage -> {
@@ -198,7 +203,11 @@ internal class MainFragmentListenerDelegate(
   ): MainFragmentState {
     return when (event) {
       is CatalogBookDetailEvent.LoginRequired -> {
-        this.openSettingsAccount(event.account, showPleaseLogInTitle = true)
+        if (settingsConfiguration.showOELogin) {
+          this.openOESettingsAccount(event.account, showPleaseLogInTitle = true)
+        } else {
+          this.openSettingsAccount(event.account, showPleaseLogInTitle = true)
+        }
         MainFragmentState.CatalogWaitingForLogin
       }
       is CatalogBookDetailEvent.OpenErrorPage -> {
@@ -238,7 +247,11 @@ internal class MainFragmentListenerDelegate(
   ): MainFragmentState {
     return when (event) {
       is AccountListEvent.AccountSelected -> {
-        this.openSettingsAccount(event.account, showPleaseLogInTitle = false)
+        if (settingsConfiguration.showOELogin) {
+          this.openOESettingsAccount(event.account, showPleaseLogInTitle = false)
+        } else {
+          this.openSettingsAccount(event.account, showPleaseLogInTitle = false)
+        }
         state
       }
       AccountListEvent.AddAccount -> {
@@ -427,9 +440,28 @@ internal class MainFragmentListenerDelegate(
     )
   }
 
+  /**
+   * Open the SimplyE account screen
+   */
   private fun openSettingsAccount(account: AccountID, showPleaseLogInTitle: Boolean) {
     this.navigator.addFragment(
       fragment = AccountDetailFragment.create(
+        AccountFragmentParameters(
+          accountId = account,
+          closeOnLoginSuccess = false,
+          showPleaseLogInTitle = showPleaseLogInTitle
+        )
+      ),
+      tab = R.id.tabSettings
+    )
+  }
+
+  /**
+   * Open the Open eBooks account screen
+   */
+  private fun openOESettingsAccount(account: AccountID, showPleaseLogInTitle: Boolean) {
+    this.navigator.addFragment(
+      fragment = OEAccountDetailFragment.create(
         AccountFragmentParameters(
           accountId = account,
           closeOnLoginSuccess = false,

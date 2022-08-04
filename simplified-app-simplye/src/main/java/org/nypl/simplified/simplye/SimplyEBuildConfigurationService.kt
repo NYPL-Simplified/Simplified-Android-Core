@@ -42,4 +42,6 @@ class SimplyEBuildConfigurationService : BuildConfigurationServiceType {
     get() = BuildConfig.SIMPLIFIED_VERSION
   override val showAgeGateUi: Boolean
     get() = true
+  override val showOELogin: Boolean
+    get() = false
 }

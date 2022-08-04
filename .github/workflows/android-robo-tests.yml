@@ -34,7 +34,7 @@ jobs:
         run: bash ./gradlew :simplified-app-simplye:assembleRelease --stacktrace
 
       - name: Set up Google Cloud SDK
-        uses: google-github-actions/setup-gcloud@master
+        uses: google-github-actions/setup-gcloud@v0
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
           service_account_key: ${{ secrets.GCP_SA_KEY }}
@@ -51,5 +51,4 @@ jobs:
           --device model=gts3lltevzw,version=28,locale=en_US,orientation=portrait  \
           --device model=blueline,version=28,locale=en_US,orientation=portrait  \
           --device model=beyond1,version=28,locale=en_US,orientation=portrait  \
-          --device model=lake_n,version=28,locale=en_US,orientation=portrait  \
           --timeout 90s

@@ -42,6 +42,12 @@ interface BuildConfigurationCatalogType {
   val showFormatLabel: Boolean
 
   /**
+   * Should custom Open eBooks login be shown?
+   */
+
+  val showOELogin: Boolean
+
+  /**
    * Enable/disable returning books.
    */
 

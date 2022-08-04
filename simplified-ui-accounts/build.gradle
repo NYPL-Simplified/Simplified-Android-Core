@@ -1,6 +1,7 @@
 apply plugin: 'kotlin-kapt'
 
 apply from: "$rootProject.projectDir/build_test.gradle"
+apply plugin: 'org.jetbrains.kotlin.android'
 
 android {
   buildFeatures {
@@ -42,6 +43,9 @@ dependencies {
   implementation libs.rxjava2.extensions
   implementation libs.rxandroid2
   implementation libs.slf4j
+  implementation libs.google.material
+  implementation libs.androidx.constraint.layout
+  implementation libs.androidx.app.compat
 
   // Temporary workaround to force databinding codegen in Robolectric tests
   // https://github.com/robolectric/robolectric/issues/3789
