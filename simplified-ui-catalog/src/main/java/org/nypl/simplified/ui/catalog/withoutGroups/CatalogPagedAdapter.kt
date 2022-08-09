@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.CoroutineScope
 import org.nypl.simplified.books.covers.BookCoverProviderType
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.ui.catalog.databinding.BookCellCorruptBinding
@@ -15,13 +16,16 @@ import org.nypl.simplified.ui.catalog.withoutGroups.BookItem.Type.CORRUPT
 import org.nypl.simplified.ui.catalog.withoutGroups.BookItem.Type.ERROR
 import org.nypl.simplified.ui.catalog.withoutGroups.BookItem.Type.IDLE
 import org.nypl.simplified.ui.catalog.withoutGroups.BookItem.Type.LOADING
+import org.slf4j.LoggerFactory
 
 class CatalogPagedAdapter(
   private val bookCoverProvider: BookCoverProviderType,
-  private val buildConfig: BuildConfigurationServiceType
+  private val buildConfig: BuildConfigurationServiceType,
+  private val viewLifecycleScope: CoroutineScope
 ) : PagingDataAdapter<BookItem, RecyclerView.ViewHolder>(
   CatalogPagedAdapterDiffing.comparisonCallback
 ) {
+  private val logger = LoggerFactory.getLogger(javaClass)
 
   override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
     val item = getItem(position)
@@ -44,7 +48,7 @@ class CatalogPagedAdapter(
     return when (viewType) {
       IDLE.ordinal -> {
         val binding = BookCellIdleBinding.inflate(inflater, parent, false)
-        BookIdleViewHolder(binding, bookCoverProvider, buildConfig.showFormatLabel)
+        BookIdleViewHolder(binding, bookCoverProvider, buildConfig.showFormatLabel, viewLifecycleScope)
       }
       CORRUPT.ordinal -> {
         val binding = BookCellCorruptBinding.inflate(inflater, parent, false)
@@ -64,6 +68,14 @@ class CatalogPagedAdapter(
 
   override fun getItemViewType(position: Int): Int {
     return getItem(position)?.type?.ordinal ?: -1
+  }
+
+  override fun onViewRecycled(holder: RecyclerView.ViewHolder) {
+    super.onViewRecycled(holder)
+    if (holder is BookIdleViewHolder) {
+      logger.debug("Unbind called for $holder")
+      holder.unbind()
+    }
   }
 }
 

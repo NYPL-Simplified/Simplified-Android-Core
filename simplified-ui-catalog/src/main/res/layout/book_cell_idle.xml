@@ -27,9 +27,9 @@
       android:layout_height="@dimen/catalogFeedCellHeight"
       android:onClick="@{() -> idleItem.actions.openBookDetail()}"
       app:coverContentDescriptionForItem="@{idleItem.entry}"
-      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintBottom_toTopOf="@id/bookCellIdleDownloadFooter"
       app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toTopOf="parent" />
+      app:layout_constraintTop_toTopOf="@id/bookCellIdleTitle" />
 
     <ProgressBar
       android:id="@+id/bookCellIdleCoverProgress"
@@ -54,6 +54,7 @@
       android:text="@{idleItem.title}"
       android:textSize="16sp"
       android:textStyle="bold"
+      app:layout_constraintBottom_toTopOf="@id/bookCellIdleAuthor"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toEndOf="@id/bookCellIdleCover"
       app:layout_constraintTop_toTopOf="parent"
@@ -69,6 +70,7 @@
       android:maxLines="1"
       android:text="@{idleItem.author}"
       android:textSize="14sp"
+      app:layout_constraintBottom_toTopOf="@id/bookCellIdleMeta"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toEndOf="@id/bookCellIdleCover"
       app:layout_constraintTop_toBottomOf="@id/bookCellIdleTitle"
@@ -85,6 +87,7 @@
       android:textSize="12sp"
       android:textStyle="italic"
       app:formatLabelForEntry="@{idleItem.entry}"
+      app:layout_constraintBottom_toTopOf="@id/bookCellIdleExpiryInfo"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toEndOf="@id/bookCellIdleCover"
       app:layout_constraintTop_toBottomOf="@id/bookCellIdleAuthor"
@@ -94,15 +97,16 @@
       android:id="@+id/bookCellIdleExpiryInfo"
       android:layout_width="0dp"
       android:layout_height="wrap_content"
-      android:layout_marginStart="16dp"
+      android:layout_marginHorizontal="16dp"
       android:layout_marginTop="4dp"
-      android:layout_marginEnd="16dp"
+      android:layout_marginBottom="8dp"
       android:drawableLeft="@drawable/catalog_feed_expiry_info_clock_icon"
       android:drawablePadding="4dp"
       android:ellipsize="end"
       android:maxLines="1"
       android:textSize="11sp"
       app:formatOptionalExpiryInfo="@{idleItem.loanExpiry}"
+      app:layout_constraintBottom_toTopOf="@id/bookCellIdleButtons"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toEndOf="@id/bookCellIdleCover"
       app:layout_constraintTop_toBottomOf="@id/bookCellIdleMeta"
@@ -116,7 +120,7 @@
       android:layout_marginTop="8dp"
       android:layout_marginEnd="16dp"
       android:layout_marginBottom="8dp"
-      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintBottom_toBottomOf="@id/bookCellIdleCover"
       app:layout_constraintEnd_toEndOf="parent"
       app:layout_constraintStart_toEndOf="@id/bookCellIdleCover"
       app:layout_constraintTop_toBottomOf="@id/bookCellIdleExpiryInfo">
@@ -126,6 +130,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingHorizontal="32dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="get"
@@ -137,11 +142,112 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:paddingHorizontal="32dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@id/bookCellIdlePrimaryButton"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="revoke"
         tools:visibility="visible" />
 
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+      android:id="@+id/bookCellIdleDownloadFooter"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:background="?attr/simplifiedColorText"
+      android:visibility="gone"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/bookCellIdleCover"
+      tools:background="@color/simplified_material_green_primary"
+      tools:visibility="visible">
+
+      <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/bookCellIdleDownloadInProgress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageButton
+          android:id="@+id/bookCellIdleDownloadCancel"
+          android:layout_width="48dp"
+          android:layout_height="24dp"
+          android:layout_marginLeft="16dp"
+          android:adjustViewBounds="false"
+          android:background="@android:color/transparent"
+          android:clickable="false"
+          android:contentDescription="@string/catalogAccessibilityBookDownloadCancel"
+          android:src="@drawable/catalog_feed_cancel_download_icon"
+          android:visibility="invisible"
+          app:layout_constraintBottom_toBottomOf="@id/bookCellIdleDownloadBar"
+          app:layout_constraintEnd_toStartOf="@id/bookCellIdleDownloadBar"
+          app:layout_constraintStart_toStartOf="parent"
+          app:layout_constraintTop_toTopOf="@id/bookCellIdleDownloadBar" />
+
+        <com.google.android.material.progressindicator.LinearProgressIndicator
+          android:id="@+id/bookCellIdleDownloadBar"
+          android:layout_width="0dp"
+          android:layout_height="24dp"
+          android:layout_marginHorizontal="16dp"
+          android:layout_marginTop="20dp"
+          android:layout_marginBottom="8dp"
+          app:configureProgressBar="@{idleItem.downloadState.progress}"
+          app:indicatorColor="@color/almost_black"
+          app:layout_constraintBottom_toTopOf="@id/bookCellIdleDownloadDescription"
+          app:layout_constraintEnd_toStartOf="@id/bookCellIdleDownloadPercentage"
+          app:layout_constraintStart_toEndOf="@id/bookCellIdleDownloadCancel"
+          app:layout_constraintTop_toTopOf="parent"
+          app:trackColor="@color/white" />
+
+        <TextView
+          android:id="@+id/bookCellIdleDownloadPercentage"
+          android:layout_width="48dp"
+          android:layout_height="wrap_content"
+          android:layout_marginRight="16dp"
+          android:gravity="center"
+          android:textColor="@color/almost_black"
+          app:formatDownloadPercentage="@{idleItem.downloadState.progress}"
+          app:layout_constraintBottom_toBottomOf="@id/bookCellIdleDownloadBar"
+          app:layout_constraintEnd_toEndOf="parent"
+          app:layout_constraintStart_toEndOf="@id/bookCellIdleDownloadBar"
+          app:layout_constraintTop_toTopOf="@id/bookCellIdleDownloadBar"
+          tools:text="60%" />
+
+        <TextView
+          android:id="@+id/bookCellIdleDownloadDescription"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:layout_marginBottom="4dp"
+          android:gravity="center"
+          android:text="@string/catalogDownloading"
+          android:textColor="@color/almost_black"
+          android:textSize="12sp"
+          app:layout_constraintBottom_toBottomOf="parent"
+          app:layout_constraintEnd_toEndOf="@id/bookCellIdleDownloadBar"
+          app:layout_constraintStart_toStartOf="@id/bookCellIdleDownloadBar"
+          app:layout_constraintTop_toBottomOf="@id/bookCellIdleDownloadBar"
+          tools:textColor="@color/almost_black" />
+      </androidx.constraintlayout.widget.ConstraintLayout>
+
+      <TextView
+        android:id="@+id/bookCellIdleDownloadComplete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:drawableRight="@drawable/ic_catalog_download_complete"
+        android:drawablePadding="5dp"
+        android:gravity="center"
+        android:paddingVertical="8dp"
+        android:text="@string/catalogDownloadComplete"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible" />
     </androidx.constraintlayout.widget.ConstraintLayout>
   </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

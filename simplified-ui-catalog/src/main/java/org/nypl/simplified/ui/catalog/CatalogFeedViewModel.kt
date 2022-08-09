@@ -19,7 +19,12 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.subjects.PublishSubject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.rx2.asFlow
 import org.joda.time.DateTime
 import org.joda.time.LocalDateTime
 import org.nypl.simplified.accounts.api.AccountEvent
@@ -35,6 +40,7 @@ import org.nypl.simplified.analytics.api.AnalyticsEvent
 import org.nypl.simplified.analytics.api.AnalyticsType
 import org.nypl.simplified.books.api.Book
 import org.nypl.simplified.books.api.BookFormat
+import org.nypl.simplified.books.api.BookID
 import org.nypl.simplified.books.book_registry.BookRegistryType
 import org.nypl.simplified.books.book_registry.BookStatus
 import org.nypl.simplified.books.book_registry.BookStatusEvent
@@ -68,6 +74,7 @@ import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.Catalog
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithGroups
 import org.nypl.simplified.ui.catalog.CatalogFeedState.CatalogFeedLoaded.CatalogFeedWithoutGroups
 import org.nypl.simplified.ui.catalog.withoutGroups.BookItem
+import org.nypl.simplified.ui.catalog.withoutGroups.DownloadState
 import org.nypl.simplified.ui.errorpage.ErrorPageParameters
 import org.nypl.simplified.ui.thread.api.UIExecutor
 import org.slf4j.LoggerFactory
@@ -131,6 +138,8 @@ class CatalogFeedViewModel(
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(::onFeedLoaderResult)
     )
+
+  private val downloadingBooks = mutableMapOf<BookID, BookStatus>()
 
   private fun onAccountEvent(event: AccountEvent) {
     when (event) {
@@ -534,6 +543,8 @@ class CatalogFeedViewModel(
 
   @VisibleForTesting
   internal fun buildBookItems(entries: PagingData<FeedEntry>): PagingData<BookItem> {
+    logger.debug("[Rob] buildBookItems called")
+    logger.debug("[Rob] current downloadingBooks: ${downloadingBooks.size}, ${downloadingBooks.entries.firstOrNull()?.key.toString()}")
     return entries.map {
       when (it) {
         is FeedEntry.FeedEntryCorrupt -> BookItem.Corrupt(it)
@@ -894,17 +905,39 @@ class CatalogFeedViewModel(
     }
   }
 
+  @OptIn(ExperimentalCoroutinesApi::class)
+  fun buildStatusFlowForBook(book: BookID): Flow<BookStatus> {
+    return bookRegistry.bookEvents().asFlow()
+      .filter { it.bookId == book }
+      .map { it.statusNow }
+      .filterNotNull()
+//    return callbackFlow {
+//      viewModelScope.launch {
+//        bookRegistry.bookEvents().filter { it.bookId == book }.asFlow().collect {
+//
+//        }
+//      }
+//    }
+  }
+
+  //downloading w/progress
+  //downloading w/o progress
+  //download complete
+  //normal idle mode
+
   @VisibleForTesting
   internal fun buildBookItem(
     entry: FeedEntry.FeedEntryOPDS,
-    bookWithStatus: BookWithStatus?,
+    bookWithStatus: BookWithStatus,
     listener: CatalogPagedViewListener
   ): BookItem {
-    return when (val status = bookWithStatus!!.status) {
+    return when (val status = bookWithStatus.status) {
       /*
       * Error States
       */
       is BookStatus.FailedDownload -> {
+        logger.debug("[Rob] FailedDownload for ${entry.feedEntry.title}")
+        downloadingBooks.remove(bookWithStatus.book.id)
         BookItem.Error(
           entry = entry,
           failure = status.result,
@@ -1026,6 +1059,9 @@ class CatalogFeedViewModel(
         )
       }
       is BookStatus.Loaned.LoanedDownloaded -> {
+        logger.debug("[Rob] LoanedDownloaded for ${entry.feedEntry.title}")
+        val justDownloaded = downloadingBooks.remove(bookWithStatus.book.id)?.let { true } ?: false
+
         val textConfig = when (val format = bookWithStatus.book.findPreferredFormat()) {
           is BookFormat.BookFormatEPUB,
           is BookFormat.BookFormatPDF -> {
@@ -1059,7 +1095,8 @@ class CatalogFeedViewModel(
             override fun primaryButton() = primaryButton
             override fun secondaryButton(): BookItem.Idle.IdleButtonConfig? = null
           },
-          loanExpiry = status.loanExpiryDate
+          loanExpiry = status.loanExpiryDate,
+          downloadState = if (justDownloaded) DownloadState.Complete else null
         )
       }
       is BookStatus.Loaned.LoanedNotDownloaded -> {
@@ -1087,12 +1124,29 @@ class CatalogFeedViewModel(
       is BookStatus.RequestingRevoke,
       is BookStatus.DownloadExternalAuthenticationInProgress,
       is BookStatus.DownloadWaitingForExternalAuthentication -> {
-        BookItem.InProgress(entry = entry)
+        downloadingBooks[bookWithStatus.book.id] = status
+        BookItem.Idle(
+          entry = entry,
+          actions = object : BookItem.Idle.IdleActions {
+            override fun openBookDetail() {}
+            override fun primaryButton(): BookItem.Idle.IdleButtonConfig? = null
+            override fun secondaryButton(): BookItem.Idle.IdleButtonConfig? = null
+          },
+          downloadState = DownloadState.InProgress()
+        )
       }
       is BookStatus.Downloading -> {
-        BookItem.InProgress(
+        logger.debug("[Rob] Determinate progress of ${status.progressPercent?.toInt()} for ${entry.feedEntry.title}")
+        downloadingBooks[bookWithStatus.book.id] = status
+        BookItem.Idle(
           entry = entry,
-          progress = status.progressPercent?.toInt()
+          actions = object : BookItem.Idle.IdleActions {
+            override fun openBookDetail() {}
+            override fun primaryButton(): BookItem.Idle.IdleButtonConfig? = null
+            override fun secondaryButton(): BookItem.Idle.IdleButtonConfig? = null
+
+          },
+          downloadState = DownloadState.InProgress(status.progressPercent?.toInt())
         )
       }
     }
