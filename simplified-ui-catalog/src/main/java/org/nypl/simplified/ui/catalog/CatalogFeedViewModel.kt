@@ -903,26 +903,6 @@ class CatalogFeedViewModel(
     }
   }
 
-  @OptIn(ExperimentalCoroutinesApi::class)
-  fun buildStatusFlowForBook(book: BookID): Flow<BookStatus> {
-    return bookRegistry.bookEvents().asFlow()
-      .filter { it.bookId == book }
-      .map { it.statusNow }
-      .filterNotNull()
-//    return callbackFlow {
-//      viewModelScope.launch {
-//        bookRegistry.bookEvents().filter { it.bookId == book }.asFlow().collect {
-//
-//        }
-//      }
-//    }
-  }
-
-  // downloading w/progress
-  // downloading w/o progress
-  // download complete
-  // normal idle mode
-
   @VisibleForTesting
   internal fun buildBookItem(
     entry: FeedEntry.FeedEntryOPDS,
