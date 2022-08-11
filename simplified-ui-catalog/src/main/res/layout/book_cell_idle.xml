@@ -27,7 +27,6 @@
       android:layout_height="@dimen/catalogFeedCellHeight"
       android:onClick="@{() -> idleItem.actions.openBookDetail()}"
       app:coverContentDescriptionForItem="@{idleItem.entry}"
-      app:layout_constraintBottom_toTopOf="@id/bookCellIdleDownloadFooter"
       app:layout_constraintStart_toStartOf="parent"
       app:layout_constraintTop_toTopOf="@id/bookCellIdleTitle" />
 
@@ -219,7 +218,7 @@
 
         <TextView
           android:id="@+id/bookCellIdleDownloadDescription"
-          android:layout_width="0dp"
+          android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:layout_marginBottom="4dp"
           android:gravity="center"

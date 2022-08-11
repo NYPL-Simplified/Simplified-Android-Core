@@ -543,8 +543,6 @@ class CatalogFeedViewModel(
 
   @VisibleForTesting
   internal fun buildBookItems(entries: PagingData<FeedEntry>): PagingData<BookItem> {
-    logger.debug("[Rob] buildBookItems called")
-    logger.debug("[Rob] current downloadingBooks: ${downloadingBooks.size}, ${downloadingBooks.entries.firstOrNull()?.key.toString()}")
     return entries.map {
       when (it) {
         is FeedEntry.FeedEntryCorrupt -> BookItem.Corrupt(it)
@@ -920,10 +918,10 @@ class CatalogFeedViewModel(
 //    }
   }
 
-  //downloading w/progress
-  //downloading w/o progress
-  //download complete
-  //normal idle mode
+  // downloading w/progress
+  // downloading w/o progress
+  // download complete
+  // normal idle mode
 
   @VisibleForTesting
   internal fun buildBookItem(
@@ -936,7 +934,6 @@ class CatalogFeedViewModel(
       * Error States
       */
       is BookStatus.FailedDownload -> {
-        logger.debug("[Rob] FailedDownload for ${entry.feedEntry.title}")
         downloadingBooks.remove(bookWithStatus.book.id)
         BookItem.Error(
           entry = entry,
@@ -949,6 +946,7 @@ class CatalogFeedViewModel(
         )
       }
       is BookStatus.FailedLoan -> {
+        downloadingBooks.remove(bookWithStatus.book.id)
         BookItem.Error(
           entry = entry,
           failure = status.result,
@@ -1059,7 +1057,6 @@ class CatalogFeedViewModel(
         )
       }
       is BookStatus.Loaned.LoanedDownloaded -> {
-        logger.debug("[Rob] LoanedDownloaded for ${entry.feedEntry.title}")
         val justDownloaded = downloadingBooks.remove(bookWithStatus.book.id)?.let { true } ?: false
 
         val textConfig = when (val format = bookWithStatus.book.findPreferredFormat()) {
@@ -1124,7 +1121,8 @@ class CatalogFeedViewModel(
       is BookStatus.RequestingRevoke,
       is BookStatus.DownloadExternalAuthenticationInProgress,
       is BookStatus.DownloadWaitingForExternalAuthentication -> {
-        downloadingBooks[bookWithStatus.book.id] = status
+        val previousDownloadStatus = downloadingBooks.replace(bookWithStatus.book.id, status)
+        val newlyDownloading = previousDownloadStatus == null
         BookItem.Idle(
           entry = entry,
           actions = object : BookItem.Idle.IdleActions {
@@ -1132,21 +1130,23 @@ class CatalogFeedViewModel(
             override fun primaryButton(): BookItem.Idle.IdleButtonConfig? = null
             override fun secondaryButton(): BookItem.Idle.IdleButtonConfig? = null
           },
-          downloadState = DownloadState.InProgress()
+          downloadState = DownloadState.InProgress(isStarting = newlyDownloading)
         )
       }
       is BookStatus.Downloading -> {
-        logger.debug("[Rob] Determinate progress of ${status.progressPercent?.toInt()} for ${entry.feedEntry.title}")
-        downloadingBooks[bookWithStatus.book.id] = status
+        val previousDownloadStatus = downloadingBooks.replace(bookWithStatus.book.id, status)
+        val newlyDownloading = previousDownloadStatus == null
         BookItem.Idle(
           entry = entry,
           actions = object : BookItem.Idle.IdleActions {
             override fun openBookDetail() {}
             override fun primaryButton(): BookItem.Idle.IdleButtonConfig? = null
             override fun secondaryButton(): BookItem.Idle.IdleButtonConfig? = null
-
           },
-          downloadState = DownloadState.InProgress(status.progressPercent?.toInt())
+          downloadState = DownloadState.InProgress(
+            progress = status.progressPercent?.toInt(),
+            isStarting = newlyDownloading
+          )
         )
       }
     }

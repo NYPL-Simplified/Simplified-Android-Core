@@ -1,8 +1,9 @@
 package org.nypl.simplified.ui.catalog.withoutGroups
 
 import android.view.View
-import androidx.core.view.doOnNextLayout
-import androidx.core.view.doOnPreDraw
+import android.view.ViewGroup
+import android.view.animation.Animation
+import android.view.animation.Transformation
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.CoroutineScope
@@ -16,24 +17,19 @@ import org.nypl.simplified.ui.catalog.databinding.BookCellCorruptBinding
 import org.nypl.simplified.ui.catalog.databinding.BookCellErrorBinding
 import org.nypl.simplified.ui.catalog.databinding.BookCellIdleBinding
 import org.nypl.simplified.ui.catalog.databinding.BookCellInProgressBinding
-import org.slf4j.LoggerFactory
 
 class BookIdleViewHolder(
   private val binding: BookCellIdleBinding,
   private val bookCoverProvider: BookCoverProviderType,
   private val showFormatLabel: Boolean,
-  private val viewLifecycleScope: CoroutineScope
+  private val viewLifecycleScope: CoroutineScope,
 ) : RecyclerView.ViewHolder(binding.root) {
 
   companion object {
     const val DOWNLOAD_COMPLETE_FOOTER_DElAY = 5000L
   }
 
-  private val logger = LoggerFactory.getLogger(javaClass)
-
   private var footerAnimationJob: Job? = null
-  private var originalHeight: Int? = null
-  private var expandedHeight: Int? = null
 
   fun bind(item: BookItem.Idle) {
     binding.idleItem = item
@@ -45,23 +41,44 @@ class BookIdleViewHolder(
     configureButtons(item)
   }
 
-  fun setupAnimation() {
-    logger.debug("setupAnimation")
-    binding.bookCellIdle.doOnPreDraw { view ->
-      logger.debug("doOnPreDraw")
-      originalHeight = view.height
+  private fun animatedFooterCollapse(view: View) {
+    val fullHeight = view.measuredHeight
 
-      binding.bookCellIdleDownloadFooter.visibility = View.VISIBLE
-      binding.bookCellIdle.doOnNextLayout {
-        logger.debug("doOnNextLayout")
-        expandedHeight = it.height
-        binding.bookCellIdleDownloadFooter.visibility = View.GONE
+    val animation = object : Animation() {
+      override fun applyTransformation(interpolatedTime: Float, t: Transformation?) {
+        if (interpolatedTime == 1f) {
+          view.visibility = View.GONE
+        } else {
+          view.layoutParams.height = fullHeight - (fullHeight * interpolatedTime).toInt()
+          view.requestLayout()
+        }
       }
     }
+
+    animation.duration = (fullHeight / view.context.resources.displayMetrics.density).toLong()
+    view.startAnimation(animation)
   }
 
-  fun unbind() {
-    footerAnimationJob?.cancel()
+  private fun animatedFooterExpand(view: View) {
+    view.measure(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+    val fullHeight = view.measuredHeight
+
+    view.layoutParams.height = 0
+    view.visibility = View.VISIBLE
+
+    val animation = object : Animation() {
+      override fun applyTransformation(interpolatedTime: Float, t: Transformation?) {
+        view.layoutParams.height =
+          if (interpolatedTime == 1f) ViewGroup.LayoutParams.WRAP_CONTENT
+          else (fullHeight * interpolatedTime).toInt()
+        view.requestLayout()
+      }
+
+      override fun willChangeBounds() = true
+    }
+
+    animation.duration = (fullHeight / view.context.resources.displayMetrics.density).toLong()
+    view.startAnimation(animation)
   }
 
   private fun configureDownloadViews(item: BookItem.Idle) {
@@ -73,13 +90,24 @@ class BookIdleViewHolder(
 
         footerAnimationJob = viewLifecycleScope.launch {
           delay(DOWNLOAD_COMPLETE_FOOTER_DElAY)
-          binding.bookCellIdleDownloadFooter.visibility = View.GONE
+          animatedFooterCollapse(binding.bookCellIdleDownloadFooter)
+        }
+        footerAnimationJob?.invokeOnCompletion {
+          binding.bookCellIdleDownloadFooter.isVisible = true
         }
       }
       is DownloadState.InProgress -> {
-        binding.bookCellIdleDownloadFooter.visibility = View.VISIBLE
+        binding.bookCellIdleDownloadFooter.visibility = View.INVISIBLE
+        binding.bookCellIdleDownloadFooter.let {
+          if (state.isStarting) {
+            viewLifecycleScope.launch {
+              delay(250)
+              animatedFooterExpand(it)
+            }
+          } else it.visibility = View.VISIBLE
+        }
         binding.bookCellIdleDownloadInProgress.visibility = View.VISIBLE
-        binding.bookCellIdleDownloadComplete.visibility = View.INVISIBLE
+        binding.bookCellIdleDownloadComplete.visibility = View.GONE
 
         state.progress?.let { progress ->
           binding.bookCellIdleCoverProgress.isIndeterminate = false
@@ -115,7 +143,10 @@ class BookIdleViewHolder(
   }
 
   private fun configureButtons(item: BookItem.Idle) {
-    binding.bookCellIdleButtons.isVisible = item.downloadState !is DownloadState.InProgress
+    if (item.downloadState is DownloadState.InProgress) {
+      binding.bookCellIdlePrimaryButton.visibility = View.GONE
+      binding.bookCellIdleSecondaryButton.visibility = View.GONE
+    }
 
     item.actions.primaryButton()?.let {
       binding.bookCellIdlePrimaryButton.visibility = View.VISIBLE

@@ -75,6 +75,12 @@ sealed class DownloadState {
   fun isIndeterminate() = progress == null
   fun isComplete() = progress == 100
 
-  object Complete: DownloadState() { override val progress = 100 }
-  class InProgress(override val progress: Int? = null): DownloadState()
+  object Complete : DownloadState() {
+    override val progress = 100
+  }
+
+  class InProgress(
+    override val progress: Int? = null,
+    val isStarting: Boolean = false
+  ) : DownloadState()
 }

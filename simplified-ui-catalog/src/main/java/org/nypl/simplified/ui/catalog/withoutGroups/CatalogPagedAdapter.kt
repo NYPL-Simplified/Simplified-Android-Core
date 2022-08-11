@@ -16,7 +16,6 @@ import org.nypl.simplified.ui.catalog.withoutGroups.BookItem.Type.CORRUPT
 import org.nypl.simplified.ui.catalog.withoutGroups.BookItem.Type.ERROR
 import org.nypl.simplified.ui.catalog.withoutGroups.BookItem.Type.IDLE
 import org.nypl.simplified.ui.catalog.withoutGroups.BookItem.Type.LOADING
-import org.slf4j.LoggerFactory
 
 class CatalogPagedAdapter(
   private val bookCoverProvider: BookCoverProviderType,
@@ -25,7 +24,6 @@ class CatalogPagedAdapter(
 ) : PagingDataAdapter<BookItem, RecyclerView.ViewHolder>(
   CatalogPagedAdapterDiffing.comparisonCallback
 ) {
-  private val logger = LoggerFactory.getLogger(javaClass)
 
   override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
     val item = getItem(position)
@@ -68,14 +66,6 @@ class CatalogPagedAdapter(
 
   override fun getItemViewType(position: Int): Int {
     return getItem(position)?.type?.ordinal ?: -1
-  }
-
-  override fun onViewRecycled(holder: RecyclerView.ViewHolder) {
-    super.onViewRecycled(holder)
-    if (holder is BookIdleViewHolder) {
-      logger.debug("Unbind called for $holder")
-      holder.unbind()
-    }
   }
 }
 
