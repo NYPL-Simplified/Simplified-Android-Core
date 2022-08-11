@@ -1,6 +1,5 @@
 package org.nypl.simplified.ui.accounts
 
-import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -16,7 +15,6 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import io.reactivex.disposables.CompositeDisposable
-import org.librarysimplified.services.api.Services
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountLoginState
 import org.nypl.simplified.accounts.api.AccountLoginState.AccountLoggedIn
@@ -65,8 +63,6 @@ class OEAccountDetailFragment : Fragment() {
   private val parameters: AccountFragmentParameters by lazy {
     this.requireArguments()[PARAMETERS_ID] as AccountFragmentParameters
   }
-
-  private val services = Services.serviceDirectory()
 
   private val viewModel: AccountDetailViewModel by viewModels(
     factoryProducer = {
@@ -244,12 +240,25 @@ class OEAccountDetailFragment : Fragment() {
     binding.firstBookLogin.firstBookLoginCl.visibility = VISIBLE
     binding.firstBookLogin.firstBookBack.visibility = GONE
     binding.firstBookLogin.firstBookLoginProgressBar.visibility = GONE
+    // Hide login form for Clever users
+    if (binding.firstBookLogin.etAccessCode.text.isEmpty()) {
+      binding.firstBookLogin.etAccessCode.visibility = GONE
+      binding.firstBookLogin.etPin.visibility = GONE
+      binding.firstBookLogin.tiAccessCode.visibility = GONE
+      binding.firstBookLogin.tiPin.visibility = GONE
+      binding.firstBookLogin.firstBookHeader.visibility = GONE
+    }
   }
 
   /**
    * Unlocks sign in form and hides bookmark & server buttons
    */
   private fun showLoggedOutUI() {
+    binding.firstBookLogin.firstBookHeader.visibility = VISIBLE
+    binding.firstBookLogin.etAccessCode.visibility = VISIBLE
+    binding.firstBookLogin.etPin.visibility = VISIBLE
+    binding.firstBookLogin.tiAccessCode.visibility = VISIBLE
+    binding.firstBookLogin.tiPin.visibility = VISIBLE
     binding.firstBookLogin.firstBookHeader.text = getString(R.string.signInHeader)
     binding.firstBookLogin.firstBookLogo.visibility = VISIBLE
     binding.firstBookLogin.loginTrouble.visibility = VISIBLE
@@ -328,7 +337,7 @@ class OEAccountDetailFragment : Fragment() {
   override fun onStart() {
     super.onStart()
 
-    this.configureToolbar(requireActivity())
+    this.configureToolbar()
 
     /*
      * Configure the bookmark syncing switch to enable/disable syncing permissions.
@@ -349,41 +358,6 @@ class OEAccountDetailFragment : Fragment() {
       )
     )
     this.sendOAuthIntent(authenticationDescription)
-  }
-
-  private fun onTryBasicLogin(description: AccountProviderAuthenticationDescription.Basic) {
-    val accountPassword = AccountPassword(binding.firstBookLogin.etPin.text.toString().trim())
-    val accountUsername = AccountUsername(binding.firstBookLogin.etAccessCode.text.toString().trim())
-    val request =
-      Basic(
-        accountId = this.viewModel.account.id,
-        description = description,
-        password = accountPassword,
-        username = accountUsername
-      )
-
-    this.viewModel.tryLogin(request)
-  }
-
-  private fun onTryOAuthClientCredentialsLogin(
-    description: AccountProviderAuthenticationDescription.OAuthClientCredentials
-  ) {
-    val accountPassword = AccountPassword(binding.firstBookLogin.etPin.text.toString().trim())
-    val accountUsername = AccountUsername(binding.firstBookLogin.etAccessCode.text.toString().trim())
-
-    val request =
-      Basic(
-        accountId = this.viewModel.account.id,
-        description = AccountProviderAuthenticationDescription.Basic(
-          description = description.description,
-          formDescription = description.formDescription,
-          logoURI = description.logoURI
-        ),
-        password = accountPassword,
-        username = accountUsername
-      )
-
-    this.viewModel.tryLogin(request)
   }
 
   private fun sendOAuthIntent(
@@ -411,7 +385,7 @@ class OEAccountDetailFragment : Fragment() {
     this.startActivity(i)
   }
 
-  private fun configureToolbar(activity: Activity) {
+  private fun configureToolbar() {
     val providerName = this.viewModel.account.provider.displayName
     this.supportActionBar?.apply {
       title = getString(R.string.accounts)
