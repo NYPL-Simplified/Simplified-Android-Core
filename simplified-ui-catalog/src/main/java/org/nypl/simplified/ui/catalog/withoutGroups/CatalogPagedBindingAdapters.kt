@@ -5,6 +5,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.os.ConfigurationCompat
 import androidx.databinding.BindingAdapter
+import com.google.android.material.progressindicator.LinearProgressIndicator
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import org.nypl.simplified.books.book_database.api.BookFormats
@@ -53,4 +54,10 @@ internal fun TextView.formatDownloadPercentage(progress: Int?) {
   } ?: run {
     visibility = View.INVISIBLE
   }
+}
+
+@BindingAdapter("configureProgressBar")
+internal fun LinearProgressIndicator.configureProgressBar(value: Int?) {
+  isIndeterminate = value == null
+  value?.let { progress = it }
 }

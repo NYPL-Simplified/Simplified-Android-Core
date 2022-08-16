@@ -191,7 +191,7 @@ class CatalogFeedFragment : Fragment(), AgeGateDialog.BirthYearSelectedListener 
 
     sharedListConfiguration(feedWithoutGroupsList)
 
-    withoutGroupsAdapter = CatalogPagedAdapter(bookCoverProvider, configService)
+    withoutGroupsAdapter = CatalogPagedAdapter(bookCoverProvider, configService, lifecycleScope)
 
     val withoutGroupsSwipeContainer = binding.feedWithoutGroups.feedWithoutGroupsSwipeContainer
     withoutGroupsSwipeContainer.setOnRefreshListener {

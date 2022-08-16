@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.CoroutineScope
 import org.nypl.simplified.books.covers.BookCoverProviderType
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.ui.catalog.databinding.BookCellCorruptBinding
@@ -18,7 +19,8 @@ import org.nypl.simplified.ui.catalog.withoutGroups.BookItem.Type.LOADING
 
 class CatalogPagedAdapter(
   private val bookCoverProvider: BookCoverProviderType,
-  private val buildConfig: BuildConfigurationServiceType
+  private val buildConfig: BuildConfigurationServiceType,
+  private val viewLifecycleScope: CoroutineScope
 ) : PagingDataAdapter<BookItem, RecyclerView.ViewHolder>(
   CatalogPagedAdapterDiffing.comparisonCallback
 ) {
@@ -44,7 +46,7 @@ class CatalogPagedAdapter(
     return when (viewType) {
       IDLE.ordinal -> {
         val binding = BookCellIdleBinding.inflate(inflater, parent, false)
-        BookIdleViewHolder(binding, bookCoverProvider, buildConfig.showFormatLabel)
+        BookIdleViewHolder(binding, bookCoverProvider, buildConfig.showFormatLabel, viewLifecycleScope)
       }
       CORRUPT.ordinal -> {
         val binding = BookCellCorruptBinding.inflate(inflater, parent, false)

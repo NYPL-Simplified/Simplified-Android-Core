@@ -17,7 +17,8 @@ sealed class BookItem {
   data class Idle(
     val entry: FeedEntry.FeedEntryOPDS,
     val actions: IdleActions,
-    val loanExpiry: DateTime? = null
+    val loanExpiry: DateTime? = null,
+    val downloadState: DownloadState? = null
   ) : BookItem() {
     override val type = IDLE
     val title: String? = entry.feedEntry.title
@@ -67,4 +68,19 @@ sealed class BookItem {
     val author: String? = entry.feedEntry.authorsCommaSeparated
     val isIndeterminate = progress == null
   }
+}
+
+sealed class DownloadState {
+  abstract val progress: Int?
+  fun isIndeterminate() = progress == null
+  fun isComplete() = progress == 100
+
+  object Complete : DownloadState() {
+    override val progress = 100
+  }
+
+  class InProgress(
+    override val progress: Int? = null,
+    val isStarting: Boolean = false
+  ) : DownloadState()
 }
