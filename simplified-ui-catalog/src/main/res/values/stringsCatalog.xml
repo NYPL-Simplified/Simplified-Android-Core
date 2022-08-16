@@ -71,6 +71,7 @@
   <string name="catalogRequesting">Requesting…</string>
   <string name="catalogDownloading">Downloading</string>
   <string name="catalogDownloadingEllipsis">Downloading…</string>
+  <string name="catalogDownloadComplete">Download complete!</string>
   <string name="catalogReserve">Reserve</string>
   <string name="catalogRetry">Retry</string>
   <string name="catalogReturn">Return</string>

@@ -36,7 +36,10 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.runs
 import io.mockk.verify
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.runBlockingTest
 import org.hamcrest.CoreMatchers.allOf
 import org.hamcrest.Description
 import org.joda.time.DateTime
@@ -49,19 +52,26 @@ import org.nypl.simplified.books.covers.BookCoverProviderType
 import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.feeds.api.FeedEntry
 import org.nypl.simplified.taskrecorder.api.TaskResult
+import org.nypl.simplified.testUtils.TestCoroutineRule
 import org.nypl.simplified.ui.catalog.ProgressBarMatchers.withProgress
 import org.nypl.simplified.ui.catalog.RecyclerViewEspressoUtils.atPositionOnView
 import org.nypl.simplified.ui.catalog.RecyclerViewEspressoUtils.hasAdapterItemCount
+import org.nypl.simplified.ui.catalog.withoutGroups.BookIdleViewHolder.Companion.DOWNLOAD_COMPLETE_FOOTER_DElAY
 import org.nypl.simplified.ui.catalog.withoutGroups.BookItem
 import org.nypl.simplified.ui.catalog.withoutGroups.BookItem.Idle.IdleActions
 import org.nypl.simplified.ui.catalog.withoutGroups.CatalogPagedAdapter
+import org.nypl.simplified.ui.catalog.withoutGroups.DownloadState
 
+@ExperimentalCoroutinesApi
 @RunWith(AndroidJUnit4::class)
 class CatalogPagedViewHoldersTest {
   private lateinit var scenario: FragmentScenario<TestFragment>
 
   @get: Rule
   val instantExecutorRule = InstantTaskExecutorRule()
+
+  @get:Rule
+  val testCoroutineRule = TestCoroutineRule()
 
   private lateinit var bookItems: List<BookItem>
 
@@ -81,7 +91,7 @@ class CatalogPagedViewHoldersTest {
 
     scenario = launchFragmentInContainer(
       themeResId = R.style.SimplifiedTheme_NoActionBar,
-      instantiate = { TestFragment(mockBookCoverProviderType, mockBuildConfig) }
+      instantiate = { TestFragment(mockBookCoverProviderType, mockBuildConfig, testCoroutineRule) }
     )
   }
 
@@ -701,6 +711,240 @@ class CatalogPagedViewHoldersTest {
       )
     )
   }
+
+  @Test
+  fun `idle books with InProgress download shows downloadFooter and hides buttons`() {
+    val mockActions = mockk<IdleActions> {
+      every { primaryButton() } returns null
+      every { secondaryButton() } returns null
+      every { openBookDetail() } just runs
+    }
+
+    bookItems = listOf<BookItem>(
+      BookItem.Idle(
+        entry = CatalogTestUtils.buildTestFeedEntryOPDS(),
+        actions = mockActions,
+        loanExpiry = null,
+        downloadState = DownloadState.InProgress(50)
+      )
+    )
+
+    scenario.onFragment { it.submitList(bookItems) }
+
+    onView(withId(TestFragment.listId)).check(
+      matches(
+        atPositionOnView(
+          0,
+          hasDescendant(
+            allOf(
+              withId(R.id.bookCellIdleDownloadFooter),
+              withEffectiveVisibility(VISIBLE)
+            )
+          )
+        )
+      )
+    )
+    onView(withId(TestFragment.listId)).check(
+      matches(
+        atPositionOnView(
+          0,
+          hasDescendant(
+            allOf(
+              withId(R.id.bookCellIdleButtons),
+              withEffectiveVisibility(GONE)
+            )
+          )
+        )
+      )
+    )
+  }
+
+  @Test
+  fun `idle books with InProgress download shows indeterminate progress bar, hide progress text`() {
+    val mockActions = mockk<IdleActions> {
+      every { primaryButton() } returns null
+      every { secondaryButton() } returns null
+      every { openBookDetail() } just runs
+    }
+
+    bookItems = listOf<BookItem>(
+      BookItem.Idle(
+        entry = CatalogTestUtils.buildTestFeedEntryOPDS(),
+        actions = mockActions,
+        loanExpiry = null,
+        downloadState = DownloadState.InProgress(null)
+      )
+    )
+
+    scenario.onFragment { it.submitList(bookItems) }
+
+    onView(withId(TestFragment.listId)).check(
+      matches(
+        atPositionOnView(
+          0,
+          hasDescendant(
+            allOf(
+              withId(R.id.bookCellIdleDownloadBar),
+              withProgress(shouldBeIndeterminate = true),
+              withEffectiveVisibility(VISIBLE)
+            )
+          )
+        )
+      )
+    )
+
+    onView(withId(TestFragment.listId)).check(
+      matches(
+        atPositionOnView(
+          0,
+          hasDescendant(
+            allOf(
+              withId(R.id.bookCellIdleDownloadPercentage),
+              withEffectiveVisibility(INVISIBLE)
+            )
+          )
+        )
+      )
+    )
+  }
+
+  @Test
+  fun `idle books with InProgress download shows determinate progress bar and percentage text`() {
+    val mockActions = mockk<IdleActions> {
+      every { primaryButton() } returns null
+      every { secondaryButton() } returns null
+      every { openBookDetail() } just runs
+    }
+
+    bookItems = listOf<BookItem>(
+      BookItem.Idle(
+        entry = CatalogTestUtils.buildTestFeedEntryOPDS(),
+        actions = mockActions,
+        loanExpiry = null,
+        downloadState = DownloadState.InProgress(50)
+      )
+    )
+
+    scenario.onFragment { it.submitList(bookItems) }
+
+    onView(withId(TestFragment.listId)).check(
+      matches(
+        atPositionOnView(
+          0,
+          hasDescendant(
+            allOf(
+              withId(R.id.bookCellIdleDownloadBar),
+              withProgress(expectedProgress = 50, shouldBeIndeterminate = false),
+              withEffectiveVisibility(VISIBLE)
+            )
+          )
+        )
+      )
+    )
+
+    onView(withId(TestFragment.listId)).check(
+      matches(
+        atPositionOnView(
+          0,
+          hasDescendant(
+            allOf(
+              withId(R.id.bookCellIdleDownloadPercentage),
+              withEffectiveVisibility(VISIBLE),
+              withText("50%")
+            )
+          )
+        )
+      )
+    )
+  }
+
+  @Test
+  fun `idle books with download complete shows completion message and hides footer after some time`() =
+    testCoroutineRule.dispatcher.runBlockingTest {
+      val mockActions = mockk<IdleActions> {
+        every { primaryButton() } returns null
+        every { secondaryButton() } returns null
+        every { openBookDetail() } just runs
+      }
+
+      bookItems = listOf<BookItem>(
+        BookItem.Idle(
+          entry = CatalogTestUtils.buildTestFeedEntryOPDS(),
+          actions = mockActions,
+          loanExpiry = null,
+          downloadState = DownloadState.Complete
+        )
+      )
+
+      scenario.onFragment { it.submitList(bookItems) }
+      testCoroutineRule.pauseDispatcher()
+
+      onView(withId(TestFragment.listId)).check(
+        matches(
+          atPositionOnView(
+            0,
+            hasDescendant(
+              allOf(
+                withId(R.id.bookCellIdleDownloadFooter),
+                withEffectiveVisibility(VISIBLE)
+              )
+            )
+          )
+        )
+      )
+
+      testCoroutineRule.advanceTimeBy(DOWNLOAD_COMPLETE_FOOTER_DElAY)
+
+      onView(withId(TestFragment.listId)).check(
+        matches(
+          atPositionOnView(
+            0,
+            hasDescendant(
+              allOf(
+                withId(R.id.bookCellIdleDownloadFooter),
+                withEffectiveVisibility(GONE)
+              )
+            )
+          )
+        )
+      )
+    }
+
+  @Test
+  fun `idle books with download complete shows buttons`() {
+    val mockActions = mockk<IdleActions> {
+      every { primaryButton() } returns null
+      every { secondaryButton() } returns null
+      every { openBookDetail() } just runs
+    }
+
+    bookItems = listOf<BookItem>(
+      BookItem.Idle(
+        entry = CatalogTestUtils.buildTestFeedEntryOPDS(),
+        actions = mockActions,
+        loanExpiry = null,
+        downloadState = DownloadState.Complete
+      )
+    )
+
+    scenario.onFragment { it.submitList(bookItems) }
+
+    onView(withId(TestFragment.listId)).check(
+      matches(
+        atPositionOnView(
+          0,
+          hasDescendant(
+            allOf(
+              withId(R.id.bookCellIdleButtons),
+              withEffectiveVisibility(VISIBLE)
+            )
+          )
+        )
+      )
+    )
+
+    testCoroutineRule.advanceUntilIdle()
+  }
 }
 
 object ProgressBarMatchers {
@@ -720,7 +964,8 @@ object ProgressBarMatchers {
 
 class TestFragment(
   private val bookCoverProvider: BookCoverProviderType,
-  private val buildConfig: BuildConfigurationServiceType
+  private val buildConfig: BuildConfigurationServiceType,
+  private val scope: CoroutineScope
 ) : Fragment() {
   lateinit var recyclerView: RecyclerView
   lateinit var withoutGroupsAdapter: CatalogPagedAdapter
@@ -739,7 +984,7 @@ class TestFragment(
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
 
-    withoutGroupsAdapter = CatalogPagedAdapter(bookCoverProvider, buildConfig)
+    withoutGroupsAdapter = CatalogPagedAdapter(bookCoverProvider, buildConfig, scope)
     recyclerView.adapter = withoutGroupsAdapter
   }
 
