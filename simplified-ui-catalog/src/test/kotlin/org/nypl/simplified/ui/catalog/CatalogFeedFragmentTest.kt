@@ -6,9 +6,7 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.MutableLiveData
-import androidx.paging.Config
 import androidx.paging.DataSource
-import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagingData
 import androidx.paging.PositionalDataSource
 import androidx.recyclerview.widget.RecyclerView
