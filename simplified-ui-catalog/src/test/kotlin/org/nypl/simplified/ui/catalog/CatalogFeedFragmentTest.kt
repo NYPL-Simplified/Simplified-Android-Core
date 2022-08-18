@@ -437,16 +437,6 @@ object RecyclerViewEspressoUtils {
     }
 }
 
-// PagedList stuff
-fun <T : Any> List<T>.asPagedList() = LivePagedListBuilder(
-  createMockDataSourceFactory(this),
-  Config(
-    enablePlaceholders = false,
-    prefetchDistance = size,
-    pageSize = if (size == 0) 1 else size
-  )
-).build()
-
 private fun <T : Any> createMockDataSourceFactory(itemList: List<T>): DataSource.Factory<Int, T> =
   object : DataSource.Factory<Int, T>() {
     override fun create(): DataSource<Int, T> = FakePositionalDataSource(itemList)

@@ -7,12 +7,11 @@ import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.ui.catalog.withoutGroups.BookItem.Type.CORRUPT
 import org.nypl.simplified.ui.catalog.withoutGroups.BookItem.Type.ERROR
 import org.nypl.simplified.ui.catalog.withoutGroups.BookItem.Type.IDLE
-import org.nypl.simplified.ui.catalog.withoutGroups.BookItem.Type.LOADING
 
 sealed class BookItem {
   abstract val type: Type
 
-  enum class Type { IDLE, CORRUPT, ERROR, LOADING }
+  enum class Type { IDLE, CORRUPT, ERROR }
 
   data class Idle(
     val entry: FeedEntry.FeedEntryOPDS,
@@ -58,29 +57,21 @@ sealed class BookItem {
       fun retry()
     }
   }
-
-  data class InProgress(
-    val entry: FeedEntry.FeedEntryOPDS,
-    val progress: Int? = null
-  ) : BookItem() {
-    override val type = LOADING
-    val title: String? = entry.feedEntry.title
-    val author: String? = entry.feedEntry.authorsCommaSeparated
-    val isIndeterminate = progress == null
-  }
 }
 
 sealed class DownloadState {
   abstract val progress: Int?
+  abstract val isStarting: Boolean
   fun isIndeterminate() = progress == null
   fun isComplete() = progress == 100
 
   object Complete : DownloadState() {
     override val progress = 100
+    override val isStarting = false
   }
 
   class InProgress(
     override val progress: Int? = null,
-    val isStarting: Boolean = false
+    override val isStarting: Boolean = false
   ) : DownloadState()
 }

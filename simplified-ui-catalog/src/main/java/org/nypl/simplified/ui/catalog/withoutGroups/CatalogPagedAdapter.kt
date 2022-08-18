@@ -11,11 +11,9 @@ import org.nypl.simplified.buildconfig.api.BuildConfigurationServiceType
 import org.nypl.simplified.ui.catalog.databinding.BookCellCorruptBinding
 import org.nypl.simplified.ui.catalog.databinding.BookCellErrorBinding
 import org.nypl.simplified.ui.catalog.databinding.BookCellIdleBinding
-import org.nypl.simplified.ui.catalog.databinding.BookCellInProgressBinding
 import org.nypl.simplified.ui.catalog.withoutGroups.BookItem.Type.CORRUPT
 import org.nypl.simplified.ui.catalog.withoutGroups.BookItem.Type.ERROR
 import org.nypl.simplified.ui.catalog.withoutGroups.BookItem.Type.IDLE
-import org.nypl.simplified.ui.catalog.withoutGroups.BookItem.Type.LOADING
 
 class CatalogPagedAdapter(
   private val bookCoverProvider: BookCoverProviderType,
@@ -32,7 +30,6 @@ class CatalogPagedAdapter(
         is BookItem.Corrupt -> (holder as BookCorruptViewHolder).bind(it)
         is BookItem.Error -> (holder as BookErrorViewHolder).bind(it)
         is BookItem.Idle -> (holder as BookIdleViewHolder).bind(it)
-        is BookItem.InProgress -> (holder as BookInProgressViewHolder).bind(it)
       }
     } ?: run {
       // probably need to do something if/when item is null as paging is using placeholders
@@ -55,10 +52,6 @@ class CatalogPagedAdapter(
       ERROR.ordinal -> {
         val binding = BookCellErrorBinding.inflate(inflater, parent, false)
         BookErrorViewHolder(binding)
-      }
-      LOADING.ordinal -> {
-        val binding = BookCellInProgressBinding.inflate(inflater, parent, false)
-        BookInProgressViewHolder(binding, bookCoverProvider, buildConfig.showFormatLabel)
       }
       else -> throw IllegalStateException("ViewType must match known ViewHolder type")
     }
@@ -85,9 +78,6 @@ object CatalogPagedAdapterDiffing {
           }
           oldItem is BookItem.Error && newItem is BookItem.Error -> {
             oldItem.entry == newItem.entry && oldItem.failure == newItem.failure
-          }
-          oldItem is BookItem.InProgress && newItem is BookItem.InProgress -> {
-            oldItem.title == newItem.title
           }
           else -> false
         }
