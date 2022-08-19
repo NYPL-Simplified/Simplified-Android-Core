@@ -1096,8 +1096,7 @@ class CatalogFeedViewModel(
       is BookStatus.RequestingRevoke,
       is BookStatus.DownloadExternalAuthenticationInProgress,
       is BookStatus.DownloadWaitingForExternalAuthentication -> {
-        val previousDownloadStatus = downloadingBooks.replace(bookWithStatus.book.id, status)
-        val newlyDownloading = previousDownloadStatus == null
+        downloadingBooks[bookWithStatus.book.id] = status
         BookItem.Idle(
           entry = entry,
           actions = object : BookItem.Idle.IdleActions {
@@ -1105,12 +1104,11 @@ class CatalogFeedViewModel(
             override fun primaryButton(): BookItem.Idle.IdleButtonConfig? = null
             override fun secondaryButton(): BookItem.Idle.IdleButtonConfig? = null
           },
-          downloadState = DownloadState.InProgress(isStarting = newlyDownloading)
+          downloadState = DownloadState.InProgress(isStarting = true)
         )
       }
       is BookStatus.Downloading -> {
-        val previousDownloadStatus = downloadingBooks.replace(bookWithStatus.book.id, status)
-        val newlyDownloading = previousDownloadStatus == null
+        downloadingBooks[bookWithStatus.book.id] = status
         BookItem.Idle(
           entry = entry,
           actions = object : BookItem.Idle.IdleActions {
@@ -1120,7 +1118,7 @@ class CatalogFeedViewModel(
           },
           downloadState = DownloadState.InProgress(
             progress = status.progressPercent?.toInt(),
-            isStarting = newlyDownloading
+            isStarting = false
           )
         )
       }

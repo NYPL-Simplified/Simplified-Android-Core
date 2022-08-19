@@ -4,10 +4,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.Transformation
-import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.nypl.simplified.books.covers.BookCoverProviderType
@@ -16,7 +14,6 @@ import org.nypl.simplified.ui.catalog.R
 import org.nypl.simplified.ui.catalog.databinding.BookCellCorruptBinding
 import org.nypl.simplified.ui.catalog.databinding.BookCellErrorBinding
 import org.nypl.simplified.ui.catalog.databinding.BookCellIdleBinding
-import org.nypl.simplified.ui.catalog.databinding.BookCellInProgressBinding
 
 class BookIdleViewHolder(
   private val binding: BookCellIdleBinding,
@@ -28,8 +25,6 @@ class BookIdleViewHolder(
   companion object {
     const val DOWNLOAD_COMPLETE_FOOTER_DElAY = 5000L
   }
-
-  private var footerAnimationJob: Job? = null
 
   fun bind(item: BookItem.Idle) {
     binding.idleItem = item
@@ -88,12 +83,9 @@ class BookIdleViewHolder(
         binding.bookCellIdleDownloadInProgress.visibility = View.INVISIBLE
         binding.bookCellIdleDownloadComplete.visibility = View.VISIBLE
 
-        footerAnimationJob = viewLifecycleScope.launch {
+        viewLifecycleScope.launch {
           delay(DOWNLOAD_COMPLETE_FOOTER_DElAY)
           animatedFooterCollapse(binding.bookCellIdleDownloadFooter)
-        }
-        footerAnimationJob?.invokeOnCompletion {
-          binding.bookCellIdleDownloadFooter.isVisible = true
         }
       }
       is DownloadState.InProgress -> {
@@ -181,37 +173,5 @@ class BookErrorViewHolder(
   fun bind(item: BookItem.Error) {
     binding.errorItem = item
     binding.executePendingBindings()
-  }
-}
-
-class BookInProgressViewHolder(
-  private val binding: BookCellInProgressBinding,
-  private val bookCoverProvider: BookCoverProviderType,
-  private val showFormatLabel: Boolean
-) : RecyclerView.ViewHolder(binding.root) {
-  fun bind(item: BookItem.InProgress) {
-    binding.inProgressItem = item
-    binding.executePendingBindings()
-
-    loadCover(item)
-    toggleFormatLabelVisibility()
-  }
-
-  private fun toggleFormatLabelVisibility() {
-    if (!showFormatLabel) binding.bookCellInProgressMeta.visibility = View.GONE
-  }
-
-  private fun loadCover(item: BookItem.InProgress) {
-    binding.bookCellInProgressCover.setImageDrawable(null)
-    binding.bookCellInProgressCover.visibility = View.INVISIBLE
-
-    bookCoverProvider.loadThumbnailInto(
-      item.entry,
-      binding.bookCellInProgressCover,
-      0,
-      itemView.context.resources.getDimensionPixelOffset(R.dimen.cover_thumbnail_height)
-    ).map {
-      binding.bookCellInProgressCover.visibility = View.VISIBLE
-    }
   }
 }
