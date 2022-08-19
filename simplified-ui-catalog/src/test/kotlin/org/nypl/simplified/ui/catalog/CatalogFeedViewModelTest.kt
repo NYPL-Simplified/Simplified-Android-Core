@@ -20,6 +20,7 @@ import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.setMain
 import org.amshove.kluent.fail
 import org.amshove.kluent.shouldBe
+import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldBeInstanceOf
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
@@ -45,6 +46,7 @@ import org.nypl.simplified.taskrecorder.api.TaskResult
 import org.nypl.simplified.testUtils.RxSchedulerJUnit5Extension
 import org.nypl.simplified.ui.catalog.withoutGroups.BookItem
 import org.nypl.simplified.ui.catalog.withoutGroups.CatalogPagedAdapterDiffing
+import org.nypl.simplified.ui.catalog.withoutGroups.DownloadState
 import org.nypl.simplified.ui.thread.api.UIExecutor
 import java.net.URI
 import java.util.stream.Stream
@@ -552,6 +554,32 @@ class CatalogFeedViewModelTest {
   }
 
   @Test
+  internal fun `buildBookItem when LoanedDownloaded and item was previously downloaded builds item with completed status`() {
+    val testEntry = CatalogTestUtils.buildTestFeedEntryOPDS()
+    val mockListener = mockk<CatalogPagedViewListener>(relaxed = true)
+    val mockBook = mockk<Book>(relaxed = true) { every { id } returns BookID.newFromText("testBookId") }
+
+    val mockDownloading = mockk<BookStatus.Downloading>(relaxed = true)
+    val mockDownloaded = mockk<BookStatus.Loaned.LoanedDownloaded>(relaxed = true)
+
+    val downloadingStatus = BookWithStatus(mockBook, mockDownloading)
+    val downloadedStatus = BookWithStatus(mockBook, mockDownloaded)
+
+    var result = subject.buildBookItem(testEntry, downloadedStatus, mockListener)
+
+    if (result is BookItem.Idle) {
+      result.downloadState shouldBe null
+    } else fail("Provided BookStatus should map to Idle item")
+
+    subject.buildBookItem(testEntry, downloadingStatus, mockListener)
+    result = subject.buildBookItem(testEntry, downloadedStatus, mockListener)
+
+    if (result is BookItem.Idle) {
+      result.downloadState shouldBeInstanceOf DownloadState.Complete::class
+    } else fail("Provided BookStatus should map to Idle item")
+  }
+
+  @Test
   internal fun `buildBookItem when LoanedNotDownloaded builds idle item with download button`() {
     val testEntry = CatalogTestUtils.buildTestFeedEntryOPDS()
     val mockBook = mockk<Book>(relaxed = true)
@@ -622,7 +650,7 @@ class CatalogFeedViewModelTest {
   }
 
   @Test
-  internal fun `buildBookItem when Downloading state builds InProgress item with progress`() {
+  internal fun `buildBookItem when Downloading state builds idle item with download progress`() {
     val testEntry = CatalogTestUtils.buildTestFeedEntryOPDS(title = "testTitle")
     val bookWithStatus = BookWithStatus(
       mockk(relaxed = true),
@@ -633,17 +661,18 @@ class CatalogFeedViewModelTest {
     val mockListener = mockk<CatalogPagedViewListener>(relaxed = true)
     val result = subject.buildBookItem(testEntry, bookWithStatus, mockListener)
 
-    if (result is BookItem.InProgress) {
+    if (result is BookItem.Idle) {
       result.entry shouldBe testEntry
       result.title shouldBe "testTitle"
-      result.isIndeterminate shouldBe false
-      result.progress shouldBe 80
+      result.downloadState?.progress shouldBeEqualTo 80
+      result.downloadState?.isIndeterminate() shouldBe false
+      result.downloadState?.isStarting shouldBe false
     } else fail("Provided BookStatus should map to InProgress item")
   }
 
   @ParameterizedTest
   @MethodSource("inProgressBookStatuses")
-  internal fun `buildBookItem builds indeterminate inProgress item for these states`(
+  internal fun `buildBookItem builds indeterminate and download starting idle item for these states`(
     providedStatus: BookStatus
   ) {
     val testEntry = CatalogTestUtils.buildTestFeedEntryOPDS(title = "testTitle")
@@ -655,11 +684,12 @@ class CatalogFeedViewModelTest {
     val mockListener = mockk<CatalogPagedViewListener>(relaxed = true)
     val result = subject.buildBookItem(testEntry, bookWithStatus, mockListener)
 
-    if (result is BookItem.InProgress) {
+    if (result is BookItem.Idle) {
       result.entry shouldBe testEntry
       result.title shouldBe "testTitle"
-      result.isIndeterminate shouldBe true
-      result.progress shouldBe null
+      result.downloadState?.isIndeterminate() shouldBe true
+      result.downloadState?.progress shouldBe null
+      result.downloadState?.isStarting shouldBe true
     } else fail("Provided BookStatus should map to InProgress item")
   }
 

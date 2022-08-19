@@ -6,9 +6,7 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.MutableLiveData
-import androidx.paging.Config
 import androidx.paging.DataSource
-import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagingData
 import androidx.paging.PositionalDataSource
 import androidx.recyclerview.widget.RecyclerView
@@ -436,16 +434,6 @@ object RecyclerViewEspressoUtils {
       }
     }
 }
-
-// PagedList stuff
-fun <T : Any> List<T>.asPagedList() = LivePagedListBuilder(
-  createMockDataSourceFactory(this),
-  Config(
-    enablePlaceholders = false,
-    prefetchDistance = size,
-    pageSize = if (size == 0) 1 else size
-  )
-).build()
 
 private fun <T : Any> createMockDataSourceFactory(itemList: List<T>): DataSource.Factory<Int, T> =
   object : DataSource.Factory<Int, T>() {

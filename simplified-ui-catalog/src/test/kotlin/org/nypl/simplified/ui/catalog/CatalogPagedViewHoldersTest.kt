@@ -96,193 +96,6 @@ class CatalogPagedViewHoldersTest {
   }
 
   @Test
-  fun `inProgress book items display title, author, progress, progress text`() {
-    val testEntry = CatalogTestUtils.buildTestFeedEntryOPDS("title0", "author0")
-    bookItems = listOf<BookItem>(BookItem.InProgress(testEntry, 50))
-    scenario.onFragment { it.submitList(bookItems) }
-
-    onView(withId(TestFragment.listId)).check(hasAdapterItemCount(1))
-    onView(withId(TestFragment.listId)).check(
-      matches(
-        atPositionOnView(
-          0,
-          hasDescendant(
-            allOf(
-              withId(R.id.bookCellInProgressTitle),
-              withText("title0")
-            )
-          )
-        )
-      )
-    )
-
-    onView(withId(TestFragment.listId)).check(
-      matches(
-        atPositionOnView(
-          0,
-          hasDescendant(
-            allOf(
-              withId(R.id.bookCellInProgressAuthor),
-              withText("author0")
-            )
-          )
-        )
-      )
-    )
-
-    onView(withId(TestFragment.listId)).check(
-      matches(
-        atPositionOnView(
-          0,
-          hasDescendant(
-            allOf(
-              withId(R.id.bookCellInProgressTitle),
-              withText("title0")
-            )
-          )
-        )
-      )
-    )
-
-    onView(withId(TestFragment.listId)).check(
-      matches(
-        atPositionOnView(
-          0,
-          hasDescendant(
-            allOf(
-              withId(R.id.bookCellInProgressDownloadBar),
-              withProgress(expectedProgress = 50)
-            )
-          )
-        )
-      )
-    )
-
-    onView(withId(TestFragment.listId)).check(
-      matches(
-        atPositionOnView(
-          0,
-          hasDescendant(
-            allOf(
-              withId(R.id.bookCellInProgressDownloadPercentage),
-              withText("50%")
-            )
-          )
-        )
-      )
-    )
-  }
-
-  @Test
-  fun `inProgress book items show or hide format label as specified by buildConfig`() {
-    val testEntry = CatalogTestUtils.buildTestFeedEntryOPDS("title0", "author0")
-    bookItems = listOf<BookItem>(BookItem.InProgress(testEntry, 50))
-
-    every { mockBuildConfig.showFormatLabel } returns false
-    scenario.recreate()
-    scenario.onFragment {
-      it.submitList(bookItems)
-    }
-
-    onView(withId(TestFragment.listId)).check(
-      matches(
-        atPositionOnView(
-          0,
-          hasDescendant(
-            allOf(
-              withId(R.id.bookCellInProgressMeta),
-              withEffectiveVisibility(GONE)
-            )
-          )
-        )
-      )
-    )
-
-    every { mockBuildConfig.showFormatLabel } returns true
-    scenario.recreate()
-    scenario.onFragment {
-      it.submitList(bookItems)
-    }
-
-    onView(withId(TestFragment.listId)).check(
-      matches(
-        atPositionOnView(
-          0,
-          hasDescendant(
-            allOf(
-              withId(R.id.bookCellInProgressMeta),
-              withEffectiveVisibility(VISIBLE)
-            )
-          )
-        )
-      )
-    )
-  }
-
-  @Test
-  fun `inProgress book items display indeterminate progress bar and title, hide percentage text`() {
-    val testEntry = CatalogTestUtils.buildTestFeedEntryOPDS("title0")
-    bookItems = listOf<BookItem>(BookItem.InProgress(testEntry))
-    scenario.onFragment { it.submitList(bookItems) }
-
-    onView(withId(TestFragment.listId)).check(hasAdapterItemCount(1))
-    onView(withId(TestFragment.listId)).check(
-      matches(
-        atPositionOnView(
-          0,
-          hasDescendant(
-            allOf(
-              withId(R.id.bookCellInProgressTitle),
-              withText("title0")
-            )
-          )
-        )
-      )
-    )
-
-    onView(withId(TestFragment.listId)).check(
-      matches(
-        atPositionOnView(
-          0,
-          hasDescendant(
-            allOf(
-              withId(R.id.bookCellInProgressDownloadBar),
-              withProgress(shouldBeIndeterminate = true)
-            )
-          )
-        )
-      )
-    )
-
-    onView(withId(TestFragment.listId)).check(
-      matches(
-        atPositionOnView(
-          0,
-          hasDescendant(
-            allOf(
-              withId(R.id.bookCellInProgressDownloadPercentage),
-              withEffectiveVisibility(INVISIBLE)
-            )
-          )
-        )
-      )
-    )
-  }
-
-  @Test
-  fun `inProgress book shows image when thumbnail future resolves`() {
-    val testEntry = CatalogTestUtils.buildTestFeedEntryOPDS("title0")
-    bookItems = listOf<BookItem>(BookItem.InProgress(testEntry))
-    scenario.onFragment { it.submitList(bookItems) }
-
-    onView(withId(R.id.bookCellInProgressCover)).check(matches(withEffectiveVisibility(INVISIBLE)))
-
-    testThumbnailFuture.set(Unit)
-
-    onView(withId(R.id.bookCellInProgressCover)).check(matches(withEffectiveVisibility(VISIBLE)))
-  }
-
-  @Test
   fun `error book items display title and button clicks invoke expected error actions`() {
     val mockEntry = mockk<FeedEntry.FeedEntryOPDS> {
       every { feedEntry.title } returns "errorTitle"
@@ -750,7 +563,20 @@ class CatalogPagedViewHoldersTest {
           0,
           hasDescendant(
             allOf(
-              withId(R.id.bookCellIdleButtons),
+              withId(R.id.bookCellIdlePrimaryButton),
+              withEffectiveVisibility(GONE)
+            )
+          )
+        )
+      )
+    )
+    onView(withId(TestFragment.listId)).check(
+      matches(
+        atPositionOnView(
+          0,
+          hasDescendant(
+            allOf(
+              withId(R.id.bookCellIdleSecondaryButton),
               withEffectiveVisibility(GONE)
             )
           )
