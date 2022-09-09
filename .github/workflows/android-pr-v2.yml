@@ -11,6 +11,7 @@ jobs:
       - name: Checkout reposistory
         uses: actions/checkout@v3
         with:
+          distribution: 'temurin'
           submodules: 'recursive'
 
       - name: set up JDK 11
