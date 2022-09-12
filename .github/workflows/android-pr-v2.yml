@@ -25,11 +25,11 @@ jobs:
       - name: Assemble
         run: .ci/ci-main.sh pull-request-v2
 
-      - name: Test (default)
-        run: ./gradlew testDebug -x :simplified-tests:testDebug
-
       - name: Test (configured)
         run: .ci/ci-test.sh pull-request
+
+      - name: Test (default)
+        run: ./gradlew testDebug -x :simplified-tests:testDebug
 
       - name: Legacy Tests
         run: ./gradlew :simplified-tests:test
