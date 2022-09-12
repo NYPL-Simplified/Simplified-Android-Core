@@ -44,4 +44,4 @@ jobs:
           java-version: 11
 
       - name: run tests
-        run: ./gradlew clean assemble test
+        run: ./gradlew clean assemble testDebug
