@@ -1,4 +1,4 @@
-name: Android CI (Authenticated)
+name: Open eBooks Build & Test
 
 on: workflow_dispatch
 

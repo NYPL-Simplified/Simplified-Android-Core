@@ -1,4 +1,4 @@
-name: Android CI (Authenticated)
+name: SimplyE Build & Test
 
 on: workflow_dispatch
 
