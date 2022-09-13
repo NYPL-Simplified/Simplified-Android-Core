@@ -1,6 +1,6 @@
 name: Android CI (Authenticated)
 
-on: push
+on: workflow_dispatch
 
 jobs:
   build:
@@ -44,4 +44,4 @@ jobs:
           java-version: 11
 
       - name: run tests
-        run: ./gradlew clean assemble test
+        run: ./gradlew clean testDebug
