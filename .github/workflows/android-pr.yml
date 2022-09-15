@@ -1,4 +1,4 @@
-name: Android CI (Pull Requests)
+name: Android CI (Pull Requests) v2
 
 on:
   pull_request:
@@ -8,19 +8,22 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout reposistory
-        uses: actions/checkout@v2
-      - name: Checkout submodules
-        run: git submodule update --init --recursive
-      - name: set up JDK 11
-        uses: actions/setup-java@v1
+      - name: Checkout Reposistory
+        uses: actions/checkout@v3
         with:
+          submodules: 'recursive'
+
+      - name: Setup Java 11
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
           java-version: 11
-      - name: Build PR
+
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+
+      - name: Assemble
         run: .ci/ci-main.sh pull-request
-      - name: Upload test report
-        uses: actions/upload-artifact@v2
-        if: ${{ always() }}
-        with:
-          name: junit-test-report
-          path: ./simplified-tests/build/reports/tests/testDebugUnitTest/
+
+      - name: Test
+        run: .ci/ci-test.sh pull-request
