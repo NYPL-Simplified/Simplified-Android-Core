@@ -1,4 +1,4 @@
-name: Android CI (Pull Requests) v2
+name: Android CI (Pull Requests)
 
 on:
   pull_request:
