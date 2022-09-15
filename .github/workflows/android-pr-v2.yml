@@ -23,13 +23,7 @@ jobs:
         uses: gradle/gradle-build-action@v2
 
       - name: Assemble
-        run: .ci/ci-main.sh pull-request-v2
+        run: .ci/ci-main.sh pull-request
 
       - name: Test (configured)
         run: .ci/ci-test.sh pull-request
-
-      - name: Test (default)
-        run: ./gradlew testDebug -x :simplified-tests:testDebug
-
-      - name: Legacy Tests
-        run: ./gradlew :simplified-tests:test
