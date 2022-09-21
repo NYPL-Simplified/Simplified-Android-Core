@@ -21,6 +21,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.hamcrest.CoreMatchers.not
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -45,7 +46,7 @@ class AccountInformationFragmentTest {
       ApplicationProvider.getApplicationContext()
     )
 
-    scenario = launchFragmentInContainer() {
+    scenario = launchFragmentInContainer {
       AccountInformationFragment {
         mockk {
           every { create(AccountInformationViewModel::class.java) } returns mockViewModel
@@ -60,6 +61,11 @@ class AccountInformationFragmentTest {
         }
       }
     }
+  }
+
+  @After
+  fun tearDown() {
+    scenario.close()
   }
 
   @Test

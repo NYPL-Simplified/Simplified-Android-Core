@@ -32,6 +32,7 @@ import kotlinx.coroutines.test.runBlockingTest
 import org.amshove.kluent.fail
 import org.amshove.kluent.shouldBe
 import org.amshove.kluent.shouldBeEqualTo
+import org.junit.After
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Test
@@ -61,7 +62,7 @@ class ConfirmationFragmentTest {
 
   @Before
   fun setUp() {
-    MockKAnnotations.init(this)
+    MockKAnnotations.init(this, relaxed = true)
 
     mockkConstructor(Cache::class)
     mockkConstructor(ConfirmationViewModelFactory::class)
@@ -88,6 +89,11 @@ class ConfirmationFragmentTest {
         "name" to "testName"
       ),
     )
+  }
+
+  @After
+  fun tearDown() {
+    scenario.close()
   }
 
   @Test

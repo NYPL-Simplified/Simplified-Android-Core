@@ -72,7 +72,7 @@ class AccountDetailFragmentTest {
 
   @Before
   fun setUp() {
-    MockKAnnotations.init(this)
+    MockKAnnotations.init(this, relaxed = true)
     Intents.init()
 
     val testCardCreatorContract = CardCreatorContract(
@@ -167,6 +167,7 @@ class AccountDetailFragmentTest {
   @After
   fun tearDown() {
     Intents.release()
+    scenario.close()
   }
 
   @Test

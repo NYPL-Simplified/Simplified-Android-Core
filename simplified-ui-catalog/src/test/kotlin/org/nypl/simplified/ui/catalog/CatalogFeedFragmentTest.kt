@@ -44,6 +44,7 @@ import org.hamcrest.Matcher
 import org.hamcrest.core.AllOf.allOf
 import org.hamcrest.core.IsEqual.equalTo
 import org.hamcrest.core.IsNot.not
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -65,6 +66,7 @@ import org.nypl.simplified.ui.catalog.RecyclerViewEspressoUtils.atPositionOnView
 import org.nypl.simplified.ui.catalog.RecyclerViewEspressoUtils.hasAdapterItemCount
 import org.nypl.simplified.ui.catalog.withoutGroups.BookItem
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
+import org.robolectric.annotation.Config
 import java.net.URI
 
 @ExperimentalCoroutinesApi
@@ -90,7 +92,7 @@ class CatalogFeedFragmentTest {
 
   @Before
   fun setUp() {
-    MockKAnnotations.init(this)
+    MockKAnnotations.init(this, relaxed = true)
 
     // Mock service directory to return mocked services
     mockkObject(Services)
@@ -141,6 +143,11 @@ class CatalogFeedFragmentTest {
       fragmentArgs = bundleOf(CatalogFeedFragment.PARAMETERS_ID to catalogFeedArguments),
       themeResId = R.style.SimplifiedTheme_NoActionBar
     )
+  }
+
+  @After
+  fun tearDown() {
+    scenario.close()
   }
 
   @Test
