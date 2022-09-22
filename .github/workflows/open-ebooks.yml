@@ -33,7 +33,7 @@ jobs:
         uses: actions/upload-artifact@master
         with:
           name: openebooks-debug.apk
-          path: ${{steps.sign_app.outputs.signedReleaseFile}}
+          path: simplified-app-simplye/build/outputs/apk/debug/simplye-debug.apk
 
   unit_tests:
     needs: [ build ]
