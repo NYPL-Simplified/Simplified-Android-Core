@@ -29,11 +29,14 @@ jobs:
           NYPL_GITHUB_ACCESS_TOKEN:         ${{ secrets.NYPL_GITHUB_ACCESS_TOKEN }}
         run: bash ./gradlew :simplified-app-openebooks:assembleDebug --stacktrace
 
-      - name: Get reference to APK
-        uses: actions/upload-artifact@master
-        with:
-          name: openebooks-debug.apk
-          path: simplified-app-simplye/build/outputs/apk/debug/simplye-debug.apk
+       - name: Setup tmate session
+         uses: mxschmitt/action-tmate@v3
+
+#      - name: Get reference to APK
+#        uses: actions/upload-artifact@master
+#        with:
+#          name: openebooks-debug.apk
+#          path: simplified-app-simplye/build/outputs/apk/debug/simplye-debug.apk
 
   unit_tests:
     needs: [ build ]
