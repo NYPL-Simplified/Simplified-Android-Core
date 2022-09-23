@@ -18,6 +18,9 @@ jobs:
           distribution: 'temurin'
           java-version: 11
 
+      - name: Set Up Credentials
+        run: .ci/ci-credentials.sh
+
       - name: Build
         env:
           NYPL_S3_ACCESS_KEY:               ${{ secrets.NYPL_S3_ACCESS_KEY }}
