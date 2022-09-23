@@ -27,16 +27,32 @@ jobs:
           MAVEN_CENTRAL_STAGING_PROFILE_ID: 'af061f5afba777'
           MAVEN_CENTRAL_SIGNING_KEY_ID:     'Library Simplified'
           NYPL_GITHUB_ACCESS_TOKEN:         ${{ secrets.NYPL_GITHUB_ACCESS_TOKEN }}
-        run: ./gradlew :simplified-app-simplye:assembleDebug --stacktrace
+        run: ./gradlew :simplified-app-simplye:assembleRelease --stacktrace
 
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
 
-#      - name: Get reference to APK
-#        uses: actions/upload-artifact@master
-#        with:
-#          name: simplye-debug.apk
-#          path: simplified-app-simplye/build/outputs/apk/debug/simplye-debug.apk
+      - name: Sign APK
+        uses: r0adkll/sign-android-release@v1
+        id: sign_app
+        with:
+          releaseDirectory: simplified-app-simplye/build/outputs/apk/release
+          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+          alias: ${{ secrets.ALIAS }}
+          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+
+      - name: Getting APK file
+        uses: actions/upload-artifact@master
+        with:
+          name: release.apk
+          path: ${{steps.sign_app.outputs.signedReleaseFile}}
+
+      - name: Getting mapping file
+        uses: actions/upload-artifact@master
+        with:
+          name: mapping.txt
+          path: simplified-app-simplye/build/outputs/mapping/release/mapping.txt
 
   unit_tests:
     needs: [ build ]
