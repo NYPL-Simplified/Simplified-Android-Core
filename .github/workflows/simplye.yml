@@ -40,6 +40,9 @@ jobs:
           NYPL_GITHUB_ACCESS_TOKEN:         ${{ secrets.NYPL_GITHUB_ACCESS_TOKEN }}
         run: .ci/ci-build.sh normal
 
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+
       - name: Sign APK
         uses: r0adkll/sign-android-release@v1
         id: sign_app
