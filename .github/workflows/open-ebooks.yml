@@ -92,7 +92,7 @@ jobs:
 
       - uses: actions/download-artifact@main
         with:
-          name: openebooks-debug.apk
+          name: openebooks-release.apk
 
       - name: Upload APK to Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1
@@ -100,4 +100,4 @@ jobs:
           appId: ${{secrets.OPENEBOOKS_FIREBASE_APP_ID}}
           token: ${{secrets.FIREBASE_TOKEN}}
           groups: openebooks-qa
-          file: openebooks-debug.apk
+          file: openebooks-release.apk
