@@ -26,8 +26,10 @@ import io.mockk.justRun
 import io.mockk.mockkConstructor
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runBlockingTest
 import org.amshove.kluent.fail
 import org.amshove.kluent.shouldBe
@@ -93,6 +95,27 @@ class ConfirmationFragmentTest {
 
   @After
   fun tearDown() {
+    /*
+    * There are some issues with activityscenario state when an Activity's finish() is called
+    * at certain lifecycle points so we only call close on non-finishing activities to avoid this.
+    * Not closing the scenarios invoking finish does introduce potential waste, but as of right now
+    * there is only this one test involving a finish() call.
+    *
+    * Reportedly this issue might be fixed by upgrading AndroidX Test Core to 1.5+
+    *
+    * Related/adjacent issues:
+    * https://github.com/android/android-test/issues/676
+    * https://github.com/android/android-test/issues/800
+    * https://github.com/android/android-test/issues/835
+    * https://github.com/android/android-test/issues/978
+    */
+    var finishing = false
+    scenario.onFragment {
+      if (it.activity?.isFinishing == true) {
+        finishing = true
+      }
+    }
+    if (!finishing) scenario.close()
     scenario.close()
   }
 
@@ -126,8 +149,7 @@ class ConfirmationFragmentTest {
   }
 
   @Test
-  fun `on CardConfirmed event sets ChildCardCreated activity result if user is logged in`() =
-    runBlockingTest {
+  fun `on CardConfirmed event sets ChildCardCreated activity result if user is logged in`() {
       val loggedInIntent = Intent().apply { putExtra("isLoggedIn", true) }
       scenario.setActivityIntent(loggedInIntent)
 
@@ -208,6 +230,21 @@ fun <F : Fragment> FragmentScenario<F>.setActivityIntent(customIntent: Intent) {
     it.isAccessible = true
     (it.get(this) as ActivityScenario<*>).onActivity { activity ->
       activity.intent = customIntent
+    }
+  }
+}
+
+// Util function to invoke a block repeatedly until a condition is met or a timeout is reached.
+fun pollAndDelayUntil(timeOut: Int = 5000, interval: Long = 250, condition: () -> Boolean) {
+  val start = System.currentTimeMillis()
+  runBlocking {
+    var conditionIsMet = condition.invoke()
+    while (!conditionIsMet && System.currentTimeMillis() < start + timeOut) {
+      delay(interval)
+      conditionIsMet = condition.invoke()
+    }
+    if (!conditionIsMet) {
+      fail("Expected condition was never met after $timeOut ms")
     }
   }
 }
