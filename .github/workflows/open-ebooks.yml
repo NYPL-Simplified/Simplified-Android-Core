@@ -40,30 +40,30 @@ jobs:
           NYPL_GITHUB_ACCESS_TOKEN:         ${{ secrets.NYPL_GITHUB_ACCESS_TOKEN }}
         run: .ci/ci-build.sh normal
 
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
+#      - name: Setup tmate session
+#        uses: mxschmitt/action-tmate@v3
 
-      - name: Sign APK
-        uses: r0adkll/sign-android-release@v1
-        id: sign_app
-        with:
-          releaseDirectory: simplified-app-openebooks/build/outputs/apk/release
-          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
-          alias: ${{ secrets.ALIAS }}
-          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
-          keyPassword: ${{ secrets.KEY_PASSWORD }}
+#      - name: Sign APK
+#        uses: r0adkll/sign-android-release@v1
+#        id: sign_app
+#        with:
+#          releaseDirectory: simplified-app-openebooks/build/outputs/apk/release
+#          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
+#          alias: ${{ secrets.ALIAS }}
+#          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+#          keyPassword: ${{ secrets.KEY_PASSWORD }}
 
       - name: Upload APK file
         uses: actions/upload-artifact@master
         with:
-          name: release.apk
-          path: ${{steps.sign_app.outputs.signedReleaseFile}}
+          name: openebooks-release.apk
+          path: simplified-app-openebooks/build/outputs/apk/release/
 
-      - name: Upload mapping file
-        uses: actions/upload-artifact@master
-        with:
-          name: mapping.txt
-          path: simplified-app-openebooks/build/outputs/mapping/release/mapping.txt
+#      - name: Upload mapping file
+#        uses: actions/upload-artifact@master
+#        with:
+#          name: mapping.txt
+#          path: simplified-app-openebooks/build/outputs/mapping/release/mapping.txt
 
   unit_tests:
     needs: [ build ]
