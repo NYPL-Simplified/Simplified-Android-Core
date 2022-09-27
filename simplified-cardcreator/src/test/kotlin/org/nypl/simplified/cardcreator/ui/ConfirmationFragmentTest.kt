@@ -116,7 +116,6 @@ class ConfirmationFragmentTest {
       }
     }
     if (!finishing) scenario.close()
-    scenario.close()
   }
 
   @Test
