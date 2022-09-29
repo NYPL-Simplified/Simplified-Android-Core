@@ -15,6 +15,7 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.mockkConstructor
 import io.mockk.mockkObject
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -86,6 +87,11 @@ class CatalogBookDetailFragmentTest {
       fragmentArgs = bundleOf(CatalogBookDetailFragment.PARAMETERS_ID to params),
       themeResId = R.style.SimplifiedTheme_NoActionBar
     )
+  }
+
+  @After
+  fun tearDown() {
+    scenario.close()
   }
 
   @Test
