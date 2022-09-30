@@ -61,7 +61,7 @@ jobs:
           java-version: 11
 
       - name: Run tests
-        run: ./gradlew clean testRelease
+        run: ./gradlew clean testDebug
 
   distribute:
     needs: [ unit_tests ]
