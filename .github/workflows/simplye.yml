@@ -42,8 +42,8 @@ jobs:
       - name: Upload APK file
         uses: actions/upload-artifact@master
         with:
-          name: simplye-release.apk
-          path: simplified-app-simplye/build/outputs/apk/release/
+          name: simplye-debug.apk
+          path: simplified-app-simplye/build/outputs/apk/debug/
 
   unit_tests:
     needs: [ build ]
@@ -70,7 +70,7 @@ jobs:
       - name: Download APK
         uses: actions/download-artifact@main
         with:
-          name: simplye-release.apk
+          name: simplye-debug.apk
 
       - name: Upload apk to Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1
@@ -78,5 +78,5 @@ jobs:
           appId: ${{secrets.SIMPLYE_FIREBASE_APP_ID}}
           token: ${{secrets.FIREBASE_TOKEN}}
           groups: simplye-qa
-          file: simplye-release.apk
+          file: simplye-debug.apk
 

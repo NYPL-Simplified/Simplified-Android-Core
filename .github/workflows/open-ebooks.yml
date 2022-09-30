@@ -42,8 +42,8 @@ jobs:
       - name: Upload APK file
         uses: actions/upload-artifact@master
         with:
-          name: openebooks-release.apk
-          path: simplified-app-openebooks/build/outputs/apk/release/
+          name: openebooks-debug.apk
+          path: simplified-app-openebooks/build/outputs/apk/debug/
 
   unit_tests:
     needs: [ build ]
@@ -70,7 +70,7 @@ jobs:
       - name: Download APK
         uses: actions/download-artifact@main
         with:
-          name: openebooks-release.apk
+          name: openebooks-debug.apk
 
       - name: Upload APK to Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1
@@ -78,4 +78,4 @@ jobs:
           appId: ${{secrets.OPENEBOOKS_FIREBASE_APP_ID}}
           token: ${{secrets.FIREBASE_TOKEN}}
           groups: openebooks-qa
-          file: openebooks-release.apk
+          file: openebooks-debug.apk
