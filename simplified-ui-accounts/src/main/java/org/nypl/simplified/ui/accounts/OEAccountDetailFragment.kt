@@ -12,8 +12,10 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
+import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import com.io7m.junreachable.UnreachableCodeException
 import io.reactivex.disposables.CompositeDisposable
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
 import org.nypl.simplified.accounts.api.AccountLoginState
@@ -28,6 +30,7 @@ import org.nypl.simplified.accounts.api.AccountPassword
 import org.nypl.simplified.accounts.api.AccountProviderAuthenticationDescription
 import org.nypl.simplified.accounts.api.AccountUsername
 import org.nypl.simplified.android.ktx.supportActionBar
+import org.nypl.simplified.android.ktx.viewLifecycleAware
 import org.nypl.simplified.listeners.api.FragmentListenerType
 import org.nypl.simplified.listeners.api.fragmentListeners
 import org.nypl.simplified.oauth.OAuthCallbackIntentParsing
@@ -37,12 +40,9 @@ import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkSyncEnableResult.S
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkSyncEnableResult.SYNC_ENABLED
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkSyncEnableResult.SYNC_ENABLE_NOT_SUPPORTED
 import org.nypl.simplified.reader.bookmarks.api.ReaderBookmarkSyncEnableStatus
-import org.slf4j.LoggerFactory
-import java.net.URI
-import org.nypl.simplified.ui.accounts.utils.hideSoftInput
-import androidx.core.widget.doOnTextChanged
-import org.nypl.simplified.android.ktx.viewLifecycleAware
 import org.nypl.simplified.ui.accounts.databinding.OeAccountBinding
+import org.nypl.simplified.ui.accounts.utils.hideSoftInput
+import org.slf4j.LoggerFactory
 
 /**
  * A fragment that shows settings for a single account.
@@ -152,20 +152,34 @@ class OEAccountDetailFragment : Fragment() {
         hideSoftInput()
         val accountUsername = AccountUsername(binding.firstBookLogin.etAccessCode.text.toString().trim())
         val accountPassword = AccountPassword(binding.firstBookLogin.etPin.text.toString().trim())
-        val description = AccountProviderAuthenticationDescription.Basic(
-          description = "First Book",
-          formDescription = AccountProviderAuthenticationDescription.FormDescription(
-            barcodeFormat = null,
-            keyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
-            passwordMaximumLength = 0,
-            passwordKeyboard = AccountProviderAuthenticationDescription.KeyboardInput.DEFAULT,
-            labels = linkedMapOf(
-              "LOGIN" to "First Book Access Code",
-              "PASSWORD" to "First Book PIN"
+        val description = when(val authMode = viewModel.account.provider.authentication) {
+          /*
+          * Presumably we should never be here with these as our primary authentication modes
+          * but there should be a cleaner way to handle this rather than throwing an exception.
+          */
+          AccountProviderAuthenticationDescription.Anonymous,
+          is AccountProviderAuthenticationDescription.COPPAAgeGate,
+          is AccountProviderAuthenticationDescription.OAuthWithIntermediary,
+          is AccountProviderAuthenticationDescription.SAML2_0 -> throw UnreachableCodeException()
+          /*
+          * For whatever reason the previous implementation of login in AccountDetailFragment
+          * just treats the client credentials flow as a regular basic auth request, and thus we
+          * convert it's AuthDescription to a basic type here.
+          *
+          * This is super brittle and means that the equality checks we do as part of request
+          * validation in ProfileAccountLoginTask will fail if for any reason the contents of the
+          * auth document payload are changed such that the Basic and ClientCredentials auth objects
+          * have different values for description, logoUri, etc.
+          */
+          is AccountProviderAuthenticationDescription.OAuthClientCredentials -> {
+            AccountProviderAuthenticationDescription.Basic(
+              description = authMode.description,
+              formDescription = authMode.formDescription,
+              logoURI = authMode.logoURI
             )
-          ),
-          logoURI = URI.create("https://circulation.openebooks.us/images/FirstBookLoginButton280.png")
-        )
+          }
+          is AccountProviderAuthenticationDescription.Basic -> authMode
+        }
 
         val request =
           Basic(
