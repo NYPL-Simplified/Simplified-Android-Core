@@ -140,4 +140,14 @@ configurations.all {
   final String version = dependency.versionConstraint.requiredVersion
   final String dependencyString = "$module:$version"
   resolutionStrategy.force dependencyString
+  // This resolution strategy is required in order to pick up Readium's fork of nanohttpd.
+  // This must remain until will update Readium. See migration guide: https://github.com/readium/kotlin-toolkit/releases/tag/2.2.1
+  resolutionStrategy.eachDependency {
+    if (requested.group == "com.github.edrlab.nanohttpd" && requested.name == "nanohttpd") {
+      useTarget("com.github.readium.nanohttpd:nanohttpd:master-SNAPSHOT")
+    }
+    if (requested.group == "com.github.edrlab.nanohttpd" && requested.name == "nanohttpd-nanolets") {
+      useTarget("com.github.readium.nanohttpd:nanohttpd-nanolets:master-SNAPSHOT")
+    }
+  }
 }
