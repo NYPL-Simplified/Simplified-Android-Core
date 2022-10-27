@@ -197,6 +197,21 @@ subprojects { project ->
       task.onlyIf { nyplDrmEnabled }
     }
   }
+  // This resolution strategy is required in order to pick up Readium's fork of nanohttpd.
+  // This must remain until will update Readium. See migration guide: https://github.com/readium/kotlin-toolkit/releases/tag/2.2.1
+  if (nyplDrmEnabled || !nyplDrmRequired) {
+    project.configurations.all {
+      resolutionStrategy {
+        dependencySubstitution {
+          all { DependencySubstitution dependency ->
+            if (dependency.requested instanceof ModuleComponentSelector && dependency.requested.group == 'com.github.edrlab.nanohttpd') {
+              dependency.useTarget ('com.github.readium.nanohttpd:' + dependency.requested.module + ':' + dependency.requested.version, 'because nanohttpd ownership changed from edrlab to readium')
+            }
+          }
+        }
+      }
+    }
+  }
 }
 
 /**
