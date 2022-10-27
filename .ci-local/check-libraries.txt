@@ -37,8 +37,6 @@
 # com.fasterxml.jackson.module:jackson-module-kotlin
 # com.github.ChuckerTeam.Chucker:library
 # com.github.akarnokd:rxjava2-extensions
-# com.github.edrlab.nanohttpd:nanohttpd
-# com.github.edrlab.nanohttpd:nanohttpd-nanolets
 # com.github.qnga:BottomNavigator
 # com.github.readium:r2-opds-kotlin
 # com.github.readium:r2-shared-kotlin
