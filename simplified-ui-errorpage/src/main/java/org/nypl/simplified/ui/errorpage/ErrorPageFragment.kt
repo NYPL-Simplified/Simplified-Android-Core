@@ -6,14 +6,12 @@ import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.style.StyleSpan
 import android.view.View
-import android.widget.Button
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import org.nypl.simplified.android.ktx.supportActionBar
-import org.nypl.simplified.reports.Reports
 import org.slf4j.LoggerFactory
 
 /**
@@ -49,7 +47,6 @@ class ErrorPageFragment : Fragment(R.layout.error_page) {
   private lateinit var errorDetails: TextView
   private lateinit var errorStepsList: RecyclerView
   private lateinit var parameters: ErrorPageParameters
-  private lateinit var sendButton: Button
 
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
@@ -58,8 +55,6 @@ class ErrorPageFragment : Fragment(R.layout.error_page) {
       view.findViewById(R.id.errorDetails)
     this.errorStepsList =
       view.findViewById(R.id.errorSteps)
-    this.sendButton =
-      view.findViewById(R.id.errorSendButton)
 
     this.parameters =
       this.arguments!!.getSerializable(PARAMETERS_ID)
@@ -97,18 +92,6 @@ class ErrorPageFragment : Fragment(R.layout.error_page) {
   override fun onStart() {
     super.onStart()
     this.configureToolbar()
-
-    this.sendButton.isEnabled = true
-    this.sendButton.setOnClickListener {
-      this.sendButton.isEnabled = false
-
-      Reports.sendReportsDefault(
-        context = requireContext(),
-        address = parameters.emailAddress,
-        subject = parameters.subject,
-        body = parameters.report
-      )
-    }
   }
 
   private fun configureToolbar() {
