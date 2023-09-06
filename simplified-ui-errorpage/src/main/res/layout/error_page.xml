@@ -53,14 +53,14 @@
     </LinearLayout>
   </androidx.core.widget.NestedScrollView>
 
-  <Button
-    android:id="@+id/errorSendButton"
+  <TextView
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginStart="32dp"
     android:layout_marginTop="16dp"
     android:layout_marginEnd="32dp"
     android:layout_marginBottom="16dp"
-    android:text="@string/errorSendReport" />
+    android:text="Contact the email listed under your library's account page (under Settings/Accounts) for assistance."
+    />
 </LinearLayout>
 

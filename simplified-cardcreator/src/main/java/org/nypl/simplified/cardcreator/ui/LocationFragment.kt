@@ -107,7 +107,7 @@ class LocationFragment : Fragment(), LocationListener {
       if (isNewYork || locationMock != null) {
         locationMock?.let { location ->
           activityModel.userLocationAddress =
-            geocoder.getFromLocation(location.latitude, location.longitude, 1)[0]
+            geocoder.getFromLocation(location.latitude, location.longitude, 1)?.get(0)
         }
 
         logger.debug("User navigated to the next screen")
@@ -230,7 +230,7 @@ class LocationFragment : Fragment(), LocationListener {
 
     try {
       if (location != null) {
-        address = geocoder.getFromLocation(location.latitude, location.longitude, maxResults)[0]
+        address = geocoder.getFromLocation(location.latitude, location.longitude, maxResults)!![0]
         logger.debug("Region is: ${address.adminArea} ${address.countryCode} ")
         binding.regionEt.setText("${address.adminArea} ${address.countryCode}", TextView.BufferType.EDITABLE)
 
@@ -292,7 +292,7 @@ class LocationFragment : Fragment(), LocationListener {
     val address: Address?
 
     try {
-      address = geocoder.getFromLocation(location.latitude, location.longitude, maxResults)[0]
+      address = geocoder.getFromLocation(location.latitude, location.longitude, maxResults)!![0]
       logger.debug("Region is: ${address.adminArea} ${address.countryCode} ")
       binding.regionEt.setText("${address.adminArea} ${address.countryCode}", TextView.BufferType.EDITABLE)
 

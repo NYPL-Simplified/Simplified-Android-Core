@@ -192,12 +192,12 @@ class AccountListRegistryFragment : Fragment(R.layout.account_list_registry) {
     })
 
     search.setOnActionExpandListener(object : OnActionExpandListener {
-      override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
+      override fun onMenuItemActionExpand(item: MenuItem): Boolean {
         // Do nothing
         return true
       }
 
-      override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
+      override fun onMenuItemActionCollapse(item: MenuItem): Boolean {
         this@AccountListRegistryFragment.accountListAdapter.resetFilter()
         return true
       }
