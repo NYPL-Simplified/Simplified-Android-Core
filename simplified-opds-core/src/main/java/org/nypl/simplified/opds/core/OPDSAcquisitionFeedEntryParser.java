@@ -21,6 +21,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -164,7 +165,16 @@ public final class OPDSAcquisitionFeedEntryParser implements OPDSAcquisitionFeed
 
     findAcquisitionAuthors(element, entry_builder);
     entry_builder.setPublisherOption(findPublisher(element));
-    entry_builder.setDistribution(findDistribution(element));
+
+    String distribution = findDistribution(element);
+    entry_builder.setDistribution(distribution);
+    if ("Axis 360".equals(distribution)) {
+      DateTime end = DateTime.now().plusMonths(2);
+      entry_builder.setAvailability(
+        OPDSAvailabilityOpenAccess.get(revoke, Option.some(end))
+      );
+    }
+
     entry_builder.setPublishedOption(OPDSAtom.findPublished(element));
     entry_builder.setSummaryOption(
       OPDSXML.getFirstChildElementTextWithNameOptional(element, ATOM_URI, "summary"));
@@ -280,11 +290,7 @@ public final class OPDSAcquisitionFeedEntryParser implements OPDSAcquisitionFeed
             final OPDSAcquisition acquisition = new OPDSAcquisition(v, href, type, indirects);
             entry_builder.addAcquisition(acquisition);
 
-            if (v == Relation.ACQUISITION_OPEN_ACCESS) {
-              entry_builder.setAvailability(OPDSAvailabilityOpenAccess.get(revoke));
-            } else {
-              tryAvailability(entry_builder, link, revoke);
-            }
+            tryAvailability(entry_builder, link, revoke);
             break;
           }
         }
@@ -653,6 +659,8 @@ public final class OPDSAcquisitionFeedEntryParser implements OPDSAcquisitionFeed
           return OPDSAvailabilityLoanable.get();
         } else if (Relation.ACQUISITION_GENERIC.getUri().toString().equals(rel)) {
           return OPDSAvailabilityLoaned.get(start_date, end_date, revoke);
+        } else if (Relation.ACQUISITION_OPEN_ACCESS.getUri().toString().equals(rel)) {
+          return OPDSAvailabilityOpenAccess.get(revoke, end_date);
         }
       }
     }

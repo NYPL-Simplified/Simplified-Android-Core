@@ -174,6 +174,10 @@ public final class OPDSJSONSerializer implements OPDSJSONSerializerType {
               oh.put("revoke", uri.toString());
               return Unit.unit();
             });
+          a.getEndDate().map(t -> {
+            oh.put("end_date", fmt.print(t));
+            return Unit.unit();
+          });
           o.set("open_access", oh);
           return o;
         }

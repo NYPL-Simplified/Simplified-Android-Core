@@ -22,6 +22,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import one.irradia.mime.api.MIMEType;
@@ -176,7 +177,9 @@ public final class OPDSJSONParser implements OPDSJSONParserType {
           node, "open_access");
         final OptionType<URI> in_revoke =
           JSONParserUtilities.getURIOptional(n, "revoke");
-        return OPDSAvailabilityOpenAccess.get(in_revoke);
+        final OptionType<DateTime> in_end_date =
+          JSONParserUtilities.getTimestampOptional(n, "end_date");
+        return OPDSAvailabilityOpenAccess.get(in_revoke, in_end_date);
       }
 
       if (node.has("revoked")) {
