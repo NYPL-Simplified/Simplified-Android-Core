@@ -165,16 +165,7 @@ public final class OPDSAcquisitionFeedEntryParser implements OPDSAcquisitionFeed
 
     findAcquisitionAuthors(element, entry_builder);
     entry_builder.setPublisherOption(findPublisher(element));
-
-    String distribution = findDistribution(element);
-    entry_builder.setDistribution(distribution);
-    if ("Axis 360".equals(distribution)) {
-      DateTime end = DateTime.now().plusMonths(2);
-      entry_builder.setAvailability(
-        OPDSAvailabilityOpenAccess.get(revoke, Option.some(end))
-      );
-    }
-
+    entry_builder.setDistribution(findDistribution(element));
     entry_builder.setPublishedOption(OPDSAtom.findPublished(element));
     entry_builder.setSummaryOption(
       OPDSXML.getFirstChildElementTextWithNameOptional(element, ATOM_URI, "summary"));
