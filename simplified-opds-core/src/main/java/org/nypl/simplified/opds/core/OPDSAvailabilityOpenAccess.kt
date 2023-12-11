@@ -15,7 +15,8 @@ data class OPDSAvailabilityOpenAccess private constructor(
    * @return The revocation link, if any
    */
 
-  val revoke: OptionType<URI>
+  val revoke: OptionType<URI>,
+  private val endDate: OptionType<DateTime>
 ) : OPDSAvailabilityType {
 
   val endDateOrNull: DateTime?
@@ -30,7 +31,7 @@ data class OPDSAvailabilityOpenAccess private constructor(
    */
 
   override fun getEndDate(): OptionType<DateTime> {
-    return Option.none()
+    return this.endDate
   }
 
   override fun toString(): String {
@@ -57,10 +58,12 @@ data class OPDSAvailabilityOpenAccess private constructor(
      */
 
     @JvmStatic
+    @JvmOverloads
     operator fun get(
-      revoke: OptionType<URI>
+      revoke: OptionType<URI>,
+      endDate: OptionType<DateTime> = Option.none(),
     ): OPDSAvailabilityOpenAccess {
-      return OPDSAvailabilityOpenAccess(revoke)
+      return OPDSAvailabilityOpenAccess(revoke, endDate)
     }
   }
 }

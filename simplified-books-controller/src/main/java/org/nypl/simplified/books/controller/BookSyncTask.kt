@@ -1,6 +1,7 @@
 package org.nypl.simplified.books.controller
 
 import com.io7m.jfunctional.Some
+import org.joda.time.DateTime
 import org.librarysimplified.http.api.LSHTTPClientType
 import org.librarysimplified.http.api.LSHTTPResponseStatus
 import org.nypl.simplified.accounts.api.AccountAuthenticationCredentials
@@ -23,6 +24,7 @@ import org.nypl.simplified.feeds.api.FeedLoading
 import org.nypl.simplified.opds.core.OPDSAvailabilityRevoked
 import org.nypl.simplified.opds.core.OPDSFeedParserType
 import org.nypl.simplified.opds.core.OPDSParseException
+import org.nypl.simplified.opds.core.getOrNull
 import org.nypl.simplified.patron.api.PatronUserProfile
 import org.nypl.simplified.patron.api.PatronUserProfileParsersType
 import org.nypl.simplified.profiles.api.ProfileID
@@ -64,12 +66,14 @@ class BookSyncTask(
     val providerAuth = provider.authentication
     if (providerAuth == AccountProviderAuthenticationDescription.Anonymous) {
       this.logger.debug("account does not support syncing")
+      this.removeExpiredBooks(account)
       return this.taskRecorder.finishSuccess(Unit)
     }
 
     val credentials = account.loginState.credentials
     if (credentials == null) {
       this.logger.debug("no credentials, aborting!")
+      this.removeExpiredBooks(account)
       return this.taskRecorder.finishSuccess(Unit)
     }
 
@@ -112,6 +116,28 @@ class BookSyncTask(
       }
       is LSHTTPResponseStatus.Failed ->
         throw IOException(status.exception)
+    }
+  }
+
+  private fun removeExpiredBooks(account: AccountType) {
+    val bookDatabase = account.bookDatabase
+    val existing = bookDatabase.books()
+
+    for (existingId in existing) {
+      try {
+        this.logger.debug("[{}] checking for deletion", existingId.brief())
+        val dbEntry = bookDatabase.entry(existingId)
+        val avail = dbEntry.book.entry.availability
+        val endDate = avail.endDate.getOrNull() ?: continue
+
+        if (endDate <= DateTime.now()) {
+          this.logger.debug("[{}] deleting", existingId.brief())
+          bookRegistry.clearFor(existingId)
+          dbEntry.delete()
+        }
+      } catch (x: Throwable) {
+        this.logger.error("[{}]: unable to delete entry: ", existingId, x)
+      }
     }
   }
 
