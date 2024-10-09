@@ -127,11 +127,16 @@ class BookSyncTask(
       try {
         this.logger.debug("[{}] checking for deletion", existingId.brief())
         val dbEntry = bookDatabase.entry(existingId)
-        val avail = dbEntry.book.entry.availability
-        val endDate = avail.endDate.getOrNull() ?: continue
 
-        if (endDate <= DateTime.now()) {
-          this.logger.debug("[{}] deleting", existingId.brief())
+        // Only expire Axis books
+        val dist = dbEntry.book.entry.distribution
+        if (dist != "Axis 360") continue
+        this.logger.debug("[{}] is Axis pub, checking expiration", existingId.brief())
+
+        val avail = dbEntry.book.entry.availability
+        val endDate = avail.endDate.getOrNull()
+        if (endDate == null || endDate <= DateTime.now()) {
+          this.logger.debug("[{}] is expired, deleting", existingId.brief())
           bookRegistry.clearFor(existingId)
           dbEntry.delete()
         }
