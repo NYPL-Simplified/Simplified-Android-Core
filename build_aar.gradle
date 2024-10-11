@@ -36,8 +36,8 @@ android {
     unitTests.includeAndroidResources = true
     unitTests.all {
       reports {
-        junitXml.enabled = true
-        html.enabled = true
+//        junitXml.enabled = true
+//        html.enabled = true
       }
     }
   }
