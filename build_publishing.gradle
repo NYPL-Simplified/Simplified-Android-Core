@@ -12,11 +12,11 @@ def noSigning =
   project.hasProperty('org.librarysimplified.no_signing')
 
 task javadocsJar(type: Jar) {
-  classifier = "javadoc"
+  archiveClassifier = "javadoc"
 }
 
 task sourcesJar(type: Jar) {
-  classifier = "sources"
+  archiveClassifier = "sources"
   from "src/main/java", "src/main/resources"
 }
 
