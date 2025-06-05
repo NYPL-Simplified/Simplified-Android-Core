@@ -68,7 +68,6 @@ dependencies {
   api project(":simplified-viewer-api")
   api project(":simplified-viewer-audiobook")
   api project(":simplified-viewer-epub-readium2")
-  api project(":simplified-viewer-pdf")
   api project(":simplified-viewer-spi")
 
   api libs.androidx.app.compat

@@ -2,22 +2,14 @@ package org.nypl.simplified.ui.catalog
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.text.TextUtils
-import android.view.Gravity
-import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
-import android.view.View
+import android.view.*
 import android.view.View.TEXT_ALIGNMENT_TEXT_END
-import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
-import android.widget.Button
-import android.widget.LinearLayout
-import android.widget.RadioButton
-import android.widget.RadioGroup
-import android.widget.Space
+import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.AppCompatButton
 import androidx.appcompat.widget.AppCompatTextView
@@ -58,6 +50,7 @@ import org.nypl.simplified.ui.catalog.databinding.FeedHeaderBinding
 import org.nypl.simplified.ui.catalog.withoutGroups.CatalogPagedAdapter
 import org.nypl.simplified.ui.screen.ScreenSizeInformationType
 import org.slf4j.LoggerFactory
+
 
 /**
  * A fragment displaying an OPDS feed.
@@ -144,6 +137,12 @@ class CatalogFeedFragment : Fragment(), AgeGateDialog.BirthYearSelectedListener 
     binding = FeedBinding.inflate(inflater, container, false)
     binding.viewModel = viewModel
     binding.lifecycleOwner = viewLifecycleOwner
+
+    binding.eolNotice.setOnClickListener {
+      val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://nypl.org"))
+      startActivity(browserIntent)
+    }
+
     return binding.root
   }
 
