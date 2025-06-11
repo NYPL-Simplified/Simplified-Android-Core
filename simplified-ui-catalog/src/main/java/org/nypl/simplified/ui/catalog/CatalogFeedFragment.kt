@@ -139,7 +139,7 @@ class CatalogFeedFragment : Fragment(), AgeGateDialog.BirthYearSelectedListener 
     binding.lifecycleOwner = viewLifecycleOwner
 
     binding.eolNotice.setOnClickListener {
-      val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://nypl.org"))
+      val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://nypl.org/ebookhelp"))
       startActivity(browserIntent)
     }
 

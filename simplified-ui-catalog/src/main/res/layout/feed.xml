@@ -26,7 +26,7 @@
       android:paddingEnd="32dp"
       android:gravity="center"
       android:textColor="@android:color/white"
-      android:text="SimplyE will be ending its ebook and audiobooks service on August 30th, 2025."
+      android:text="Please note: SimplyE will discontinue service in late August 2025. Learn more: nypl.org/ebookhelp"
       android:background="#143661"
       />
 
