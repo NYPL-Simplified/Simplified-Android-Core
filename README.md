@@ -1,4 +1,6 @@
 Library Simplified
+>  The SimplyE app will be discontinued in August 2025 and the resources shared here will be retired.
+
 ===
 
 [![Build Status](https://img.shields.io/github/workflow/status/NYPL-Simplified/Simplified-Android-Core/Android%20CI%20(Authenticated)?style=flat-square)](https://github.com/NYPL-Simplified/Simplified-Android-Core/actions?query=workflow%3A%22Android+CI+%28Authenticated%29%22)
