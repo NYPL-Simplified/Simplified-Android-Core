@@ -56,17 +56,9 @@ class AnnouncementsDialog : DialogFragment(R.layout.announcements_dialog) {
   }
 
   private fun reconfigureUI(announcementIndex: Int) {
-    val title =
-      requireContext().getString(
-        R.string.announcementTitle,
-        this.viewModel.account.provider.displayName,
-        announcementIndex + 1,
-        this.viewModel.announcements.size
-      )
     val announcement =
       this.viewModel.announcements[announcementIndex].content
 
-    this.title.text = title
     this.content.text = announcement
   }
 }

@@ -4,8 +4,15 @@ import android.app.ActionBar
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.view.ViewGroup
+import android.view.WindowInsets
+import android.widget.FrameLayout
+import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
@@ -68,6 +75,18 @@ class MainActivity : AppCompatActivity(R.layout.main_host) {
       } else {
         this.supportActionBar?.hide()
       }
+    }
+
+    val parent = findViewById<LinearLayout>(R.id.mainRoot)
+    ViewCompat.setOnApplyWindowInsetsListener(parent) { v, windowInsets ->
+      v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+        val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+        leftMargin = insets.left
+        bottomMargin = insets.bottom
+        rightMargin = insets.right
+        topMargin = insets.top
+      }
+      WindowInsetsCompat.CONSUMED
     }
   }
 

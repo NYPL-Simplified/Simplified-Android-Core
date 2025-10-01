@@ -185,6 +185,7 @@ subprojects { project ->
       allowInsecureProtocol true
     }
     maven { url "https://jitpack.io" }
+    maven { url "https://oss.sonatype.org/content/repositories/releases/" }
     jcenter()
   }
 
@@ -211,6 +212,11 @@ subprojects { project ->
         }
       }
     }
+  }
+  project.configurations.all {
+    resolutionStrategy.force "com.google.android.exoplayer:exoplayer:2.13.3"
+    resolutionStrategy.force "com.google.android.exoplayer:exoplayer-core:2.13.3"
+    resolutionStrategy.force "com.github.kittinunf.fuel:fuel-android:2.2.3"
   }
 }
 

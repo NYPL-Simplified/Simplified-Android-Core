@@ -33,7 +33,6 @@ dependencies {
   implementation project(":simplified-ui-thread-api")
   implementation project(":simplified-viewer-api")
   implementation project(":simplified-viewer-audiobook")
-  implementation project(":simplified-viewer-pdf")
   implementation project(':simplified-ui-navigation-tabs')
 
   implementation libs.androidx.app.compat
